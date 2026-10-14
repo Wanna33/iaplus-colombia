@@ -29,6 +29,13 @@ main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .stat b{display:block;font-size:28px;line-height:1.1}
 .stat span{color:var(--mut);font-size:13px}
+.stat.big{grid-column:1/-1;background:linear-gradient(135deg,#12a8ff,#1e56ff);color:#fff;border:0;padding:20px 24px}
+.stat.big span{color:#dbe9ff;font-size:15px;font-weight:600}
+.stat.big b{font-size:clamp(46px,9vw,72px);margin:4px 0}
+.stat.big small{color:#dbe9ff;font-size:13px}
+.accrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.accrow:last-child{border-bottom:0}
+.accname{font-weight:700;flex:1 1 240px;word-break:break-all}
 .stat.w b{color:var(--warn)}.stat.b b{color:var(--bad)}.stat.g b{color:var(--ok)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:0 8px 24px rgba(30,60,120,.05)}
 .card h2{font-size:18px;margin-bottom:12px}
@@ -175,16 +182,42 @@ function state(it){
 }
 function statsHtml(){
   const cnt = k => items.filter(i=>state(i).k===k).length;
-  return `<div class="stat"><b>${items.length}</b><span>Cuentas en total</span></div>
-    <div class="stat"><b>${cnt("av")}</b><span>Disponibles (sin cliente)</span></div>
-    <div class="stat g"><b>${cnt("ok")}</b><span>Activas</span></div>
-    <div class="stat w"><b>${cnt("w")}</b><span>Vencen en ≤5 días</span></div>
-    <div class="stat b"><b>${cnt("b")}</b><span>Vencidas</span></div>`;
+  const withClient = items.filter(i=>i.cliente);
+  const uniq = arr => new Set(arr.map(i=>i.cliente.toLowerCase())).size;
+  const activos = uniq(withClient.filter(i=>!i.vencida));
+  const total = uniq(withClient);
+  const dayMs = 86400000, now = Date.now();
+  const hoy = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<dayMs).length;
+  const semana = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<7*dayMs).length;
+  return `<div class="stat big"><span>👥 Clientes activos ahora</span><b data-n="${activos}">0</b><small>${total} clientes en total desde el inicio · +${hoy} hoy · +${semana} esta semana</small></div>
+    <div class="stat"><b data-n="${items.length}">0</b><span>Cuentas en total</span></div>
+    <div class="stat"><b data-n="${cnt("av")}">0</b><span>Códigos disponibles</span></div>
+    <div class="stat g"><b data-n="${cnt("ok")}">0</b><span>Planes activos</span></div>
+    <div class="stat w"><b data-n="${cnt("w")}">0</b><span>Vencen en ≤5 días</span></div>
+    <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>`;
+}
+function byAccountHtml(){
+  const m = new Map();
+  items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,act:0,tot:0,libre:0,v:0};
+    if(i.cliente){ a.tot++; if(i.vencida) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
+  return [...m.values()].map(a=>`<div class="accrow"><div class="accname">${esc(a.k)}</div>
+    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag" style="background:#eef1f7;color:var(--mut)">${a.tot} clientes en total</span></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+}
+const prevN = [];
+function countUp(){
+  document.querySelectorAll("[data-n]").forEach((el,idx)=>{
+    const to = +el.dataset.n, from = +(prevN[idx]||0); prevN[idx] = to;
+    if(from===to){ el.textContent = to; return; }
+    const t0 = performance.now(), dur = 700;
+    const step = t => { const p = Math.min(1,(t-t0)/dur); el.textContent = Math.round(from+(to-from)*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
 }
 function render(){
-  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); fillAccounts(); rows(); return; }
+  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); $("#byAcc").innerHTML = byAccountHtml(); countUp(); fillAccounts(); rows(); return; }
   $("#app").innerHTML = `
   <div class="stats" id="stats">${statsHtml()}</div>
+  <div class="card"><h2>📊 Clientes por cuenta</h2><div id="byAcc">${byAccountHtml()}</div></div>
   <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
     <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crea un código nuevo de un solo uso para otro cliente. El correo, la contraseña y el código 2FA son los mismos de la cuenta.</p>
     <form id="genForm" class="form">
@@ -216,6 +249,7 @@ function render(){
   $("#addForm").onsubmit = addAccount;
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
+  countUp();
   $("#genForm").onsubmit = genCode;
   $("#gAcc").onchange = syncDays;
   fillAccounts();
