@@ -74,6 +74,13 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 .msg{max-width:560px;margin:70px auto;text-align:center}
 .msg h2{font-size:28px;margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:22px}
 .expired .days{color:#d33}
+.addbox{margin-top:34px;background:var(--card);border:2px dashed #b9d0ff;border-radius:22px;padding:22px;max-width:640px}
+.addbox h3{font-size:19px;margin-bottom:4px}.addbox p{color:var(--mut);font-size:14px;margin-bottom:12px}
+.addrow{display:flex;gap:10px;flex-wrap:wrap}
+.addrow input{flex:1;min-width:180px;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:inherit;font-size:16px;letter-spacing:.05em;text-transform:uppercase;background:#fff;color:var(--text)}
+.addrow input:focus{outline:2px solid rgba(30,107,255,.3);border-color:var(--acc)}
+.addrow button{border:0;cursor:pointer;font:inherit}
+.adderr{color:#d33;font-weight:600;margin-top:10px;font-size:14px}
 .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
 .confetti i{position:absolute;top:-12px;width:9px;height:14px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
@@ -108,9 +115,9 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 </head>
 <body>
 <header class="bar"><div class="bar-in" id="bar">
-  <a class="brand" href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+  <a class="brand" href="index.html?tienda=1"><img src="logo.png" alt="IA Plus Colombia"></a>
   <div class="prod">Mi cuenta</div>
-  <div class="meta"><a class="back" href="index.html">← Volver a la tienda</a></div>
+  <div class="meta"><a class="back" href="index.html?tienda=1">← Volver a la tienda</a></div>
 </div></header>
 <main id="app"><div class="msg"><p>Cargando tu cuenta…</p></div></main>
 
@@ -119,25 +126,27 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8
 const WHATSAPP = "573102035327";
 const DAY = 86400000;
 const TOTP_EMAILS = ["uguonauxs4@vexcamp.com"];
-let totpCode = "", totpAt = 0, totpBusy = false;
+const totpCache = {};
 async function refreshTotp(){
-  const box=document.querySelector("[data-totp]"); if(!box) return;
-  const left=30-Math.floor(Date.now()/1000)%30;
-  if((!totpCode||Math.floor(Date.now()/30000)!==totpAt)&&!totpBusy){
-    totpBusy=true;
-    try{
-      const cred=load("iap_cred");
-      const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",idToken:cred.token,correo:box.dataset.totp})});
-      const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
-      totpCode=j.code; totpAt=Math.floor(Date.now()/30000);
-    }catch(err){ box.querySelector(".tcode").textContent="No disponible"; }
-    totpBusy=false;
+  const left=30-Math.floor(Date.now()/1000)%30, slot=Math.floor(Date.now()/30000);
+  for(const box of document.querySelectorAll("[data-totp]")){
+    const mail=box.dataset.totp; let c=totpCache[mail];
+    if((!c||c.slot!==slot)&&!(c&&c.busy)){
+      totpCache[mail]=Object.assign(c||{},{busy:true});
+      try{
+        const cred=load("iap_cred");
+        const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",idToken:cred.token,correo:mail})});
+        const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+        totpCache[mail]={code:j.code,slot:slot,busy:false};
+      }catch(err){ totpCache[mail]={code:"",slot:slot-1,busy:false,err:true}; box.querySelector(".tcode").textContent="No disponible"; }
+      c=totpCache[mail];
+    }
+    if(!c||!c.code) continue;
+    box.querySelector(".tcode").textContent=c.code.slice(0,3)+" "+c.code.slice(3);
+    box.querySelector(".tcopy").dataset.copy=c.code;
+    box.querySelector(".tleft").textContent=left;
+    box.querySelector(".tbar").style.width=(left/30*100)+"%";
   }
-  if(!totpCode) return;
-  box.querySelector(".tcode").textContent=totpCode.slice(0,3)+" "+totpCode.slice(3);
-  box.querySelector(".tcopy").dataset.copy=totpCode;
-  box.querySelector(".tleft").textContent=left;
-  box.querySelector(".tbar").style.width=(left/30*100)+"%";
 }
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -152,7 +161,7 @@ const I = {
   ok:'<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>'
 };
 function message(title, text){
-  $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><a class="cta" href="index.html">Ir a la tienda</a></div>`;
+  $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><a class="cta" href="index.html?tienda=1">Ir a la tienda</a></div>`;
 }
 function confetti(){
   const box=document.createElement("div"); box.className="confetti";
@@ -205,9 +214,9 @@ function header(items){
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const u = load("iap_user"); const mail = u && u.email ? u.email.replace(/^(.{2}).*(@.*)$/,"$1****$2") : "";
-  $("#bar").innerHTML = `<a class="brand" href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+  $("#bar").innerHTML = `<a class="brand" href="index.html?tienda=1"><img src="logo.png" alt="IA Plus Colombia"></a>
     <div class="prod">${esc(it.producto)} <span class="badge ${ex?'off':''}">${ex?'Vencido':'Activo'}</span></div>
-    <div class="meta">${mail?`<span>Cuenta <b>${esc(mail)}</b></span><span class="sep"></span>`:''}<span>Tiempo restante <b>${ex?'0 días':left+(left===1?' día':' días')}</b></span><a class="back" href="index.html">← Tienda</a></div>`;
+    <div class="meta">${mail?`<span>Cuenta <b>${esc(mail)}</b></span><span class="sep"></span>`:''}<span>Tiempo restante <b>${ex?'0 días':left+(left===1?' día':' días')}</b></span>${u&&String(u.email).toLowerCase()==="j03l1525@gmail.com"?'<a class="back" href="admin.html">Panel admin</a>':''}<a class="back" href="index.html?tienda=1">← Tienda</a></div>`;
 }
 function tick(){
   document.querySelectorAll("[data-end]").forEach(el=>{
@@ -223,19 +232,41 @@ document.addEventListener("click", e=>{
   const g = e.target.closest(".tog");
   if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; }
 });
-(async function(){
+function addBox(first){
+  return `<div class="addbox" id="addbox"><h3>➕ ${first?'Desbloquea tu cuenta':'Agregar otra cuenta'}</h3>
+    <p>${first?'Escribe el código que te enviamos por WhatsApp.':'¿Compraste otra cuenta? Escribe aquí su código de activación.'}</p>
+    <form class="addrow" id="addForm"><input id="addCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="cta" style="margin:0" type="submit">Desbloquear</button></form>
+    <div class="adderr" id="addErr" hidden></div>
+    <p style="margin:12px 0 0"><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar otra cuenta')}" target="_blank" rel="noopener" style="color:var(--acc);font-weight:700">¿No tienes código? Cómpralo por WhatsApp →</a></p></div>`;
+}
+function bindAdd(){
+  const f=$("#addForm"); if(!f) return;
+  f.onsubmit=async e=>{
+    e.preventDefault(); const btn=f.querySelector("button"), err=$("#addErr"); err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
+    try{
+      const cred=load("iap_cred");
+      const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"redeem",code:$("#addCode").value,idToken:cred.token})});
+      const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+      sessionStorage.removeItem("iap_conf"); await loadAll();
+    }catch(ex){ err.textContent=ex.message; err.hidden=false; btn.disabled=false; btn.textContent="Desbloquear"; }
+  };
+}
+let timer=null;
+async function loadAll(){
   const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ message("Inicia sesión para ver tu cuenta","Entra otra vez con tu Gmail en la tienda y desbloquea tu cuenta con tu código."); return; }
   try{
     const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"list",idToken:cred.token})});
     const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error");
-    if(!j.items.length){ message("Aún no tienes cuentas","Escribe tu código de activación en la tienda para desbloquear tu cuenta."); return; }
+    if(!j.items.length){ $("#app").innerHTML = addBox(true); bindAdd(); return; }
     header(j.items);
-    $("#app").innerHTML = j.items.map(section).join("");
-    tick(); refreshTotp(); setInterval(()=>{tick();refreshTotp();},1000);
+    $("#app").innerHTML = j.items.map(section).join("") + addBox(false);
+    bindAdd();
+    tick(); refreshTotp(); if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
     if(j.items.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message)); }
-})();
+}
+loadAll();
 </script>
 </body>
 </html>

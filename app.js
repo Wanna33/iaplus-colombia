@@ -63,7 +63,7 @@ function parseJwt(t){
   const b = t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
   return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")));
 }
-function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); }
+function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); loadMine(); }
 
 function onGoogle(resp){
   // Para máxima seguridad, verifica resp.credential también en tu servidor.
@@ -144,16 +144,15 @@ async function callApi(action, code){
 function renderRedeem(){
   const box = $("#redeemBox"); if(!box) return;
   if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
-  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html" target="_blank" rel="noopener">🔓 Abrir mi cuenta de ChatGPT</a>' : '';
+  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html">🔓 Abrir mi cuenta de ChatGPT</a>' : '';
   box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
     <div id="acctList">${myItems===null?'':(list||'')}</div>`;
   $("#redeemForm").onsubmit = async e => {
     e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
     const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
-    const w = window.open("", "_blank");
-    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); if(w) w.location.href = "cuenta.html"; }
-    catch(ex){ if(w) w.close(); err.textContent = ex.message; err.hidden=false; }
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); location.href = "cuenta.html"; return; }
+    catch(ex){ err.textContent = ex.message; err.hidden=false; }
     renderRedeem_keep(err.textContent, !err.hidden);
   };
 }
@@ -164,7 +163,11 @@ document.addEventListener("click", e => {
 });
 async function loadMine(){
   if(!user || !CONFIG.API_URL) return;
-  try{ myItems = await callApi("list"); renderRedeem(); renderAuth(); }catch{}
+  try{
+    myItems = await callApi("list"); renderRedeem(); renderAuth();
+    // quien ya desbloqueó una cuenta entra directo a su pantalla (correo, contraseña y autenticador)
+    if(myItems.length && !/[?&]tienda/.test(location.search)) location.replace("cuenta.html");
+  }catch{}
 }
 
 /* ============ INIT ============ */
