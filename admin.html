@@ -173,6 +173,7 @@ function render(){
       <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
       <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
       <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
+      <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="text" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
       <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
       <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
     </form>
@@ -231,7 +232,7 @@ function rows(){
   $("#rows").innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small></div></td>
+    return `<tr data-f="${i.fila}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
@@ -250,7 +251,7 @@ function msgFor(i){
 async function addAccount(e){
   e.preventDefault(); const b=e.target.querySelector("button"); b.disabled=true;
   try{
-    const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,dias:$("#fDays").value});
+    const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,clave2fa:$("#fKey").value,dias:$("#fDays").value});
     toast("Cuenta creada ✔");
     await refresh(); showCode(j.codigo,{producto:$("#fProd").value,dias:$("#fDays").value});
     $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#addBox").open=false;
@@ -279,7 +280,8 @@ document.addEventListener("click", async e=>{
     if(a==="edit"){
       const clave = prompt("Nueva contraseña de la cuenta (deja igual para no cambiar):", i.clave); if(clave===null) return;
       const correo = prompt("Correo de la cuenta:", i.correo); if(correo===null) return;
-      await api("admin_update",{fila:i.fila,clave,correo}); toast("Cuenta actualizada ✔");
+      const clave2fa = prompt("Clave del autenticador 2FA (deja vacío para no cambiarla):", ""); if(clave2fa===null) return;
+      await api("admin_update",{fila:i.fila,clave,correo,clave2fa}); toast("Cuenta actualizada ✔");
     }
     await refresh();
   }catch(ex){ toast(ex.message); }
