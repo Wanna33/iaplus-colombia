@@ -57,5 +57,5 @@
   // Android/PC: el navegador avisa cuando se puede instalar; si ya hay sesión, se muestra enseguida
   window.addEventListener("load", () => setTimeout(showBanner, 2500));
   // vibración suave al tocar botones (celulares que lo permiten)
-  document.addEventListener("click", e => { if(navigator.vibrate && e.target.closest(".btn,.ib,.chip,.tabs button,.bn a,.bn button")) navigator.vibrate(8); }, {passive:true});
+  document.addEventListener("click", e => { if(e.isTrusted && navigator.userActivation && navigator.userActivation.isActive && navigator.vibrate && e.target.closest(".btn,.ib,.chip,.tabs button,.bn a,.bn button")) navigator.vibrate(8); }, {passive:true});
 })();
