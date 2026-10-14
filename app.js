@@ -6,6 +6,8 @@ const CONFIG = {
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
   WHATSAPP: "573102035327",
   STORE: "IA Plus Colombia",
+  // URL de la API (Apps Script) que entrega las cuentas con el código de activación
+  API_URL: "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec",
 };
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
@@ -109,7 +111,7 @@ function parseJwt(t){
   const b = t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
   return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")));
 }
-function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); }
+function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); }
 
 function onGoogle(resp){
   // Para máxima seguridad, verifica resp.credential también en tu servidor.
@@ -118,6 +120,7 @@ function onGoogle(resp){
   if(!okIss || p.aud !== CONFIG.GOOGLE_CLIENT_ID || p.exp*1000 < Date.now() || !p.email_verified){
     toast("No se pudo verificar tu cuenta de Google"); return;
   }
+  save("iap_cred",{token:resp.credential,exp:p.exp*1000});
   setUser({email:p.email, name:p.name || p.email, picture:p.picture || ""});
 }
 function showSetupError(){
@@ -146,8 +149,8 @@ function avatarOf(sz){
 }
 function logout(){
   try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{}
-  user = null; save("iap_user", null); cart = []; save("iap_cart", []);
-  renderAuth(); renderCart(); renderHeroCard(); toast("Sesión cerrada");
+  user = null; save("iap_user", null); save("iap_cred", null); cart = []; save("iap_cart", []);
+  renderAuth(); renderCart(); renderHeroCard(); renderRedeem(); toast("Sesión cerrada");
 }
 function renderAuth(){
   const a = $("#authArea");
@@ -173,10 +176,48 @@ function renderHeroCard(){
   }
 }
 
+/* ============ MI CUENTA (código de activación) ============ */
+let myItems = null;
+async function callApi(action, code){
+  const cred = load("iap_cred", null);
+  if(!CONFIG.API_URL) throw new Error("El servicio de cuentas aún no está configurado.");
+  if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Pulsa Salir y vuelve a entrar con Google.");
+  const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action, code, idToken:cred.token})});
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || "Error");
+  return j.items;
+}
+function renderRedeem(){
+  const box = $("#redeemBox"); if(!box) return;
+  if(!user){ box.innerHTML = '<p class="muted">Inicia sesión con tu Gmail para activar tu código.</p>'; return; }
+  const list = (myItems||[]).map(i=>`<div class="acct"><b>${esc(i.producto)}</b>
+    <div class="row"><span>Correo</span><code>${esc(i.correo)}</code><button class="copy" data-copy="${esc(i.correo)}">Copiar</button></div>
+    <div class="row"><span>Contraseña</span><code>${esc(i.clave)}</code><button class="copy" data-copy="${esc(i.clave)}">Copiar</button></div></div>`).join("");
+  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar código</button></form>
+    <p class="note err" id="redeemErr" hidden></p>
+    <div id="acctList">${myItems===null?'':(list||'<p class="muted">Aún no tienes cuentas activadas.</p>')}</div>`;
+  $("#redeemForm").onsubmit = async e => {
+    e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
+    const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta activada ✔"); }
+    catch(ex){ err.textContent = ex.message; err.hidden=false; }
+    renderRedeem_keep(err.textContent, !err.hidden);
+  };
+}
+function renderRedeem_keep(msg, show){ renderRedeem(); if(show){ const e=$("#redeemErr"); e.textContent=msg; e.hidden=false; } }
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-copy]"); if(!t) return;
+  navigator.clipboard?.writeText(t.dataset.copy).then(()=>toast("Copiado ✔"));
+});
+async function loadMine(){
+  if(!user || !CONFIG.API_URL) return;
+  try{ myItems = await callApi("list"); renderRedeem(); }catch{}
+}
+
 /* ============ INIT ============ */
 $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión ✔"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
 $("#burger").onclick = () => $("#links").classList.toggle("on");
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
 $("#year").textContent = new Date().getFullYear();
-renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard();
+renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard(); renderRedeem(); loadMine();

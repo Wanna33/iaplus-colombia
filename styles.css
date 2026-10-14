@@ -151,3 +151,17 @@ details p{color:var(--mut);margin-top:10px}
 
 .card .ico img{width:36px;height:36px;object-fit:contain}
 .cico img{width:20px;height:20px;vertical-align:middle}
+
+/* mi cuenta */
+.redeem{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow)}
+.redeem-form{display:flex;gap:10px;flex-wrap:wrap}
+.redeem-form input{flex:1;min-width:200px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:16px;letter-spacing:.05em;text-transform:uppercase}
+.redeem-form input:focus{outline:2px solid var(--cyan);border-color:transparent}
+.redeem .muted{color:var(--mut);text-align:center}
+.redeem .note{margin-top:12px}
+.acct{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--bg2)}
+.acct .row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.acct .row span{color:var(--mut);font-size:13px;width:90px}
+.acct code{flex:1;min-width:0;word-break:break-all;background:var(--bg);padding:8px 12px;border-radius:8px;color:var(--cyan)}
+.copy{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}
+.copy:hover{border-color:var(--cyan);color:var(--cyan)}
