@@ -156,19 +156,27 @@ function statsHtml(){
     <div class="stat b"><b>${cnt("b")}</b><span>Vencidas</span></div>`;
 }
 function render(){
-  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); rows(); return; }
+  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); fillAccounts(); rows(); return; }
   $("#app").innerHTML = `
   <div class="stats" id="stats">${statsHtml()}</div>
-  <div class="card"><h2>➕ Agregar cuenta y generar código</h2>
-    <form id="addForm" class="form">
+  <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
+    <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crea un código nuevo de un solo uso para otro cliente. El correo, la contraseña y el código 2FA son los mismos de la cuenta.</p>
+    <form id="genForm" class="form">
+      <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
+      <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
+      <div><button class="btn p" style="width:100%" type="submit">Generar código</button></div>
+    </form>
+    <div class="newcode" id="newcode"></div>
+  </div>
+  <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
+    <form id="addForm" class="form" style="margin-top:14px">
       <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
       <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
       <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
       <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
       <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
     </form>
-    <div class="newcode" id="newcode"></div>
-  </div>
+  </details>
   <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
     <div class="tools">
       <input id="q" placeholder="Buscar cliente, correo o código…">
@@ -178,9 +186,40 @@ function render(){
     <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
   </div>`;
   $("#addForm").onsubmit = addAccount;
+  $("#genForm").onsubmit = genCode;
+  $("#gAcc").onchange = syncDays;
+  fillAccounts();
   $("#q").oninput = $("#st").onchange = rows;
   $("#csv").onclick = exportCsv;
   rows();
+}
+function accounts(){
+  const m = new Map();
+  items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
+  return [...m.values()];
+}
+function fillAccounts(){
+  const sel=$("#gAcc"); if(!sel) return; const prev=sel.value; const list=accounts();
+  sel.innerHTML = list.length ? list.map(a=>`<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)}</option>`).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
+  if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
+}
+function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a) $("#gDays").value=a.dias; }
+function showCode(code, it){
+  const n=$("#newcode"); n.classList.add("on");
+  n.innerHTML = `<div style="color:var(--mut);font-size:13px">Código para el cliente (un solo uso) — ${esc(it.producto)}:</div><div class="mono">${esc(code)}</div>
+    <div class="acts" style="margin-top:10px"><button class="btn s" id="cpCode">Copiar código</button><button class="btn s" id="cpMsg">Copiar mensaje para el cliente</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:code}))}">Enviar por WhatsApp</a></div>`;
+  $("#cpCode").onclick = ()=>copy(code); $("#cpMsg").onclick = ()=>copy(msgFor({...it,codigo:code}));
+}
+async function genCode(e){
+  e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
+  const b=e.target.querySelector("button"); b.disabled=true;
+  try{
+    const j = await api("admin_clone",{fila:a.fila,dias:$("#gDays").value});
+    copy(msgFor({producto:a.producto,codigo:j.codigo,dias:$("#gDays").value}));
+    await refresh(); showCode(j.codigo,{producto:a.producto,dias:$("#gDays").value});
+    toast("Código creado ✔ (mensaje copiado)");
+  }catch(ex){ toast(ex.message); }
+  b.disabled=false;
 }
 function filtered(){
   const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
@@ -212,14 +251,11 @@ async function addAccount(e){
   e.preventDefault(); const b=e.target.querySelector("button"); b.disabled=true;
   try{
     const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,dias:$("#fDays").value});
-    const it = {producto:$("#fProd").value,codigo:j.codigo,dias:$("#fDays").value};
     toast("Cuenta creada ✔");
-    await refresh();
-    const n=$("#newcode"); n.classList.add("on");
-    n.innerHTML = `<div style="color:var(--mut);font-size:13px">Código para el cliente (un solo uso):</div><div class="mono">${esc(j.codigo)}</div>
-      <div class="acts" style="margin-top:10px"><button class="btn s" id="cpCode">Copiar código</button><button class="btn s" id="cpMsg">Copiar mensaje para el cliente</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor(it))}">Enviar por WhatsApp</a></div>`;
-    $("#cpCode").onclick = ()=>copy(j.codigo); $("#cpMsg").onclick = ()=>copy(msgFor(it));
-  }catch(ex){ toast(ex.message); b.disabled=false; }
+    await refresh(); showCode(j.codigo,{producto:$("#fProd").value,dias:$("#fDays").value});
+    $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#addBox").open=false;
+  }catch(ex){ toast(ex.message); }
+  b.disabled=false;
 }
 function copy(t){ navigator.clipboard?.writeText(t).then(()=>toast("Copiado ✔")); }
 function exportCsv(){
