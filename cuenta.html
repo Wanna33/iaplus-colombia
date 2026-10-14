@@ -260,7 +260,7 @@ function confetti(){
     p.style.animationDuration=(2.4+Math.random()*2.4)+"s";p.style.animationDelay=Math.random()+"s";box.appendChild(p);}
   document.body.appendChild(box); setTimeout(()=>box.remove(),6500);
 }
-const APPS=[{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
+const APPS=[{k:"claude",n:"Claude Code",url:"https://claude.ai/login",host:"claude.ai",dev:1},{k:"gemini",n:"Gemini Pro",url:"https://gemini.google.com/",host:"gemini.google.com"},{k:"flow",n:"Flow",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 function section(it){
   const app=appOf(it);
@@ -300,7 +300,7 @@ function section(it){
         <div class="mock"><div class="t">Inicia sesión</div><div class="in hl"><span>${esc(it.correo)}</span><span>Editar</span></div><div class="go">Continuar</div></div></div></div>
       <div class="step"><div class="num">3</div><div><h3>Escribe la contraseña</h3><p>Copia la "Contraseña de acceso", pégala y pulsa "Continuar". Si te pide verificación, escríbenos por WhatsApp y te ayudamos.</p>
         <div class="mock"><div class="t">Introduce tu contraseña</div><div class="in hl"><span>Contraseña</span><span>👁</span></div><div class="go">Continuar</div></div></div></div>
-      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. Puedes usarla en hasta 2 dispositivos y tiene acceso por 1 mes.</div>
+      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. ${app.dev===1?"Úsala en 1 solo dispositivo":"Puedes usarla en hasta 2 dispositivos"} y tiene acceso por 1 mes.</div>
       ${app.k==="chatgpt"?`<details class="note" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
         <ol style="margin:10px 0 0 18px;display:grid;gap:6px">
           <li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
