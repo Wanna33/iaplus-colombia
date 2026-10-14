@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Panel admin | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="logo.png">
+<link rel="icon" href="logo.webp" type="image/webp">
+<meta name="theme-color" content="#1e6bff">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#eef4ff}
@@ -81,8 +82,9 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 </style>
 </head>
 <body>
+<noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
 <header class="bar"><div class="bar-in">
-  <a href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+  <a href="index.html"><img src="logo.webp" alt="IA Plus Colombia"></a>
   <h1>Panel de administrador</h1>
   <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="reload">↻ Actualizar</button></div>
 </div></header>
@@ -94,6 +96,10 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
+function copyText(t){
+  const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
+  return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
+}
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
@@ -284,7 +290,7 @@ async function addAccount(e){
   }catch(ex){ toast(ex.message); }
   b.disabled=false;
 }
-function copy(t){ navigator.clipboard?.writeText(t).then(()=>toast("Copiado ✔")); }
+function copy(t){ copyText(t).then(()=>toast("Copiado ✔")); }
 function exportCsv(){
   const head = ["Producto","Cuenta","Codigo","Estado","Cliente","Activada","Vence","Dias restantes","Dias del plan"];
   const q = v => '"'+String(v??"").replace(/"/g,'""')+'"';

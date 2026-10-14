@@ -28,6 +28,15 @@ let user = load("iap_user", null);
 let cart = load("iap_cart", []);
 let filter = "Todos";
 
+// copiar con respaldo para navegadores antiguos o sin HTTPS
+function copyText(t){
+  if(navigator.clipboard?.writeText) return navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t));
+  return fallbackCopy(t);
+}
+function fallbackCopy(t){
+  return new Promise(res=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0";
+    document.body.appendChild(a); a.select(); try{ document.execCommand("copy"); }catch{} a.remove(); res(); });
+}
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),2400); }
 
 /* ============ CATÁLOGO ============ */
@@ -159,7 +168,7 @@ function renderRedeem(){
 function renderRedeem_keep(msg, show){ renderRedeem(); if(show){ const e=$("#redeemErr"); e.textContent=msg; e.hidden=false; } }
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-copy]"); if(!t) return;
-  navigator.clipboard?.writeText(t.dataset.copy).then(()=>toast("Copiado ✔"));
+  copyText(t.dataset.copy).then(()=>toast("Copiado ✔"));
 });
 async function loadMine(){
   if(!user || !CONFIG.API_URL) return;
@@ -172,8 +181,9 @@ async function loadMine(){
 
 /* ============ INIT ============ */
 $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión ✔"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
-$("#burger").onclick = () => $("#links").classList.toggle("on");
+$("#burger").onclick = () => { const on = $("#links").classList.toggle("on"); $("#burger").setAttribute("aria-expanded", on); };
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
+$("#waFloat").href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent("Hola, quiero información")}`;
 $("#year").textContent = new Date().getFullYear();
 renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard(); renderRedeem(); loadMine();

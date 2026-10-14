@@ -5,15 +5,32 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IA Plus Colombia | Cuentas Digitales Premium</title>
 <meta name="description" content="Compra cuentas digitales premium (IA, streaming, diseño y más) al mejor precio en Colombia. Ingresa con tu cuenta de Gmail.">
-<link rel="icon" href="logo.png">
+<link rel="icon" href="logo.webp" type="image/webp">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="canonical" href="https://wanna33.github.io/iaplus-colombia/">
+<meta name="theme-color" content="#05070d">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="IA Plus Colombia">
+<meta property="og:title" content="IA Plus Colombia | Cuentas digitales premium">
+<meta property="og:description" content="ChatGPT y más al mejor precio en Colombia. Entrega rápida por WhatsApp y garantía.">
+<meta property="og:url" content="https://wanna33.github.io/iaplus-colombia/">
+<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preload" as="image" href="logo.webp" type="image/webp">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"IA Plus Colombia","url":"https://wanna33.github.io/iaplus-colombia/","image":"https://wanna33.github.io/iaplus-colombia/logo.png","areaServed":"CO","priceRange":"COP"}</script>
 <link rel="stylesheet" href="styles.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+<a class="skip" href="#catalogo">Saltar al contenido</a>
+<noscript><div class="nojs">Para usar la tienda necesitas activar JavaScript en tu navegador.</div></noscript>
 
 <header class="nav">
   <div class="wrap nav-in">
-    <a href="#inicio" class="brand"><img src="logo.png" alt="IA Plus Colombia"></a>
+    <a href="#inicio" class="brand"><img src="logo.webp" alt="IA Plus Colombia"></a>
     <nav class="links" id="links">
       <a href="#catalogo">Catálogo</a>
       <a href="#como">Cómo funciona</a>
@@ -27,7 +44,7 @@
           Ingresar con Gmail
         </button>
       </div>
-      <button class="burger" id="burger" aria-label="Menú">☰</button>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">☰</button>
     </div>
   </div>
 </header>
@@ -91,7 +108,7 @@
 
 <footer class="footer" id="contacto">
   <div class="wrap foot-in">
-    <img src="logo.png" alt="IA Plus Colombia" class="foot-logo">
+    <img src="logo.webp" alt="IA Plus Colombia" class="foot-logo">
     <div>
       <p>¿Dudas? Escríbenos directamente.</p>
       <a class="btn btn-primary" id="waContact" target="_blank" rel="noopener">💬 WhatsApp</a>
@@ -104,7 +121,7 @@
 <div class="modal" id="loginModal" aria-hidden="true">
   <div class="modal-box">
     <button class="modal-x" id="closeLogin" aria-label="Cerrar">✕</button>
-    <img src="logo.png" alt="" class="modal-logo">
+    <img src="logo.webp" alt="" class="modal-logo">
     <h3>Ingresa con tu Gmail</h3>
     <p>Usa tu cuenta de Google para comprar y ver tus pedidos.</p>
     <div id="gBtn" class="gbtn"></div>
@@ -112,7 +129,11 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" title="WhatsApp">
+  <svg viewBox="0 0 32 32" width="28" height="28" fill="#fff" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-3.9-.6-5.5-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.300 5.3 4.6 2 .8 2.7.9 3.7.7.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4Z"/></svg>
+</a>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="app.js"></script>
 </body>

@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tu cuenta ChatGPT Plus | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="logo.png">
+<link rel="icon" href="logo.webp" type="image/webp">
+<meta name="theme-color" content="#1e6bff">
 <style>
 :root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--soft:#eef4ff}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -114,8 +115,9 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 </style>
 </head>
 <body>
+<noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
 <header class="bar"><div class="bar-in" id="bar">
-  <a class="brand" href="index.html?tienda=1"><img src="logo.png" alt="IA Plus Colombia"></a>
+  <a class="brand" href="index.html?tienda=1"><img src="logo.webp" alt="IA Plus Colombia"></a>
   <div class="prod">Mi cuenta</div>
   <div class="meta"><a class="back" href="index.html?tienda=1">← Volver a la tienda</a></div>
 </div></header>
@@ -146,6 +148,10 @@ async function refreshTotp(){
     box.querySelector(".tleft").textContent=left;
     box.querySelector(".tbar").style.width=(left/30*100)+"%";
   }
+}
+function copyText(t){
+  const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
+  return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
 }
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -213,7 +219,7 @@ function header(items){
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const u = load("iap_user"); const mail = u && u.email ? u.email.replace(/^(.{2}).*(@.*)$/,"$1****$2") : "";
-  $("#bar").innerHTML = `<a class="brand" href="index.html?tienda=1"><img src="logo.png" alt="IA Plus Colombia"></a>
+  $("#bar").innerHTML = `<a class="brand" href="index.html?tienda=1"><img src="logo.webp" alt="IA Plus Colombia"></a>
     <div class="prod">${esc(it.producto)} <span class="badge ${ex?'off':''}">${ex?'Vencido':'Activo'}</span></div>
     <div class="meta">${mail?`<span>Cuenta <b>${esc(mail)}</b></span><span class="sep"></span>`:''}<span>Tiempo restante <b>${ex?'0 días':left+(left===1?' día':' días')}</b></span>${u&&String(u.email).toLowerCase()==="j03l1525@gmail.com"?'<a class="back" href="admin.html">Panel admin</a>':''}<a class="back" href="index.html?tienda=1">← Tienda</a></div>`;
 }
@@ -227,7 +233,7 @@ function tick(){
 }
 document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
-  if(c){ navigator.clipboard?.writeText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); }); return; }
+  if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); }); return; }
   const g = e.target.closest(".tog");
   if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; }
 });

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /cuenta.html
+Sitemap: https://wanna33.github.io/iaplus-colombia/sitemap.xml
