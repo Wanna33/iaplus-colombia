@@ -140,7 +140,7 @@ async function askTotp(box){
   const btn=box.querySelector("[data-ask]"); btn.disabled=true; btn.textContent="Pidiendo…";
   try{
     const cred=load("iap_cred");
-    const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",idToken:cred.token,correo:mail})});
+    const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",v:2,idToken:cred.token,correo:mail})});
     const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
     st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes;
   }catch(err){ st.err=err.message; }
