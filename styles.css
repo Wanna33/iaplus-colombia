@@ -171,3 +171,47 @@ details p{color:var(--mut);margin-top:10px}
 .redeem-inline .redeem-form input{width:100%}
 .buy-link{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--cyan)}
 .buy-link:hover{text-decoration:underline}
+
+/* ===== móvil ===== */
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden}
+input,button,select{font-size:16px}
+.btn,.chip,.burger{touch-action:manipulation;min-height:44px}
+@media(max-width:860px){
+  .nav-in{height:64px;gap:8px}
+  .brand img{height:48px}
+  .links{top:64px}
+  .links a{padding:12px 0;font-size:16px;border-bottom:1px solid var(--line)}
+  .links a:last-child{border-bottom:0}
+}
+@media(max-width:600px){
+  .wrap{padding:0 16px}
+  .hero{padding:36px 0 40px}
+  .hero p{font-size:16px}
+  .cta .btn{flex:1 1 100%}
+  .trust{gap:8px 14px;font-size:13px}
+  .login-card{padding:26px 18px;border-radius:20px}
+  .section{padding:46px 0}
+  .grid{grid-template-columns:1fr}
+  .card{padding:20px}
+  .price{font-size:26px}
+  .steps{grid-template-columns:1fr 1fr;gap:12px}
+  .step{padding:18px 14px}
+  .step h3{font-size:16px}
+  .step p{font-size:13px}
+  details{padding:14px 16px}
+  .foot-logo{height:96px}
+  .nav-right{gap:6px}
+  .nav-right .btn{padding:8px 10px;font-size:13px;min-height:40px}
+  .user img{width:34px;height:34px}
+  .user button{padding:6px 10px}
+  .modal{padding:12px}
+  .modal-box{padding:26px 18px}
+  .redeem-form input{min-width:0;width:100%}
+  .redeem-form .btn{width:100%}
+  .toast{width:calc(100% - 32px);text-align:center;bottom:16px}
+}
+@media(max-width:380px){
+  .steps{grid-template-columns:1fr}
+  .btn-google{padding:8px 10px;font-size:13px}
+}

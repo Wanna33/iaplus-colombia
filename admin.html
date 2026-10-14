@@ -55,6 +55,27 @@ tr:hover td{background:#fafcff}
 .newcode .mono{font-size:26px;color:var(--ok)}
 .empty{text-align:center;color:var(--mut);padding:30px}
 .hide{display:none!important}
+html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
+.btn{min-height:40px}
+@media(max-width:760px){
+  .bar{position:static}
+  .bar-in{padding:10px 14px}.bar h1{font-size:16px}.bar img{height:32px}
+  main{padding:14px 12px 60px}
+  .card{padding:16px 14px;border-radius:16px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .tools input,.tools select{max-width:none;width:100%}
+  .tools .btn{width:100%}
+  table,thead,tbody,tr,td{display:block;min-width:0}
+  thead{display:none}
+  tr{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px;background:#fff}
+  td{border:0;padding:5px 0;display:flex;justify-content:space-between;gap:12px;text-align:right}
+  td::before{content:attr(data-l);color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;text-align:left;flex:none}
+  td[data-l=""]::before{display:none}
+  td.acts-td{display:block;text-align:left}
+  td.acts-td::before{display:none}
+  tr:hover td{background:none}
+  .newcode .mono{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -171,10 +192,10 @@ function rows(){
   $("#rows").innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}"><td>${esc(i.producto)}</td><td><div>${esc(i.correo)}</div><small style="color:var(--mut)">${esc(i.clave)}</small></td>
-      <td class="mono">${esc(i.codigo||"—")}</td><td><span class="tag t-${s.k}">${s.t}</span></td>
-      <td>${esc(i.cliente||"—")}</td><td>${fdate(i.inicio)}</td><td>${fdate(i.fin)}</td><td>${rest}<br><small style="color:var(--mut)">plan ${i.dias} d</small></td>
-      <td><div class="acts">
+    return `<tr data-f="${i.fila}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small></div></td>
+      <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
+      <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
+      <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button>`:""}
         ${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
         <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>

@@ -78,6 +78,32 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 .confetti i{position:absolute;top:-12px;width:9px;height:14px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
 @media(max-width:980px){.acct{grid-template-columns:1fr}.brand{border:0;padding:0}.meta{margin-left:0}.meta .sep{display:none}}
+html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
+@media(max-width:600px){
+  .bar{position:static}
+  .bar-in{padding:10px 14px;gap:10px}
+  .brand img{height:34px}
+  .prod{font-size:17px}
+  .meta{width:100%;gap:10px;font-size:13px;justify-content:space-between}
+  main{padding:14px 12px 50px}
+  .acct{gap:16px}
+  .card{padding:20px 16px;border-radius:20px}
+  .card h1{font-size:23px}
+  .field{padding:8px 8px 8px 14px;gap:8px}
+  .field code{font-size:16px}
+  .ib{width:44px;height:44px}
+  .days{font-size:38px}
+  .dates{font-size:12px}
+  .tcode{font-size:30px;letter-spacing:.08em}
+  .steps h2{font-size:19px}
+  .step{grid-template-columns:36px 1fr;gap:12px}
+  .num{width:36px;height:36px;font-size:15px}
+  .step:not(:last-child)::before{left:17px;top:38px}
+  .step h3{font-size:17px;margin-top:4px}
+  .mock{padding:16px;max-width:100%}
+  .mock .t{font-size:18px}
+  .cta{width:100%;justify-content:center}
+}
 </style>
 </head>
 <body>
