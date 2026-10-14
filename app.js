@@ -54,7 +54,9 @@ function renderFilters(){
   $("#filters").onclick = e => { const c=e.target.dataset.c; if(c){ filter=c; renderFilters(); renderGrid(); } };
 }
 function renderGrid(){
-  const list = PRODUCTS.filter(p => filter==="Todos" || p.cat===filter);
+  const q = (($("#search")||{}).value||"").trim().toLowerCase(), so = ($("#sort")||{}).value||"";
+  let list = PRODUCTS.filter(p => (filter==="Todos" || p.cat===filter) && (!q || (p.name+" "+p.cat+" "+p.feats.join(" ")).toLowerCase().includes(q)));
+  if(so) list = [...list].sort((a,b)=> so==="asc" ? a.price-b.price : b.price-a.price);
   $("#grid").innerHTML = list.map((p,n)=>`
     <article class="card reveal" style="--d:${n*90}ms">
       ${p.hot?'<span class="badge">🔥 Popular</span>':''}
@@ -63,8 +65,10 @@ function renderGrid(){
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
+      <div class="perday">≈ ${cop(Math.round(p.price/30/100)*100)} al día</div>
       <a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">💬 Comprar por WhatsApp</a>
-    </article>`).join("");
+    </article>`).join("") || `<div class="nores">No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
+  const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); renderGrid(); };
   observeReveal();
 }
 function observeReveal(){
@@ -239,4 +243,32 @@ document.addEventListener("pointermove", e => {
     const io = new IntersectionObserver(es => es.forEach(en => { if(en.isIntersecting){ links.forEach(a => a.classList.toggle("on", a.dataset.s === en.target.id)); } }), {rootMargin:"-45% 0px -50% 0px"});
     ["inicio","catalogo"].forEach(id => { const s = document.getElementById(id); if(s) io.observe(s); });
   }
+})();
+
+/* ============ MEJORAS DE LA PÁGINA ============ */
+(function(){
+  // buscador y orden
+  const se=$("#search"), so=$("#sort");
+  if(se) se.addEventListener("input", renderGrid);
+  if(so) so.addEventListener("change", renderGrid);
+  // franja de productos que se desplaza
+  const mq=$("#mq");
+  if(mq){ const one=PRODUCTS.map(p=>`<a class="mq-i" href="#catalogo"><span class="mq-ic ${p.lt?"lt":""}">${iconOf(p)}</span><b>${esc(p.name)}</b><small>${cop(p.price)}</small></a>`).join(""); mq.innerHTML=one+one; }
+  // "desde $X" en la portada
+  const from=Math.min(...PRODUCTS.map(p=>p.price)), hs=document.querySelector(".hero-from");
+  if(hs) hs.textContent="Desde "+cop(from)+" al mes";
+  // datos estructurados para buscadores
+  try{
+    const ld=document.createElement("script"); ld.type="application/ld+json";
+    ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList",itemListElement:PRODUCTS.map((p,i)=>({"@type":"ListItem",position:i+1,item:{"@type":"Product",name:p.name,image:location.origin+location.pathname.replace(/[^/]*$/,"")+p.img,description:p.feats.join(". "),offers:{"@type":"Offer",price:p.price,priceCurrency:"COP",availability:"https://schema.org/InStock"}}}))});
+    document.head.appendChild(ld);
+  }catch{}
+  // barra de progreso y botón de subir
+  const pr=$("#progress"), tt=$("#totop");
+  let tick=false;
+  const onScroll=()=>{ if(tick) return; tick=true; requestAnimationFrame(()=>{ const h=document.documentElement; const max=h.scrollHeight-h.clientHeight; if(pr) pr.style.transform="scaleX("+(max>0?h.scrollTop/max:0)+")"; if(tt) tt.classList.toggle("on", h.scrollTop>700); tick=false; }); };
+  addEventListener("scroll", onScroll, {passive:true}); onScroll();
+  if(tt) tt.onclick=()=>scrollTo({top:0,behavior:"smooth"});
+  // contador animado en la portada
+  document.querySelectorAll("[data-count]").forEach(el=>{ const to=el.dataset.count==="auto"?PRODUCTS.length:+el.dataset.count; let n=0; const t0=performance.now(); const step=t=>{ const p=Math.min(1,(t-t0)/1100); el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); }; requestAnimationFrame(step); });
 })();

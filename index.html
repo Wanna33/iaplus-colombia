@@ -38,6 +38,7 @@
     <a href="#inicio" class="brand"><img src="logo.webp" alt="IA Plus Colombia"></a>
     <nav class="links" id="links">
       <a href="#catalogo">Catálogo</a>
+      <a href="#porque">Beneficios</a>
       <a href="#como">Cómo funciona</a>
       <a href="#faq">Preguntas</a>
       <a href="#contacto">Contacto</a>
@@ -65,6 +66,7 @@
         <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
         <button class="btn btn-ghost" id="heroLogin">Ingresar con Gmail</button>
       </div>
+      <div class="hstats"><div><b data-count="auto">0</b><span>cuentas premium</span></div><div><b class="hero-from">—</b><span>precios en COP</span></div><div><b>30</b><span>días de acceso</span></div></div>
       <ul class="trust">
         <li>⚡ Entrega rápida</li>
         <li>🛡️ Garantía incluida</li>
@@ -80,16 +82,37 @@
   </div>
 </section>
 
+<div class="marquee" aria-label="Productos disponibles"><div class="mq-track" id="mq"></div></div>
+
 <section class="section" id="catalogo">
   <div class="wrap">
     <h2 class="title">Catálogo de <span class="grad">cuentas</span></h2>
     <p class="sub">Precio en pesos colombianos (COP). Compra tu código por WhatsApp y desbloquea tu cuenta aquí.</p>
+    <div class="toolbar">
+      <div class="search"><span aria-hidden="true">🔎</span><input id="search" type="search" placeholder="Buscar: ChatGPT, CapCut, Gemini…" autocomplete="off" aria-label="Buscar producto"></div>
+      <select id="sort" aria-label="Ordenar"><option value="">Ordenar: destacados</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+    </div>
     <div class="filters" id="filters"></div>
     <div class="grid" id="grid"></div>
     <div class="unlock-card reveal" id="unlock">
       <div class="unlock-title">🔓 ¿Ya pagaste? Escribe tu código</div>
       <p class="unlock-sub">Sirve para cualquiera de las cuentas del catálogo.</p>
       <div class="redeem-inline" id="redeemBox"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="porque">
+  <div class="wrap">
+    <h2 class="title">¿Por qué <span class="grad">IA Plus</span>?</h2>
+    <p class="sub">Todo pensado para que compres rápido y uses tu cuenta sin complicaciones.</p>
+    <div class="why">
+      <div class="why-i reveal"><i>⚡</i><h3>Entrega rápida</h3><p>Recibes tu código por WhatsApp y activas tu cuenta en minutos.</p></div>
+      <div class="why-i reveal" style="--d:70ms"><i>🛡️</i><h3>Garantía incluida</h3><p>Si tu cuenta falla, te ayudamos y te damos otra durante el periodo contratado.</p></div>
+      <div class="why-i reveal" style="--d:140ms"><i>💳</i><h3>Paga fácil</h3><p>Nequi, Daviplata, Bancolombia y otros medios, en pesos colombianos.</p></div>
+      <div class="why-i reveal" style="--d:210ms"><i>📲</i><h3>Instálala como app</h3><p>Guarda IA Plus en tu pantalla de inicio y entra a tu cuenta con un toque.</p></div>
+      <div class="why-i reveal" style="--d:280ms"><i>⏳</i><h3>Controla tu plan</h3><p>Ves los días que te quedan y el código de verificación desde tu celular.</p></div>
+      <div class="why-i reveal" style="--d:350ms"><i>💬</i><h3>Soporte real</h3><p>Una persona te responde por WhatsApp cuando lo necesites.</p></div>
     </div>
   </div>
 </section>
@@ -112,6 +135,9 @@
     <details class="reveal"><summary>¿Para qué piden mi Gmail?</summary><p>Para identificarte, guardar tu historial de pedidos y enviarte la confirmación. Nunca pedimos tu contraseña de Google.</p></details>
     <details class="reveal"><summary>¿Cuánto tarda la entrega?</summary><p>Normalmente entre 5 y 30 minutos en horario de atención.</p></details>
     <details class="reveal"><summary>¿Tienen garantía?</summary><p>Sí. Cada cuenta incluye garantía durante el periodo contratado. Si falla, la reponemos.</p></details>
+    <details class="reveal"><summary>¿Qué pasa si mi cuenta deja de funcionar?</summary><p>Escríbenos por WhatsApp desde el botón "Tengo un problema" en Mi cuenta. Revisamos el caso y, si hace falta, te damos otra cuenta con el mismo tiempo que te quedaba.</p></details>
+    <details class="reveal"><summary>¿Puedo renovar mi plan?</summary><p>Sí. Cuando te queden pocos días verás un botón de renovar en Mi cuenta que te lleva a WhatsApp.</p></details>
+    <details class="reveal"><summary>¿Puedo usar IA Plus como app en mi celular?</summary><p>Sí. Pulsa "Instalar" en la barra inferior y se guarda en tu pantalla de inicio. En iPhone: Compartir y luego "Añadir a pantalla de inicio".</p></details>
     <details class="reveal"><summary>¿Cómo puedo pagar?</summary><p>Nequi, Daviplata, Bancolombia y otros medios que te indicaremos por WhatsApp.</p></details>
   </div>
 </section>
@@ -123,6 +149,7 @@
       <p>¿Dudas? Escríbenos directamente.</p>
       <a class="btn btn-primary" id="waContact" target="_blank" rel="noopener">💬 WhatsApp</a>
     </div>
+    <nav class="foot-links"><a href="terminos.html">Términos</a><a href="privacidad.html">Privacidad</a><a href="#catalogo">Catálogo</a><a href="#faq">Preguntas</a></nav>
     <small>© <span id="year"></span> IA Plus Colombia. Todos los derechos reservados.</small>
   </div>
 </footer>
@@ -143,6 +170,8 @@
   <svg viewBox="0 0 32 32" width="28" height="28" fill="#fff" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-3.9-.6-5.5-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.300 5.3 4.6 2 .8 2.7.9 3.7.7.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4Z"/></svg>
 </a>
 
+<div class="progress" id="progress" aria-hidden="true"></div>
+<button type="button" class="totop" id="totop" aria-label="Subir">↑</button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <nav class="bn" id="bn" aria-label="Navegación">
