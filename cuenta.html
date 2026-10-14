@@ -6,6 +6,12 @@
 <title>Tu cuenta | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo.webp" type="image/webp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="IA Plus">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta name="theme-color" content="#1e6bff">
 <style>
@@ -114,6 +120,25 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
   .mock .t{font-size:18px}
   .cta{width:100%;justify-content:center}
 }
+
+.bn{display:none}
+@media(max-width:760px){
+  .bn{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(30,60,120,.08)}
+  .bn a,.bn button{display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;color:var(--mut);font:inherit;font-size:11px;font-weight:700;padding:6px 2px;border-radius:12px;cursor:pointer;min-height:52px;justify-content:center}
+  .bn i{font-style:normal;font-size:21px;line-height:1.1}
+  .bn a.on{color:var(--acc);background:var(--soft)}.bn a:active,.bn button:active{background:var(--soft)}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .back{display:none}
+  .meta{justify-content:flex-start}
+  .field{flex-wrap:nowrap}
+  .ib{width:48px;height:48px}
+  .tcode{font-size:34px}
+  .card{animation:cup .5s cubic-bezier(.2,.7,.2,1) both}
+  .steps{animation:cup .6s .1s cubic-bezier(.2,.7,.2,1) both}
+}
+@keyframes cup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (display-mode: standalone){.bn button[data-install]{display:none}.bn{grid-template-columns:repeat(4,1fr)}}
+.toastc{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#101a33;color:#fff;padding:10px 18px;border-radius:12px;font-weight:600;z-index:60;animation:cup .25s both}
 </style>
 </head>
 <body>
@@ -342,6 +367,20 @@ async function loadAll(){
   }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message)); }
 }
 loadAll();
+(function(){
+  const wa=document.getElementById("bnWa"); if(wa) wa.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, necesito ayuda con mi cuenta");
+  const add=document.getElementById("bnTop");
+  if(add) add.addEventListener("click",e=>{ e.preventDefault(); const b=document.getElementById("addbox"); if(b){ b.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>{ const i=document.getElementById("addCode"); if(i) i.focus(); },500); } });
+  document.addEventListener("click",e=>{ const c=e.target.closest("[data-copy]"); if(!c) return; const t=document.createElement("div"); t.className="toastc"; t.textContent="Copiado ✔"; document.body.appendChild(t); setTimeout(()=>t.remove(),1400); });
+})();
 </script>
+<nav class="bn" aria-label="Navegación">
+  <a href="cuenta.html" class="on"><i>🔑</i><span>Mi cuenta</span></a>
+  <a href="index.html?tienda=1#catalogo"><i>🛍️</i><span>Tienda</span></a>
+  <a href="#" id="bnTop" data-addcode><i>➕</i><span>Otro código</span></a>
+  <a id="bnWa" target="_blank" rel="noopener"><i>💬</i><span>Ayuda</span></a>
+  <button type="button" data-install><i>📲</i><span>Instalar</span></button>
+</nav>
+<script src="pwa.js"></script>
 </body>
 </html>

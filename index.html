@@ -6,8 +6,12 @@
 <title>IA Plus Colombia | Cuentas Digitales Premium</title>
 <meta name="description" content="Compra cuentas digitales premium (IA, streaming, diseño y más) al mejor precio en Colombia. Ingresa con tu cuenta de Gmail.">
 <link rel="icon" href="logo.webp" type="image/webp">
-<link rel="apple-touch-icon" href="logo.png">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="IA Plus">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="canonical" href="https://wanna33.github.io/iaplus-colombia/">
 <meta name="theme-color" content="#05070d">
 <meta name="color-scheme" content="dark">
@@ -140,6 +144,14 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<nav class="bn" id="bn" aria-label="Navegación">
+  <a href="#inicio" data-s="inicio"><i>🏠</i><span>Inicio</span></a>
+  <a href="#catalogo" data-s="catalogo"><i>🛍️</i><span>Catálogo</span></a>
+  <a href="cuenta.html" id="bnAcct"><i>👤</i><span>Mi cuenta</span></a>
+  <a id="bnWa" target="_blank" rel="noopener"><i>💬</i><span>WhatsApp</span></a>
+  <button type="button" data-install id="bnApp"><i>📲</i><span>Instalar</span></button>
+</nav>
 <script src="app.js"></script>
+<script src="pwa.js"></script>
 </body>
 </html>

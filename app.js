@@ -222,3 +222,18 @@ document.addEventListener("pointermove", e => {
   const c = e.target.closest?.(".card"); if(!c) return;
   const r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
 });
+
+/* ============ BARRA INFERIOR (celular) ============ */
+(function(){
+  const wa = $("#bnWa"); if(wa){ wa.href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent("Hola, quiero información")}`; }
+  const acct = $("#bnAcct");
+  if(acct) acct.addEventListener("click", e => {
+    if(!user){ e.preventDefault(); openLogin(); }            // sin sesión: abre el ingreso con Gmail
+    else if(!hasAccount()){ e.preventDefault(); location.hash = "inicio"; $("#heroCode")?.focus(); toast("Escribe tu código para activar tu cuenta"); }
+  });
+  const links = [...document.querySelectorAll(".bn a[data-s]")];
+  if(links.length && "IntersectionObserver" in window){
+    const io = new IntersectionObserver(es => es.forEach(en => { if(en.isIntersecting){ links.forEach(a => a.classList.toggle("on", a.dataset.s === en.target.id)); } }), {rootMargin:"-45% 0px -50% 0px"});
+    ["inicio","catalogo"].forEach(id => { const s = document.getElementById(id); if(s) io.observe(s); });
+  }
+})();
