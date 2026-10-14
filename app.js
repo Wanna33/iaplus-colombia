@@ -4,7 +4,7 @@ const CONFIG = {
   //    y agrega tu dominio (y http://localhost) en "Orígenes autorizados de JavaScript".
   GOOGLE_CLIENT_ID: "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com",
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
-  WHATSAPP: "573000000000",
+  WHATSAPP: "573102035327",
   STORE: "IA Plus Colombia",
 };
 
