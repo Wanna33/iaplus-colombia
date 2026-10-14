@@ -2,7 +2,7 @@
 const CONFIG = {
   // 1) Crea un "OAuth Client ID" tipo Web en https://console.cloud.google.com/apis/credentials
   //    y agrega tu dominio (y http://localhost) en "Orígenes autorizados de JavaScript".
-  GOOGLE_CLIENT_ID: "TU_CLIENT_ID.apps.googleusercontent.com",
+  GOOGLE_CLIENT_ID: "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com",
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
   WHATSAPP: "573000000000",
   STORE: "IA Plus Colombia",
