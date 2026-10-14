@@ -4,23 +4,17 @@ const CONFIG = {
   //    y agrega tu dominio (y http://localhost) en "Orígenes autorizados de JavaScript".
   GOOGLE_CLIENT_ID: "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com",
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
-  WHATSAPP: "573000000000",
+  WHATSAPP: "573102035327",
   STORE: "IA Plus Colombia",
+  // URL de la API (Apps Script) que entrega las cuentas con el código de activación
+  API_URL: "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec",
 };
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT Plus", cat:"IA", ico:"🤖", price:45000, per:"/mes", hot:true, feats:["GPT de última generación","Generación de imágenes","Garantía durante el mes"]},
-  {id:"gemini", name:"Gemini Advanced", cat:"IA", ico:"✨", price:35000, per:"/mes", feats:["Google AI Pro","2 TB de almacenamiento","Garantía durante el mes"]},
-  {id:"claude", name:"Claude Pro", cat:"IA", ico:"🧠", price:55000, per:"/mes", feats:["Más uso y modelos avanzados","Proyectos y archivos","Garantía durante el mes"]},
-  {id:"midjourney", name:"Midjourney", cat:"IA", ico:"🎨", price:40000, per:"/mes", feats:["Imágenes con IA","Modo rápido","Garantía durante el mes"]},
-  {id:"canva", name:"Canva Pro", cat:"Diseño", ico:"🖌️", price:15000, per:"/mes", hot:true, feats:["Todas las plantillas premium","Quitar fondos","Kit de marca"]},
-  {id:"capcut", name:"CapCut Pro", cat:"Diseño", ico:"🎬", price:18000, per:"/mes", feats:["Sin marca de agua","Efectos premium","Exporta en 4K"]},
-  {id:"netflix", name:"Netflix", cat:"Streaming", ico:"🍿", price:14000, per:"/mes", feats:["Perfil individual","Calidad HD/4K","Soporte incluido"]},
-  {id:"disney", name:"Disney+", cat:"Streaming", ico:"🏰", price:10000, per:"/mes", feats:["Perfil individual","Disney, Marvel, Star Wars","Soporte incluido"]},
-  {id:"spotify", name:"Spotify Premium", cat:"Música", ico:"🎧", price:12000, per:"/mes", feats:["Sin anuncios","Descargas offline","En tu propio correo"]},
-  {id:"youtube", name:"YouTube Premium", cat:"Música", ico:"▶️", price:10000, per:"/mes", feats:["Sin anuncios","YouTube Music incluido","Reproducción en segundo plano"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
+const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
 
 /* ============ UTILIDADES ============ */
 const $ = s => document.querySelector(s);
@@ -37,6 +31,7 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on
 
 /* ============ CATÁLOGO ============ */
 function renderFilters(){
+  if(new Set(PRODUCTS.map(p=>p.cat)).size<2){ $("#filters").innerHTML=""; return; }
   const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
   $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}">${c}</button>`).join("");
   $("#filters").onclick = e => { const c=e.target.dataset.c; if(c){ filter=c; renderFilters(); renderGrid(); } };
@@ -46,67 +41,18 @@ function renderGrid(){
   $("#grid").innerHTML = list.map(p=>`
     <article class="card">
       ${p.hot?'<span class="badge">🔥 Popular</span>':''}
-      <div class="ico">${p.ico}</div>
+      <div class="ico">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
-      <button class="btn btn-primary full" data-add="${p.id}">Agregar al carrito</button>
+      <div class="unlock-title">🔓 ¿Ya pagaste? Escribe tu código</div>
+      <div class="redeem-inline" id="redeemBox"></div>
+      <a class="buy-link" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">¿No tienes código? Cómpralo por WhatsApp</a>
     </article>`).join("");
+  renderRedeem();
 }
-$("#grid").addEventListener("click", e => {
-  const id = e.target.dataset.add; if(!id) return;
-  if(!user){ openLogin(); toast("Primero ingresa con tu Gmail"); return; }
-  cart.push(id); save("iap_cart", cart); renderCart(); toast("Agregado al carrito ✔");
-});
-
-/* ============ CARRITO ============ */
-function renderCart(){
-  $("#cartCount").textContent = cart.length;
-  const body = $("#cartItems");
-  if(!cart.length){ body.innerHTML = '<div class="empty">Tu carrito está vacío</div>'; $("#cartTotal").textContent = cop(0); return; }
-  let total = 0;
-  body.innerHTML = cart.map((id,i)=>{
-    const p = PRODUCTS.find(x=>x.id===id); total += p.price;
-    return `<div class="citem"><div>${p.ico} <b>${esc(p.name)}</b><small>${cop(p.price)} ${p.per}</small></div><button data-rm="${i}" aria-label="Quitar">🗑</button></div>`;
-  }).join("");
-  $("#cartTotal").textContent = cop(total);
-}
-$("#cartItems").addEventListener("click", e => {
-  const i = e.target.dataset.rm; if(i===undefined) return;
-  cart.splice(+i,1); save("iap_cart", cart); renderCart();
-});
-function openDrawer(on){ $("#drawer").classList.toggle("on",on); $("#overlay").classList.toggle("on",on); }
-$("#cartBtn").onclick = () => openDrawer(true);
-$("#closeCart").onclick = () => openDrawer(false);
-$("#overlay").onclick = () => openDrawer(false);
-
-$("#checkout").onclick = () => {
-  if(!user){ openDrawer(false); openLogin(); return; }
-  if(!cart.length){ toast("Tu carrito está vacío"); return; }
-  const items = cart.map(id => PRODUCTS.find(p=>p.id===id));
-  const total = items.reduce((a,p)=>a+p.price,0);
-  const orders = load("iap_orders", []);
-  orders.unshift({date:new Date().toLocaleString("es-CO"), email:user.email, items:items.map(p=>p.name), total});
-  save("iap_orders", orders);
-  const msg = `Hola ${CONFIG.STORE} 👋\nQuiero hacer este pedido:\n\n` +
-    items.map(p=>`• ${p.name} - ${cop(p.price)}`).join("\n") +
-    `\n\nTotal: ${cop(total)} COP\nMi Gmail: ${user.email}\nNombre: ${user.name}`;
-  window.open(`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
-  cart = []; save("iap_cart", cart); renderCart(); openDrawer(false);
-};
-$("#myOrders").onclick = () => {
-  if(!user){ openDrawer(false); openLogin(); return; }
-  const mine = load("iap_orders", []).filter(o=>o.email===user.email);
-  $("#cartItems").innerHTML = mine.length
-    ? mine.map(o=>`<div class="order"><b>${cop(o.total)}</b><br>${o.items.map(esc).join(", ")}<br><small>${esc(o.date)}</small></div>`).join("")
-    : '<div class="empty">Aún no tienes pedidos</div>';
-  $("#cartTotal").textContent = "—";
-  $(".drawer-head h3").textContent = "Mis pedidos";
-  const back = () => { $(".drawer-head h3").textContent = "Tu carrito"; renderCart(); };
-  $("#closeCart").addEventListener("click", back, {once:true});
-  $("#overlay").addEventListener("click", back, {once:true});
-};
+function renderCart(){}
 
 /* ============ LOGIN REAL CON GOOGLE ============ */
 const hasClientId = /^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(CONFIG.GOOGLE_CLIENT_ID);
@@ -116,7 +62,7 @@ function parseJwt(t){
   const b = t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
   return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")));
 }
-function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); }
+function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); }
 
 function onGoogle(resp){
   // Para máxima seguridad, verifica resp.credential también en tu servidor.
@@ -125,6 +71,7 @@ function onGoogle(resp){
   if(!okIss || p.aud !== CONFIG.GOOGLE_CLIENT_ID || p.exp*1000 < Date.now() || !p.email_verified){
     toast("No se pudo verificar tu cuenta de Google"); return;
   }
+  save("iap_cred",{token:resp.credential,exp:p.exp*1000});
   setUser({email:p.email, name:p.name || p.email, picture:p.picture || ""});
 }
 function showSetupError(){
@@ -153,8 +100,8 @@ function avatarOf(sz){
 }
 function logout(){
   try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{}
-  user = null; save("iap_user", null); cart = []; save("iap_cart", []);
-  renderAuth(); renderCart(); renderHeroCard(); toast("Sesión cerrada");
+  user = null; save("iap_user", null); save("iap_cred", null); cart = []; save("iap_cart", []);
+  renderAuth(); renderCart(); renderHeroCard(); renderRedeem(); toast("Sesión cerrada");
 }
 function renderAuth(){
   const a = $("#authArea");
@@ -180,10 +127,47 @@ function renderHeroCard(){
   }
 }
 
+/* ============ MI CUENTA (código de activación) ============ */
+let myItems = null;
+async function callApi(action, code){
+  const cred = load("iap_cred", null);
+  if(!CONFIG.API_URL) throw new Error("El servicio de cuentas aún no está configurado.");
+  if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Pulsa Salir y vuelve a entrar con Google.");
+  const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action, code, idToken:cred.token})});
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || "Error");
+  return j.items;
+}
+function renderRedeem(){
+  const box = $("#redeemBox"); if(!box) return;
+  if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
+  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html" target="_blank" rel="noopener">🔓 Abrir mi cuenta de ChatGPT</a>' : '';
+  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
+    <p class="note err" id="redeemErr" hidden></p>
+    <div id="acctList">${myItems===null?'':(list||'')}</div>`;
+  $("#redeemForm").onsubmit = async e => {
+    e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
+    const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
+    const w = window.open("", "_blank");
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); if(w) w.location.href = "cuenta.html"; }
+    catch(ex){ if(w) w.close(); err.textContent = ex.message; err.hidden=false; }
+    renderRedeem_keep(err.textContent, !err.hidden);
+  };
+}
+function renderRedeem_keep(msg, show){ renderRedeem(); if(show){ const e=$("#redeemErr"); e.textContent=msg; e.hidden=false; } }
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-copy]"); if(!t) return;
+  navigator.clipboard?.writeText(t.dataset.copy).then(()=>toast("Copiado ✔"));
+});
+async function loadMine(){
+  if(!user || !CONFIG.API_URL) return;
+  try{ myItems = await callApi("list"); renderRedeem(); }catch{}
+}
+
 /* ============ INIT ============ */
 $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión ✔"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
 $("#burger").onclick = () => $("#links").classList.toggle("on");
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
 $("#year").textContent = new Date().getFullYear();
-renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard();
+renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard(); renderRedeem(); loadMine();

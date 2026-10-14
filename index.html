@@ -21,7 +21,6 @@
       <a href="#contacto">Contacto</a>
     </nav>
     <div class="nav-right">
-      <button class="cart-btn" id="cartBtn" aria-label="Carrito">🛒 <span id="cartCount">0</span></button>
       <div id="authArea">
         <button class="btn btn-google" id="loginBtn">
           <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
@@ -62,20 +61,20 @@
 <section class="section" id="catalogo">
   <div class="wrap">
     <h2 class="title">Catálogo de <span class="grad">cuentas</span></h2>
-    <p class="sub">Precios en pesos colombianos (COP). Inicia sesión con Gmail para comprar.</p>
+    <p class="sub">Precio en pesos colombianos (COP). Compra tu código por WhatsApp y desbloquea tu cuenta aquí.</p>
     <div class="filters" id="filters"></div>
     <div class="grid" id="grid"></div>
   </div>
 </section>
 
-<section class="section alt" id="como">
+<section class="section" id="como">
   <div class="wrap">
     <h2 class="title">¿Cómo <span class="grad">funciona</span>?</h2>
     <div class="steps">
       <div class="step"><b>1</b><h3>Ingresa con Gmail</h3><p>Un clic con tu cuenta de Google. Sin contraseñas nuevas.</p></div>
-      <div class="step"><b>2</b><h3>Elige tu cuenta</h3><p>Agrega al carrito los servicios que quieras.</p></div>
-      <div class="step"><b>3</b><h3>Paga</h3><p>Confirmas el pedido por WhatsApp y pagas con Nequi, Daviplata o transferencia.</p></div>
-      <div class="step"><b>4</b><h3>Recibe tu acceso</h3><p>Te enviamos los datos de tu cuenta en minutos.</p></div>
+      <div class="step"><b>2</b><h3>Pide tu código</h3><p>Escríbenos por WhatsApp y pide tu cuenta.</p></div>
+      <div class="step"><b>3</b><h3>Paga</h3><p>Pagas con Nequi, Daviplata o transferencia y te enviamos tu código.</p></div>
+      <div class="step"><b>4</b><h3>Desbloquea tu cuenta</h3><p>Escribe el código en la tarjeta y verás el correo y la contraseña.</p></div>
     </div>
   </div>
 </section>
@@ -100,18 +99,6 @@
     <small>© <span id="year"></span> IA Plus Colombia. Todos los derechos reservados.</small>
   </div>
 </footer>
-
-<!-- Carrito -->
-<aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-head"><h3>Tu carrito</h3><button id="closeCart" aria-label="Cerrar">✕</button></div>
-  <div class="drawer-body" id="cartItems"></div>
-  <div class="drawer-foot">
-    <div class="total"><span>Total</span><strong id="cartTotal">$0</strong></div>
-    <button class="btn btn-primary full" id="checkout">Finalizar por WhatsApp</button>
-    <button class="btn btn-ghost full" id="myOrders">Mis pedidos</button>
-  </div>
-</aside>
-<div class="overlay" id="overlay"></div>
 
 <!-- Modal login -->
 <div class="modal" id="loginModal" aria-hidden="true">
