@@ -101,9 +101,13 @@ const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
 let items = [], busy = false, hlCode = "";
 const DRAFT = "iap_admin_draft";
-const draftGet = () => { try { return JSON.parse(sessionStorage.getItem(DRAFT)) || {}; } catch { return {}; } };
-const draftSet = d => { try { sessionStorage.setItem(DRAFT, JSON.stringify(d)); } catch {} };
-const draftClear = () => { try { sessionStorage.removeItem(DRAFT); } catch {} };
+// Permanente (localStorage): producto, correo y días. Las contraseñas y claves 2FA solo duran mientras la pestaña esté abierta (sessionStorage).
+const SENSITIVE = ["clave","k2"];
+const draftGet = () => { try { return {...(JSON.parse(sessionStorage.getItem(DRAFT))||{}), ...(JSON.parse(localStorage.getItem(DRAFT))||{})}; } catch { return {}; } };
+const draftSet = d => { try {
+  const perm = {}, temp = {}; for(const k in d) (SENSITIVE.includes(k)?temp:perm)[k] = d[k];
+  localStorage.setItem(DRAFT, JSON.stringify(perm)); sessionStorage.setItem(DRAFT, JSON.stringify(temp)); } catch {} };
+const draftClear = () => { try { localStorage.removeItem(DRAFT); sessionStorage.removeItem(DRAFT); } catch {} };
 const FIELDS = {fProd:"producto", fMail:"correo", fPass:"clave", fKey:"k2", fDays:"dias"};
 function restoreDraft(){
   const d = draftGet(); let any = false;
@@ -112,7 +116,7 @@ function restoreDraft(){
 }
 function saveDraft(){
   const d = {}; for(const [id,k] of Object.entries(FIELDS)) d[k] = $("#"+id).value; draftSet(d);
-  $("#draftNote").textContent = "Guardado automático ✔ (borrador de esta sesión)";
+  $("#draftNote").textContent = "Guardado automático ✔ (correo y días quedan guardados; contraseñas solo mientras esta pestaña esté abierta)";
 }
 
 function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),2600); }
