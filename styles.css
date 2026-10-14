@@ -76,7 +76,7 @@ a{color:inherit;text-decoration:none}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
 .chip.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(30,100,255,.3)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,320px));justify-content:center;gap:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,420px));justify-content:center;gap:22px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;transition:.25s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .card:hover{transform:translateY(-6px);border-color:#b9d4ff;box-shadow:var(--shadow-lg)}
 .card .badge{position:absolute;top:14px;right:14px;background:var(--card)3dc;color:#b45f00;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px}
@@ -165,3 +165,9 @@ details p{color:var(--mut);margin-top:10px}
 .acct code{flex:1;min-width:0;word-break:break-all;background:var(--bg);padding:8px 12px;border-radius:8px;color:var(--cyan)}
 .copy{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}
 .copy:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.unlock-title{font-weight:700;color:var(--navy);margin:6px 0 10px}
+.redeem-inline .redeem-form{flex-direction:column}
+.redeem-inline .redeem-form input{width:100%}
+.buy-link{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--cyan)}
+.buy-link:hover{text-decoration:underline}

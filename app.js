@@ -46,62 +46,13 @@ function renderGrid(){
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
-      <button class="btn btn-primary full" data-add="${p.id}">Agregar al carrito</button>
+      <div class="unlock-title">🔓 ¿Ya pagaste? Escribe tu código</div>
+      <div class="redeem-inline" id="redeemBox"></div>
+      <a class="buy-link" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">¿No tienes código? Cómpralo por WhatsApp</a>
     </article>`).join("");
+  renderRedeem();
 }
-$("#grid").addEventListener("click", e => {
-  const id = e.target.dataset.add; if(!id) return;
-  if(!user){ openLogin(); toast("Primero ingresa con tu Gmail"); return; }
-  cart.push(id); save("iap_cart", cart); renderCart(); toast("Agregado al carrito ✔");
-});
-
-/* ============ CARRITO ============ */
-function renderCart(){
-  $("#cartCount").textContent = cart.length;
-  const body = $("#cartItems");
-  if(!cart.length){ body.innerHTML = '<div class="empty">Tu carrito está vacío</div>'; $("#cartTotal").textContent = cop(0); return; }
-  let total = 0;
-  body.innerHTML = cart.map((id,i)=>{
-    const p = PRODUCTS.find(x=>x.id===id); total += p.price;
-    return `<div class="citem"><div><span class="cico">${iconOf(p)}</span> <b>${esc(p.name)}</b><small>${cop(p.price)} ${p.per}</small></div><button data-rm="${i}" aria-label="Quitar">🗑</button></div>`;
-  }).join("");
-  $("#cartTotal").textContent = cop(total);
-}
-$("#cartItems").addEventListener("click", e => {
-  const i = e.target.dataset.rm; if(i===undefined) return;
-  cart.splice(+i,1); save("iap_cart", cart); renderCart();
-});
-function openDrawer(on){ $("#drawer").classList.toggle("on",on); $("#overlay").classList.toggle("on",on); }
-$("#cartBtn").onclick = () => openDrawer(true);
-$("#closeCart").onclick = () => openDrawer(false);
-$("#overlay").onclick = () => openDrawer(false);
-
-$("#checkout").onclick = () => {
-  if(!user){ openDrawer(false); openLogin(); return; }
-  if(!cart.length){ toast("Tu carrito está vacío"); return; }
-  const items = cart.map(id => PRODUCTS.find(p=>p.id===id));
-  const total = items.reduce((a,p)=>a+p.price,0);
-  const orders = load("iap_orders", []);
-  orders.unshift({date:new Date().toLocaleString("es-CO"), email:user.email, items:items.map(p=>p.name), total});
-  save("iap_orders", orders);
-  const msg = `Hola ${CONFIG.STORE} 👋\nQuiero hacer este pedido:\n\n` +
-    items.map(p=>`• ${p.name} - ${cop(p.price)}`).join("\n") +
-    `\n\nTotal: ${cop(total)} COP\nMi Gmail: ${user.email}\nNombre: ${user.name}`;
-  window.open(`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
-  cart = []; save("iap_cart", cart); renderCart(); openDrawer(false);
-};
-$("#myOrders").onclick = () => {
-  if(!user){ openDrawer(false); openLogin(); return; }
-  const mine = load("iap_orders", []).filter(o=>o.email===user.email);
-  $("#cartItems").innerHTML = mine.length
-    ? mine.map(o=>`<div class="order"><b>${cop(o.total)}</b><br>${o.items.map(esc).join(", ")}<br><small>${esc(o.date)}</small></div>`).join("")
-    : '<div class="empty">Aún no tienes pedidos</div>';
-  $("#cartTotal").textContent = "—";
-  $(".drawer-head h3").textContent = "Mis pedidos";
-  const back = () => { $(".drawer-head h3").textContent = "Tu carrito"; renderCart(); };
-  $("#closeCart").addEventListener("click", back, {once:true});
-  $("#overlay").addEventListener("click", back, {once:true});
-};
+function renderCart(){}
 
 /* ============ LOGIN REAL CON GOOGLE ============ */
 const hasClientId = /^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(CONFIG.GOOGLE_CLIENT_ID);
@@ -189,17 +140,17 @@ async function callApi(action, code){
 }
 function renderRedeem(){
   const box = $("#redeemBox"); if(!box) return;
-  if(!user){ box.innerHTML = '<p class="muted">Inicia sesión con tu Gmail para activar tu código.</p>'; return; }
+  if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
   const list = (myItems||[]).map(i=>`<div class="acct"><b>${esc(i.producto)}</b>
     <div class="row"><span>Correo</span><code>${esc(i.correo)}</code><button class="copy" data-copy="${esc(i.correo)}">Copiar</button></div>
     <div class="row"><span>Contraseña</span><code>${esc(i.clave)}</code><button class="copy" data-copy="${esc(i.clave)}">Copiar</button></div></div>`).join("");
-  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar código</button></form>
+  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
     <div id="acctList">${myItems===null?'':(list||'<p class="muted">Aún no tienes cuentas activadas.</p>')}</div>`;
   $("#redeemForm").onsubmit = async e => {
     e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
     const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
-    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta activada ✔"); }
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); }
     catch(ex){ err.textContent = ex.message; err.hidden=false; }
     renderRedeem_keep(err.textContent, !err.hidden);
   };
