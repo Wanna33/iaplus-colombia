@@ -28,14 +28,16 @@
   }
   function hideBanner(){ const b = document.getElementById("pwaBanner"); if(b) b.remove(); }
   function showBanner(){
-    if(standalone || get("iap_installed") || document.getElementById("pwaBanner")) return;
-    const t = +get("iap_pwa_x") || 0; if(Date.now() - t < 3*86400000) return; // si lo cerró, no vuelve en 3 días
+    // se avisa UNA sola vez por inicio de sesión (al entrar con Gmail se reinicia el aviso)
+    if(standalone || get("iap_installed") || get("iap_pwa_seen") || !get("iap_user") || get("iap_user")==="null" || document.getElementById("pwaBanner")) return;
+    if(!ios && !deferred) return; // en Android/PC solo si el navegador ya permite instalar con un toque
+    set("iap_pwa_seen","1");
     css();
     const b = document.createElement("div"); b.className = "pwa-b"; b.id = "pwaBanner";
     b.innerHTML = `<img src="icon-192.png" alt=""><div><b>Instala la app de IA Plus</b>Entra a tu cuenta con un toque desde tu pantalla de inicio.</div><button class="go">Instalar</button><button class="x" aria-label="Cerrar">✕</button>`;
     document.body.appendChild(b);
     b.querySelector(".go").onclick = install;
-    b.querySelector(".x").onclick = () => { set("iap_pwa_x", Date.now()); hideBanner(); };
+    b.querySelector(".x").onclick = hideBanner;
   }
   async function install(){
     if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch{} deferred = null; hideBanner(); return; }
@@ -48,9 +50,12 @@
     document.body.appendChild(sh);
   }
   window.iapInstall = install;
+  window.iapAskInstall = showBanner;
   document.addEventListener("click", e => { if(e.target.closest("[data-install]")){ e.preventDefault(); install(); } });
   // iOS no avisa solo: mostramos el aviso con instrucciones tras unos segundos
-  if(ios && !standalone) window.addEventListener("load", () => setTimeout(showBanner, 4000));
+  if(ios && !standalone) window.addEventListener("load", () => setTimeout(showBanner, 2500));
+  // Android/PC: el navegador avisa cuando se puede instalar; si ya hay sesión, se muestra enseguida
+  window.addEventListener("load", () => setTimeout(showBanner, 2500));
   // vibración suave al tocar botones (celulares que lo permiten)
   document.addEventListener("click", e => { if(navigator.vibrate && e.target.closest(".btn,.ib,.chip,.tabs button,.bn a,.bn button")) navigator.vibrate(8); }, {passive:true});
 })();

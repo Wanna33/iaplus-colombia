@@ -80,7 +80,7 @@ function parseJwt(t){
   const b = t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
   return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")));
 }
-function setUser(u){ user = u; save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); loadMine(); }
+function setUser(u){ user = u; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); loadMine(); setTimeout(()=>window.iapAskInstall&&window.iapAskInstall(),1200); }
 
 function onGoogle(resp){
   // Para máxima seguridad, verifica resp.credential también en tu servidor.
@@ -118,7 +118,7 @@ function avatarOf(sz){
 }
 function logout(){
   try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{}
-  user = null; save("iap_user", null); save("iap_cred", null); save("iap_has", false); cart = []; save("iap_cart", []);
+  user = null; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", null); save("iap_cred", null); save("iap_has", false); cart = []; save("iap_cart", []);
   renderAuth(); renderCart(); renderHeroCard(); renderRedeem(); toast("Sesión cerrada");
 }
 function renderAuth(){
