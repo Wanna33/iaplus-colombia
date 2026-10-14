@@ -55,6 +55,8 @@ tr:hover td{background:#fafcff}
 .newcode .mono{font-size:26px;color:var(--ok)}
 .empty{text-align:center;color:var(--mut);padding:30px}
 .hide{display:none!important}
+tr.hl td{background:#fff7cf!important}
+.saved{margin-top:10px;font-size:13px;color:var(--ok);font-weight:600}
 html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 .btn{min-height:40px}
 @media(max-width:760px){
@@ -97,7 +99,21 @@ const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;"
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
-let items = [], busy = false;
+let items = [], busy = false, hlCode = "";
+const DRAFT = "iap_admin_draft";
+const draftGet = () => { try { return JSON.parse(sessionStorage.getItem(DRAFT)) || {}; } catch { return {}; } };
+const draftSet = d => { try { sessionStorage.setItem(DRAFT, JSON.stringify(d)); } catch {} };
+const draftClear = () => { try { sessionStorage.removeItem(DRAFT); } catch {} };
+const FIELDS = {fProd:"producto", fMail:"correo", fPass:"clave", fKey:"k2", fDays:"dias"};
+function restoreDraft(){
+  const d = draftGet(); let any = false;
+  for(const [id,k] of Object.entries(FIELDS)){ if(d[k]!==undefined && d[k]!==""){ $("#"+id).value = d[k]; if(k!=="producto"&&k!=="dias") any = true; } }
+  if(any){ $("#addBox").open = true; $("#draftNote").textContent = "Borrador recuperado automáticamente ✔"; }
+}
+function saveDraft(){
+  const d = {}; for(const [id,k] of Object.entries(FIELDS)) d[k] = $("#"+id).value; draftSet(d);
+  $("#draftNote").textContent = "Guardado automático ✔ (borrador de esta sesión)";
+}
 
 function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),2600); }
 function message(title, text, extra=""){ $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p>${extra}</div>`; }
@@ -177,6 +193,7 @@ function render(){
       <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
       <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
     </form>
+    <div class="saved" id="draftNote"></div>
   </details>
   <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
     <div class="tools">
@@ -187,6 +204,8 @@ function render(){
     <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
   </div>`;
   $("#addForm").onsubmit = addAccount;
+  $("#addForm").addEventListener("input", saveDraft);
+  restoreDraft();
   $("#genForm").onsubmit = genCode;
   $("#gAcc").onchange = syncDays;
   fillAccounts();
@@ -225,14 +244,14 @@ async function genCode(e){
 function filtered(){
   const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
   return items.filter(i => (!st || state(i).k===st) && (!q || [i.cliente,i.correo,i.codigo,i.producto].join(" ").toLowerCase().includes(q)))
-    .sort((a,b)=> (a.restante??9999)-(b.restante??9999));
+    .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
 function rows(){
   const list = filtered();
   $("#rows").innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}</div></td>
+    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
@@ -252,9 +271,12 @@ async function addAccount(e){
   e.preventDefault(); const b=e.target.querySelector("button"); b.disabled=true;
   try{
     const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,clave2fa:$("#fKey").value,dias:$("#fDays").value});
-    toast("Cuenta creada ✔");
-    await refresh(); showCode(j.codigo,{producto:$("#fProd").value,dias:$("#fDays").value});
-    $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#addBox").open=false;
+    const prod=$("#fProd").value, dias=$("#fDays").value;
+    hlCode = j.codigo; draftClear();
+    $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#addBox").open=false; $("#draftNote").textContent="";
+    await refresh(); showCode(j.codigo,{producto:prod,dias:dias});
+    toast("Cuenta guardada en tu hoja de Google ✔");
+    $("#rows tr.hl")?.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(ex){ toast(ex.message); }
   b.disabled=false;
 }
