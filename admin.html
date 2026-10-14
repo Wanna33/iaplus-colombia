@@ -177,6 +177,7 @@ function rows(){
       <td><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button>`:""}
         ${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
+        <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>
         <button class="btn s" data-a="edit">Editar</button>
         <button class="btn s" data-a="new">Nuevo código</button>
         ${i.cliente?`<button class="btn s d" data-a="rev">Quitar cliente</button>`:""}
@@ -213,6 +214,7 @@ document.addEventListener("click", async e=>{
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(`Hola 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`),"_blank"); return; }
+    if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
     if(a==="ext"){ await api("admin_extend",{fila:i.fila,dias:30}); toast("+30 días agregados ✔"); }
     if(a==="new"){ if(!confirm(i.cliente?"Esta cuenta ya tiene cliente. Un código nuevo la libera y le quita el acceso al cliente actual. ¿Continuar?":"¿Generar un código nuevo para esta cuenta?")) return;
       const j = await api("admin_newcode",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Nuevo código creado y mensaje copiado ✔"); }
