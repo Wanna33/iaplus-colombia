@@ -133,16 +133,32 @@ function renderAuth(){
   a.innerHTML = `${adm}${mine}<div class="user">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
   $("#logout").onclick = logout;
 }
+function hasAccount(){ return !!(user && (load("iap_has", false) || (myItems&&myItems.length))); }
+async function redeemCode(code, err, btn, label){
+  err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
+  try{ myItems = await callApi("redeem", code); toast("Cuenta desbloqueada ✔"); location.href = "cuenta.html"; }
+  catch(ex){ err.textContent = ex.message; err.hidden=false; btn.disabled=false; btn.textContent=label; }
+}
 function renderHeroCard(){
   const c = $("#heroCard");
-  if(user){
-    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])}</h3><p>${esc(user.email)}</p></div>
-      <a href="#catalogo" class="btn btn-primary full">Ver catálogo</a>
-      <button class="btn btn-ghost full" id="heroLogout" style="margin-top:10px">Cerrar sesión</button>`;
+  if(user && hasAccount()){
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])} 👋</h3><p>Tu cuenta ya está activa.</p></div>
+      <a href="cuenta.html" class="btn btn-primary full pulse-btn">🔓 Ver mi cuenta</a>
+      <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">Comprar otra cuenta</a>
+      <button class="linkbtn" id="heroLogout">Cerrar sesión</button>`;
     $("#heroLogout").onclick = logout;
+  } else if(user){
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])} 👋</h3><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
+      <form id="heroForm" class="redeem-form" style="flex-direction:column"><input id="heroCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar mi código</button></form>
+      <p class="note err" id="heroErr" hidden></p>
+      <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">¿Aún no tienes código? Ver catálogo</a>
+      <button class="linkbtn" id="heroLogout">Cerrar sesión</button>`;
+    $("#heroLogout").onclick = logout;
+    $("#heroForm").onsubmit = e => { e.preventDefault(); redeemCode($("#heroCode").value, $("#heroErr"), e.target.querySelector("button"), "Activar mi código"); };
   } else {
-    c.innerHTML = `<h3>Inicia sesión</h3><p>Entra con tu cuenta de Google para comprar y ver tus pedidos.</p>
-      <div id="gBtnHero" class="gbtn"></div><small class="legal">Usamos Google para identificarte. Nunca vemos tu contraseña.</small>`;
+    c.innerHTML = `<h3>Entra a tu cuenta</h3><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
+      <div id="gBtnHero" class="gbtn"></div><small class="legal">Usamos Google para identificarte. Nunca vemos tu contraseña.</small>
+      <a href="#catalogo" class="linkbtn" style="display:block;margin-top:12px">¿Aún no tienes código? Ver catálogo ↓</a>`;
     initGoogle();
   }
 }
@@ -186,7 +202,7 @@ document.addEventListener("click", e => {
 async function loadMine(){
   if(!user || !CONFIG.API_URL) return;
   try{
-    myItems = await callApi("list"); save("iap_has", myItems.length>0); renderRedeem(); renderAuth();
+    myItems = await callApi("list"); save("iap_has", myItems.length>0); renderRedeem(); renderAuth(); renderHeroCard();
     // quien ya desbloqueó una cuenta entra directo a su pantalla (correo, contraseña y autenticador)
     if(myItems.length && !/[?&]tienda/.test(location.search)) location.replace("cuenta.html");
   }catch{}

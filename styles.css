@@ -273,3 +273,8 @@ details:hover{border-color:#2f7bff}
 .chip{transition:.25s}
 .chip.on{transform:translateY(-1px)}
 @media(max-width:600px){.unlock-card .redeem-inline .redeem-form{flex-direction:column}}
+.linkbtn{display:block;margin:12px auto 0;background:none;border:0;color:var(--cyan);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+.pulse-btn{animation:pulsebtn 2.2s ease-in-out infinite}
+@keyframes pulsebtn{0%,100%{box-shadow:0 8px 22px rgba(30,100,255,.32)}50%{box-shadow:0 8px 34px rgba(56,200,255,.7)}}
+.login-card .redeem-form input{width:100%}
+@media(max-width:860px){.hero-in .login-card{order:-1}.hero{padding-top:28px}}
