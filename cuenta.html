@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu cuenta ChatGPT Plus | IA Plus Colombia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="chatgpt.png">
+<style>
+:root{--bg:#030806;--card:rgba(10,24,19,.78);--line:rgba(52,211,153,.28);--g:#34d399;--g2:#10b981;--text:#ecfdf5;--mut:#8fb5a6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--text);background:radial-gradient(900px 500px at 15% -10%,rgba(16,185,129,.35),transparent 60%),radial-gradient(800px 500px at 100% 20%,rgba(52,211,153,.18),transparent 60%),var(--bg);line-height:1.5;padding:28px 18px 60px}
+a{color:inherit;text-decoration:none}
+.top{max-width:880px;margin:0 auto 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--mut);font-size:14px}.top a:hover{color:var(--g)}
+.brand-mini{font-weight:700;letter-spacing:.02em}
+.wrap{max-width:880px;margin:0 auto}
+.hero{text-align:center;margin-bottom:26px}
+.logo{width:104px;height:104px;border-radius:28px;display:grid;place-items:center;margin:0 auto 18px;background:linear-gradient(145deg,#10b981,#065f46);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 18px 50px rgba(16,185,129,.45);animation:float 4s ease-in-out infinite}
+.logo img{width:62px;height:62px}
+@keyframes float{50%{transform:translateY(-8px)}}
+h1{font-size:clamp(30px,6vw,52px);line-height:1.1;letter-spacing:-.02em}
+h1 span{background:linear-gradient(90deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
+.crown{display:inline-block;animation:float 3s ease-in-out infinite}
+.hero h2{font-size:clamp(18px,3.4vw,26px);margin-top:10px;font-weight:700}
+.hero p{color:var(--mut);margin-top:6px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:26px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.field{margin-bottom:18px}
+.field label{display:flex;align-items:center;gap:8px;color:var(--g);font-weight:700;font-size:17px;margin-bottom:8px}
+.box{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 18px}
+.box code{flex:1;min-width:0;font-size:clamp(16px,3.4vw,22px);font-weight:600;word-break:break-all;font-family:inherit}
+.copy{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;color:#fff;background:linear-gradient(135deg,#10b981,#047857);font-weight:700;font-size:15px;padding:13px 18px;border-radius:12px;transition:.2s;font-family:inherit}
+.copy:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(16,185,129,.45)}
+.copy.ok{background:#059669}
+.show{background:none;border:0;color:var(--mut);cursor:pointer;font-size:20px;padding:0 6px}
+.plan{margin-top:22px;border-top:1px solid var(--line);padding-top:22px}
+.plan-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.days{font-size:clamp(40px,9vw,68px);font-weight:800;line-height:1;background:linear-gradient(90deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
+.days small{font-size:.32em;color:var(--mut);-webkit-text-fill-color:var(--mut);font-weight:600;margin-left:6px}
+.clock{color:var(--mut);font-size:15px;text-align:right}
+.clock b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
+.bar{height:12px;border-radius:99px;background:rgba(255,255,255,.08);margin:16px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#34d399,#10b981);box-shadow:0 0 18px rgba(52,211,153,.7);transition:width 1s}
+.dates{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;gap:10px;flex-wrap:wrap}
+.expired .days{background:none;-webkit-text-fill-color:#f87171;color:#f87171}
+.go{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+.btn{flex:1;min-width:200px;text-align:center;padding:15px;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.04);transition:.2s;font-family:inherit}
+.btn.main{background:linear-gradient(135deg,#10b981,#047857);border:0;color:#fff;box-shadow:0 10px 28px rgba(16,185,129,.4)}
+.btn:hover{transform:translateY(-2px)}
+.perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px}
+.perk{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;text-align:center;font-size:14px;color:var(--mut)}
+.perk b{display:block;color:var(--text);font-size:15px;margin-top:4px}
+.perk .e{font-size:26px}
+.steps{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 22px;color:var(--mut);font-size:14px}
+.steps b{color:var(--text)}.steps ol{margin:8px 0 0 18px}
+.msg{text-align:center;padding:50px 20px}
+.msg h2{margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:20px}
+.acct+.acct{margin-top:26px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tag{display:inline-block;background:rgba(52,211,153,.14);border:1px solid var(--line);color:var(--g);padding:4px 12px;border-radius:99px;font-size:13px;font-weight:600}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+.confetti i{position:absolute;top:-12px;width:9px;height:14px;opacity:.9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
+footer{max-width:880px;margin:30px auto 0;text-align:center;color:var(--mut);font-size:13px}
+</style>
+</head>
+<body>
+<div class="top"><span class="brand-mini">IA Plus Colombia</span><a href="index.html">← Volver a la tienda</a></div>
+<div class="wrap" id="app"><div class="msg"><p>Cargando tu cuenta…</p></div></div>
+<footer>Guarda estos datos y no los compartas. ¿Necesitas ayuda? <a id="wa" target="_blank" rel="noopener" style="color:var(--g)">Escríbenos por WhatsApp</a></footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
+const WHATSAPP = "573102035327";
+const DAY = 86400000;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+$("#wa").href = "https://wa.me/" + WHATSAPP;
+
+function message(title, text, withHome){
+  $("#app").innerHTML = `<div class="panel msg"><h2>${title}</h2><p>${text}</p>${withHome?'<a class="btn main" href="index.html" style="display:inline-block;flex:none">Ir a la tienda</a>':''}</div>`;
+}
+function confetti(){
+  const box = document.createElement("div"); box.className = "confetti";
+  const cols = ["#34d399","#10b981","#6ee7b7","#fbbf24","#ffffff"];
+  for(let i=0;i<70;i++){ const p=document.createElement("i");
+    p.style.left=Math.random()*100+"%"; p.style.background=cols[i%cols.length];
+    p.style.animationDuration=(2.5+Math.random()*2.5)+"s"; p.style.animationDelay=Math.random()*1.2+"s";
+    p.style.transform="rotate("+Math.random()*360+"deg)"; box.appendChild(p); }
+  document.body.appendChild(box); setTimeout(()=>box.remove(),7000);
+}
+const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
+
+function card(it, idx){
+  const isGpt = /chatgpt|gpt/i.test(it.producto);
+  const logo = isGpt ? "chatgpt.png" : "logo.png";
+  const start = it.inicio ? new Date(it.inicio) : null;
+  const end = it.fin ? new Date(it.fin) : null;
+  const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
+  const pct = start && end ? Math.min(100, Math.max(0,(Date.now()-start)/(end-start)*100)) : 0;
+  const expired = it.vencida;
+  const body = expired ? `<div class="msg" style="padding:30px 10px"><h2>Tu plan venció</h2><p>Escríbenos por WhatsApp para renovar tu cuenta.</p><a class="btn main" style="display:inline-block;flex:none" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto)}">Renovar por WhatsApp</a></div>` : `
+    <div class="field"><label>✉️ Dirección de correo electrónico</label>
+      <div class="box"><code>${esc(it.correo)}</code><button class="copy" data-copy="${esc(it.correo)}">📋 Copiar</button></div></div>
+    <div class="field"><label>🔒 Contraseña</label>
+      <div class="box"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="show" title="Mostrar u ocultar">👁</button><button class="copy" data-copy="${esc(it.clave)}">📋 Copiar</button></div></div>`;
+  return `<section class="acct ${expired?'expired':''}">
+    <div class="hero"><div class="logo"><img src="${logo}" alt=""></div>
+      <h1>${esc(it.producto).replace(/Plus/,'<span>Plus</span>')} <span class="crown">👑</span></h1>
+      <h2>${expired?'Tu acceso terminó':'Tu acceso ya está listo'}</h2>
+      <p>${expired?'':'Usa estas credenciales para iniciar sesión en tu cuenta.'}</p></div>
+    <div class="panel">${body}
+      <div class="plan"><div class="plan-head">
+        <div class="days">${left}<small>${left===1?'día restante':'días restantes'}</small></div>
+        <div class="clock">Tu plan de 1 mes está corriendo<br><b data-end="${it.fin||''}">--:--:--</b></div></div>
+        <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div>
+        <div class="dates"><span>Inicio: ${start?fmt(start):'—'}</span><span>Vence: ${end?fmt(end):'—'}</span></div></div>
+      ${expired?'':`<div class="go"><a class="btn main" href="https://chatgpt.com/auth/login" target="_blank" rel="noopener">Ir a ChatGPT →</a></div>`}
+    </div>
+    <div class="perks">
+      <div class="perk"><div class="e">⚡</div><b>Acceso por 1 mes</b></div>
+      <div class="perk"><div class="e">📱</div><b>Hasta 2 dispositivos</b></div>
+      <div class="perk"><div class="e">👑</div><b>Funciones avanzadas</b></div>
+      <div class="perk"><div class="e">🛠️</div><b>Soporte y acompañamiento</b></div></div>
+    <div class="steps"><b>¿Cómo entrar?</b><ol><li>Abre chatgpt.com y pulsa "Iniciar sesión".</li><li>Pega el correo y la contraseña con los botones "Copiar".</li><li>No cambies los datos de la cuenta.</li></ol></div>
+  </section>`;
+}
+function tick(){
+  document.querySelectorAll("[data-end]").forEach(el=>{
+    const e = el.dataset.end; if(!e) return;
+    const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="00:00:00"; return; }
+    const d=Math.floor(ms/DAY), h=Math.floor(ms%DAY/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
+    el.textContent = d+"d "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  });
+}
+document.addEventListener("click", e=>{
+  const c = e.target.closest("[data-copy]");
+  if(c){ navigator.clipboard?.writeText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML="✔ Copiado"; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1600); }); return; }
+  const s = e.target.closest(".show");
+  if(s){ const pw=s.parentElement.querySelector(".pw"); pw.textContent = pw.textContent.includes("•") ? pw.dataset.pw : "••••••••••"; }
+});
+
+(async function(){
+  const cred = load("iap_cred");
+  if(!cred || cred.exp < Date.now()){
+    message("Inicia sesión para ver tu cuenta","Entra otra vez con tu Gmail en la tienda y desbloquea tu cuenta con tu código.",true); return; }
+  try{
+    const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"list",idToken:cred.token})});
+    const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+    if(!j.items.length){ message("Aún no tienes cuentas","Escribe tu código de activación en la tienda para desbloquear tu cuenta.",true); return; }
+    $("#app").innerHTML = j.items.map(card).join("");
+    tick(); setInterval(tick,1000);
+    if(j.items.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
+  }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message), true); }
+})();
+</script>
+</body>
+</html>

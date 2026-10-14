@@ -141,17 +141,16 @@ async function callApi(action, code){
 function renderRedeem(){
   const box = $("#redeemBox"); if(!box) return;
   if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
-  const list = (myItems||[]).map(i=>`<div class="acct"><b>${esc(i.producto)}</b>
-    <div class="row"><span>Correo</span><code>${esc(i.correo)}</code><button class="copy" data-copy="${esc(i.correo)}">Copiar</button></div>
-    <div class="row"><span>Contraseña</span><code>${esc(i.clave)}</code><button class="copy" data-copy="${esc(i.clave)}">Copiar</button></div></div>`).join("");
+  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html" target="_blank" rel="noopener">🔓 Abrir mi cuenta de ChatGPT</a>' : '';
   box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
-    <div id="acctList">${myItems===null?'':(list||'<p class="muted">Aún no tienes cuentas activadas.</p>')}</div>`;
+    <div id="acctList">${myItems===null?'':(list||'')}</div>`;
   $("#redeemForm").onsubmit = async e => {
     e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
     const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
-    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); }
-    catch(ex){ err.textContent = ex.message; err.hidden=false; }
+    const w = window.open("", "_blank");
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); if(w) w.location.href = "cuenta.html"; }
+    catch(ex){ if(w) w.close(); err.textContent = ex.message; err.hidden=false; }
     renderRedeem_keep(err.textContent, !err.hidden);
   };
 }
