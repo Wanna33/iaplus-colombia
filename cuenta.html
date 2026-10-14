@@ -147,6 +147,7 @@ function section(it){
     <div class="card">
       <h1>Inicio de sesión directo</h1>
       <p class="lead">Usa los datos de la cuenta que aparecen abajo y sigue los pasos para iniciar sesión en ChatGPT.</p>
+      ${it.cliente!==undefined?`<div class="note" style="margin:0 0 6px"><b>Admin:</b> código ${esc(it.codigo||'—')} · cliente ${esc(it.cliente||'sin asignar')}</div>`:''}
       <div class="lbl">${I.mail} Cuenta de acceso</div>
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
