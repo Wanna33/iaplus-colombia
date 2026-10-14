@@ -272,6 +272,14 @@ function section(it){
       <div class="step"><div class="num">3</div><div><h3>Escribe la contraseña</h3><p>Copia la "Contraseña de acceso", pégala y pulsa "Continuar". Si te pide verificación, escríbenos por WhatsApp y te ayudamos.</p>
         <div class="mock"><div class="t">Introduce tu contraseña</div><div class="in hl"><span>Contraseña</span><span>👁</span></div><div class="go">Continuar</div></div></div></div>
       <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. Puedes usarla en hasta 2 dispositivos y tiene acceso por 1 mes.</div>
+      <details class="note" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
+        <ol style="margin:10px 0 0 18px;display:grid;gap:6px">
+          <li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
+          <li>En tu navegador normal borra las <b>cookies y la caché</b> de chatgpt.com y vuelve a entrar.</li>
+          <li>Desactiva extensiones (bloqueadores de anuncios, VPN, extensiones de ChatGPT) o prueba con <b>Google Chrome</b> actualizado.</li>
+          <li>Abre un <b>chat nuevo</b> y elige el modelo desde la lista de arriba (no uses chats ni enlaces antiguos).</li>
+          <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li>
+        </ol></details>
     </div>`;
   return `<section class="acct ${ex?'expired':''}" data-prod="${esc(it.producto)}">${left_col}${right_col}</section>`;
 }

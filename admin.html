@@ -24,7 +24,11 @@ a{color:inherit;text-decoration:none}
 .btn.p:hover{color:#fff;filter:brightness(1.05)}
 .btn.s{padding:6px 10px;font-size:13px;border-radius:9px}
 .btn.d{color:var(--bad)}.btn.d:hover{border-color:var(--bad);color:var(--bad)}
+.btn.wa{color:#0b8f4d}.btn.wa:hover{border-color:#0b8f4d;color:#0b8f4d}
 main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;position:sticky;top:64px;z-index:15}
+.tabs button{flex:1 1 auto;border:0;background:none;padding:10px 14px;border-radius:10px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap}
+.tabs button.on{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .stat b{display:block;font-size:28px;line-height:1.1}
@@ -41,8 +45,8 @@ main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
 .card h2{font-size:18px;margin-bottom:12px}
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
 .form label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-bottom:4px}
-input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:#fff;color:var(--text)}
-input:focus,select:focus{outline:2px solid rgba(30,107,255,.3);border-color:var(--acc)}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(30,107,255,.3);border-color:var(--acc)}
 .tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
 .tools input{max-width:300px}.tools select{max-width:200px}
 .wrapt{overflow-x:auto}
@@ -52,7 +56,7 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tr:hover td{background:#fafcff}
 .mono{font-family:Consolas,monospace;font-weight:700;letter-spacing:.03em}
 .tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}.t-g{background:#eef1f7;color:var(--mut)}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
 .msg{max-width:480px;margin:90px auto;text-align:center}
 .msg h2{font-size:26px;margin-bottom:8px}.msg p{color:var(--mut);margin-bottom:18px}
@@ -61,16 +65,33 @@ tr:hover td{background:#fafcff}
 .newcode{margin-top:12px;background:var(--okbg);border:1px solid #b6e8d1;border-radius:14px;padding:14px;display:none}
 .newcode.on{display:block}
 .newcode .mono{font-size:26px;color:var(--ok)}
+.codeline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.codeline .mono{font-size:20px}
 .empty{text-align:center;color:var(--mut);padding:30px}
 .hide{display:none!important}
 tr.hl td{background:#fff7cf!important}
 .saved{margin-top:10px;font-size:13px;color:var(--ok);font-weight:600}
+.note{font-size:12px;color:var(--mut);max-width:220px;white-space:pre-wrap;word-break:break-word}
+.bars{display:grid;gap:8px}
+.brow{display:grid;grid-template-columns:90px 1fr 150px;gap:10px;align-items:center;font-size:13px}
+.brow i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--acc2),var(--acc));min-width:2px}
+.alert{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--line)}
+.alert:last-child{border-bottom:0}
+.alert .who{flex:1 1 220px;word-break:break-all}
+dialog{border:0;border-radius:18px;padding:22px;width:min(560px,92vw);box-shadow:0 20px 60px rgba(10,20,50,.35);color:var(--text)}
+dialog::backdrop{background:rgba(10,20,50,.45)}
+dialog h2{font-size:19px;margin-bottom:12px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:14px;margin-bottom:14px}
+.kv b{color:var(--mut);font-weight:600}
+.kv span{word-break:break-all}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px}
 html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 .btn{min-height:40px}
 @media(max-width:760px){
   .bar{position:static}
   .bar-in{padding:10px 14px}.bar h1{font-size:16px}.bar img{height:32px}
   main{padding:14px 12px 60px}
+  .tabs{top:0}
   .card{padding:16px 14px;border-radius:16px}
   .stats{grid-template-columns:repeat(2,1fr)}
   .tools input,.tools select{max-width:none;width:100%}
@@ -85,6 +106,8 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
   td.acts-td::before{display:none}
   tr:hover td{background:none}
   .newcode .mono{font-size:22px}
+  .brow{grid-template-columns:70px 1fr}.brow span:last-child{grid-column:1/-1}
+  .kv{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -103,6 +126,7 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
+const DEFAULT_PRICE = 10000;
 function copyText(t){
   const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
   return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
@@ -112,7 +136,10 @@ const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;"
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
-let items = [], busy = false, hlCode = "";
+const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
+const money = n => "$"+Math.round(Number(n)||0).toLocaleString("es-CO");
+let items = [], busy = false, hlCode = "", curTab = "res";
+try{ curTab = sessionStorage.getItem("iap_tab") || "res"; }catch{}
 const DRAFT = "iap_admin_draft";
 // Permanente (localStorage): producto, correo y días. Las contraseñas y claves 2FA solo duran mientras la pestaña esté abierta (sessionStorage).
 const SENSITIVE = ["clave","k2"];
@@ -121,10 +148,10 @@ const draftSet = d => { try {
   const perm = {}, temp = {}; for(const k in d) (SENSITIVE.includes(k)?temp:perm)[k] = d[k];
   localStorage.setItem(DRAFT, JSON.stringify(perm)); sessionStorage.setItem(DRAFT, JSON.stringify(temp)); } catch {} };
 const draftClear = () => { try { localStorage.removeItem(DRAFT); sessionStorage.removeItem(DRAFT); } catch {} };
-const FIELDS = {fProd:"producto", fMail:"correo", fPass:"clave", fKey:"k2", fDays:"dias"};
+const FIELDS = {fProd:"producto", fMail:"correo", fPass:"clave", fKey:"k2", fDays:"dias", fPrice:"precio"};
 function restoreDraft(){
   const d = draftGet(); let any = false;
-  for(const [id,k] of Object.entries(FIELDS)){ if(d[k]!==undefined && d[k]!==""){ $("#"+id).value = d[k]; if(k!=="producto"&&k!=="dias") any = true; } }
+  for(const [id,k] of Object.entries(FIELDS)){ if(d[k]!==undefined && d[k]!==""){ $("#"+id).value = d[k]; if(k!=="producto"&&k!=="dias"&&k!=="precio") any = true; } }
   if(any){ $("#addBox").open = true; $("#draftNote").textContent = "Borrador recuperado automáticamente ✔"; }
 }
 function saveDraft(){
@@ -174,34 +201,107 @@ function start(){
   refresh();
 }
 
+/* ---------- Utilidades de datos ---------- */
 function state(it){
   if(!it.cliente) return {k:"av", t:"Disponible"};
   if(it.vencida) return {k:"b", t:"Vencida"};
   if(it.restante!==null && it.restante<=5) return {k:"w", t:"Por vencer"};
   return {k:"ok", t:"Activa"};
 }
+function waNum(n){ n=String(n||"").replace(/[^\d]/g,""); if(!n) return ""; if(n.length===10 && n[0]==="3") n="57"+n; return n; }
+function waLink(num, text){ const n=waNum(num); return "https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):""); }
+function renewMsg(i){ return `Hola${i.nombre?" "+i.nombre.split(" ")[0]:""} 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`; }
+function msgFor(i){
+  return `Hola 👋 Este es tu código de activación de ${i.producto}: ${i.codigo}\n\n1) Entra a ${SITE}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de ${i.producto} y pulsa "Desbloquear cuenta".\n\nEl código solo funciona una vez y tu plan dura ${i.dias} días desde que lo actives.`;
+}
+function clients(){
+  const m = new Map();
+  items.filter(i=>i.cliente).forEach(i=>{
+    const k = i.cliente.toLowerCase();
+    const c = m.get(k) || {email:k, nombre:"", whatsapp:"", nota:"", cuentas:[], gastado:0, primera:null, ultima:null, vence:null, activos:0, vencidos:0, usos2fa:0};
+    c.cuentas.push(i);
+    c.nombre = c.nombre || i.nombre; c.whatsapp = c.whatsapp || i.whatsapp; c.nota = c.nota || i.nota;
+    c.gastado += Number(i.precio)||0; c.usos2fa += i.usos2fa||0;
+    if(i.inicio){ if(!c.primera || i.inicio<c.primera) c.primera=i.inicio; if(!c.ultima || i.inicio>c.ultima) c.ultima=i.inicio; }
+    if(i.vencida) c.vencidos++; else { c.activos++; if(i.fin && (!c.vence || i.fin>c.vence)) c.vence=i.fin; }
+    m.set(k,c);
+  });
+  return [...m.values()];
+}
+function cState(c){
+  if(!c.activos) return {k:"b", t:"Vencido"};
+  const r = Math.min(...c.cuentas.filter(i=>!i.vencida).map(i=>i.restante??9999));
+  return r<=5 ? {k:"w", t:"Por vencer"} : {k:"ok", t:"Activo"};
+}
+
+/* ---------- Diálogos ---------- */
+function askForm(title, fields, intro=""){
+  return new Promise(res=>{
+    const d=document.createElement("dialog");
+    d.innerHTML=`<form method="dialog"><h2>${esc(title)}</h2>${intro?`<p style="color:var(--mut);font-size:14px;margin-bottom:12px">${intro}</p>`:""}
+      <div class="form" style="grid-template-columns:1fr">${fields.map(f=>`<div><label>${esc(f.label)}</label>${f.area
+        ?`<textarea name="${f.id}" rows="3" placeholder="${esc(f.ph||"")}">${esc(f.value||"")}</textarea>`
+        :`<input name="${f.id}" type="${f.type||"text"}" value="${esc(f.value??"")}" placeholder="${esc(f.ph||"")}" autocomplete="off" ${f.req?"required":""}>`}</div>`).join("")}</div>
+      <div class="acts" style="margin-top:16px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn p" value="ok">Guardar</button></div></form>`;
+    document.body.appendChild(d);
+    d.addEventListener("close",()=>{ let out=null; if(d.returnValue==="ok"){ out={}; new FormData(d.querySelector("form")).forEach((v,k)=>out[k]=v); } d.remove(); res(out); });
+    d.showModal();
+  });
+}
+function showInfo(html){
+  const d=document.createElement("dialog");
+  d.innerHTML=html+`<div class="acts" style="margin-top:14px;justify-content:flex-end"><button class="btn p" id="dlgX">Cerrar</button></div>`;
+  document.body.appendChild(d); d.querySelector("#dlgX").onclick=()=>d.close(); d.addEventListener("close",()=>d.remove()); d.showModal();
+}
+
+/* ---------- Vistas ---------- */
 function statsHtml(){
   const cnt = k => items.filter(i=>state(i).k===k).length;
   const withClient = items.filter(i=>i.cliente);
   const uniq = arr => new Set(arr.map(i=>i.cliente.toLowerCase())).size;
   const activos = uniq(withClient.filter(i=>!i.vencida));
   const total = uniq(withClient);
-  const dayMs = 86400000, now = Date.now();
+  const dayMs = 86400000, now = Date.now(), nd = new Date();
   const hoy = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<dayMs).length;
   const semana = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<7*dayMs).length;
+  const inMonth = i => { if(!i.inicio) return false; const d=new Date(i.inicio); return d.getMonth()===nd.getMonth() && d.getFullYear()===nd.getFullYear(); };
+  const ingMes = withClient.filter(inMonth).reduce((s,i)=>s+(Number(i.precio)||0),0);
+  const ingTot = withClient.reduce((s,i)=>s+(Number(i.precio)||0),0);
+  const libres = items.filter(i=>!i.cliente).length;
   return `<div class="stat big"><span>👥 Clientes activos ahora</span><b data-n="${activos}">0</b><small>${total} clientes en total desde el inicio · +${hoy} hoy · +${semana} esta semana</small></div>
-    <div class="stat"><b data-n="${items.length}">0</b><span>Cuentas en total</span></div>
-    <div class="stat"><b data-n="${cnt("av")}">0</b><span>Códigos disponibles</span></div>
+    <div class="stat"><b>${money(ingMes)}</b><span>Ingresos este mes</span></div>
+    <div class="stat"><b>${money(ingTot)}</b><span>Ingresos totales</span></div>
+    <div class="stat"><b data-n="${items.length}">0</b><span>Cuentas / códigos en total</span></div>
+    <div class="stat"><b data-n="${libres}">0</b><span>Códigos disponibles</span></div>
     <div class="stat g"><b data-n="${cnt("ok")}">0</b><span>Planes activos</span></div>
     <div class="stat w"><b data-n="${cnt("w")}">0</b><span>Vencen en ≤5 días</span></div>
     <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>`;
+}
+function attentionHtml(){
+  const list = items.filter(i=>i.cliente && (i.vencida || (i.restante!==null && i.restante<=5)))
+    .sort((a,b)=>(a.restante??-9999)-(b.restante??-9999)).slice(0,25);
+  if(!list.length) return '<div class="empty">Todo al día ✔ No hay planes por vencer ni vencidos.</div>';
+  return list.map(i=>`<div class="alert" data-f="${i.fila}"><div class="who"><b>${esc(i.nombre||i.cliente)}</b><br><small style="color:var(--mut)">${esc(i.cliente)} · ${esc(i.producto)}</small></div>
+    <span class="tag t-${i.vencida?"b":"w"}">${i.vencida?"Venció "+fdate(i.fin):"Vence en "+i.restante+(i.restante===1?" día":" días")}</span>
+    <a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}" ${i.whatsapp?"":'data-nowa="1"'}>💬 Avisar por WhatsApp</a>
+    <button class="btn s" data-a="ext">Renovar</button></div>`).join("");
+}
+function monthsHtml(){
+  const now = new Date(), rows = [];
+  for(let k=5;k>=0;k--){
+    const d = new Date(now.getFullYear(), now.getMonth()-k, 1);
+    const its = items.filter(i=>{ if(!i.inicio||!i.cliente) return false; const x=new Date(i.inicio); return x.getMonth()===d.getMonth()&&x.getFullYear()===d.getFullYear(); });
+    rows.push({l:d.toLocaleDateString("es-CO",{month:"short",year:"2-digit"}), n:its.length, v:its.reduce((s,i)=>s+(Number(i.precio)||0),0)});
+  }
+  const mx = Math.max(1,...rows.map(r=>r.n));
+  return `<div class="bars">${rows.map(r=>`<div class="brow"><span>${esc(r.l)}</span><i style="width:${Math.max(1,r.n/mx*100)}%"></i><span><b>${r.n}</b> ventas · ${money(r.v)}</span></div>`).join("")}</div>`;
 }
 function byAccountHtml(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,act:0,tot:0,libre:0,v:0};
     if(i.cliente){ a.tot++; if(i.vencida) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="accrow"><div class="accname">${esc(a.k)}</div>
-    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag" style="background:#eef1f7;color:var(--mut)">${a.tot} clientes en total</span></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
 const prevN = [];
 function countUp(){
@@ -213,50 +313,142 @@ function countUp(){
     requestAnimationFrame(step);
   });
 }
+function setTab(t){
+  curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  document.querySelectorAll("[id^=tab-]").forEach(s=>s.classList.toggle("hide", s.id!=="tab-"+t));
+  if(t==="log") loadLog();
+}
+function updateViews(){
+  $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
+  $("#byAcc").innerHTML = byAccountHtml(); countUp(); fillAccounts(); crows(); rows();
+}
 function render(){
-  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); $("#byAcc").innerHTML = byAccountHtml(); countUp(); fillAccounts(); rows(); return; }
+  if($("#addForm")){ updateViews(); return; }
   $("#app").innerHTML = `
-  <div class="stats" id="stats">${statsHtml()}</div>
-  <div class="card"><h2>📊 Clientes por cuenta</h2><div id="byAcc">${byAccountHtml()}</div></div>
-  <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
-    <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crea un código nuevo de un solo uso para otro cliente. El correo, la contraseña y el código 2FA son los mismos de la cuenta.</p>
-    <form id="genForm" class="form">
-      <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
-      <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
-      <div><button class="btn p" style="width:100%" type="submit">Generar código</button></div>
-    </form>
-    <div class="newcode" id="newcode"></div>
+  <div class="tabs">
+    <button data-t="res">📊 Resumen</button><button data-t="cli">👥 Clientes</button><button data-t="cta">🔑 Cuentas y códigos</button><button data-t="log">🕘 Registro</button>
   </div>
-  <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
-    <form id="addForm" class="form" style="margin-top:14px">
-      <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
-      <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
-      <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
-      <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="text" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
-      <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
-      <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
-    </form>
-    <div class="saved" id="draftNote"></div>
-  </details>
-  <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
-    <div class="tools">
-      <input id="q" placeholder="Buscar cliente, correo o código…">
-      <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option></select>
-      <button class="btn s" id="csv">⬇ Exportar CSV</button>
+
+  <section id="tab-res">
+    <div class="stats" id="stats"></div>
+    <div class="card"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
+    <div class="card"><h2>📈 Ventas de los últimos 6 meses</h2><div id="months"></div>
+      <p style="color:var(--mut);font-size:12px;margin-top:10px">Cuenta las activaciones por fecha de canje. Los montos salen del precio que anotas en cada cuenta.</p></div>
+    <div class="card"><h2>🧩 Clientes por cuenta</h2><div id="byAcc"></div></div>
+  </section>
+
+  <section id="tab-cli" class="hide">
+    <div class="card"><h2>👥 Todos mis clientes</h2>
+      <div class="tools">
+        <input id="cq" placeholder="Buscar por nombre, Gmail, WhatsApp o nota…">
+        <select id="cst"><option value="">Todos</option><option value="ok">Activos</option><option value="w">Por vencer</option><option value="b">Vencidos</option></select>
+        <select id="cso"><option value="rest">Ordenar: vencen primero</option><option value="gasto">Ordenar: más pagaron</option><option value="nuevo">Ordenar: más recientes</option><option value="nombre">Ordenar: nombre</option></select>
+        <button class="btn s" id="ccsv">⬇ Exportar clientes CSV</button>
+      </div>
+      <div class="wrapt"><table><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Cuentas</th><th>Estado</th><th>Vence</th><th>Cliente desde</th><th>Total pagado</th><th>Nota</th><th>Acciones</th></tr></thead><tbody id="crows"></tbody></table></div>
     </div>
-    <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
-  </div>`;
+  </section>
+
+  <section id="tab-cta" class="hide">
+    <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Puedes crear hasta 20 de una vez.</p>
+      <form id="genForm" class="form">
+        <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
+        <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
+        <div><label>Precio (COP)</label><input id="gPrice" type="number" min="0" step="500" value="${DEFAULT_PRICE}"></div>
+        <div><label>Cantidad de códigos</label><input id="gQty" type="number" min="1" max="20" value="1" required></div>
+        <div><button class="btn p" style="width:100%" type="submit">Generar</button></div>
+      </form>
+      <div class="newcode" id="newcode"></div>
+    </div>
+    <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
+      <form id="addForm" class="form" style="margin-top:14px">
+        <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
+        <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
+        <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
+        <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="text" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
+        <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
+        <div><label>Precio (COP)</label><input id="fPrice" type="number" min="0" step="500" value="${DEFAULT_PRICE}"></div>
+        <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
+      </form>
+      <div class="saved" id="draftNote"></div>
+    </details>
+    <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
+      <div class="tools">
+        <input id="q" placeholder="Buscar cliente, correo, código o nota…">
+        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option></select>
+        <button class="btn s" id="csv">⬇ Exportar CSV</button>
+      </div>
+      <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Precio</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="tab-log" class="hide">
+    <div class="card"><h2>🕘 Registro de actividad</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Canjes, códigos de autenticación pedidos y acciones que haces en este panel (últimos 300 eventos).</p>
+      <div class="tools"><button class="btn s" id="logReload">↻ Recargar registro</button><input id="lq" placeholder="Filtrar el registro…"></div>
+      <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Evento</th><th>Detalle</th><th>Quién</th></tr></thead><tbody id="lrows"><tr><td colspan="4" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
+    </div>
+  </section>`;
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
   $("#addForm").onsubmit = addAccount;
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
-  countUp();
   $("#genForm").onsubmit = genCode;
   $("#gAcc").onchange = syncDays;
-  fillAccounts();
   $("#q").oninput = $("#st").onchange = rows;
-  $("#csv").onclick = exportCsv;
-  rows();
+  $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
+  $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
+  $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
+  updateViews(); setTab(curTab);
 }
+
+/* ---------- Clientes ---------- */
+function cFiltered(){
+  const q = ($("#cq")?.value||"").toLowerCase(), st = $("#cst")?.value||"", so = $("#cso")?.value||"rest";
+  const list = clients().filter(c=>(!st||cState(c).k===st) && (!q || [c.nombre,c.email,c.whatsapp,c.nota].join(" ").toLowerCase().includes(q)));
+  const rest = c => Math.min(...c.cuentas.filter(i=>!i.vencida).map(i=>i.restante??9999), 99999);
+  const sorters = {rest:(a,b)=>rest(a)-rest(b), gasto:(a,b)=>b.gastado-a.gastado, nuevo:(a,b)=>String(b.ultima||"").localeCompare(String(a.ultima||"")), nombre:(a,b)=>(a.nombre||a.email).localeCompare(b.nombre||b.email)};
+  return list.sort(sorters[so]);
+}
+function crows(){
+  const el = $("#crows"); if(!el) return;
+  const list = cFiltered();
+  el.innerHTML = list.length ? list.map(c=>{
+    const s = cState(c);
+    return `<tr data-c="${esc(c.email)}"><td data-l="Cliente"><div><b>${esc(c.nombre||"(sin nombre)")}</b><br><small style="color:var(--mut)">${esc(c.email)}</small></div></td>
+      <td data-l="WhatsApp">${c.whatsapp?esc(c.whatsapp):'<span style="color:var(--mut)">—</span>'}</td>
+      <td data-l="Cuentas">${c.cuentas.length} <small style="color:var(--mut)">(${c.activos} activas${c.vencidos?`, ${c.vencidos} vencidas`:""})</small></td>
+      <td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
+      <td data-l="Vence">${fdate(c.vence)}</td><td data-l="Desde">${fdate(c.primera)}</td>
+      <td data-l="Pagado"><b>${money(c.gastado)}</b></td><td data-l="Nota"><div class="note">${esc(c.nota||"—")}</div></td>
+      <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button>
+        ${c.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp, renewMsg({...c.cuentas[0],nombre:c.nombre}))}">💬 WhatsApp</a>`:""}</div></td></tr>`;
+  }).join("") : `<tr><td colspan="9" class="empty">No hay clientes que coincidan.</td></tr>`;
+}
+function clientDetail(c){
+  const s = cState(c);
+  showInfo(`<h2>${esc(c.nombre||c.email)} <span class="tag t-${s.k}">${s.t}</span></h2>
+    <div class="kv"><b>Gmail</b><span>${esc(c.email)}</span><b>WhatsApp</b><span>${esc(c.whatsapp||"—")}</span>
+    <b>Cliente desde</b><span>${fdate(c.primera)}</span><b>Última activación</b><span>${fdate(c.ultima)}</span>
+    <b>Total pagado</b><span><b style="color:var(--text)">${money(c.gastado)}</b></span><b>Códigos 2FA pedidos</b><span>${c.usos2fa}</span>
+    <b>Nota</b><span style="white-space:pre-wrap">${esc(c.nota||"—")}</span></div>
+    <h2 style="font-size:16px">Cuentas de este cliente (${c.cuentas.length})</h2>
+    ${c.cuentas.map(i=>{const st=state(i);return `<div class="mini"><b>${esc(i.producto)}</b> · ${esc(i.correo)} <span class="tag t-${st.k}">${st.t}</span><br>
+      Código <span class="mono">${esc(i.codigo)}</span> · Activada ${fdate(i.inicio)} · Vence ${fdate(i.fin)} ${i.vencida?"":`(${i.restante} d)`}<br>
+      2FA: ${i.tiene2fa?`${i.usos2fa}/${i.max2fa} usos${i.ultimo2fa?" · último "+fdt(i.ultimo2fa):""}`:"sin clave"} · Precio ${money(i.precio)}</div>`;}).join("")}`);
+}
+async function editClient(c){
+  const v = await askForm("Datos de "+(c.nombre||c.email),[
+    {id:"nombre",label:"Nombre",value:c.nombre,ph:"Ej: Laura Pérez"},
+    {id:"whatsapp",label:"WhatsApp (con o sin 57)",value:c.whatsapp,ph:"3001234567"},
+    {id:"nota",label:"Nota privada",value:c.nota,area:true,ph:"Ej: paga por Nequi, renueva cada mes…"}]);
+  if(!v) return;
+  await api("admin_clientinfo",{cliente:c.email,nombre:v.nombre,whatsapp:v.whatsapp,nota:v.nota}); toast("Datos del cliente guardados ✔"); await refresh();
+}
+
+/* ---------- Cuentas / códigos ---------- */
 function accounts(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
@@ -268,93 +460,148 @@ function fillAccounts(){
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
 }
 function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a) $("#gDays").value=a.dias; }
-function showCode(code, it){
+function showCodes(codes, it){
   const n=$("#newcode"); n.classList.add("on");
-  n.innerHTML = `<div style="color:var(--mut);font-size:13px">Código para el cliente (un solo uso) — ${esc(it.producto)}:</div><div class="mono">${esc(code)}</div>
-    <div class="acts" style="margin-top:10px"><button class="btn s" id="cpCode">Copiar código</button><button class="btn s" id="cpMsg">Copiar mensaje para el cliente</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:code}))}">Enviar por WhatsApp</a></div>`;
-  $("#cpCode").onclick = ()=>copy(code); $("#cpMsg").onclick = ()=>copy(msgFor({...it,codigo:code}));
+  n.innerHTML = `<div style="color:var(--mut);font-size:13px">${codes.length>1?codes.length+" códigos nuevos":"Código nuevo"} (un solo uso) — ${esc(it.producto)}:</div>
+    ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
+    ${codes.length>1?`<div class="acts" style="margin-top:10px"><button class="btn s" id="cpAll">Copiar todos los códigos</button></div>`:""}`;
+  n.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
+  n.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({...it,codigo:b.dataset.cm})));
+  const all=$("#cpAll"); if(all) all.onclick=()=>copy(codes.join("\n"));
 }
 async function genCode(e){
   e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
   const b=e.target.querySelector("button"); b.disabled=true;
+  const dias=$("#gDays").value, precio=$("#gPrice").value, qty=Math.max(1,Math.min(20,+$("#gQty").value||1));
   try{
-    const j = await api("admin_clone",{fila:a.fila,dias:$("#gDays").value});
-    copy(msgFor({producto:a.producto,codigo:j.codigo,dias:$("#gDays").value}));
-    await refresh(); showCode(j.codigo,{producto:a.producto,dias:$("#gDays").value});
-    toast("Código creado ✔ (mensaje copiado)");
+    let codes;
+    if(qty>1) codes = (await api("admin_bulk",{fila:a.fila,dias,precio,cantidad:qty})).codigos;
+    else codes = [(await api("admin_clone",{fila:a.fila,dias,precio})).codigo];
+    copy(codes.length>1?codes.join("\n"):msgFor({producto:a.producto,codigo:codes[0],dias}));
+    await refresh(); showCodes(codes,{producto:a.producto,dias});
+    toast(codes.length>1?`${codes.length} códigos creados ✔ (copiados)`:"Código creado ✔ (mensaje copiado)");
   }catch(ex){ toast(ex.message); }
   b.disabled=false;
 }
 function filtered(){
   const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
-  return items.filter(i => (!st || state(i).k===st) && (!q || [i.cliente,i.correo,i.codigo,i.producto].join(" ").toLowerCase().includes(q)))
+  return items.filter(i => (!st || state(i).k===st) && (!q || [i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ").toLowerCase().includes(q)))
     .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
 function rows(){
+  const el = $("#rows"); if(!el) return;
   const list = filtered();
-  $("#rows").innerHTML = list.length ? list.map(i=>{
+  el.innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}</div></td>
+    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
-      <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
+      <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
-        ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button>`:""}
-        ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
+        ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
+        ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+ Días</button>${i.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}">💬 WhatsApp</a>`:`<button class="btn s" data-a="wa">Renovar WA</button>`}`:""}
         <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>
         <button class="btn s" data-a="edit">Editar</button>
         <button class="btn s" data-a="new">Nuevo código</button>
         ${i.cliente?`<button class="btn s d" data-a="rev">Quitar cliente</button>`:""}
+        <button class="btn s d" data-a="del" title="Borra esta fila de la hoja">🗑</button>
       </div></td></tr>`;
-  }).join("") : `<tr><td colspan="10" class="empty">No hay cuentas que coincidan.</td></tr>`;
-}
-function msgFor(i){
-  return `Hola 👋 Este es tu código de activación de ${i.producto}: ${i.codigo}\n\n1) Entra a ${SITE}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de ${i.producto} y pulsa "Desbloquear cuenta".\n\nEl código solo funciona una vez y tu plan dura ${i.dias} días desde que lo actives.`;
+  }).join("") : `<tr><td colspan="11" class="empty">No hay cuentas que coincidan.</td></tr>`;
 }
 async function addAccount(e){
   e.preventDefault(); const b=e.target.querySelector("button"); b.disabled=true;
   try{
-    const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,clave2fa:$("#fKey").value,dias:$("#fDays").value});
+    const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,clave2fa:$("#fKey").value,dias:$("#fDays").value,precio:$("#fPrice").value});
     const prod=$("#fProd").value, dias=$("#fDays").value;
     hlCode = j.codigo; draftClear();
-    $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#addBox").open=false; $("#draftNote").textContent="";
-    await refresh(); showCode(j.codigo,{producto:prod,dias:dias});
+    $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#fPrice").value=DEFAULT_PRICE; $("#addBox").open=false; $("#draftNote").textContent="";
+    await refresh(); showCodes([j.codigo],{producto:prod,dias:dias});
     toast("Cuenta guardada en tu hoja de Google ✔");
     $("#rows tr.hl")?.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(ex){ toast(ex.message); }
   b.disabled=false;
 }
 function copy(t){ copyText(t).then(()=>toast("Copiado ✔")); }
-function exportCsv(){
-  const head = ["Producto","Cuenta","Codigo","Estado","Cliente","Activada","Vence","Dias restantes","Dias del plan"];
-  const q = v => '"'+String(v??"").replace(/"/g,'""')+'"';
-  const csv = [head.map(q).join(",")].concat(filtered().map(i=>[i.producto,i.correo,i.codigo,state(i).t,i.cliente,fdate(i.inicio),fdate(i.fin),i.restante??"",i.dias].map(q).join(","))).join("\n");
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"})); a.download = "cuentas-iaplus.csv"; a.click();
+
+/* ---------- Registro ---------- */
+let logData = [];
+async function loadLog(){
+  try{ logData = (await api("admin_log")).log; drawLog(); }
+  catch(ex){ $("#lrows").innerHTML = `<tr><td colspan="4" class="empty">${esc(/no válida/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script.":ex.message)}</td></tr>`; }
 }
+function drawLog(){
+  const q = ($("#lq")?.value||"").toLowerCase();
+  const list = logData.filter(l=>!q||[l.evento,l.detalle,l.quien].join(" ").toLowerCase().includes(q));
+  $("#lrows").innerHTML = list.length ? list.map(l=>`<tr><td data-l="Fecha">${fdt(l.fecha)}</td><td data-l="Evento"><b>${esc(l.evento)}</b></td><td data-l="Detalle" style="word-break:break-all">${esc(l.detalle)}</td><td data-l="Quién" style="word-break:break-all">${esc(l.quien)}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">Sin eventos.</td></tr>`;
+}
+
+/* ---------- CSV ---------- */
+function download(name, head, data){
+  const q = v => '"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv = [head.map(q).join(",")].concat(data.map(r=>r.map(q).join(","))).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"})); a.download = name; a.click();
+}
+function exportCsv(){
+  download("cuentas-iaplus.csv",["Producto","Cuenta","Codigo","Estado","Cliente","Nombre","WhatsApp","Activada","Vence","Dias restantes","Dias del plan","Precio","Nota"],
+    filtered().map(i=>[i.producto,i.correo,i.codigo,state(i).t,i.cliente,i.nombre,i.whatsapp,fdate(i.inicio),fdate(i.fin),i.restante??"",i.dias,i.precio||"",i.nota]));
+}
+function exportClientsCsv(){
+  download("clientes-iaplus.csv",["Nombre","Gmail","WhatsApp","Cuentas","Activas","Vencidas","Estado","Vence","Cliente desde","Total pagado","Nota"],
+    cFiltered().map(c=>[c.nombre,c.email,c.whatsapp,c.cuentas.length,c.activos,c.vencidos,cState(c).t,fdate(c.vence),fdate(c.primera),c.gastado,c.nota]));
+}
+
+/* ---------- Acciones ---------- */
 document.addEventListener("click", async e=>{
+  const ca = e.target.closest("[data-ca]");
+  if(ca){
+    const c = clients().find(x=>x.email===ca.closest("tr").dataset.c); if(!c) return;
+    try{ if(ca.dataset.ca==="info") clientDetail(c); else await editClient(c); }catch(ex){ toast(ex.message); }
+    return;
+  }
   const bt = e.target.closest("[data-a]"); if(!bt) return;
-  const tr = bt.closest("tr"); const i = items.find(x=>String(x.fila)===tr.dataset.f); if(!i) return;
+  const host = bt.closest("tr")||bt.closest(".alert"); const i = items.find(x=>String(x.fila)===host.dataset.f); if(!i) return;
   const a = bt.dataset.a;
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
-    if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(`Hola 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`),"_blank"); return; }
-    if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
+    if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(renewMsg(i)),"_blank"); return; }
+    if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:i.precio||DEFAULT_PRICE}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
     if(a==="r2fa"){ if(!confirm("¿Devolver los 3 códigos de autenticación a "+i.cliente+"?")) return; await api("admin_reset2fa",{fila:i.fila}); toast("Códigos 2FA reiniciados ✔"); }
-    if(a==="ext"){ await api("admin_extend",{fila:i.fila,dias:30}); toast("+30 días agregados ✔"); }
+    if(a==="ext"){
+      const v = await askForm("Renovar / sumar días a "+(i.nombre||i.cliente),[
+        {id:"dias",label:"Días a sumar (usa negativo para restar)",type:"number",value:30,req:true},
+        {id:"precio",label:"Monto cobrado en COP (opcional, se suma al total del cliente)",type:"number",value:DEFAULT_PRICE}]);
+      if(!v) return;
+      await api("admin_extend",{fila:i.fila,dias:v.dias,precio:v.precio}); toast("Días agregados ✔");
+    }
+    if(a==="assign"){
+      const v = await askForm("Asignar cliente a "+i.codigo,[
+        {id:"cliente",label:"Gmail del cliente",type:"email",req:true,ph:"cliente@gmail.com"}],
+        "El plan empieza a contar desde ahora, igual que si el cliente canjeara el código.");
+      if(!v) return; await api("admin_assign",{fila:i.fila,cliente:v.cliente}); toast("Cliente asignado ✔");
+    }
     if(a==="new"){ if(!confirm(i.cliente?"Esta cuenta ya tiene cliente. Un código nuevo la libera y le quita el acceso al cliente actual. ¿Continuar?":"¿Generar un código nuevo para esta cuenta?")) return;
       const j = await api("admin_newcode",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Nuevo código creado y mensaje copiado ✔"); }
     if(a==="rev"){ if(!confirm("¿Quitar al cliente "+i.cliente+" de esta cuenta? El código quedará libre otra vez.")) return; await api("admin_revoke",{fila:i.fila}); toast("Cliente quitado ✔"); }
+    if(a==="del"){ if(!confirm("¿Borrar esta fila ("+(i.codigo||i.correo)+")"+(i.cliente?" y el acceso de "+i.cliente:"")+"? No se puede deshacer, pero queda anotado en el Registro.")) return;
+      await api("admin_delete",{fila:i.fila}); toast("Fila borrada ✔"); }
     if(a==="edit"){
-      const clave = prompt("Nueva contraseña de la cuenta (deja igual para no cambiar):", i.clave); if(clave===null) return;
-      const correo = prompt("Correo de la cuenta:", i.correo); if(correo===null) return;
-      const clave2fa = prompt("Clave del autenticador 2FA (deja vacío para no cambiarla):", ""); if(clave2fa===null) return;
-      await api("admin_update",{fila:i.fila,clave,correo,clave2fa}); toast("Cuenta actualizada ✔");
+      const v = await askForm("Editar cuenta "+i.correo,[
+        {id:"correo",label:"Correo de la cuenta",value:i.correo},
+        {id:"clave",label:"Contraseña de la cuenta",value:i.clave},
+        {id:"producto",label:"Producto",value:i.producto},
+        {id:"clave2fa",label:"Clave del autenticador 2FA (vacío = no cambiar)",value:"",ph:i.tiene2fa?"Ya tiene una guardada":"ABCD EFGH IJKL MNOP"},
+        {id:"diasPlan",label:"Días del plan",type:"number",value:i.dias},
+        {id:"precio",label:"Precio (COP)",type:"number",value:i.precio||""},
+        {id:"whatsapp",label:"WhatsApp del cliente",value:i.whatsapp,ph:"3001234567"},
+        {id:"nota",label:"Nota privada",value:i.nota,area:true}]);
+      if(!v) return;
+      await api("admin_update",{fila:i.fila,...v}); toast("Cuenta actualizada ✔");
     }
     await refresh();
-  }catch(ex){ toast(ex.message); }
+  }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para usar esta función.":ex.message); }
 });
 $("#reload").onclick = refresh;
-start(); setInterval(()=>{ if(!document.hidden && $("#rows")) refresh(); }, 120000);
+start(); setInterval(()=>{ if(!document.hidden && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 </script>
 </body>
 </html>
