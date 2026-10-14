@@ -6,6 +6,7 @@ const CONFIG = {
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
   WHATSAPP: "573102035327",
   STORE: "IA Plus Colombia",
+  ADMIN: "j03l1525@gmail.com", // solo muestra el botón; el permiso real lo valida el servidor
   // URL de la API (Apps Script) que entrega las cuentas con el código de activación
   API_URL: "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec",
 };
@@ -110,7 +111,9 @@ function renderAuth(){
     $("#loginBtn").onclick = openLogin;
     return;
   }
-  a.innerHTML = `<div class="user">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
+  const mine = (myItems&&myItems.length) ? '<a class="btn btn-ghost" href="cuenta.html" style="padding:8px 14px">Mi cuenta</a> ' : '';
+  const adm = (user.email||"").toLowerCase()===CONFIG.ADMIN ? '<a class="btn btn-primary" href="admin.html" style="padding:8px 14px">Panel admin</a> ' : '';
+  a.innerHTML = `${adm}${mine}<div class="user">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
   $("#logout").onclick = logout;
 }
 function renderHeroCard(){
@@ -161,7 +164,7 @@ document.addEventListener("click", e => {
 });
 async function loadMine(){
   if(!user || !CONFIG.API_URL) return;
-  try{ myItems = await callApi("list"); renderRedeem(); }catch{}
+  try{ myItems = await callApi("list"); renderRedeem(); renderAuth(); }catch{}
 }
 
 /* ============ INIT ============ */

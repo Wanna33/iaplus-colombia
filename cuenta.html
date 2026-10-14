@@ -155,11 +155,12 @@ function section(it){
       ${TOTP_EMAILS.includes(String(it.correo).toLowerCase())?`<div data-totp="${esc(String(it.correo).toLowerCase())}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <p class="tnote">Este código cambia cada 30 segundos. Úsalo si ChatGPT te pide verificación en dos pasos.</p></div>`:''}
-      <div class="plan"><h3>⏳ Tu plan de 1 mes está corriendo</h3>
+      <div class="plan"><h3>⏳ ${left<=5&&end?'Tu plan está por vencer':'Tu plan está corriendo'}</h3>
         <div class="days">${left}<small>${left===1?'día restante':'días restantes'}</small></div>
         <div class="clock">Vence en <b data-end="${it.fin||''}">--</b></div>
         <div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>
         <div class="dates"><span>Inicio: ${start?fmt(start):'—'}</span><span>Vence: ${end?fmt(end):'—'}</span></div></div>
+      ${left<=5&&end?`<a class="cta" style="display:flex;justify-content:center;margin-top:16px" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto+' ('+it.correo+')')}">🔄 Renovar mi plan</a>`:''}
       <a class="wa" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}">💬 ¿Necesitas ayuda? Escríbenos por WhatsApp</a>
     </div>`;
   const right_col = ex ? '' : `

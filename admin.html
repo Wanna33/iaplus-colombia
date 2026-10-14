@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel admin | IA Plus Colombia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="logo.png">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#eef4ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+a{color:inherit;text-decoration:none}
+.bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar-in{max-width:1300px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bar img{height:38px;background:#000;border-radius:10px;padding:2px 5px}
+.bar h1{font-size:19px}
+.sp{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mut);font-size:14px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;color:var(--text)}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.p{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;border:0}
+.btn.p:hover{color:#fff;filter:brightness(1.05)}
+.btn.s{padding:6px 10px;font-size:13px;border-radius:9px}
+.btn.d{color:var(--bad)}.btn.d:hover{border-color:var(--bad);color:var(--bad)}
+main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat b{display:block;font-size:28px;line-height:1.1}
+.stat span{color:var(--mut);font-size:13px}
+.stat.w b{color:var(--warn)}.stat.b b{color:var(--bad)}.stat.g b{color:var(--ok)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:0 8px 24px rgba(30,60,120,.05)}
+.card h2{font-size:18px;margin-bottom:12px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
+.form label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-bottom:4px}
+input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;background:#fff;color:var(--text)}
+input:focus,select:focus{outline:2px solid rgba(30,107,255,.3);border-color:var(--acc)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.tools input{max-width:300px}.tools select{max-width:200px}
+.wrapt{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:980px}
+th{text-align:left;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:#fafcff}
+.mono{font-family:Consolas,monospace;font-weight:700;letter-spacing:.03em}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.msg{max-width:480px;margin:90px auto;text-align:center}
+.msg h2{font-size:26px;margin-bottom:8px}.msg p{color:var(--mut);margin-bottom:18px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#101a33;color:#fff;padding:12px 20px;border-radius:12px;opacity:0;transition:.25s;z-index:50;max-width:92vw}
+.toast.on{transform:translateX(-50%);opacity:1}
+.newcode{margin-top:12px;background:var(--okbg);border:1px solid #b6e8d1;border-radius:14px;padding:14px;display:none}
+.newcode.on{display:block}
+.newcode .mono{font-size:26px;color:var(--ok)}
+.empty{text-align:center;color:var(--mut);padding:30px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+  <h1>Panel de administrador</h1>
+  <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="reload">↻ Actualizar</button></div>
+</div></header>
+
+<main id="app"><div class="msg"><p>Cargando…</p></div></main>
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
+const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
+const SITE = "https://wanna33.github.io/iaplus-colombia/";
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+let items = [], busy = false;
+
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),2600); }
+function message(title, text, extra=""){ $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p>${extra}</div>`; }
+function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
+
+async function api(action, data={}){
+  const cred = load("iap_cred");
+  if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Inicia sesión otra vez.");
+  const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action, idToken:cred.token, ...data})});
+  const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error"); return j;
+}
+
+function showLogin(){
+  message("Acceso del administrador","Inicia sesión con la cuenta de Google autorizada.",'<div id="g" style="display:inline-block"></div>');
+  const go = () => {
+    if(!window.google?.accounts?.id){ return setTimeout(go,300); }
+    google.accounts.id.initialize({client_id:CLIENT_ID, callback:r=>{
+      const p=parseJwt(r.credential);
+      save("iap_cred",{token:r.credential,exp:p.exp*1000}); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""});
+      start();
+    }});
+    google.accounts.id.renderButton($("#g"),{theme:"outline",size:"large",shape:"pill",locale:"es"});
+  };
+  go();
+}
+
+async function refresh(){
+  if(busy) return; busy = true;
+  try{ const j = await api("admin_list"); items = j.items; render(); }
+  catch(e){
+    if(/administrador/i.test(e.message)) message("Acceso denegado","Esta cuenta no es administradora.",'<a class="btn" href="index.html">Volver a la tienda</a>');
+    else if(/sesión|venció|Inicia/i.test(e.message)) showLogin();
+    else message("No se pudo cargar", esc(e.message), '<button class="btn p" onclick="start()">Reintentar</button>');
+  }
+  busy = false;
+}
+function start(){
+  const u = load("iap_user"); const cred = load("iap_cred");
+  if(!cred || cred.exp < Date.now()){ showLogin(); return; }
+  $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide");
+  refresh();
+}
+
+function state(it){
+  if(!it.cliente) return {k:"av", t:"Disponible"};
+  if(it.vencida) return {k:"b", t:"Vencida"};
+  if(it.restante!==null && it.restante<=5) return {k:"w", t:"Por vencer"};
+  return {k:"ok", t:"Activa"};
+}
+function statsHtml(){
+  const cnt = k => items.filter(i=>state(i).k===k).length;
+  return `<div class="stat"><b>${items.length}</b><span>Cuentas en total</span></div>
+    <div class="stat"><b>${cnt("av")}</b><span>Disponibles (sin cliente)</span></div>
+    <div class="stat g"><b>${cnt("ok")}</b><span>Activas</span></div>
+    <div class="stat w"><b>${cnt("w")}</b><span>Vencen en ≤5 días</span></div>
+    <div class="stat b"><b>${cnt("b")}</b><span>Vencidas</span></div>`;
+}
+function render(){
+  if($("#addForm")){ $("#stats").innerHTML = statsHtml(); rows(); return; }
+  $("#app").innerHTML = `
+  <div class="stats" id="stats">${statsHtml()}</div>
+  <div class="card"><h2>➕ Agregar cuenta y generar código</h2>
+    <form id="addForm" class="form">
+      <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
+      <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
+      <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
+      <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
+      <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
+    </form>
+    <div class="newcode" id="newcode"></div>
+  </div>
+  <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
+    <div class="tools">
+      <input id="q" placeholder="Buscar cliente, correo o código…">
+      <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option></select>
+      <button class="btn s" id="csv">⬇ Exportar CSV</button>
+    </div>
+    <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
+  </div>`;
+  $("#addForm").onsubmit = addAccount;
+  $("#q").oninput = $("#st").onchange = rows;
+  $("#csv").onclick = exportCsv;
+  rows();
+}
+function filtered(){
+  const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
+  return items.filter(i => (!st || state(i).k===st) && (!q || [i.cliente,i.correo,i.codigo,i.producto].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=> (a.restante??9999)-(b.restante??9999));
+}
+function rows(){
+  const list = filtered();
+  $("#rows").innerHTML = list.length ? list.map(i=>{
+    const s = state(i);
+    const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
+    return `<tr data-f="${i.fila}"><td>${esc(i.producto)}</td><td><div>${esc(i.correo)}</div><small style="color:var(--mut)">${esc(i.clave)}</small></td>
+      <td class="mono">${esc(i.codigo||"—")}</td><td><span class="tag t-${s.k}">${s.t}</span></td>
+      <td>${esc(i.cliente||"—")}</td><td>${fdate(i.inicio)}</td><td>${fdate(i.fin)}</td><td>${rest}<br><small style="color:var(--mut)">plan ${i.dias} d</small></td>
+      <td><div class="acts">
+        ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button>`:""}
+        ${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
+        <button class="btn s" data-a="edit">Editar</button>
+        <button class="btn s" data-a="new">Nuevo código</button>
+        ${i.cliente?`<button class="btn s d" data-a="rev">Quitar cliente</button>`:""}
+      </div></td></tr>`;
+  }).join("") : `<tr><td colspan="9" class="empty">No hay cuentas que coincidan.</td></tr>`;
+}
+function msgFor(i){
+  return `Hola 👋 Este es tu código de activación de ${i.producto}: ${i.codigo}\n\n1) Entra a ${SITE}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de ${i.producto} y pulsa "Desbloquear cuenta".\n\nEl código solo funciona una vez y tu plan dura ${i.dias} días desde que lo actives.`;
+}
+async function addAccount(e){
+  e.preventDefault(); const b=e.target.querySelector("button"); b.disabled=true;
+  try{
+    const j = await api("admin_add",{producto:$("#fProd").value,correo:$("#fMail").value,clave:$("#fPass").value,dias:$("#fDays").value});
+    const it = {producto:$("#fProd").value,codigo:j.codigo,dias:$("#fDays").value};
+    toast("Cuenta creada ✔");
+    await refresh();
+    const n=$("#newcode"); n.classList.add("on");
+    n.innerHTML = `<div style="color:var(--mut);font-size:13px">Código para el cliente (un solo uso):</div><div class="mono">${esc(j.codigo)}</div>
+      <div class="acts" style="margin-top:10px"><button class="btn s" id="cpCode">Copiar código</button><button class="btn s" id="cpMsg">Copiar mensaje para el cliente</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor(it))}">Enviar por WhatsApp</a></div>`;
+    $("#cpCode").onclick = ()=>copy(j.codigo); $("#cpMsg").onclick = ()=>copy(msgFor(it));
+  }catch(ex){ toast(ex.message); b.disabled=false; }
+}
+function copy(t){ navigator.clipboard?.writeText(t).then(()=>toast("Copiado ✔")); }
+function exportCsv(){
+  const head = ["Producto","Cuenta","Codigo","Estado","Cliente","Activada","Vence","Dias restantes","Dias del plan"];
+  const q = v => '"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv = [head.map(q).join(",")].concat(filtered().map(i=>[i.producto,i.correo,i.codigo,state(i).t,i.cliente,fdate(i.inicio),fdate(i.fin),i.restante??"",i.dias].map(q).join(","))).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"})); a.download = "cuentas-iaplus.csv"; a.click();
+}
+document.addEventListener("click", async e=>{
+  const bt = e.target.closest("[data-a]"); if(!bt) return;
+  const tr = bt.closest("tr"); const i = items.find(x=>String(x.fila)===tr.dataset.f); if(!i) return;
+  const a = bt.dataset.a;
+  try{
+    if(a==="msg"){ copy(msgFor(i)); return; }
+    if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(`Hola 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`),"_blank"); return; }
+    if(a==="ext"){ await api("admin_extend",{fila:i.fila,dias:30}); toast("+30 días agregados ✔"); }
+    if(a==="new"){ if(!confirm(i.cliente?"Esta cuenta ya tiene cliente. Un código nuevo la libera y le quita el acceso al cliente actual. ¿Continuar?":"¿Generar un código nuevo para esta cuenta?")) return;
+      const j = await api("admin_newcode",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Nuevo código creado y mensaje copiado ✔"); }
+    if(a==="rev"){ if(!confirm("¿Quitar al cliente "+i.cliente+" de esta cuenta? El código quedará libre otra vez.")) return; await api("admin_revoke",{fila:i.fila}); toast("Cliente quitado ✔"); }
+    if(a==="edit"){
+      const clave = prompt("Nueva contraseña de la cuenta (deja igual para no cambiar):", i.clave); if(clave===null) return;
+      const correo = prompt("Correo de la cuenta:", i.correo); if(correo===null) return;
+      await api("admin_update",{fila:i.fila,clave,correo}); toast("Cuenta actualizada ✔");
+    }
+    await refresh();
+  }catch(ex){ toast(ex.message); }
+});
+$("#reload").onclick = refresh;
+start(); setInterval(()=>{ if(!document.hidden && $("#rows")) refresh(); }, 120000);
+</script>
+</body>
+</html>
