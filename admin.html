@@ -244,7 +244,7 @@ function render(){
       <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option></select>
       <button class="btn s" id="csv">⬇ Exportar CSV</button>
     </div>
-    <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
   </div>`;
   $("#addForm").onsubmit = addAccount;
   $("#addForm").addEventListener("input", saveDraft);
@@ -297,16 +297,16 @@ function rows(){
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
     return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
-      <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
+      <td data-l="Cliente" style="word-break:break-all">${esc(i.cliente||"—")}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button>`:""}
-        ${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
+        ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+30 días</button><button class="btn s" data-a="wa">Renovar WA</button>`:""}
         <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>
         <button class="btn s" data-a="edit">Editar</button>
         <button class="btn s" data-a="new">Nuevo código</button>
         ${i.cliente?`<button class="btn s d" data-a="rev">Quitar cliente</button>`:""}
       </div></td></tr>`;
-  }).join("") : `<tr><td colspan="9" class="empty">No hay cuentas que coincidan.</td></tr>`;
+  }).join("") : `<tr><td colspan="10" class="empty">No hay cuentas que coincidan.</td></tr>`;
 }
 function msgFor(i){
   return `Hola 👋 Este es tu código de activación de ${i.producto}: ${i.codigo}\n\n1) Entra a ${SITE}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de ${i.producto} y pulsa "Desbloquear cuenta".\n\nEl código solo funciona una vez y tu plan dura ${i.dias} días desde que lo actives.`;
@@ -339,6 +339,7 @@ document.addEventListener("click", async e=>{
     if(a==="msg"){ copy(msgFor(i)); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(`Hola 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`),"_blank"); return; }
     if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
+    if(a==="r2fa"){ if(!confirm("¿Devolver los 3 códigos de autenticación a "+i.cliente+"?")) return; await api("admin_reset2fa",{fila:i.fila}); toast("Códigos 2FA reiniciados ✔"); }
     if(a==="ext"){ await api("admin_extend",{fila:i.fila,dias:30}); toast("+30 días agregados ✔"); }
     if(a==="new"){ if(!confirm(i.cliente?"Esta cuenta ya tiene cliente. Un código nuevo la libera y le quita el acceso al cliente actual. ¿Continuar?":"¿Generar un código nuevo para esta cuenta?")) return;
       const j = await api("admin_newcode",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Nuevo código creado y mensaje copiado ✔"); }

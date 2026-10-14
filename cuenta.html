@@ -45,6 +45,7 @@ main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
 .tcnt{width:46px;height:46px;border-radius:50%;background:var(--soft);color:var(--acc);display:grid;place-items:center;font-size:18px}
 .tline{height:5px;border-radius:99px;background:#dbe6fb;margin-top:10px;overflow:hidden}
 .tbar{display:block;height:100%;background:var(--acc);transition:width 1s linear}
+.tbtn:disabled{opacity:.5;cursor:not-allowed!important;box-shadow:none}
 .tnote{color:var(--mut);font-size:14px;margin-top:8px}
 .plan{margin-top:26px;border:1.5px solid #cfe0ff;background:linear-gradient(180deg,#f3f8ff,#fff);border-radius:20px;padding:20px}
 .plan h3{font-size:17px;color:#33425f;display:flex;align-items:center;gap:8px}
@@ -127,28 +128,48 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const WHATSAPP = "573102035327";
 const DAY = 86400000;
-const totpCache = {};
-async function refreshTotp(){
-  const left=30-Math.floor(Date.now()/1000)%30, slot=Math.floor(Date.now()/30000);
+const totpState = {};
+function totpRest(box){
+  const st=totpState[box.dataset.totp]||{};
+  if(st.rest!==undefined) return st.rest;
+  return box.dataset.rest===""||box.dataset.rest===undefined ? null : +box.dataset.rest;
+}
+async function askTotp(box){
+  const mail=box.dataset.totp, st=totpState[mail]=totpState[mail]||{};
+  if(st.busy) return; st.busy=true; st.err="";
+  const btn=box.querySelector("[data-ask]"); btn.disabled=true; btn.textContent="Pidiendo…";
+  try{
+    const cred=load("iap_cred");
+    const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",idToken:cred.token,correo:mail})});
+    const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+    st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes;
+  }catch(err){ st.err=err.message; }
+  st.busy=false; renderTotp();
+}
+function renderTotp(){
+  const now=Date.now();
   for(const box of document.querySelectorAll("[data-totp]")){
-    const mail=box.dataset.totp; let c=totpCache[mail];
-    if((!c||c.slot!==slot)&&!(c&&c.busy)){
-      totpCache[mail]=Object.assign(c||{},{busy:true});
-      try{
-        const cred=load("iap_cred");
-        const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",idToken:cred.token,correo:mail})});
-        const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
-        totpCache[mail]={code:j.code,slot:slot,busy:false};
-      }catch(err){ totpCache[mail]={code:"",slot:slot-1,busy:false,err:true}; box.querySelector(".tcode").textContent="No disponible"; }
-      c=totpCache[mail];
+    const st=totpState[box.dataset.totp]||{}, rest=totpRest(box);
+    const show = st.code && st.until>now;
+    box.querySelector(".tview").hidden=!show;
+    box.querySelector(".task").hidden=!!show;
+    if(show){
+      const left=Math.max(0,Math.ceil((st.until-now)/1000));
+      box.querySelector(".tcode").textContent=st.code.slice(0,3)+" "+st.code.slice(3);
+      box.querySelector(".tcopy").dataset.copy=st.code;
+      box.querySelector(".tleft").textContent=left;
+      box.querySelector(".tbar").style.width=(left/30*100)+"%";
+    } else {
+      const btn=box.querySelector("[data-ask]");
+      const none = rest!==null && rest<=0;
+      btn.disabled=none||!!st.busy;
+      btn.textContent=none?"Sin códigos disponibles":(st.code?"Pedir otro código":"Pedir código de autenticación");
+      box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||3)+" códigos." : "Te quedan "+rest+" de "+(box.dataset.max||3)+" códigos.");
     }
-    if(!c||!c.code) continue;
-    box.querySelector(".tcode").textContent=c.code.slice(0,3)+" "+c.code.slice(3);
-    box.querySelector(".tcopy").dataset.copy=c.code;
-    box.querySelector(".tleft").textContent=left;
-    box.querySelector(".tbar").style.width=(left/30*100)+"%";
+    box.querySelector(".tnote").textContent = st.err ? st.err : (rest!==null && rest<=0 && !show ? "Si necesitas ayuda, escríbenos por WhatsApp." : "Cada vez que lo pides se descuenta uno de tus códigos disponibles. El código dura 30 segundos.");
   }
 }
+function refreshTotp(){ renderTotp(); }
 function copyText(t){
   const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
   return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
@@ -192,9 +213,10 @@ function section(it){
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
-      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
-        <div class="tbox"><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
-        <p class="tnote">Este código cambia cada 30 segundos. Úsalo si ChatGPT te pide verificación en dos pasos.</p></div>`:''}
+      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||3}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
+        <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
+        <div class="task"><button class="cta tbtn" type="button" data-ask style="border:0;cursor:pointer;font:inherit;font-weight:700;margin:0">Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
+        <p class="tnote"></p></div>`:''}
       <div class="plan"><h3>⏳ ${left<=5&&end?'Tu plan está por vencer':'Tu plan está corriendo'}</h3>
         <div class="days">${left}<small>${left===1?'día restante':'días restantes'}</small></div>
         <div class="clock">Vence en <b data-end="${it.fin||''}">--</b></div>
@@ -234,6 +256,8 @@ function tick(){
 document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); }); return; }
+  const ask = e.target.closest("[data-ask]");
+  if(ask){ askTotp(ask.closest("[data-totp]")); return; }
   const g = e.target.closest(".tog");
   if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; }
 });
