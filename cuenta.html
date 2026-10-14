@@ -291,6 +291,7 @@ function section(it){
         <div class="dates"><span>Inicio: ${start?fmt(start):'—'}</span><span>Vence: ${end?fmt(end):'—'}</span></div></div>
       ${left<=5&&end?`<a class="cta" style="display:flex;justify-content:center;margin-top:16px" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto+' ('+it.correo+')')}">🔄 Renovar mi plan</a>`:''}
       <a class="wa" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}">💬 ¿Necesitas ayuda? Escríbenos por WhatsApp</a>
+      <a class="wa" style="margin-top:10px;color:#b45f00;background:#fff8ec" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, tengo un problema con mi cuenta '+it.producto+' ('+it.correo+'). ¿Me ayudan o me dan otra cuenta?')}">⚠️ Tengo un problema con esta cuenta</a>
     </div>`;
   const right_col = ex ? '' : `
     <div class="steps"><h2>Cómo iniciar sesión</h2>

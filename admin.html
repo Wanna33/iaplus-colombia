@@ -64,7 +64,7 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tr:hover td{background:#fafcff}
 .mono{font-family:Consolas,monospace;font-weight:700;letter-spacing:.03em}
 .tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}.t-g{background:#eef1f7;color:var(--mut)}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}.t-g{background:#eef1f7;color:var(--mut)}.t-pr{background:#2b1a05;color:#ffb347}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
 .msg{max-width:480px;margin:90px auto;text-align:center}
 .msg h2{font-size:26px;margin-bottom:8px}.msg p{color:var(--mut);margin-bottom:18px}
@@ -110,6 +110,7 @@ tbody tr{animation:up .35s ease both}
 .btn{transition:.2s}.btn:active{transform:scale(.96)}
 dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.prog2{height:6px;border-radius:9px;background:#e3eaf8;overflow:hidden}.prog2 i{display:block;height:100%;background:var(--acc);transition:width .5s linear}
 .skel{height:90px;border-radius:16px;background:linear-gradient(90deg,#eef1f7 25%,#f8faff 50%,#eef1f7 75%);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:12px}
 @keyframes sk{to{background-position:-200% 0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -243,6 +244,7 @@ function start(){
 
 /* ---------- Utilidades de datos ---------- */
 function state(it){
+  if(it.estado==="Con problemas" && !it.cliente) return {k:"pr", t:"Con problemas"};
   if(!it.cliente) return {k:"av", t:"Disponible"};
   if(it.vencida) return {k:"b", t:"Vencida"};
   if(it.restante!==null && it.restante<=5) return {k:"w", t:"Por vencer"};
@@ -275,14 +277,14 @@ function cState(c){
 }
 
 /* ---------- Diálogos ---------- */
-function askForm(title, fields, intro=""){
+function askForm(title, fields, intro="", okLabel="Guardar"){
   return new Promise(res=>{
     const d=document.createElement("dialog");
     d.innerHTML=`<form method="dialog"><h2>${esc(title)}</h2>${intro?`<p style="color:var(--mut);font-size:14px;margin-bottom:12px">${intro}</p>`:""}
-      <div class="form" style="grid-template-columns:1fr">${fields.map(f=>`<div><label>${esc(f.label)}</label>${f.area
+      <div class="form" style="grid-template-columns:1fr">${fields.map(f=>`<div>${f.type==="check"?`<label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input type="checkbox" name="${f.id}" value="1" ${f.value?"checked":""} style="width:auto"> ${esc(f.label)}</label>`:`<label>${esc(f.label)}</label>`}${f.type==="check"?"":f.type==="select"?`<select name="${f.id}" required>${f.opts.map(o=>`<option value="${esc(o.v)}" ${o.v==f.value?"selected":""}>${esc(o.l)}</option>`).join("")}</select>`:f.area
         ?`<textarea name="${f.id}" rows="3" placeholder="${esc(f.ph||"")}">${esc(f.value||"")}</textarea>`
         :`<input name="${f.id}" type="${f.type||"text"}" value="${esc(f.value??"")}" placeholder="${esc(f.ph||"")}" autocomplete="off" ${f.req?"required":""}>`}</div>`).join("")}</div>
-      <div class="acts" style="margin-top:16px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn p" value="ok">Guardar</button></div></form>`;
+      <div class="acts" style="margin-top:16px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn p" value="ok">${esc(okLabel)}</button></div></form>`;
     document.body.appendChild(d);
     d.addEventListener("close",()=>{ let out=null; if(d.returnValue==="ok"){ out={}; new FormData(d.querySelector("form")).forEach((v,k)=>out[k]=v); } d.remove(); res(out); });
     d.showModal();
@@ -307,7 +309,8 @@ function statsHtml(){
   const inMonth = i => { if(!i.inicio) return false; const d=new Date(i.inicio); return d.getMonth()===nd.getMonth() && d.getFullYear()===nd.getFullYear(); };
   const ingMes = withClient.filter(inMonth).reduce((s,i)=>s+(Number(i.precio)||0),0);
   const ingTot = withClient.reduce((s,i)=>s+(Number(i.precio)||0),0);
-  const libres = items.filter(i=>!i.cliente).length;
+  const prob = items.filter(i=>state(i).k==="pr").length;
+  const libres = items.filter(i=>!i.cliente && state(i).k!=="pr").length;
   return `<div class="stat big"><span>👥 Clientes activos ahora</span><b data-n="${activos}">0</b><small>${total} clientes en total desde el inicio · +${hoy} hoy · +${semana} esta semana</small></div>
     <div class="stat"><b>${money(ingMes)}</b><span>Ingresos este mes</span></div>
     <div class="stat"><b>${money(ingTot)}</b><span>Ingresos totales</span></div>
@@ -315,7 +318,8 @@ function statsHtml(){
     <div class="stat"><b data-n="${libres}">0</b><span>Códigos disponibles</span></div>
     <div class="stat g"><b data-n="${cnt("ok")}">0</b><span>Planes activos</span></div>
     <div class="stat w"><b data-n="${cnt("w")}">0</b><span>Vencen en ≤5 días</span></div>
-    <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>`;
+    <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>
+    <div class="stat w"><b data-n="${prob}">0</b><span>Cuentas con problemas</span></div>`;
 }
 function attentionHtml(){
   const list = items.filter(i=>i.cliente && (i.vencida || (i.restante!==null && i.restante<=5)))
@@ -423,7 +427,8 @@ function render(){
     <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
       <div class="tools">
         <input id="q" placeholder="Buscar cliente, correo, código o nota…">
-        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option></select>
+        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option><option value="pr">Con problemas</option></select>
+        <select id="pf"><option value="">Todos los productos</option></select>
         <button class="btn s" id="csv">⬇ Exportar CSV</button>
       </div>
       <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Precio</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
@@ -445,7 +450,7 @@ function render(){
   restoreDraft();
   $("#genForm").onsubmit = genCode;
   $("#gAcc").onchange = syncDays;
-  $("#q").oninput = $("#st").onchange = rows;
+  $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
   $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
   $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
@@ -502,7 +507,12 @@ function accounts(){
   items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
   return [...m.values()];
 }
+function fillProducts(){
+  const sel=$("#pf"); if(!sel) return; const prev=sel.value; const ps=[...new Set(items.map(i=>i.producto))];
+  sel.innerHTML='<option value="">Todos los productos</option>'+ps.map(p=>`<option>${esc(p)}</option>`).join(""); if(ps.includes(prev)) sel.value=prev;
+}
 function fillAccounts(){
+  fillProducts();
   const sel=$("#gAcc"); if(!sel) return; const prev=sel.value; const list=accounts();
   sel.innerHTML = list.length ? list.map(a=>`<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)}</option>`).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
@@ -533,7 +543,8 @@ async function genCode(e){
 }
 function filtered(){
   const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
-  return items.filter(i => (!st || state(i).k===st) && (!q || [i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ").toLowerCase().includes(q)))
+  const pf = $("#pf")?.value||"";
+  return items.filter(i => (!st || state(i).k===st) && (!pf || i.producto===pf) && (!q || [i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ").toLowerCase().includes(q)))
     .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
 function rows(){
@@ -548,6 +559,8 @@ function rows(){
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
         <button class="btn s" data-a="creds" title="Copia correo y contraseña">📋 Datos</button>
+        ${i.tiene2fa?`<button class="btn s" data-a="v2fa" title="Ver el código de autenticación ahora">🔢 Ver 2FA</button>`:""}
+        ${i.cliente?`<button class="btn s p" data-a="repl" title="El cliente tiene un problema: darle otra cuenta">🔁 Reemplazar cuenta</button><button class="btn s" data-a="chcli">✏️ Cambiar Gmail</button>`:`<button class="btn s" data-a="prob">${state(i).k==="pr"?"✔ Ya funciona":"⚠️ Con problemas"}</button>`}
         ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+ Días</button>${i.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}">💬 WhatsApp</a>`:`<button class="btn s" data-a="wa">Renovar WA</button>`}`:""}
         <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>
         <button class="btn s" data-a="edit">Editar</button>
@@ -599,6 +612,19 @@ function exportClientsCsv(){
     cFiltered().map(c=>[c.nombre,c.email,c.whatsapp,c.cuentas.length,c.activos,c.vencidos,cState(c).t,fdate(c.vence),fdate(c.primera),c.gastado,c.nota]));
 }
 
+/* ---------- Ver código 2FA (soporte) ---------- */
+async function show2fa(i){
+  const d=document.createElement("dialog");
+  d.innerHTML=`<h2>🔢 Código 2FA</h2><p style="color:var(--mut);font-size:14px">${esc(i.correo)}</p><div class="mono" id="t2c" style="font-size:44px;letter-spacing:.12em;text-align:center;margin:14px 0;color:var(--acc)">······</div><div class="prog2"><i id="t2b"></i></div><p id="t2s" style="text-align:center;color:var(--mut);font-size:13px;margin-top:8px"></p><div class="acts" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="t2cp">Copiar</button><button class="btn p" id="t2x">Cerrar</button></div>`;
+  document.body.appendChild(d); d.showModal();
+  let code="", end=0, alive=true;
+  const pull=async()=>{ try{ const j=await api("totp",{correo:i.correo,ask:true}); code=j.code; end=Date.now()+j.left*1000; $("#t2c").textContent=code.slice(0,3)+" "+code.slice(3); }catch(ex){ $("#t2s").textContent=ex.message; } };
+  await pull();
+  const iv=setInterval(()=>{ if(!alive) return; const l=Math.max(0,Math.ceil((end-Date.now())/1000)); $("#t2s").textContent="Cambia en "+l+" s"; $("#t2b").style.width=(l/30*100)+"%"; if(l<=0) pull(); },500);
+  $("#t2cp").onclick=()=>copy(code); $("#t2x").onclick=()=>d.close();
+  d.addEventListener("close",()=>{ alive=false; clearInterval(iv); d.remove(); });
+}
+
 /* ---------- Acciones ---------- */
 document.addEventListener("click", async e=>{
   const ca = e.target.closest("[data-ca]");
@@ -612,6 +638,19 @@ document.addEventListener("click", async e=>{
   const a = bt.dataset.a;
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
+    if(a==="v2fa"){ await show2fa(i); return; }
+    if(a==="repl"){
+      const dests = accounts().filter(x=>x.correo.toLowerCase()!==i.correo.toLowerCase() && items.some(z=>z.correo===x.correo && z.estado!=="Con problemas"));
+      if(!dests.length) return toast("Primero agrega otra cuenta para poder reemplazar");
+      const v = await askForm("Reemplazar la cuenta de "+(i.nombre||i.cliente),[
+        {id:"destino",label:"Darle esta cuenta",type:"select",opts:dests.map(x=>({v:x.fila,l:x.producto+" — "+x.correo})),value:(dests.find(x=>x.producto===i.producto)||dests[0]).fila},
+        {id:"motivo",label:"Motivo (opcional)",ph:"Ej: la cuenta pidió verificación"},
+        {id:"marcarProblema",label:"Marcar la cuenta anterior ("+i.correo+") como «Con problemas» para no entregarla",type:"check",value:true}],
+        "Se queda con el mismo código y el mismo tiempo restante ("+(i.restante??"—")+" días). El correo y la contraseña que ve en Mi cuenta cambian solos.","Reemplazar");
+      if(!v) return; await api("admin_replace",{fila:i.fila,destino:v.destino,motivo:v.motivo,marcarProblema:!!v.marcarProblema}); toast("Cuenta reemplazada ✔ El cliente ya ve la nueva");
+    }
+    if(a==="chcli"){ const v = await askForm("Cambiar el Gmail del cliente",[{id:"cliente",label:"Nuevo Gmail",type:"email",req:true,value:i.cliente}],"Conserva el plan y las fechas. El cliente anterior pierde el acceso."); if(!v) return; await api("admin_changeclient",{fila:i.fila,cliente:v.cliente}); toast("Gmail cambiado ✔"); }
+    if(a==="prob"){ await api("admin_setstate",{fila:i.fila,estado:state(i).k==="pr"?"Disponible":"Con problemas"}); toast("Estado actualizado ✔"); }
     if(a==="creds"){ copy(`${i.producto}\nCuenta: ${i.correo}\nContraseña: ${i.clave}`); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(renewMsg(i)),"_blank"); return; }
     if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:priceOf(i.producto)}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
