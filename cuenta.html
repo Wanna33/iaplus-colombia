@@ -5,69 +5,81 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tu cuenta ChatGPT Plus | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="chatgpt.png">
+<link rel="icon" href="logo.png">
 <style>
-:root{--bg:#030806;--card:rgba(10,24,19,.78);--line:rgba(52,211,153,.28);--g:#34d399;--g2:#10b981;--text:#ecfdf5;--mut:#8fb5a6}
+:root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--soft:#eef4ff}
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--text);background:radial-gradient(900px 500px at 15% -10%,rgba(16,185,129,.35),transparent 60%),radial-gradient(800px 500px at 100% 20%,rgba(52,211,153,.18),transparent 60%),var(--bg);line-height:1.5;padding:28px 18px 60px}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
 a{color:inherit;text-decoration:none}
-.top{max-width:880px;margin:0 auto 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.top a{color:var(--mut);font-size:14px}.top a:hover{color:var(--g)}
-.brand-mini{font-weight:700;letter-spacing:.02em}
-.wrap{max-width:880px;margin:0 auto}
-.hero{text-align:center;margin-bottom:26px}
-.logo{width:104px;height:104px;border-radius:28px;display:grid;place-items:center;margin:0 auto 18px;background:linear-gradient(145deg,#10b981,#065f46);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 18px 50px rgba(16,185,129,.45);animation:float 4s ease-in-out infinite}
-.logo img{width:62px;height:62px}
-@keyframes float{50%{transform:translateY(-8px)}}
-h1{font-size:clamp(30px,6vw,52px);line-height:1.1;letter-spacing:-.02em}
-h1 span{background:linear-gradient(90deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
-.crown{display:inline-block;animation:float 3s ease-in-out infinite}
-.hero h2{font-size:clamp(18px,3.4vw,26px);margin-top:10px;font-weight:700}
-.hero p{color:var(--mut);margin-top:6px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:26px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
-.field{margin-bottom:18px}
-.field label{display:flex;align-items:center;gap:8px;color:var(--g);font-weight:700;font-size:17px;margin-bottom:8px}
-.box{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 18px}
-.box code{flex:1;min-width:0;font-size:clamp(16px,3.4vw,22px);font-weight:600;word-break:break-all;font-family:inherit}
-.copy{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;color:#fff;background:linear-gradient(135deg,#10b981,#047857);font-weight:700;font-size:15px;padding:13px 18px;border-radius:12px;transition:.2s;font-family:inherit}
-.copy:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(16,185,129,.45)}
-.copy.ok{background:#059669}
-.show{background:none;border:0;color:var(--mut);cursor:pointer;font-size:20px;padding:0 6px}
-.plan{margin-top:22px;border-top:1px solid var(--line);padding-top:22px}
-.plan-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.days{font-size:clamp(40px,9vw,68px);font-weight:800;line-height:1;background:linear-gradient(90deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent}
-.days small{font-size:.32em;color:var(--mut);-webkit-text-fill-color:var(--mut);font-weight:600;margin-left:6px}
-.clock{color:var(--mut);font-size:15px;text-align:right}
-.clock b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
-.bar{height:12px;border-radius:99px;background:rgba(255,255,255,.08);margin:16px 0 10px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#34d399,#10b981);box-shadow:0 0 18px rgba(52,211,153,.7);transition:width 1s}
-.dates{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;gap:10px;flex-wrap:wrap}
-.expired .days{background:none;-webkit-text-fill-color:#f87171;color:#f87171}
-.go{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
-.btn{flex:1;min-width:200px;text-align:center;padding:15px;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.04);transition:.2s;font-family:inherit}
-.btn.main{background:linear-gradient(135deg,#10b981,#047857);border:0;color:#fff;box-shadow:0 10px 28px rgba(16,185,129,.4)}
-.btn:hover{transform:translateY(-2px)}
-.perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px}
-.perk{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;text-align:center;font-size:14px;color:var(--mut)}
-.perk b{display:block;color:var(--text);font-size:15px;margin-top:4px}
-.perk .e{font-size:26px}
-.steps{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 22px;color:var(--mut);font-size:14px}
-.steps b{color:var(--text)}.steps ol{margin:8px 0 0 18px}
-.msg{text-align:center;padding:50px 20px}
-.msg h2{margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:20px}
-.acct+.acct{margin-top:26px}
-.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.tag{display:inline-block;background:rgba(52,211,153,.14);border:1px solid var(--line);color:var(--g);padding:4px 12px;border-radius:99px;font-size:13px;font-weight:600}
-.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:5}
-.confetti i{position:absolute;top:-12px;width:9px;height:14px;opacity:.9;animation:fall linear forwards}
-@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
-footer{max-width:880px;margin:30px auto 0;text-align:center;color:var(--mut);font-size:13px}
+.bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar-in{max-width:1240px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--line)}
+.brand img{height:40px;background:#000;border-radius:10px;padding:2px 5px}
+.prod{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--okbg);color:var(--ok);font-size:14px;font-weight:700;padding:5px 12px;border-radius:99px}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.badge.off{background:#fde8e8;color:#d33}.badge.off::before{background:#d33}
+.meta{margin-left:auto;display:flex;gap:18px;color:var(--mut);font-size:15px;flex-wrap:wrap;align-items:center}
+.meta b{color:var(--text)}
+.meta .sep{width:1px;height:22px;background:var(--line)}
+.back{border:1px solid var(--line);border-radius:99px;padding:8px 16px;font-size:14px;color:var(--text);background:#fff}
+.back:hover{border-color:var(--acc);color:var(--acc)}
+main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
+.acct{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:26px;align-items:start}
+.acct+.acct{margin-top:40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:30px;box-shadow:0 10px 30px rgba(30,60,120,.06)}
+.card h1{font-size:clamp(24px,3.4vw,32px);line-height:1.2;letter-spacing:-.01em}
+.card .lead{color:var(--mut);margin:12px 0 20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.lbl{display:flex;align-items:center;gap:8px;font-weight:800;color:#33425f;margin:18px 0 8px;font-size:17px}
+.lbl svg{width:20px;height:20px;stroke:#7b8aa6;fill:none;stroke-width:1.8}
+.field{display:flex;align-items:center;gap:10px;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 20px}
+.field code{flex:1;min-width:0;font-family:inherit;font-size:clamp(17px,2.4vw,23px);font-weight:600;word-break:break-all}
+.ib{width:48px;height:48px;border-radius:13px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--acc);transition:.15s;flex:none}
+.ib:hover{border-color:var(--acc);background:var(--soft)}
+.ib svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9}
+.ib.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.plan{margin-top:26px;border:1.5px solid #cfe0ff;background:linear-gradient(180deg,#f3f8ff,#fff);border-radius:20px;padding:20px}
+.plan h3{font-size:17px;color:#33425f;display:flex;align-items:center;gap:8px}
+.days{font-size:46px;font-weight:800;color:var(--acc);line-height:1.1;margin-top:6px}
+.days small{font-size:16px;color:var(--mut);font-weight:600;margin-left:6px}
+.clock{color:var(--mut);margin-top:2px}.clock b{color:var(--text);font-variant-numeric:tabular-nums}
+.prog{height:10px;border-radius:99px;background:#e3eaf8;margin:14px 0 8px;overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.dates{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--mut);font-size:13px}
+.wa{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:14px;border-radius:14px;border:1px solid var(--line);font-weight:700;color:#1a8f55;background:#f1fbf6}
+.wa:hover{border-color:#1a8f55}
+.steps{padding:6px 4px}
+.steps h2{font-size:22px;margin:0 0 18px 6px}
+.step{position:relative;display:grid;grid-template-columns:44px 1fr;gap:16px;padding-bottom:26px}
+.step:not(:last-child)::before{content:"";position:absolute;left:21px;top:46px;bottom:4px;width:2px;background:#dfe6f3}
+.num{width:44px;height:44px;border-radius:50%;background:var(--acc);color:#fff;font-weight:800;font-size:18px;display:grid;place-items:center;box-shadow:0 6px 16px rgba(30,107,255,.35)}
+.step h3{font-size:20px;margin:8px 0 4px}
+.step p{color:var(--mut)}
+.mock{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:520px;box-shadow:0 8px 24px rgba(30,60,120,.08)}
+.mock .t{font-size:22px;font-weight:700;margin-bottom:14px;text-align:center}
+.mock .in{border:1.5px solid #d6deec;border-radius:12px;padding:13px 16px;color:#7b8aa6;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.mock .in.hl{border-color:var(--acc);color:var(--text);box-shadow:0 0 0 3px rgba(30,107,255,.15)}
+.mock .go{background:#0b0f1a;color:#fff;text-align:center;padding:13px;border-radius:99px;font-weight:700}
+.cta{display:inline-flex;margin-top:14px;padding:13px 22px;border-radius:12px;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;font-weight:700;box-shadow:0 8px 22px rgba(30,107,255,.3)}
+.cta:hover{transform:translateY(-2px)}
+.note{margin-top:6px;background:var(--soft);border:1px solid #d6e4ff;border-radius:16px;padding:16px 18px;color:#33425f;font-size:15px}
+.note b{color:var(--acc)}
+.msg{max-width:560px;margin:70px auto;text-align:center}
+.msg h2{font-size:28px;margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:22px}
+.expired .days{color:#d33}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+.confetti i{position:absolute;top:-12px;width:9px;height:14px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
+@media(max-width:980px){.acct{grid-template-columns:1fr}.brand{border:0;padding:0}.meta{margin-left:0}.meta .sep{display:none}}
 </style>
 </head>
 <body>
-<div class="top"><span class="brand-mini">IA Plus Colombia</span><a href="index.html">← Volver a la tienda</a></div>
-<div class="wrap" id="app"><div class="msg"><p>Cargando tu cuenta…</p></div></div>
-<footer>Guarda estos datos y no los compartas. ¿Necesitas ayuda? <a id="wa" target="_blank" rel="noopener" style="color:var(--g)">Escríbenos por WhatsApp</a></footer>
+<header class="bar"><div class="bar-in" id="bar">
+  <a class="brand" href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+  <div class="prod">Mi cuenta</div>
+  <div class="meta"><a class="back" href="index.html">← Volver a la tienda</a></div>
+</div></header>
+<main id="app"><div class="msg"><p>Cargando tu cuenta…</p></div></main>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
@@ -76,83 +88,94 @@ const DAY = 86400000;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
-$("#wa").href = "https://wa.me/" + WHATSAPP;
-
-function message(title, text, withHome){
-  $("#app").innerHTML = `<div class="panel msg"><h2>${title}</h2><p>${text}</p>${withHome?'<a class="btn main" href="index.html" style="display:inline-block;flex:none">Ir a la tienda</a>':''}</div>`;
+const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
+const I = {
+  mail:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>',
+  lock:'<svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="3"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+  eye:'<svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeoff:'<svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.5 7.6C3.9 9.4 2 12 2 12s3.6 6 10 6a9.8 9.8 0 0 0 4-.9"/></svg>',
+  ok:'<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>'
+};
+function message(title, text){
+  $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><a class="cta" href="index.html">Ir a la tienda</a></div>`;
 }
 function confetti(){
-  const box = document.createElement("div"); box.className = "confetti";
-  const cols = ["#34d399","#10b981","#6ee7b7","#fbbf24","#ffffff"];
-  for(let i=0;i<70;i++){ const p=document.createElement("i");
-    p.style.left=Math.random()*100+"%"; p.style.background=cols[i%cols.length];
-    p.style.animationDuration=(2.5+Math.random()*2.5)+"s"; p.style.animationDelay=Math.random()*1.2+"s";
-    p.style.transform="rotate("+Math.random()*360+"deg)"; box.appendChild(p); }
-  document.body.appendChild(box); setTimeout(()=>box.remove(),7000);
+  const box=document.createElement("div"); box.className="confetti";
+  const cols=["#1e6bff","#12a8ff","#12a36b","#fbbf24","#7c3aed"];
+  for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=Math.random()*100+"%";p.style.background=cols[i%5];
+    p.style.animationDuration=(2.4+Math.random()*2.4)+"s";p.style.animationDelay=Math.random()+"s";box.appendChild(p);}
+  document.body.appendChild(box); setTimeout(()=>box.remove(),6500);
 }
-const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
-
-function card(it, idx){
-  const isGpt = /chatgpt|gpt/i.test(it.producto);
-  const logo = isGpt ? "chatgpt.png" : "logo.png";
+function section(it){
   const start = it.inicio ? new Date(it.inicio) : null;
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const pct = start && end ? Math.min(100, Math.max(0,(Date.now()-start)/(end-start)*100)) : 0;
-  const expired = it.vencida;
-  const body = expired ? `<div class="msg" style="padding:30px 10px"><h2>Tu plan venció</h2><p>Escríbenos por WhatsApp para renovar tu cuenta.</p><a class="btn main" style="display:inline-block;flex:none" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto)}">Renovar por WhatsApp</a></div>` : `
-    <div class="field"><label>✉️ Dirección de correo electrónico</label>
-      <div class="box"><code>${esc(it.correo)}</code><button class="copy" data-copy="${esc(it.correo)}">📋 Copiar</button></div></div>
-    <div class="field"><label>🔒 Contraseña</label>
-      <div class="box"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="show" title="Mostrar u ocultar">👁</button><button class="copy" data-copy="${esc(it.clave)}">📋 Copiar</button></div></div>`;
-  return `<section class="acct ${expired?'expired':''}">
-    <div class="hero"><div class="logo"><img src="${logo}" alt=""></div>
-      <h1>${esc(it.producto).replace(/Plus/,'<span>Plus</span>')} <span class="crown">👑</span></h1>
-      <h2>${expired?'Tu acceso terminó':'Tu acceso ya está listo'}</h2>
-      <p>${expired?'':'Usa estas credenciales para iniciar sesión en tu cuenta.'}</p></div>
-    <div class="panel">${body}
-      <div class="plan"><div class="plan-head">
+  const ex = it.vencida;
+  const left_col = ex ? `
+    <div class="card"><h1>Tu plan venció</h1><p class="lead">El acceso a esta cuenta terminó. Escríbenos y la renovamos.</p>
+    <a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto)}">Renovar por WhatsApp</a></div>` : `
+    <div class="card">
+      <h1>Inicio de sesión directo</h1>
+      <p class="lead">Usa los datos de la cuenta que aparecen abajo y sigue los pasos para iniciar sesión en ChatGPT.</p>
+      <div class="lbl">${I.mail} Cuenta de acceso</div>
+      <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
+      <div class="lbl">${I.lock} Contraseña de acceso</div>
+      <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
+      <div class="plan"><h3>⏳ Tu plan de 1 mes está corriendo</h3>
         <div class="days">${left}<small>${left===1?'día restante':'días restantes'}</small></div>
-        <div class="clock">Tu plan de 1 mes está corriendo<br><b data-end="${it.fin||''}">--:--:--</b></div></div>
-        <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div>
+        <div class="clock">Vence en <b data-end="${it.fin||''}">--</b></div>
+        <div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>
         <div class="dates"><span>Inicio: ${start?fmt(start):'—'}</span><span>Vence: ${end?fmt(end):'—'}</span></div></div>
-      ${expired?'':`<div class="go"><a class="btn main" href="https://chatgpt.com/auth/login" target="_blank" rel="noopener">Ir a ChatGPT →</a></div>`}
-    </div>
-    <div class="perks">
-      <div class="perk"><div class="e">⚡</div><b>Acceso por 1 mes</b></div>
-      <div class="perk"><div class="e">📱</div><b>Hasta 2 dispositivos</b></div>
-      <div class="perk"><div class="e">👑</div><b>Funciones avanzadas</b></div>
-      <div class="perk"><div class="e">🛠️</div><b>Soporte y acompañamiento</b></div></div>
-    <div class="steps"><b>¿Cómo entrar?</b><ol><li>Abre chatgpt.com y pulsa "Iniciar sesión".</li><li>Pega el correo y la contraseña con los botones "Copiar".</li><li>No cambies los datos de la cuenta.</li></ol></div>
-  </section>`;
+      <a class="wa" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}">💬 ¿Necesitas ayuda? Escríbenos por WhatsApp</a>
+    </div>`;
+  const right_col = ex ? '' : `
+    <div class="steps"><h2>Cómo iniciar sesión</h2>
+      <div class="step"><div class="num">1</div><div><h3>Abre ChatGPT</h3><p>Entra a chatgpt.com y pulsa "Iniciar sesión".</p><a class="cta" href="https://chatgpt.com/auth/login" target="_blank" rel="noopener">Ir a ChatGPT →</a></div></div>
+      <div class="step"><div class="num">2</div><div><h3>Pega tu correo</h3><p>Copia la "Cuenta de acceso" con el botón de copiar, pégala en el campo de correo y pulsa "Continuar".</p>
+        <div class="mock"><div class="t">Inicia sesión</div><div class="in hl"><span>${esc(it.correo)}</span><span>Editar</span></div><div class="go">Continuar</div></div></div></div>
+      <div class="step"><div class="num">3</div><div><h3>Escribe la contraseña</h3><p>Copia la "Contraseña de acceso", pégala y pulsa "Continuar". Si te pide verificación, escríbenos por WhatsApp y te ayudamos.</p>
+        <div class="mock"><div class="t">Introduce tu contraseña</div><div class="in hl"><span>Contraseña</span><span>👁</span></div><div class="go">Continuar</div></div></div></div>
+      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. Puedes usarla en hasta 2 dispositivos y tiene acceso por 1 mes.</div>
+    </div>`;
+  return `<section class="acct ${ex?'expired':''}" data-prod="${esc(it.producto)}">${left_col}${right_col}</section>`;
+}
+function header(items){
+  const it = items[0], ex = it.vencida;
+  const end = it.fin ? new Date(it.fin) : null;
+  const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
+  const u = load("iap_user"); const mail = u && u.email ? u.email.replace(/^(.{2}).*(@.*)$/,"$1****$2") : "";
+  $("#bar").innerHTML = `<a class="brand" href="index.html"><img src="logo.png" alt="IA Plus Colombia"></a>
+    <div class="prod">${esc(it.producto)} <span class="badge ${ex?'off':''}">${ex?'Vencido':'Activo'}</span></div>
+    <div class="meta">${mail?`<span>Cuenta <b>${esc(mail)}</b></span><span class="sep"></span>`:''}<span>Tiempo restante <b>${ex?'0 días':left+(left===1?' día':' días')}</b></span><a class="back" href="index.html">← Tienda</a></div>`;
 }
 function tick(){
   document.querySelectorAll("[data-end]").forEach(el=>{
     const e = el.dataset.end; if(!e) return;
-    const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="00:00:00"; return; }
+    const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="0 días"; return; }
     const d=Math.floor(ms/DAY), h=Math.floor(ms%DAY/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
-    el.textContent = d+"d "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    el.textContent = d+" d  "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
   });
 }
 document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
-  if(c){ navigator.clipboard?.writeText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML="✔ Copiado"; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1600); }); return; }
-  const s = e.target.closest(".show");
-  if(s){ const pw=s.parentElement.querySelector(".pw"); pw.textContent = pw.textContent.includes("•") ? pw.dataset.pw : "••••••••••"; }
+  if(c){ navigator.clipboard?.writeText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); }); return; }
+  const g = e.target.closest(".tog");
+  if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; }
 });
-
 (async function(){
   const cred = load("iap_cred");
-  if(!cred || cred.exp < Date.now()){
-    message("Inicia sesión para ver tu cuenta","Entra otra vez con tu Gmail en la tienda y desbloquea tu cuenta con tu código.",true); return; }
+  if(!cred || cred.exp < Date.now()){ message("Inicia sesión para ver tu cuenta","Entra otra vez con tu Gmail en la tienda y desbloquea tu cuenta con tu código."); return; }
   try{
     const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"list",idToken:cred.token})});
     const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error");
-    if(!j.items.length){ message("Aún no tienes cuentas","Escribe tu código de activación en la tienda para desbloquear tu cuenta.",true); return; }
-    $("#app").innerHTML = j.items.map(card).join("");
+    if(!j.items.length){ message("Aún no tienes cuentas","Escribe tu código de activación en la tienda para desbloquear tu cuenta."); return; }
+    header(j.items);
+    $("#app").innerHTML = j.items.map(section).join("");
     tick(); setInterval(tick,1000);
     if(j.items.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
-  }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message), true); }
+  }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message)); }
 })();
 </script>
 </body>
