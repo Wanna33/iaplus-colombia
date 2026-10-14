@@ -10,17 +10,9 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT Plus", cat:"IA", ico:"🤖", price:45000, per:"/mes", hot:true, feats:["GPT de última generación","Generación de imágenes","Garantía durante el mes"]},
-  {id:"gemini", name:"Gemini Advanced", cat:"IA", ico:"✨", price:35000, per:"/mes", feats:["Google AI Pro","2 TB de almacenamiento","Garantía durante el mes"]},
-  {id:"claude", name:"Claude Pro", cat:"IA", ico:"🧠", price:55000, per:"/mes", feats:["Más uso y modelos avanzados","Proyectos y archivos","Garantía durante el mes"]},
-  {id:"midjourney", name:"Midjourney", cat:"IA", ico:"🎨", price:40000, per:"/mes", feats:["Imágenes con IA","Modo rápido","Garantía durante el mes"]},
-  {id:"canva", name:"Canva Pro", cat:"Diseño", ico:"🖌️", price:15000, per:"/mes", hot:true, feats:["Todas las plantillas premium","Quitar fondos","Kit de marca"]},
-  {id:"capcut", name:"CapCut Pro", cat:"Diseño", ico:"🎬", price:18000, per:"/mes", feats:["Sin marca de agua","Efectos premium","Exporta en 4K"]},
-  {id:"netflix", name:"Netflix", cat:"Streaming", ico:"🍿", price:14000, per:"/mes", feats:["Perfil individual","Calidad HD/4K","Soporte incluido"]},
-  {id:"disney", name:"Disney+", cat:"Streaming", ico:"🏰", price:10000, per:"/mes", feats:["Perfil individual","Disney, Marvel, Star Wars","Soporte incluido"]},
-  {id:"spotify", name:"Spotify Premium", cat:"Música", ico:"🎧", price:12000, per:"/mes", feats:["Sin anuncios","Descargas offline","En tu propio correo"]},
-  {id:"youtube", name:"YouTube Premium", cat:"Música", ico:"▶️", price:10000, per:"/mes", feats:["Sin anuncios","YouTube Music incluido","Reproducción en segundo plano"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
+const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
 
 /* ============ UTILIDADES ============ */
 const $ = s => document.querySelector(s);
@@ -37,6 +29,7 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on
 
 /* ============ CATÁLOGO ============ */
 function renderFilters(){
+  if(new Set(PRODUCTS.map(p=>p.cat)).size<2){ $("#filters").innerHTML=""; return; }
   const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
   $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}">${c}</button>`).join("");
   $("#filters").onclick = e => { const c=e.target.dataset.c; if(c){ filter=c; renderFilters(); renderGrid(); } };
@@ -46,7 +39,7 @@ function renderGrid(){
   $("#grid").innerHTML = list.map(p=>`
     <article class="card">
       ${p.hot?'<span class="badge">🔥 Popular</span>':''}
-      <div class="ico">${p.ico}</div>
+      <div class="ico">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
@@ -68,7 +61,7 @@ function renderCart(){
   let total = 0;
   body.innerHTML = cart.map((id,i)=>{
     const p = PRODUCTS.find(x=>x.id===id); total += p.price;
-    return `<div class="citem"><div>${p.ico} <b>${esc(p.name)}</b><small>${cop(p.price)} ${p.per}</small></div><button data-rm="${i}" aria-label="Quitar">🗑</button></div>`;
+    return `<div class="citem"><div><span class="cico">${iconOf(p)}</span> <b>${esc(p.name)}</b><small>${cop(p.price)} ${p.per}</small></div><button data-rm="${i}" aria-label="Quitar">🗑</button></div>`;
   }).join("");
   $("#cartTotal").textContent = cop(total);
 }
