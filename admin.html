@@ -85,6 +85,26 @@ dialog h2{font-size:19px;margin-bottom:12px}
 .kv b{color:var(--mut);font-weight:600}
 .kv span{word-break:break-all}
 .mini{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+.prodgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:16px;padding:16px;background:linear-gradient(180deg,#fff,var(--soft));transition:transform .25s,box-shadow .25s}
+.pcard:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(30,100,255,.15)}
+.pcard .pe{font-size:28px}.pcard .pn{font-size:30px;font-weight:800;line-height:1.1;margin:6px 0}.pcard .pn small{font-size:13px;color:var(--mut);font-weight:600}.pcard .pm{font-size:13px;color:var(--mut)}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+section[id^=tab-]:not(.hide)>.card,section[id^=tab-]:not(.hide)>details{animation:up .5s cubic-bezier(.2,.7,.2,1) both}
+section[id^=tab-]:not(.hide)>.card:nth-child(2){animation-delay:.06s}
+section[id^=tab-]:not(.hide)>.card:nth-child(3){animation-delay:.12s}
+section[id^=tab-]:not(.hide)>.card:nth-child(4){animation-delay:.18s}
+.stat{transition:transform .25s,box-shadow .25s;animation:up .5s cubic-bezier(.2,.7,.2,1) both}.stat:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(30,100,255,.12)}
+.stat:nth-child(2){animation-delay:.05s}.stat:nth-child(3){animation-delay:.1s}.stat:nth-child(4){animation-delay:.15s}.stat:nth-child(5){animation-delay:.2s}
+.stat.big{background-size:200% 200%;animation:up .5s both,gradmove 10s ease infinite}
+@keyframes gradmove{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+tbody tr{animation:up .35s ease both}
+.btn{transition:.2s}.btn:active{transform:scale(.96)}
+dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.skel{height:90px;border-radius:16px;background:linear-gradient(90deg,#eef1f7 25%,#f8faff 50%,#eef1f7 75%);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:12px}
+@keyframes sk{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 .btn{min-height:40px}
 @media(max-width:760px){
@@ -119,14 +139,17 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
   <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="reload">↻ Actualizar</button></div>
 </div></header>
 
-<main id="app"><div class="msg"><p>Cargando…</p></div></main>
+<main id="app"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
 <div class="toast" id="toast"></div>
 
 <script>
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
+const PRICES = {"ChatGPT":10000,"CapCut Pro":15000,"Filmora":10000};
 const DEFAULT_PRICE = 10000;
+const priceOf = p => { const k = Object.keys(PRICES).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? PRICES[k] : DEFAULT_PRICE; };
+const EMO = p => /capcut/i.test(p)?"🎬":/filmora/i.test(p)?"🎞️":/chatgpt/i.test(p)?"🤖":"📦";
 function copyText(t){
   const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
   return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
@@ -296,6 +319,11 @@ function monthsHtml(){
   const mx = Math.max(1,...rows.map(r=>r.n));
   return `<div class="bars">${rows.map(r=>`<div class="brow"><span>${esc(r.l)}</span><i style="width:${Math.max(1,r.n/mx*100)}%"></i><span><b>${r.n}</b> ventas · ${money(r.v)}</span></div>`).join("")}</div>`;
 }
+function byProductHtml(){
+  const m = new Map();
+  items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,act:0,tot:0,libre:0,ing:0}; if(i.cliente){ a.tot++; if(!i.vencida) a.act++; a.ing+=Number(i.precio)||0; } else a.libre++; m.set(k,a); });
+  return [...m.values()].map(a=>`<div class="pcard"><div class="pe">${EMO(a.k)}</div><b>${esc(a.k)}</b><div class="pn">${a.act} <small>activos</small></div><div class="pm">${a.tot} vendidos · ${a.libre} libres</div><div class="pm"><b>${money(a.ing)}</b> ingresos</div></div>`).join("") || '<div class="empty">Aún no hay productos.</div>';
+}
 function byAccountHtml(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,act:0,tot:0,libre:0,v:0};
@@ -321,7 +349,7 @@ function setTab(t){
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
-  $("#byAcc").innerHTML = byAccountHtml(); countUp(); fillAccounts(); crows(); rows();
+  $("#byAcc").innerHTML = byAccountHtml(); $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); crows(); rows();
 }
 function render(){
   if($("#addForm")){ updateViews(); return; }
@@ -335,6 +363,7 @@ function render(){
     <div class="card"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
     <div class="card"><h2>📈 Ventas de los últimos 6 meses</h2><div id="months"></div>
       <p style="color:var(--mut);font-size:12px;margin-top:10px">Cuenta las activaciones por fecha de canje. Los montos salen del precio que anotas en cada cuenta.</p></div>
+    <div class="card"><h2>🛍️ Ventas por producto</h2><div id="byProd" class="prodgrid"></div></div>
     <div class="card"><h2>🧩 Clientes por cuenta</h2><div id="byAcc"></div></div>
   </section>
 
@@ -364,7 +393,7 @@ function render(){
     </div>
     <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
       <form id="addForm" class="form" style="margin-top:14px">
-        <div><label>Producto</label><input id="fProd" value="ChatGPT" required></div>
+        <div><label>Producto</label><input id="fProd" value="ChatGPT" list="prodList" required><datalist id="prodList">${Object.keys(PRICES).map(k=>`<option value="${k}">`).join("")}</datalist></div>
         <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
         <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
         <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="text" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
@@ -393,6 +422,7 @@ function render(){
   </section>`;
   document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
   $("#addForm").onsubmit = addAccount;
+  $("#fProd").addEventListener("change",()=>{ $("#fPrice").value = priceOf($("#fProd").value); saveDraft(); });
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
   $("#genForm").onsubmit = genCode;
@@ -459,7 +489,7 @@ function fillAccounts(){
   sel.innerHTML = list.length ? list.map(a=>`<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)}</option>`).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
 }
-function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a) $("#gDays").value=a.dias; }
+function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a){ $("#gDays").value=a.dias; $("#gPrice").value=priceOf(a.producto); } }
 function showCodes(codes, it){
   const n=$("#newcode"); n.classList.add("on");
   n.innerHTML = `<div style="color:var(--mut);font-size:13px">${codes.length>1?codes.length+" códigos nuevos":"Código nuevo"} (un solo uso) — ${esc(it.producto)}:</div>
@@ -494,11 +524,12 @@ function rows(){
   el.innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
+    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${EMO(i.producto)} ${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
+        <button class="btn s" data-a="creds" title="Copia correo y contraseña">📋 Datos</button>
         ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+ Días</button>${i.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}">💬 WhatsApp</a>`:`<button class="btn s" data-a="wa">Renovar WA</button>`}`:""}
         <button class="btn s" data-a="clone" title="Otro código para esta misma cuenta (otro cliente)">+ Código otro cliente</button>
         <button class="btn s" data-a="edit">Editar</button>
@@ -563,13 +594,14 @@ document.addEventListener("click", async e=>{
   const a = bt.dataset.a;
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
+    if(a==="creds"){ copy(`${i.producto}\nCuenta: ${i.correo}\nContraseña: ${i.clave}`); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(renewMsg(i)),"_blank"); return; }
-    if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:i.precio||DEFAULT_PRICE}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
+    if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:priceOf(i.producto)}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
     if(a==="r2fa"){ if(!confirm("¿Devolver los 3 códigos de autenticación a "+i.cliente+"?")) return; await api("admin_reset2fa",{fila:i.fila}); toast("Códigos 2FA reiniciados ✔"); }
     if(a==="ext"){
       const v = await askForm("Renovar / sumar días a "+(i.nombre||i.cliente),[
         {id:"dias",label:"Días a sumar (usa negativo para restar)",type:"number",value:30,req:true},
-        {id:"precio",label:"Monto cobrado en COP (opcional, se suma al total del cliente)",type:"number",value:DEFAULT_PRICE}]);
+        {id:"precio",label:"Monto cobrado en COP (opcional, se suma al total del cliente)",type:"number",value:priceOf(i.producto)}]);
       if(!v) return;
       await api("admin_extend",{fila:i.fila,dias:v.dias,precio:v.precio}); toast("Días agregados ✔");
     }
@@ -601,6 +633,10 @@ document.addEventListener("click", async e=>{
   }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para usar esta función.":ex.message); }
 });
 $("#reload").onclick = refresh;
+document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
+  if(e.key!=="/" || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || !$("#q")) return;
+  e.preventDefault(); if(curTab==="res"||curTab==="log") setTab("cta"); (curTab==="cli"?$("#cq"):$("#q")).focus();
+});
 start(); setInterval(()=>{ if(!document.hidden && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 </script>
 </body>

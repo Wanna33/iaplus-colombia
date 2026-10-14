@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tu cuenta ChatGPT Plus | IA Plus Colombia</title>
+<title>Tu cuenta | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo.webp" type="image/webp">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -235,7 +235,10 @@ function confetti(){
     p.style.animationDuration=(2.4+Math.random()*2.4)+"s";p.style.animationDelay=Math.random()+"s";box.appendChild(p);}
   document.body.appendChild(box); setTimeout(()=>box.remove(),6500);
 }
+const APPS=[{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
+const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 function section(it){
+  const app=appOf(it);
   const start = it.inicio ? new Date(it.inicio) : null;
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
@@ -246,7 +249,7 @@ function section(it){
     <a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto)}">Renovar por WhatsApp</a></div>` : `
     <div class="card">
       <h1>Inicio de sesión directo</h1>
-      <p class="lead">Usa los datos de la cuenta que aparecen abajo y sigue los pasos para iniciar sesión en ChatGPT.</p>
+      <p class="lead">Usa los datos de la cuenta que aparecen abajo y sigue los pasos para iniciar sesión en ${esc(app.n)}.</p>
       ${it.cliente!==undefined?`<div class="note" style="margin:0 0 6px"><b>Admin:</b> código ${esc(it.codigo||'—')} · cliente ${esc(it.cliente||'sin asignar')}</div>`:''}
       <div class="lbl">${I.mail} Cuenta de acceso</div>
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
@@ -266,20 +269,20 @@ function section(it){
     </div>`;
   const right_col = ex ? '' : `
     <div class="steps"><h2>Cómo iniciar sesión</h2>
-      <div class="step"><div class="num">1</div><div><h3>Abre ChatGPT</h3><p>Entra a chatgpt.com y pulsa "Iniciar sesión".</p><a class="cta" href="https://chatgpt.com/auth/login" target="_blank" rel="noopener">Ir a ChatGPT →</a></div></div>
+      <div class="step"><div class="num">1</div><div><h3>Abre ${esc(app.n)}</h3><p>${app.host?`Entra a ${esc(app.host)} e inicia sesión.`:`Abre la aplicación e inicia sesión.`}</p>${app.url?`<a class="cta" href="${app.url}" target="_blank" rel="noopener">Ir a ${esc(app.n)} →</a>`:""}</div></div>
       <div class="step"><div class="num">2</div><div><h3>Pega tu correo</h3><p>Copia la "Cuenta de acceso" con el botón de copiar, pégala en el campo de correo y pulsa "Continuar".</p>
         <div class="mock"><div class="t">Inicia sesión</div><div class="in hl"><span>${esc(it.correo)}</span><span>Editar</span></div><div class="go">Continuar</div></div></div></div>
       <div class="step"><div class="num">3</div><div><h3>Escribe la contraseña</h3><p>Copia la "Contraseña de acceso", pégala y pulsa "Continuar". Si te pide verificación, escríbenos por WhatsApp y te ayudamos.</p>
         <div class="mock"><div class="t">Introduce tu contraseña</div><div class="in hl"><span>Contraseña</span><span>👁</span></div><div class="go">Continuar</div></div></div></div>
       <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. Puedes usarla en hasta 2 dispositivos y tiene acceso por 1 mes.</div>
-      <details class="note" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
+      ${app.k==="chatgpt"?`<details class="note" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
         <ol style="margin:10px 0 0 18px;display:grid;gap:6px">
           <li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
           <li>En tu navegador normal borra las <b>cookies y la caché</b> de chatgpt.com y vuelve a entrar.</li>
           <li>Desactiva extensiones (bloqueadores de anuncios, VPN, extensiones de ChatGPT) o prueba con <b>Google Chrome</b> actualizado.</li>
           <li>Abre un <b>chat nuevo</b> y elige el modelo desde la lista de arriba (no uses chats ni enlaces antiguos).</li>
           <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li>
-        </ol></details>
+        </ol></details>`:""}
     </div>`;
   return `<section class="acct ${ex?'expired':''}" data-prod="${esc(it.producto)}">${left_col}${right_col}</section>`;
 }

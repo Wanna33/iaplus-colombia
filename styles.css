@@ -232,3 +232,44 @@ input,button,select{font-size:16px}
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 @media(max-width:600px){.wa-float{width:52px;height:52px}}
+
+/* ===== animaciones y pulido ===== */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1) var(--d,0ms),transform .7s cubic-bezier(.2,.7,.2,1) var(--d,0ms)}
+.reveal.in{opacity:1;transform:none}
+.hero-text>*{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+.hero-text>*:nth-child(2){animation-delay:.08s}.hero-text>*:nth-child(3){animation-delay:.16s}.hero-text>*:nth-child(4){animation-delay:.24s}.hero-text>*:nth-child(5){animation-delay:.32s}
+.login-card{animation:rise .9s .2s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.glow{animation:drift 14s ease-in-out infinite alternate}
+.g2{animation-duration:18s;animation-direction:alternate-reverse}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.15)}}
+.hero h1 .grad{background-size:200% 100%;background-image:linear-gradient(90deg,#12a8ff,#7a5cff,#12a8ff);animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.card{background:linear-gradient(180deg,#0f1830,var(--card));transition:transform .3s,border-color .3s,box-shadow .3s}
+.card::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,0%),rgba(56,200,255,.14),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card:hover::after{opacity:1}
+.card:hover{border-color:#2f7bff}
+.card .ico{width:64px;height:64px;transition:transform .35s}
+.card:hover .ico{transform:rotate(-6deg) scale(1.08)}
+.card .ico img{width:44px;height:44px;border-radius:12px}
+.card .ico.lt img{background:#fff;padding:3px}
+.card .badge{background:#3a2a05;border:1px solid #6b4a0a;color:#ffc24a}
+.buy-btn{position:relative;overflow:hidden}
+.buy-btn::before{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s}
+.buy-btn:hover::before{left:130%}
+.btn-primary:active{transform:scale(.97)}
+.step{transition:transform .3s,border-color .3s}
+.step:hover{transform:translateY(-5px);border-color:#2f7bff}
+.step b{animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 6px 16px rgba(30,100,255,.3)}50%{box-shadow:0 6px 28px rgba(56,200,255,.65)}}
+details{transition:border-color .3s,transform .2s}
+details:hover{border-color:#2f7bff}
+.unlock-card{max-width:520px;margin:34px auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow-lg);text-align:center}
+.unlock-card .unlock-title{margin:0 0 4px;font-size:18px}
+.unlock-sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.unlock-card .redeem-inline .redeem-form{flex-direction:row}
+.wa-float{animation:wa 2.6s ease-in-out infinite}
+@keyframes wa{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 0 rgba(37,211,102,.5)}50%{box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 14px rgba(37,211,102,0)}}
+.chip{transition:.25s}
+.chip.on{transform:translateY(-1px)}
+@media(max-width:600px){.unlock-card .redeem-inline .redeem-form{flex-direction:column}}

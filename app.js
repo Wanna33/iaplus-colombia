@@ -14,6 +14,8 @@ const CONFIG = {
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
   {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.png", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.png", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
 const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
 
@@ -50,19 +52,23 @@ function renderFilters(){
 }
 function renderGrid(){
   const list = PRODUCTS.filter(p => filter==="Todos" || p.cat===filter);
-  $("#grid").innerHTML = list.map(p=>`
-    <article class="card">
+  $("#grid").innerHTML = list.map((p,n)=>`
+    <article class="card reveal" style="--d:${n*90}ms">
       ${p.hot?'<span class="badge">🔥 Popular</span>':''}
-      <div class="ico">${iconOf(p)}</div>
+      <div class="ico ${p.lt?"lt":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
-      <div class="unlock-title">🔓 ¿Ya pagaste? Escribe tu código</div>
-      <div class="redeem-inline" id="redeemBox"></div>
-      <a class="buy-link" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">¿No tienes código? Cómpralo por WhatsApp</a>
+      <a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">💬 Comprar por WhatsApp</a>
     </article>`).join("");
-  renderRedeem();
+  observeReveal();
+}
+function observeReveal(){
+  const els = document.querySelectorAll(".reveal:not(.in)");
+  if(!("IntersectionObserver" in window)){ els.forEach(e=>e.classList.add("in")); return; }
+  const io = new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); } }), {threshold:.12});
+  els.forEach(e=>io.observe(e));
 }
 function renderCart(){}
 
@@ -160,7 +166,7 @@ function renderRedeem(){
     return;
   }
   if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
-  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html">🔓 Abrir mi cuenta de ChatGPT</a>' : '';
+  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html">🔓 Abrir mi cuenta</a>' : '';
   box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
     <div id="acctList">${myItems===null?'':(list||'')}</div>`;
@@ -193,4 +199,10 @@ $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
 $("#waFloat").href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent("Hola, quiero información")}`;
 $("#year").textContent = new Date().getFullYear();
-renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard(); renderRedeem(); loadMine();
+observeReveal(); renderFilters(); renderGrid(); renderCart(); renderAuth(); renderHeroCard(); renderRedeem(); loadMine();
+
+// brillo que sigue al mouse en las tarjetas
+document.addEventListener("pointermove", e => {
+  const c = e.target.closest?.(".card"); if(!c) return;
+  const r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX-r.left)+"px"); c.style.setProperty("--my", (e.clientY-r.top)+"px");
+});
