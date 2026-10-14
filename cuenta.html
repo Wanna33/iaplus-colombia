@@ -6,6 +6,7 @@
 <title>Tu cuenta ChatGPT Plus | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo.webp" type="image/webp">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta name="theme-color" content="#1e6bff">
 <style>
 :root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--soft:#eef4ff}
@@ -128,45 +129,83 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const WHATSAPP = "573102035327";
 const DAY = 86400000;
+const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
+const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
+let credP = null;
+function ensureCred(){
+  const c = load("iap_cred");
+  if(c && c.exp > Date.now()+30000) return Promise.resolve(c);
+  if(credP) return credP;
+  credP = new Promise(resolve=>{
+    let bar = document.getElementById("relogin");
+    if(!bar){ bar = document.createElement("div"); bar.id="relogin";
+      bar.style.cssText="position:fixed;left:12px;right:12px;bottom:14px;max-width:460px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(20,40,90,.25);z-index:60;text-align:center";
+      bar.innerHTML='<div style="font-weight:700;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div>';
+      document.body.appendChild(bar); }
+    const init = () => {
+      if(!window.google?.accounts?.id){ return setTimeout(init,300); }
+      google.accounts.id.initialize({client_id:CLIENT_ID, auto_select:true, callback:r=>{
+        const p=parseJwt(r.credential); const cr={token:r.credential,exp:p.exp*1000};
+        save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""});
+        bar.remove(); credP=null; resolve(cr);
+      }});
+      google.accounts.id.renderButton(document.getElementById("relBtn"),{theme:"outline",size:"large",shape:"pill",locale:"es"});
+      try{ google.accounts.id.prompt(); }catch{}
+    };
+    init();
+  });
+  return credP;
+}
+async function callApi(body){
+  const cred = await ensureCred();
+  const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({...body, idToken:cred.token})});
+  const j = await r.json();
+  if(!j.ok && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return callApi(body); }
+  return j;
+}
 const totpState = {};
 function totpRest(box){
   const st=totpState[box.dataset.totp]||{};
   if(st.rest!==undefined) return st.rest;
   return box.dataset.rest===""||box.dataset.rest===undefined ? null : +box.dataset.rest;
 }
-async function askTotp(box){
+async function fetchTotp(box, ask){
   const mail=box.dataset.totp, st=totpState[mail]=totpState[mail]||{};
-  if(st.busy) return; st.busy=true; st.err="";
-  const btn=box.querySelector("[data-ask]"); btn.disabled=true; btn.textContent="Pidiendo…";
+  if(st.busy) return; st.busy=true; if(ask) st.err="";
+  const btn=box.querySelector("[data-ask]"); if(ask){ btn.disabled=true; btn.textContent="Pidiendo…"; }
   try{
-    const cred=load("iap_cred");
-    const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"totp",v:2,idToken:cred.token,correo:mail})});
-    const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
-    st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes;
-  }catch(err){ st.err=err.message; }
+    const j=await callApi({action:"totp",v:2,ask:!!ask,correo:mail});
+    if(!j.ok){ if(/SESION_2FA/.test(j.error||"")){ st.sesion=0; st.code=""; } else throw new Error(j.error||"Error"); }
+    else { st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes; st.sesion=j.hasta||(Date.now()+600000); st.err=""; }
+  }catch(err){ st.err=err.message; if(ask) st.sesion=0; }
   st.busy=false; renderTotp();
 }
+function askTotp(box){ return fetchTotp(box,true); }
 function renderTotp(){
   const now=Date.now();
   for(const box of document.querySelectorAll("[data-totp]")){
     const st=totpState[box.dataset.totp]||{}, rest=totpRest(box);
-    const show = st.code && st.until>now;
-    box.querySelector(".tview").hidden=!show;
-    box.querySelector(".task").hidden=!!show;
-    if(show){
+    const active = st.code && st.sesion && st.sesion>now;
+    if(active && st.until<=now && !st.busy) fetchTotp(box,false); // el código sigue circulando solo
+    box.querySelector(".tview").hidden=!active;
+    box.querySelector(".task").hidden=!!active;
+    if(active){
       const left=Math.max(0,Math.ceil((st.until-now)/1000));
       box.querySelector(".tcode").textContent=st.code.slice(0,3)+" "+st.code.slice(3);
       box.querySelector(".tcopy").dataset.copy=st.code;
       box.querySelector(".tleft").textContent=left;
       box.querySelector(".tbar").style.width=(left/30*100)+"%";
+      const m=Math.max(0,Math.ceil((st.sesion-now)/60000));
+      box.querySelector(".tnote").textContent="El código se renueva solo durante "+m+" min más. Después tendrás que volver a pedirlo.";
     } else {
       const btn=box.querySelector("[data-ask]");
       const none = rest!==null && rest<=0;
       btn.disabled=none||!!st.busy;
-      btn.textContent=none?"Sin códigos disponibles":(st.code?"Pedir otro código":"Pedir código de autenticación");
-      box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||3)+" códigos." : "Te quedan "+rest+" de "+(box.dataset.max||3)+" códigos.");
+      btn.textContent=none?"Sin códigos disponibles":"Pedir código de autenticación";
+      box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||3)+" pedidos." : "Te quedan "+rest+" de "+(box.dataset.max||3)+" pedidos.");
+      box.querySelector(".tnote").textContent = st.err ? st.err : (none ? "Si necesitas ayuda, escríbenos por WhatsApp." : "Al pedirlo se descuenta 1 de tus "+(box.dataset.max||3)+" pedidos. Luego el código se renueva solo durante 10 minutos.");
     }
-    box.querySelector(".tnote").textContent = st.err ? st.err : (rest!==null && rest<=0 && !show ? "Si necesitas ayuda, escríbenos por WhatsApp." : "Cada vez que lo pides se descuenta uno de tus códigos disponibles. El código dura 30 segundos.");
   }
 }
 function refreshTotp(){ renderTotp(); }
@@ -273,20 +312,16 @@ function bindAdd(){
   f.onsubmit=async e=>{
     e.preventDefault(); const btn=f.querySelector("button"), err=$("#addErr"); err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
     try{
-      const cred=load("iap_cred");
-      const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"redeem",code:$("#addCode").value,idToken:cred.token})});
-      const j=await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+      const j=await callApi({action:"redeem",code:$("#addCode").value}); if(!j.ok) throw new Error(j.error||"Error");
       sessionStorage.removeItem("iap_conf"); await loadAll();
     }catch(ex){ err.textContent=ex.message; err.hidden=false; btn.disabled=false; btn.textContent="Desbloquear"; }
   };
 }
 let timer=null;
 async function loadAll(){
-  const cred = load("iap_cred");
-  if(!cred || cred.exp < Date.now()){ message("Inicia sesión para ver tu cuenta","Entra otra vez con tu Gmail en la tienda y desbloquea tu cuenta con tu código."); return; }
   try{
-    const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action:"list",idToken:cred.token})});
-    const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error");
+    const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
+    save("iap_has", j.items.length>0);
     if(!j.items.length){ $("#app").innerHTML = addBox(true); bindAdd(); return; }
     header(j.items);
     $("#app").innerHTML = j.items.map(section).join("") + addBox(false);
