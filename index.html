@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IA Plus Colombia | Cuentas Digitales Premium</title>
+<meta name="description" content="Compra cuentas digitales premium (IA, streaming, diseño y más) al mejor precio en Colombia. Ingresa con tu cuenta de Gmail.">
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="styles.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#inicio" class="brand"><img src="logo.png" alt="IA Plus Colombia"></a>
+    <nav class="links" id="links">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#como">Cómo funciona</a>
+      <a href="#faq">Preguntas</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <div class="nav-right">
+      <button class="cart-btn" id="cartBtn" aria-label="Carrito">🛒 <span id="cartCount">0</span></button>
+      <div id="authArea">
+        <button class="btn btn-google" id="loginBtn">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+          Ingresar con Gmail
+        </button>
+      </div>
+      <button class="burger" id="burger" aria-label="Menú">☰</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="inicio">
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="wrap hero-in">
+    <div class="hero-text">
+      <span class="pill">🇨🇴 Tienda oficial en Colombia</span>
+      <h1>Cuentas digitales <span class="grad">premium</span> al mejor precio</h1>
+      <p>Inteligencia artificial, streaming, diseño y más. Inicia sesión con tu Gmail, elige tu cuenta y recíbela en minutos por WhatsApp.</p>
+      <div class="cta">
+        <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
+        <button class="btn btn-ghost" id="heroLogin">Ingresar con Gmail</button>
+      </div>
+      <ul class="trust">
+        <li>⚡ Entrega rápida</li>
+        <li>🛡️ Garantía incluida</li>
+        <li>💬 Soporte por WhatsApp</li>
+      </ul>
+    </div>
+    <div class="login-card" id="heroCard">
+      <h3 id="heroCardTitle">Inicia sesión</h3>
+      <p id="heroCardText">Entra con tu cuenta de Google para comprar y ver tus pedidos.</p>
+      <div id="gBtnHero" class="gbtn"></div>
+      <small class="legal">Usamos Google para identificarte. Nunca vemos tu contraseña.</small>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="catalogo">
+  <div class="wrap">
+    <h2 class="title">Catálogo de <span class="grad">cuentas</span></h2>
+    <p class="sub">Precios en pesos colombianos (COP). Inicia sesión con Gmail para comprar.</p>
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="section alt" id="como">
+  <div class="wrap">
+    <h2 class="title">¿Cómo <span class="grad">funciona</span>?</h2>
+    <div class="steps">
+      <div class="step"><b>1</b><h3>Ingresa con Gmail</h3><p>Un clic con tu cuenta de Google. Sin contraseñas nuevas.</p></div>
+      <div class="step"><b>2</b><h3>Elige tu cuenta</h3><p>Agrega al carrito los servicios que quieras.</p></div>
+      <div class="step"><b>3</b><h3>Paga</h3><p>Confirmas el pedido por WhatsApp y pagas con Nequi, Daviplata o transferencia.</p></div>
+      <div class="step"><b>4</b><h3>Recibe tu acceso</h3><p>Te enviamos los datos de tu cuenta en minutos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap narrow">
+    <h2 class="title">Preguntas <span class="grad">frecuentes</span></h2>
+    <details><summary>¿Para qué piden mi Gmail?</summary><p>Para identificarte, guardar tu historial de pedidos y enviarte la confirmación. Nunca pedimos tu contraseña de Google.</p></details>
+    <details><summary>¿Cuánto tarda la entrega?</summary><p>Normalmente entre 5 y 30 minutos en horario de atención.</p></details>
+    <details><summary>¿Tienen garantía?</summary><p>Sí. Cada cuenta incluye garantía durante el periodo contratado. Si falla, la reponemos.</p></details>
+    <details><summary>¿Cómo puedo pagar?</summary><p>Nequi, Daviplata, Bancolombia y otros medios que te indicaremos por WhatsApp.</p></details>
+  </div>
+</section>
+
+<footer class="footer" id="contacto">
+  <div class="wrap foot-in">
+    <img src="logo.png" alt="IA Plus Colombia" class="foot-logo">
+    <div>
+      <p>¿Dudas? Escríbenos directamente.</p>
+      <a class="btn btn-primary" id="waContact" target="_blank" rel="noopener">💬 WhatsApp</a>
+    </div>
+    <small>© <span id="year"></span> IA Plus Colombia. Todos los derechos reservados.</small>
+  </div>
+</footer>
+
+<!-- Carrito -->
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head"><h3>Tu carrito</h3><button id="closeCart" aria-label="Cerrar">✕</button></div>
+  <div class="drawer-body" id="cartItems"></div>
+  <div class="drawer-foot">
+    <div class="total"><span>Total</span><strong id="cartTotal">$0</strong></div>
+    <button class="btn btn-primary full" id="checkout">Finalizar por WhatsApp</button>
+    <button class="btn btn-ghost full" id="myOrders">Mis pedidos</button>
+  </div>
+</aside>
+<div class="overlay" id="overlay"></div>
+
+<!-- Modal login -->
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-box">
+    <button class="modal-x" id="closeLogin" aria-label="Cerrar">✕</button>
+    <img src="logo.png" alt="" class="modal-logo">
+    <h3>Ingresa con tu Gmail</h3>
+    <p>Usa tu cuenta de Google para comprar y ver tus pedidos.</p>
+    <div id="gBtn" class="gbtn"></div>
+    <p class="note err" id="loginErr" hidden></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
