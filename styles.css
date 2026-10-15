@@ -407,3 +407,10 @@ details:hover,details[open]{border-color:var(--blue)}
 .modal-logo{height:64px;width:auto;margin:0 auto 14px}
 @media(max-width:860px){.brand img{height:42px}}
 @media(max-width:600px){.foot-logo{height:66px}}
+
+/* ===== logo definitivo (IA+ Plus Colombia) ===== */
+.brand img{height:58px;width:auto}
+.foot-logo{height:130px;width:auto}
+.modal-logo{height:110px;width:auto;margin:0 auto 14px}
+@media(max-width:860px){.brand img{height:48px}}
+@media(max-width:600px){.foot-logo{height:100px}}
