@@ -110,11 +110,13 @@ tbody tr{animation:up .35s ease both}
 .btn{transition:.2s}.btn:active{transform:scale(.96)}
 dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
-.passrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.passrow{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .passrow:last-child{border-bottom:0}
 .pr-info{display:flex;flex-direction:column;min-width:0}.pr-info .mono{font-size:14px;word-break:break-all}.pr-info small{color:var(--mut)}
 .pr-in{font-family:Consolas,monospace;font-weight:700}
-@media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}}
+@media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}.pr-cap{display:flex;align-items:center;gap:8px}}
+.pr-cap{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.qa{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.qa .btn{flex:1 1 170px}
 .chk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:12px;cursor:pointer}.chk input{width:auto}
 .capfree{color:var(--mut);font-size:12px;white-space:nowrap}
 .ttlbox{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;background:#f1f6ff;border:1px solid #d6e4ff;border-radius:12px;padding:10px 14px;font-size:14px}
@@ -370,8 +372,9 @@ function byProductHtml(){
 }
 function passListHtml(){
   const m = new Map();
-  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente) a.clientes++; m.set(k,a); });
-  return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente":"clientes"} · ${a.total} ${a.total===1?"código":"códigos"}</small></div>
+  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente&&!i.vencida) a.clientes++; m.set(k,a); });
+  return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente activo":"clientes activos"} · ${a.total} ${a.total===1?"código":"códigos"}</small></div>
+    <div class="pr-cap">${(()=>{ const c=capMap().get(a.correo.toLowerCase()); return c?capBar(c,getCap()):""; })()}</div>
     <input class="pr-in" data-pk="${esc(a.k)}" data-orig="${esc(a.clave)}" value="${esc(a.clave)}" autocomplete="off" aria-label="Contraseña de ${esc(a.correo)}">
     <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
@@ -413,22 +416,27 @@ function setTab(t){
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
   if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
-  $("#byAcc").innerHTML = byAccountHtml(); $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); fillAuto(); crows(); rows();
+  $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); fillAuto(); crows(); rows();
 }
 function render(){
   if($("#addForm")){ updateViews(); return; }
   $("#app").innerHTML = `
   <div class="tabs">
-    <button data-t="res"><i>📊</i><span>Resumen</span></button><button data-t="cli"><i>👥</i><span>Clientes</span></button><button data-t="cta"><i>🔑</i><span>Cuentas</span></button><button data-t="log"><i>🕘</i><span>Registro</span></button>
+    <button data-t="res"><i>📊</i><span>Resumen</span></button><button data-t="cli"><i>👥</i><span>Clientes</span></button><button data-t="cod"><i>🎫</i><span>Códigos</span></button><button data-t="cta"><i>🔑</i><span>Cuentas</span></button><button data-t="log"><i>🕘</i><span>Registro</span></button>
   </div>
 
   <section id="tab-res">
+    <div class="qa">
+      <button class="btn p" data-qa="gen">🎲 Generar código</button>
+      <button class="btn" data-qa="acc">➕ Agregar cuenta</button>
+      <button class="btn" data-qa="pass">🔑 Cambiar contraseña</button>
+      <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
+    </div>
     <div class="stats" id="stats"></div>
     <div class="card"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
     <div class="card"><h2>📈 Ventas de los últimos 6 meses</h2><div id="months"></div>
       <p style="color:var(--mut);font-size:12px;margin-top:10px">Cuenta las activaciones por fecha de canje. Los montos salen del precio que anotas en cada cuenta.</p></div>
     <div class="card"><h2>🛍️ Ventas por producto</h2><div id="byProd" class="prodgrid"></div></div>
-    <div class="card"><h2>🧩 Clientes por cuenta</h2><div id="byAcc"></div></div>
   </section>
 
   <section id="tab-cli" class="hide">
@@ -443,10 +451,7 @@ function render(){
     </div>
   </section>
 
-  <section id="tab-cta" class="hide">
-    <div class="card"><h2>🔐 Contraseñas de mis cuentas</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cambia la contraseña de una cuenta y se actualiza sola para todos los clientes que la comparten. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
-      <div id="passList"></div></div>
+  <section id="tab-cod" class="hide">
     <div class="card"><h2>🎲 Generar códigos automáticos</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. El cupo se mide con los clientes que <b>ya canjearon</b> su código; los códigos sin canjear no ocupan lugar (puedes cambiarlo con la casilla de abajo).</p>
       <form id="autoForm" class="form">
@@ -464,7 +469,7 @@ function render(){
       <div id="capInfo" class="capinfo"></div>
       <div class="newcode" id="autoOut"></div>
     </div>
-    <div class="card"><h2>🔑 Generar código de una cuenta en particular</h2>
+    <details class="card" id="manualBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">🔑 Generar código de una cuenta en particular</summary>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Se crea 1 código por defecto; puedes subir la cantidad si lo necesitas.</p>
       <form id="genForm" class="form">
         <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
@@ -474,7 +479,22 @@ function render(){
         <div><button class="btn p" style="width:100%" type="submit">Generar</button></div>
       </form>
       <div class="newcode" id="newcode"></div>
+    </details>
+    <div class="card"><h2>📋 Todos los códigos y clientes</h2>
+      <div class="tools">
+        <input id="q" placeholder="Buscar cliente, correo, código o nota…">
+        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option><option value="pr">Con problemas</option></select>
+        <select id="pf"><option value="">Todos los productos</option></select>
+        <button class="btn s" id="csv">⬇ Exportar CSV</button>
+      </div>
+      <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Precio</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
     </div>
+  </section>
+
+  <section id="tab-cta" class="hide">
+    <div class="card"><h2>🧩 Mis cuentas</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada fila es una cuenta que compartes: ves cuántos clientes la usan (barra de cupo) y puedes cambiar su contraseña. Al guardar, <b>se actualiza sola para todos sus clientes</b>. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
+      <div id="passList"></div></div>
     <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
       <form id="addForm" class="form" style="margin-top:14px">
         <div><label>Producto</label><input id="fProd" value="ChatGPT" list="prodList" required><datalist id="prodList">${Object.keys(PRICES).map(k=>`<option value="${k}">`).join("")}</datalist></div>
@@ -487,15 +507,6 @@ function render(){
       </form>
       <div class="saved" id="draftNote"></div>
     </details>
-    <div class="card"><h2>📋 Cuentas, clientes y tiempo restante</h2>
-      <div class="tools">
-        <input id="q" placeholder="Buscar cliente, correo, código o nota…">
-        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option><option value="pr">Con problemas</option></select>
-        <select id="pf"><option value="">Todos los productos</option></select>
-        <button class="btn s" id="csv">⬇ Exportar CSV</button>
-      </div>
-      <div class="wrapt"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Estado</th><th>Cliente (Gmail)</th><th>Activada</th><th>Vence</th><th>Pidió 2FA</th><th>Precio</th><th>Tiempo restante</th><th>Acciones</th></tr></thead><tbody id="rows"></tbody></table></div>
-    </div>
   </section>
 
   <section id="tab-log" class="hide">
@@ -523,7 +534,16 @@ function render(){
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
   $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
   $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
+  document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>quick(b.dataset.qa));
   updateViews(); setTab(curTab);
+}
+// Acciones rápidas del Resumen
+function quick(a){
+  const go=(tab,el)=>{ setTab(tab); setTimeout(()=>{ el&&el.scrollIntoView({behavior:"smooth",block:"start"}); },60); };
+  if(a==="gen") go("cod",$("#autoForm"));
+  else if(a==="acc"){ setTab("cta"); $("#addBox").open=true; setTimeout(()=>{ $("#addBox").scrollIntoView({behavior:"smooth",block:"start"}); $("#fMail").focus(); },80); }
+  else if(a==="pass"){ setTab("cta"); setTimeout(()=>{ const i=document.querySelector(".pr-in"); if(i){ i.scrollIntoView({behavior:"smooth",block:"center"}); i.focus(); i.select(); } },80); }
+  else if(a==="avisar") $("#attn").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 /* ---------- Clientes ---------- */
@@ -683,6 +703,7 @@ function fillAccounts(){
 }
 function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a){ $("#gDays").value=a.dias; $("#gPrice").value=priceOf(a.producto); } }
 function showCodes(codes, it){
+  const mb=$("#manualBox"); if(mb) mb.open=true;
   const n=$("#newcode"); n.classList.add("on");
   n.innerHTML = `<div style="color:var(--mut);font-size:13px">${codes.length>1?codes.length+" códigos nuevos":"Código nuevo"} (un solo uso) — ${esc(it.producto)}:</div>
     ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
@@ -751,7 +772,7 @@ async function addAccount(e){
     const prod=$("#fProd").value, dias=$("#fDays").value;
     hlCode = j.codigo; draftClear();
     $("#addForm").reset(); $("#fProd").value="ChatGPT"; $("#fDays").value=30; $("#fPrice").value=DEFAULT_PRICE; $("#addBox").open=false; $("#draftNote").textContent="";
-    await refresh(); showCodes([j.codigo],{producto:prod,dias:dias});
+    await refresh(); setTab("cod"); showCodes([j.codigo],{producto:prod,dias:dias});
     toast("Cuenta guardada en tu hoja de Google ✔");
     $("#rows tr.hl")?.scrollIntoView({behavior:"smooth",block:"center"});
   }catch(ex){ toast(ex.message); }
@@ -903,7 +924,7 @@ document.addEventListener("click", async e=>{
 $("#reload").onclick = refresh;
 document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
   if(e.key!=="/" || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || !$("#q")) return;
-  e.preventDefault(); if(curTab==="res"||curTab==="log") setTab("cta"); (curTab==="cli"?$("#cq"):$("#q")).focus();
+  e.preventDefault(); if(curTab!=="cli"&&curTab!=="cod") setTab("cod"); (curTab==="cli"?$("#cq"):$("#q")).focus();
 });
 start(); setInterval(()=>{ if(!document.hidden && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 </script>
