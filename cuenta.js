@@ -270,8 +270,7 @@ async function openMore(){
   try{
     const j=await callApi({action:"acct_options"}); if(!j.ok) throw new Error(j.error||"Error");
     if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas activas.</p>`; return; }
-    if(!j.grupos.length){ body.innerHTML=`<p>Por ahora no hay otras cuentas disponibles. Escríbenos y te ayudamos.</p>`; return; }
-    body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus 5 pedidos de código de cada día.</p>`+j.grupos.map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
+        body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus 5 pedidos de código de cada día.</p>`+(j.grupos||[]).map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+(g.opciones.length?"":`<div class="mopt"><div><small>Sin cuentas libres por ahora</small></div><a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero una cuenta de "+g.producto)}">Pedir</a></div>`)+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
     body.onclick=async e=>{
       const b=e.target.closest("[data-pick]"); if(!b) return; b.disabled=true; b.textContent="Agregando…";
       try{ const r=await callApi({action:"acct_add",fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
