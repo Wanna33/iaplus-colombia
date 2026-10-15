@@ -561,7 +561,7 @@ function rows(){
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
     return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${EMO(i.producto)} ${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}${expiraHtml(i)}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
-      <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
+      <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||5)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||5}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
         <button class="btn s" data-a="creds" title="Copia correo y contraseña">📋 Datos</button>
@@ -697,7 +697,7 @@ document.addEventListener("click", async e=>{
     if(a==="creds"){ copy(`${i.producto}\nCuenta: ${i.correo}\nContraseña: ${i.clave}`); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(renewMsg(i)),"_blank"); return; }
     if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:priceOf(i.producto)}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
-    if(a==="r2fa"){ if(!confirm("¿Devolver los 3 códigos de autenticación a "+i.cliente+"?")) return; await api("admin_reset2fa",{fila:i.fila}); toast("Códigos 2FA reiniciados ✔"); }
+    if(a==="r2fa"){ if(!confirm("¿Devolver los pedidos de códigos de autenticación de hoy a "+i.cliente+"?")) return; await api("admin_reset2fa",{fila:i.fila}); toast("Códigos 2FA reiniciados ✔"); }
     if(a==="ext"){
       const v = await askForm("Renovar / sumar días a "+(i.nombre||i.cliente),[
         {id:"dias",label:"Días a sumar (usa negativo para restar)",type:"number",value:30,req:true},

@@ -82,8 +82,8 @@ function renderTotp(){
       const none = rest!==null && rest<=0;
       btn.disabled=none||!!st.busy;
       btn.textContent=none?"Sin códigos disponibles":"Pedir código de autenticación";
-      box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||3)+" pedidos." : "Te quedan "+rest+" de "+(box.dataset.max||3)+" pedidos.");
-      box.querySelector(".tnote").textContent = st.err ? st.err : (none ? "Si necesitas ayuda, escríbenos por WhatsApp." : "Al pedirlo se descuenta 1 de tus "+(box.dataset.max||3)+" pedidos. Luego el código se renueva solo durante 10 minutos.");
+      box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||5)+" pedidos de hoy. Mañana se renuevan." : "Te quedan "+rest+" de "+(box.dataset.max||5)+" pedidos de hoy.");
+      box.querySelector(".tnote").textContent = st.err ? st.err : (none ? "Si necesitas ayuda, escríbenos por WhatsApp." : "Al pedirlo se descuenta 1 de tus "+(box.dataset.max||5)+" pedidos de hoy (se renuevan cada día). Luego el código se renueva solo durante 10 minutos.");
     }
   }
 }
@@ -143,7 +143,7 @@ function card(it, idx){
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
-      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||3}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
+      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||5}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
         <p class="tnote"></p></div>`:""}
