@@ -349,10 +349,10 @@ function byProductHtml(){
 }
 function byAccountHtml(){
   const m = new Map();
-  items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,act:0,tot:0,libre:0,v:0};
+  items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,fila:i.fila,act:0,tot:0,libre:0,v:0};
     if(i.cliente){ a.tot++; if(i.vencida) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="accrow"><div class="accname">${esc(a.k)}</div>
-    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span><button class="btn s p" data-pa="${a.fila}">🔑 Cambiar contraseña</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
 const prevN = [];
 function countUp(){
@@ -561,6 +561,7 @@ function rows(){
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
         <button class="btn s" data-a="creds" title="Copia correo y contraseña">📋 Datos</button>
+        <button class="btn s" data-a="pass" title="Cambiar la contraseña de esta cuenta">🔑 Contraseña</button>
         ${i.tiene2fa?`<button class="btn s" data-a="v2fa" title="Ver el código de autenticación ahora">🔢 Ver 2FA</button>`:""}
         ${i.cliente?`<button class="btn s p" data-a="repl" title="El cliente tiene un problema: darle otra cuenta">🔁 Reemplazar cuenta</button><button class="btn s" data-a="chcli">✏️ Cambiar Gmail</button>`:`<button class="btn s" data-a="prob">${state(i).k==="pr"?"✔ Ya funciona":"⚠️ Con problemas"}</button>`}
         ${i.cliente&&i.tiene2fa?`<button class="btn s" data-a="r2fa">Reiniciar 2FA</button>`:""}${i.cliente?`<button class="btn s" data-a="ext">+ Días</button>${i.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}">💬 WhatsApp</a>`:`<button class="btn s" data-a="wa">Renovar WA</button>`}`:""}
@@ -628,7 +629,21 @@ async function show2fa(i){
 }
 
 /* ---------- Acciones ---------- */
+async function changePassword(i){
+  const mismas = items.filter(x=>x.correo.toLowerCase()===i.correo.toLowerCase());
+  const v = await askForm("Cambiar contraseña de "+i.correo,[
+    {id:"clave",label:"Nueva contraseña",value:i.clave,req:true}],
+    "Se actualiza en "+mismas.length+(mismas.length===1?" código":" códigos")+" de esta cuenta ("+mismas.filter(x=>x.cliente).length+" con cliente). Los clientes la ven al instante en Mi cuenta.");
+  if(!v) return; const nueva=String(v.clave).trim();
+  if(!nueva||nueva===i.clave) return toast("No hay cambios");
+  await api("admin_update",{fila:i.fila,clave:nueva});
+  await refresh();
+  const faltan = items.filter(x=>x.correo.toLowerCase()===i.correo.toLowerCase() && x.clave!==nueva).length;
+  toast(faltan ? "⚠️ Solo se cambió en 1 código: falta actualizar el backend (Code.gs) en Apps Script" : "Contraseña actualizada ✔ en "+mismas.length+(mismas.length===1?" código":" códigos"));
+}
 document.addEventListener("click", async e=>{
+  const pa = e.target.closest("[data-pa]");
+  if(pa){ const i=items.find(x=>String(x.fila)===pa.dataset.pa); if(i){ try{ await changePassword(i); }catch(ex){ toast(ex.message); } } return; }
   const ca = e.target.closest("[data-ca]");
   if(ca){
     const c = clients().find(x=>x.email===ca.closest("tr").dataset.c); if(!c) return;
@@ -653,6 +668,7 @@ document.addEventListener("click", async e=>{
     }
     if(a==="chcli"){ const v = await askForm("Cambiar el Gmail del cliente",[{id:"cliente",label:"Nuevo Gmail",type:"email",req:true,value:i.cliente}],"Conserva el plan y las fechas. El cliente anterior pierde el acceso."); if(!v) return; await api("admin_changeclient",{fila:i.fila,cliente:v.cliente}); toast("Gmail cambiado ✔"); }
     if(a==="prob"){ await api("admin_setstate",{fila:i.fila,estado:state(i).k==="pr"?"Disponible":"Con problemas"}); toast("Estado actualizado ✔"); }
+    if(a==="pass"){ await changePassword(i); return; }
     if(a==="creds"){ copy(`${i.producto}\nCuenta: ${i.correo}\nContraseña: ${i.clave}`); return; }
     if(a==="wa"){ window.open("https://wa.me/?text="+encodeURIComponent(renewMsg(i)),"_blank"); return; }
     if(a==="clone"){ const j = await api("admin_clone",{fila:i.fila,precio:priceOf(i.producto)}); copy(msgFor({...i,codigo:j.codigo})); toast("Código nuevo para la misma cuenta ✔ (mensaje copiado)"); }
