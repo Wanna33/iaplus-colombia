@@ -185,6 +185,29 @@ main{max-width:1320px;margin:0 auto;padding:46px 28px 90px}
 }
 @media (display-mode: standalone){.bn button[data-install]{display:none}.bn{grid-template-columns:repeat(4,1fr)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== botones: orden claro y animaciones en lo importante ===== */
+.foot{grid-template-columns:1fr 1fr}
+.foot .buyagain{grid-column:1/-1;border-top:1.5px solid var(--line);border-right:0!important;background:var(--red);color:#fff;border-radius:0 0 18px 18px;padding:18px 10px;font-size:18px;box-shadow:none;animation:iapNudge 3.2s ease-in-out infinite}
+.foot .buyagain:hover{background:#e0403d;color:#fff;transform:none;box-shadow:none}
+.banner{background:linear-gradient(135deg,#ef5350,#ff8a65);box-shadow:0 10px 26px rgba(239,83,80,.35)}
+.banner:hover{background:linear-gradient(135deg,#e0403d,#ff7a55)}
+.banner::after{display:none}
+.banner b{color:#fff}
+.banner .chev{animation:iapBounce 1.6s ease-in-out infinite}
+.banner[aria-expanded=true] .chev{animation:none}
+.tbtn{width:100%;padding:16px 20px;font-size:17px;animation:iapGlow 2s ease-in-out infinite}
+.tbtn:disabled{animation:none}
+.task{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.task .trest{margin:0!important;text-align:center}
+.tview .tcode{font-size:34px;letter-spacing:4px}
+.field .ib{transition:.2s}
+.field .ib:active{transform:scale(.9)}
+.morebox .cta{animation:iapGlow 2s ease-in-out infinite}
+@keyframes iapGlow{0%,100%{box-shadow:0 8px 20px rgba(239,83,80,.3),0 0 0 0 rgba(239,83,80,.45)}50%{box-shadow:0 8px 20px rgba(239,83,80,.3),0 0 0 12px rgba(239,83,80,0)}}
+@keyframes iapBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes iapNudge{0%,88%,100%{transform:none}92%{transform:translateY(-3px)}96%{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.tbtn,.banner .chev,.foot .buyagain,.morebox .cta{animation:none!important}}
 </style>
 </head>
 <body>

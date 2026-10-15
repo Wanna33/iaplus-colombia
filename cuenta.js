@@ -146,7 +146,7 @@ function card(it, idx){
       ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||5}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
-        <div class="task"><button class="cta tbtn" type="button" data-ask>Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
+        <div class="task"><button class="cta tbtn" type="button" data-ask>🔐 Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
         <p class="tnote"></p></div>`:""}
       <div class="how"><h3>Cómo iniciar sesión</h3>
         <ol><li>Abre ${esc(app.n)}${app.url?` → <a class="l" href="${app.url}" target="_blank" rel="noopener">${esc(app.host||"ir al sitio")}</a>`:""}.</li>
@@ -163,7 +163,7 @@ function card(it, idx){
   return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${idx*80}ms" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
     <div class="sub-head"><div class="picon">${icon}</div>
       <div class="pname"><h2>${esc(app.n==="tu cuenta"?it.producto:app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
-      <a class="buyagain" href="${renew}" target="_blank" rel="noopener">${ex?"Renovar":"Comprar otra vez"}</a></div>
+    </div>
     <div class="sub-body">
       ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-expanded="true"><span>🔑 Mis datos de acceso · <b data-end="${it.fin||""}">--</b></span><span class="chev">⌃</span></button>`}
       <div class="rows">
@@ -174,7 +174,7 @@ function card(it, idx){
       ${ex?"":`<div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>`}
     </div>
     ${access}
-    <div class="foot"><a href="index.html?tienda=1#faq"><span class="q">?</span> Ayuda</a><a href="${prob}" target="_blank" rel="noopener"><span class="q">!</span> Soporte</a></div>
+    <div class="foot"><a href="index.html?tienda=1#faq"><span class="q">?</span> Ayuda</a><a href="${prob}" target="_blank" rel="noopener"><span class="q">!</span> Soporte</a><a class="buyagain" href="${renew}" target="_blank" rel="noopener">${ex?"🔁 Renovar mi plan":"🔁 Renovar / comprar otra vez"}</a></div>
   </article>`;
 }
 function histHtml(){

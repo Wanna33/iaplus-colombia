@@ -430,3 +430,10 @@ details:hover,details[open]{border-color:var(--blue)}
 .mopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .mopt small{display:block;color:var(--mut)}
 .mgrp{margin:14px 0 2px;font-size:15px}.morebox{margin:18px 0}
+
+/* tienda: botones principales animados */
+.hero .cta .btn-primary,.hero-text .cta .btn-primary{animation:iapGlow 2.2s ease-in-out infinite}
+.hero .cta .btn-ghost,.hero-text .cta .btn-ghost{transition:.2s}
+.hero .cta .btn-ghost:hover{transform:translateY(-2px)}
+@keyframes iapGlow{0%,100%{box-shadow:0 8px 20px rgba(239,83,80,.3),0 0 0 0 rgba(239,83,80,.45)}50%{box-shadow:0 8px 20px rgba(239,83,80,.3),0 0 0 12px rgba(239,83,80,0)}}
+@media (prefers-reduced-motion:reduce){.hero .cta .btn-primary{animation:none!important}}
