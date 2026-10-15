@@ -629,17 +629,33 @@ async function show2fa(i){
 }
 
 /* ---------- Acciones ---------- */
+// Cambia la contraseña en TODAS las filas (códigos) que comparten ese correo. Funciona con el backend viejo y el nuevo.
+async function setPasswordEverywhere(correo, nueva){
+  const mail = correo.toLowerCase();
+  let pend = items.filter(x=>x.correo.toLowerCase()===mail && x.clave!==nueva);
+  let revisado = false;
+  for(let n=0; n<pend.length && n<60; n++){
+    toast("Actualizando contraseña… "+(n+1)+" de "+pend.length);
+    await api("admin_update",{fila:pend[n].fila,clave:nueva});
+    if(!revisado){ revisado = true; // con el backend nuevo la primera llamada ya actualiza todas: se revisa para no repetir
+      const j = await api("admin_list"); items = j.items;
+      pend = items.filter(x=>x.correo.toLowerCase()===mail && x.clave!==nueva); n = -1; if(!pend.length) break;
+    }
+  }
+  await refresh();
+  return items.filter(x=>x.correo.toLowerCase()===mail);
+}
 async function changePassword(i){
   const mismas = items.filter(x=>x.correo.toLowerCase()===i.correo.toLowerCase());
+  const conCli = mismas.filter(x=>x.cliente).length;
   const v = await askForm("Cambiar contraseña de "+i.correo,[
     {id:"clave",label:"Nueva contraseña",value:i.clave,req:true}],
-    "Se actualiza en "+mismas.length+(mismas.length===1?" código":" códigos")+" de esta cuenta ("+mismas.filter(x=>x.cliente).length+" con cliente). Los clientes la ven al instante en Mi cuenta.");
+    "Se actualiza en "+mismas.length+(mismas.length===1?" código":" códigos")+" de esta cuenta ("+conCli+(conCli===1?" cliente la verá":" clientes la verán")+" al instante en Mi cuenta).");
   if(!v) return; const nueva=String(v.clave).trim();
   if(!nueva||nueva===i.clave) return toast("No hay cambios");
-  await api("admin_update",{fila:i.fila,clave:nueva});
-  await refresh();
-  const faltan = items.filter(x=>x.correo.toLowerCase()===i.correo.toLowerCase() && x.clave!==nueva).length;
-  toast(faltan ? "⚠️ Solo se cambió en 1 código: falta actualizar el backend (Code.gs) en Apps Script" : "Contraseña actualizada ✔ en "+mismas.length+(mismas.length===1?" código":" códigos"));
+  const fin = await setPasswordEverywhere(i.correo, nueva);
+  const mal = fin.filter(x=>x.clave!==nueva).length;
+  toast(mal ? "⚠️ "+mal+" código(s) no se actualizaron. Pulsa de nuevo en Cambiar contraseña" : "Contraseña actualizada ✔ para "+conCli+(conCli===1?" cliente":" clientes")+" ("+fin.length+(fin.length===1?" código":" códigos")+")");
 }
 document.addEventListener("click", async e=>{
   const pa = e.target.closest("[data-pa]");
@@ -702,7 +718,9 @@ document.addEventListener("click", async e=>{
         {id:"whatsapp",label:"WhatsApp del cliente",value:i.whatsapp,ph:"3001234567"},
         {id:"nota",label:"Nota privada",value:i.nota,area:true}]);
       if(!v) return;
-      await api("admin_update",{fila:i.fila,...v}); toast("Cuenta actualizada ✔");
+      await api("admin_update",{fila:i.fila,...v});
+      if(v.clave && v.clave.trim() && v.clave.trim()!==i.clave && (!v.correo || v.correo.trim().toLowerCase()===i.correo.toLowerCase())){ await refresh(); await setPasswordEverywhere(i.correo, v.clave.trim()); }
+      toast("Cuenta actualizada ✔");
     }
     await refresh();
   }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para usar esta función.":ex.message); }
