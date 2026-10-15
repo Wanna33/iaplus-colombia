@@ -135,6 +135,42 @@ dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 .caprow2{display:inline-flex;align-items:center;gap:8px}
 .capwarn{margin-top:10px;background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 14px;font-weight:700;font-size:14px}
 .grp{margin-top:10px}.grp small{color:var(--mut);display:block}
+/* ---- funciones de gestión ---- */
+.alerts{display:grid;gap:8px}
+.alrt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card);color:var(--text);font:inherit;font-size:14px;cursor:pointer;transition:.2s}
+.alrt:hover{transform:translateY(-1px);border-color:var(--acc)}
+.alrt.b{background:var(--badbg);border-color:transparent}.alrt.w{background:var(--warnbg);border-color:transparent}
+.avhead{font-size:13px;color:var(--mut);margin-bottom:6px}.avhead b{color:var(--text)}
+.alert.done{opacity:.62}.avdone{color:var(--ok);font-weight:700;font-size:12px}
+.due{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:118px}
+.dcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%;font-size:11px;color:var(--mut)}
+.dcol b{color:var(--text);font-size:12px;min-height:14px}.dcol i{display:block;width:100%;max-width:26px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--acc2),var(--acc))}
+.dcol i.hot{background:linear-gradient(180deg,#f6b73c,#e8590c)}.dcol span{white-space:nowrap}
+.duenote{margin-top:10px;font-size:13px;color:var(--mut)}.duenote b{color:var(--text)}
+.prow{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.prow.total{border-bottom:0;font-weight:800}.pr-n{display:flex;flex-direction:column;min-width:0}.pr-n .mono{font-size:13px;word-break:break-all}.pr-n small,.pr-c small{color:var(--mut);font-weight:600}
+.pr-c{display:flex;flex-direction:column;gap:2px}.cost-in{padding:8px 10px;font-weight:700}.pos{color:var(--ok)}.neg{color:var(--bad)}
+@media(max-width:760px){.prow{grid-template-columns:1fr 1fr}.pr-n{grid-column:1/-1}.due{height:104px}.dcol span{font-size:9px}}
+dialog.gs{width:min(620px,94vw);padding:14px;top:8vh;margin:0 auto}
+dialog.gs input{font-size:17px;padding:14px}.gsr{display:grid;gap:6px;margin-top:10px;max-height:56vh;overflow:auto}
+.gsi{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card);color:var(--text);font:inherit;cursor:pointer}
+.gsi:hover,.gsi:focus{border-color:var(--acc);background:var(--soft)}.gsi small{color:var(--mut);word-break:break-all}.gsh{font-size:12px;color:var(--mut);margin-top:8px;text-align:center}
+dialog.set{width:min(640px,94vw)}dialog.set h3{margin:18px 0 6px;font-size:15px}dialog.set label{display:block;font-size:13px;color:var(--mut);font-weight:600;margin:10px 0 4px}
+dialog.set textarea{font-size:13px}.sethelp{font-size:12px;color:var(--mut)}.sethelp code{background:var(--soft);padding:1px 6px;border-radius:6px;color:var(--acc)}
+/* ---- modo oscuro ---- */
+[data-theme=dark]{color-scheme:dark;--bg:#0e131d;--card:#171e2d;--line:#273149;--text:#e8edf8;--mut:#94a2bf;--soft:#1b2640;--okbg:#0f3a2b;--warnbg:#3b2e0b;--badbg:#3f1818;--acc:#4d8dff;--acc2:#2bb6ff}
+[data-theme=dark] .bar,[data-theme=dark] .tabs,[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea,[data-theme=dark] .btn,[data-theme=dark] dialog{background:var(--card);color:var(--text)}
+[data-theme=dark] .btn.p{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff}
+[data-theme=dark] .btn.s.p{color:#fff}
+[data-theme=dark] tr:hover td,[data-theme=dark] .gsi:hover{background:#1b2540}
+[data-theme=dark] .pcard{background:linear-gradient(180deg,#171e2d,#1b2640)}
+[data-theme=dark] .ttlbox{background:#18233a;border-color:#2a3a5c}
+[data-theme=dark] .newcode{background:#0f3a2b;border-color:#1b6b4d}
+[data-theme=dark] .skel{background:linear-gradient(90deg,#171e2d 25%,#1f2940 50%,#171e2d 75%);background-size:200% 100%}
+[data-theme=dark] .tabs button.on{color:#fff}
+[data-theme=dark] .mini{background:#171e2d}
+[data-theme=dark] .t-g,[data-theme=dark] .t-nc{background:#232d45;color:var(--mut)}
+[data-theme=dark] ::backdrop{background:rgba(0,0,0,.65)}
 .prog2{height:6px;border-radius:9px;background:#e3eaf8;overflow:hidden}.prog2 i{display:block;height:100%;background:var(--acc);transition:width .5s linear}
 .skel{height:90px;border-radius:16px;background:linear-gradient(90deg,#eef1f7 25%,#f8faff 50%,#eef1f7 75%);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:12px}
 @keyframes sk{to{background-position:-200% 0}}
@@ -179,7 +215,7 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 <header class="bar"><div class="bar-in">
   <a href="index.html"><img src="logo-main.webp" alt="IA Plus Colombia"></a>
   <h1>Panel de administrador</h1>
-  <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="reload">↻ Actualizar</button></div>
+  <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="gSearch" title="Buscar (Ctrl+K)" aria-label="Buscar">🔎</button><button class="btn s hide" id="gSettings" title="Ajustes" aria-label="Ajustes">⚙️</button><button class="btn s hide" id="reload">↻ Actualizar</button></div>
 </div></header>
 
 <main id="app"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>

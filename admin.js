@@ -77,7 +77,7 @@ async function refresh(){
 function start(){
   const u = load("iap_user"); const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ showLogin(); return; }
-  $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide");
+  $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide"); $("#gSearch").classList.remove("hide"); $("#gSettings").classList.remove("hide");
   refresh();
 }
 
@@ -92,10 +92,6 @@ function state(it){
 }
 function waNum(n){ n=String(n||"").replace(/[^\d]/g,""); if(!n) return ""; if(n.length===10 && n[0]==="3") n="57"+n; return n; }
 function waLink(num, text){ const n=waNum(num); return "https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):""); }
-function renewMsg(i){ return `Hola${i.nombre?" "+i.nombre.split(" ")[0]:""} 👋 Tu plan de ${i.producto} ${i.vencida?"venció":"vence el "+fdate(i.fin)}. ¿Quieres renovarlo?`; }
-function msgFor(i){
-  return `Hola 👋 Este es tu código de activación de ${i.producto}: ${i.codigo}\n\n1) Entra a ${SITE}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de ${i.producto} y pulsa "Desbloquear cuenta".\n\nEl código solo funciona una vez y tu plan dura ${i.dias} días desde que lo actives.`;
-}
 function clients(){
   const m = new Map();
   items.filter(i=>i.cliente).forEach(i=>{
@@ -161,15 +157,6 @@ function statsHtml(){
     <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>
     <div class="stat w"><b data-n="${prob}">0</b><span>Cuentas con problemas</span></div>`;
 }
-function attentionHtml(){
-  const list = items.filter(i=>i.cliente && (i.vencida || (i.restante!==null && i.restante<=5)))
-    .sort((a,b)=>(a.restante??-9999)-(b.restante??-9999)).slice(0,25);
-  if(!list.length) return '<div class="empty">Todo al día ✔ No hay planes por vencer ni vencidos.</div>';
-  return list.map(i=>`<div class="alert" data-f="${i.fila}"><div class="who"><b>${esc(i.nombre||i.cliente)}</b><br><small style="color:var(--mut)">${esc(i.cliente)} · ${esc(i.producto)}</small></div>
-    <span class="tag t-${i.vencida?"b":"w"}">${i.vencida?"Venció "+fdate(i.fin):"Vence en "+i.restante+(i.restante===1?" día":" días")}</span>
-    <a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, renewMsg(i))}" ${i.whatsapp?"":'data-nowa="1"'}>💬 Avisar por WhatsApp</a>
-    <button class="btn s" data-a="ext">Renovar</button></div>`).join("");
-}
 function monthsHtml(){
   const now = new Date(), rows = [];
   for(let k=5;k>=0;k--){
@@ -202,6 +189,7 @@ async function savePass(k){
     const fin = await setPasswordEverywhere(i.correo, nueva);
     const mal = fin.filter(x=>x.clave!==nueva).length, cli = fin.filter(x=>x.cliente).length;
     toast(mal ? "⚠️ "+mal+" código(s) no se actualizaron. Pulsa Guardar otra vez" : "Contraseña actualizada ✔ para "+cli+(cli===1?" cliente":" clientes"));
+    if(!mal) offerNotify(i.correo, i.producto);
   }catch(ex){ toast(ex.message); }
   const pl = $("#passList"); if(pl) pl.innerHTML = passListHtml();
 }
@@ -229,7 +217,8 @@ function setTab(t){
   if(t==="log") loadLog();
 }
 function updateViews(){
-  $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
+  $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
+  if(!$("#profit").contains(document.activeElement)) $("#profit").innerHTML = profitHtml();
   if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
   $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); fillAuto(); crows(); rows();
 }
@@ -248,10 +237,13 @@ function render(){
       <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
     </div>
     <div class="stats" id="stats"></div>
+    <div class="card"><h2>🔔 Alertas</h2><div id="alerts" class="alerts"></div></div>
     <div class="card"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
+    <div class="card"><h2>📅 Vencimientos de los próximos 14 días</h2><div id="due"></div></div>
     <div class="card"><h2>📈 Ventas de los últimos 6 meses</h2><div id="months"></div>
       <p style="color:var(--mut);font-size:12px;margin-top:10px">Cuenta las activaciones por fecha de canje. Los montos salen del precio que anotas en cada cuenta.</p></div>
     <div class="card"><h2>🛍️ Ventas por producto</h2><div id="byProd" class="prodgrid"></div></div>
+    <div class="card"><h2>💰 Rentabilidad por cuenta</h2><div id="profit"></div></div>
   </section>
 
   <section id="tab-cli" class="hide">
@@ -663,6 +655,7 @@ async function changePassword(i){
   const fin = await setPasswordEverywhere(i.correo, nueva);
   const mal = fin.filter(x=>x.clave!==nueva).length;
   toast(mal ? "⚠️ "+mal+" código(s) no se actualizaron. Pulsa de nuevo en Cambiar contraseña" : "Contraseña actualizada ✔ para "+conCli+(conCli===1?" cliente":" clientes")+" ("+fin.length+(fin.length===1?" código":" códigos")+")");
+  if(!mal) offerNotify(i.correo, i.producto);
 }
 document.addEventListener("input", e=>{ const inp=e.target.closest(".pr-in"); if(!inp) return; const b=document.querySelector(`[data-ps="${CSS.escape(inp.dataset.pk)}"]`); if(b) b.disabled = inp.value.trim()==="" || inp.value.trim()===inp.dataset.orig; });
 document.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.classList && e.target.classList.contains("pr-in")){ e.preventDefault(); savePass(e.target.dataset.pk); } });
@@ -742,3 +735,194 @@ document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
   e.preventDefault(); if(curTab!=="cli"&&curTab!=="cod") setTab("cod"); (curTab==="cli"?$("#cq"):$("#q")).focus();
 });
 start(); setInterval(()=>{ if(!document.hidden && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
+
+
+/* =====================================================================
+   FUNCIONES DE GESTIÓN: plantillas, avisos, alertas, vencimientos,
+   rentabilidad, búsqueda global, ajustes, respaldo y modo oscuro.
+   (Se guardan en este navegador; no necesitan cambios en el backend.)
+   ===================================================================== */
+const lsSet = (k,v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} };
+const firstName = i => String(i.nombre||"").trim().split(/\s+/)[0] || "";
+const sp = s => String(s).replace(/ {2,}/g," ").replace(/ ([.,!?])/g,"$1");
+
+/* ---------- Plantillas de mensajes ---------- */
+const TPL_DEFAULT = {
+  renovar: "Hola {nombre} 👋 Tu plan de {producto} {estado}. ¿Quieres renovarlo?",
+  vencido: "Hola {nombre} 👋 Tu {producto} venció el {fin}. ¿Quieres reactivarlo? Escríbenos y lo dejamos listo.",
+  codigo: "Hola 👋 Este es tu código de activación de {producto}: {codigo}\n\n1) Entra a {sitio}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de {producto} y pulsa \"Desbloquear cuenta\".\n\nEl código solo funciona una vez y tu plan dura {dias} días desde que lo actives.",
+  clave: "Hola {nombre} 👋 Actualizamos la contraseña de tu cuenta de {producto}. Entra a {sitio}cuenta.html y verás los datos nuevos. Si tienes dudas, escríbenos."
+};
+const TPL = () => ({...TPL_DEFAULT, ...(load("iap_tpl")||{})});
+function fillTpl(key, v){ const t = TPL()[key] || TPL_DEFAULT[key]; return t.replace(/\{(\w+)\}/g,(m,k)=> v[k]!==undefined ? v[k] : m); }
+function renewMsg(i){
+  const base = {nombre:firstName(i), producto:i.producto, fin:fdate(i.fin), dias:i.dias, sitio:SITE, estado:i.vencida?"venció el "+fdate(i.fin):"vence el "+fdate(i.fin)};
+  return sp(fillTpl(i.vencida?"vencido":"renovar", base));
+}
+function msgFor(i){ return fillTpl("codigo", {producto:i.producto, codigo:i.codigo, dias:i.dias, sitio:SITE, nombre:firstName(i)}); }
+
+/* ---------- Seguimiento de avisos (a quién ya le escribiste) ---------- */
+const avKey = i => String(i.cliente).toLowerCase()+"|"+i.producto+"|"+(i.fin||"");
+const AVS = () => load("iap_avisos") || {};
+function markAv(i){ const a = AVS(); a[avKey(i)] = Date.now(); lsSet("iap_avisos", a); }
+function avText(i){
+  const t = AVS()[avKey(i)]; if(!t) return "";
+  const h = Math.floor((Date.now()-t)/3600000);
+  return h<1 ? "hace unos minutos" : h<24 ? "hace "+h+" h" : "hace "+Math.floor(h/24)+" d";
+}
+function attentionHtml(){
+  const list = items.filter(i=>i.cliente && (i.vencida || (i.restante!==null && i.restante<=5)))
+    .sort((a,b)=> (!!AVS()[avKey(a)]-!!AVS()[avKey(b)]) || ((a.restante??-9999)-(b.restante??-9999))).slice(0,30);
+  if(!list.length) return '<div class="empty">Todo al día ✔ No hay planes por vencer ni vencidos.</div>';
+  const pend = list.filter(i=>!AVS()[avKey(i)]).length;
+  return `<div class="avhead">${pend?`<b>${pend}</b> por avisar`:"✔ Ya avisaste a todos"} · <small>los que ya avisaste bajan al final</small></div>` +
+    list.map(i=>{ const av = avText(i); return `<div class="alert ${av?"done":""}" data-f="${i.fila}"><div class="who"><b>${esc(i.nombre||i.cliente)}</b><br><small style="color:var(--mut)">${esc(i.cliente)} · ${esc(i.producto)}</small></div>
+    <span class="tag t-${i.vencida?"b":"w"}">${i.vencida?"Venció "+fdate(i.fin):"Vence en "+i.restante+(i.restante===1?" día":" días")}</span>
+    ${av?`<small class="avdone">✔ avisado ${av}</small>`:""}
+    <a class="btn s wa" target="_blank" rel="noopener" data-av="${i.fila}" href="${waLink(i.whatsapp, renewMsg(i))}">💬 ${av?"Avisar otra vez":"Avisar por WhatsApp"}</a>
+    <button class="btn s" data-a="ext">Renovar</button></div>`; }).join("");
+}
+
+/* ---------- Alertas inteligentes ---------- */
+function alertsHtml(){
+  const cap = getCap(), out = [], cm = [...capMap().values()];
+  cm.filter(a=>!a.prob && used(a)>=cap).forEach(a=>out.push({t:"b",ic:"🚫",tx:`Cuenta llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. No le generes más códigos.`,go:"cta"}));
+  cm.filter(a=>!a.prob && used(a)<cap && used(a)>=Math.ceil(cap*.8)).forEach(a=>out.push({t:"w",ic:"📈",tx:`Casi llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. Conviene agregar una cuenta nueva.`,go:"cta"}));
+  cm.filter(a=>a.prob).forEach(a=>out.push({t:"b",ic:"⚠️",tx:`Cuenta marcada con problemas: <b>${esc(a.correo)}</b>.`,go:"cta"}));
+  const sin2 = {}; items.forEach(i=>{ if(i.cliente && !i.vencida && !i.tiene2fa){ const k=i.correo.toLowerCase(); sin2[k]=(sin2[k]||0)+1; } });
+  Object.entries(sin2).forEach(([k,n])=>out.push({t:"w",ic:"🔓",tx:`<b>${esc(k)}</b> tiene ${n} cliente${n===1?"":"s"} y no tiene clave 2FA guardada.`,go:"cta"}));
+  const prods = new Set(items.map(i=>i.producto));
+  prods.forEach(p=>{ const abiertas = cm.filter(a=>!a.prob && a.filas[p]!==undefined && used(a)<cap); if(!abiertas.length && cm.some(a=>a.filas[p]!==undefined)) out.push({t:"b",ic:"🧯",tx:`Sin cupo para vender <b>${esc(p)}</b>: todas sus cuentas están llenas.`,go:"cod"}); });
+  const venc7 = items.filter(i=>i.cliente && i.vencida && i.restante!==null && i.restante<=-1 && i.restante>=-7 && !AVS()[avKey(i)]);
+  if(venc7.length) out.push({t:"w",ic:"💸",tx:`${venc7.length} cliente${venc7.length===1?"":"s"} venció${venc7.length===1?"":"ieron"} en la última semana y no los has avisado: es el mejor momento para recuperarlos.`,go:"res",el:"#attn"});
+  if(TTL) items.filter(i=>!i.cliente && i.codigo && i.creado).forEach(i=>{ const left = Math.ceil((new Date(i.creado).getTime()+TTL*60000-Date.now())/60000); if(left>0 && left<=10) out.push({t:"w",ic:"⏱",tx:`El código <b>${esc(i.codigo)}</b> se borra en ${left} min si nadie lo canjea.`,go:"cod"}); });
+  if(!out.length) return '<div class="empty">Todo en orden ✔ No hay alertas.</div>';
+  const rank = {b:0,w:1}; out.sort((a,b)=>rank[a.t]-rank[b.t]);
+  return out.slice(0,12).map(a=>`<button class="alrt ${a.t}" type="button" data-goto="${a.go}" ${a.el?`data-el="${a.el}"`:""}><span>${a.ic}</span><span>${a.tx}</span></button>`).join("");
+}
+
+/* ---------- Vencimientos de los próximos 14 días ---------- */
+function dueHtml(){
+  const days = [...Array(14)].map((_,k)=>({k, n:0, names:[], v:0}));
+  items.filter(i=>i.cliente && !i.vencida && i.fin).forEach(i=>{
+    const d = Math.ceil((new Date(i.fin)-Date.now())/DAY_MS); if(d>=0 && d<14){ days[d].n++; days[d].names.push(i.nombre||i.cliente); days[d].v += Number(i.precio)||0; }
+  });
+  const mx = Math.max(1,...days.map(d=>d.n)), week = days.slice(0,7), nw = week.reduce((s,d)=>s+d.n,0), vw = week.reduce((s,d)=>s+d.v,0);
+  const lbl = k => { if(k===0) return "hoy"; if(k===1) return "mañ"; const d=new Date(Date.now()+k*DAY_MS); return d.toLocaleDateString("es-CO",{weekday:"short"}).slice(0,2)+" "+d.getDate(); };
+  return `<div class="due">${days.map(d=>`<div class="dcol" title="${esc(d.names.join(", ")||"Nadie")}"><b>${d.n||""}</b><i class="${d.k<=2?"hot":""}" style="height:${d.n?Math.max(10,d.n/mx*74):3}px"></i><span>${lbl(d.k)}</span></div>`).join("")}</div>
+    <p class="duenote">${nw?`Esta semana vencen <b>${nw}</b> plan${nw===1?"":"es"}. Si todos renuevan entran <b>${money(vw)}</b>.`:"Nadie vence en los próximos 7 días."}</p>`;
+}
+const DAY_MS = 86400000;
+
+/* ---------- Rentabilidad por cuenta (el costo lo anotas tú) ---------- */
+const COST_KEY = "iap_costs";
+const COSTS = () => load(COST_KEY) || {};
+function profitHtml(){
+  const costs = COSTS(), m = new Map();
+  items.forEach(i=>{
+    const k = i.correo.toLowerCase(), a = m.get(k) || {k, correo:i.correo, producto:i.producto, act:0, ing:0};
+    if(i.cliente && !i.vencida){ a.act++; a.ing += (Number(i.precio)||0) * 30 / Math.max(1, i.dias||30); }
+    m.set(k,a);
+  });
+  const list = [...m.values()].sort((a,b)=>b.ing-a.ing);
+  let tIng=0, tCost=0;
+  const rows = list.map(a=>{ const c = Number(costs[a.k])||0; tIng += a.ing; tCost += c; const g = a.ing - c;
+    return `<div class="prow"><div class="pr-n"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.act} activo${a.act===1?"":"s"}</small></div>
+      <div class="pr-c"><small>Ingreso/mes</small><b>${money(a.ing)}</b></div>
+      <div class="pr-c"><small>Costo/mes</small><input class="cost-in" data-ck="${esc(a.k)}" type="number" min="0" step="500" value="${c||""}" placeholder="0" aria-label="Costo de ${esc(a.correo)}"></div>
+      <div class="pr-c"><small>Ganancia</small><b class="${g<0?"neg":"pos"}">${money(g)}</b></div></div>`; }).join("");
+  const g = tIng - tCost;
+  return `<p style="color:var(--mut);font-size:13px;margin-bottom:10px">Ingreso mensual estimado = lo que pagan los clientes <b>activos</b> de cada cuenta (ajustado a 30 días). Escribe cuánto te cuesta cada cuenta al mes; se guarda en este navegador.</p>${rows||'<div class="empty">Aún no hay cuentas.</div>'}
+    <div class="prow total"><div class="pr-n"><b>Total</b></div><div class="pr-c"><small>Ingreso/mes</small><b>${money(tIng)}</b></div><div class="pr-c"><small>Costos/mes</small><b>${money(tCost)}</b></div><div class="pr-c"><small>Ganancia</small><b class="${g<0?"neg":"pos"}">${money(g)}</b></div></div>`;
+}
+
+/* ---------- Avisar a los clientes después de cambiar una contraseña ---------- */
+function offerNotify(correo, producto){
+  const cl = items.filter(x=>x.correo.toLowerCase()===correo.toLowerCase() && x.cliente && !x.vencida);
+  if(!cl.length) return;
+  setTimeout(()=>showInfo(`<h2>📣 Avisar a los clientes</h2><p style="color:var(--mut);font-size:14px;margin-bottom:12px">La contraseña de <b>${esc(correo)}</b> cambió. Ellos ya la ven en Mi cuenta; avísales para que no se confundan.</p>
+    ${cl.map(i=>`<div class="mini"><b>${esc(i.nombre||i.cliente)}</b> <small style="color:var(--mut)">${esc(i.cliente)}</small><div style="margin-top:6px"><a class="btn s wa" target="_blank" rel="noopener" href="${waLink(i.whatsapp, sp(fillTpl("clave",{nombre:firstName(i),producto:i.producto||producto,sitio:SITE})))}">💬 Avisar por WhatsApp</a></div></div>`).join("")}`), 350);
+}
+
+/* ---------- Búsqueda global (Ctrl+K) ---------- */
+function openSearch(){
+  const d = document.createElement("dialog"); d.className="gs";
+  d.innerHTML = `<input id="gsq" placeholder="Buscar cliente, Gmail, WhatsApp, código o cuenta…" autocomplete="off" aria-label="Buscar"><div id="gsr" class="gsr"></div><p class="gsh">Enter abre el primer resultado · Esc cierra</p>`;
+  document.body.appendChild(d); d.showModal();
+  const q = d.querySelector("#gsq"), r = d.querySelector("#gsr");
+  const go = (kind, val) => { d.close(); if(kind==="cli"){ setTab("cli"); $("#cq").value = val; crows(); } else { setTab("cod"); $("#q").value = val; $("#st").value=""; $("#pf").value=""; rows(); } window.scrollTo({top:0,behavior:"smooth"}); };
+  const paint = () => {
+    const s = q.value.trim().toLowerCase(); if(!s){ r.innerHTML = '<div class="empty">Escribe para buscar…</div>'; return; }
+    const res = [];
+    clients().filter(c=>[c.nombre,c.email,c.whatsapp,c.nota].join(" ").toLowerCase().includes(s)).slice(0,6).forEach(c=>res.push({k:"cli",v:c.email,t:"👤 "+(c.nombre||c.email),sub:c.email+" · "+c.cuentas.length+" cuenta"+(c.cuentas.length===1?"":"s")}));
+    items.filter(i=>[i.codigo,i.correo,i.nota,i.producto].join(" ").toLowerCase().includes(s)).slice(0,8).forEach(i=>res.push({k:"cod",v:i.codigo||i.correo,t:(i.codigo?"🎫 "+i.codigo:"🔑 "+i.correo),sub:i.producto+" · "+i.correo+" · "+(i.cliente?"cliente "+i.cliente:"sin cliente")}));
+    r.innerHTML = res.length ? res.map((x,n)=>`<button class="gsi" type="button" data-n="${n}"><b>${esc(x.t)}</b><small>${esc(x.sub)}</small></button>`).join("") : '<div class="empty">Sin resultados.</div>';
+    r.querySelectorAll(".gsi").forEach(b=>b.onclick=()=>{ const x=res[+b.dataset.n]; go(x.k,x.v); });
+    r._res = res;
+  };
+  q.addEventListener("input", paint); paint();
+  q.addEventListener("keydown", e=>{ if(e.key==="Enter" && r._res && r._res[0]){ e.preventDefault(); go(r._res[0].k, r._res[0].v); } });
+  d.addEventListener("close", ()=>d.remove());
+  d.addEventListener("click", e=>{ if(e.target===d) d.close(); });
+  q.focus();
+}
+
+/* ---------- Respaldo ---------- */
+function backupJson(){
+  const data = {generado:new Date().toISOString(), cuentas:items, costos:COSTS(), plantillas:TPL()};
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download = "respaldo-iaplus-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+}
+
+/* ---------- Tema oscuro ---------- */
+function applyTheme(){ const t = load("iap_theme") || ""; document.documentElement.dataset.theme = t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content = t==="dark" ? "#0f1420" : "#1e6bff"; }
+applyTheme();
+
+/* ---------- Ajustes ---------- */
+function openSettings(){
+  const t = TPL(), d = document.createElement("dialog"); d.className="set";
+  d.innerHTML = `<form method="dialog"><h2>⚙️ Ajustes</h2>
+    <h3>💬 Mensajes de WhatsApp</h3>
+    <p class="sethelp">Usa estas palabras entre llaves y se reemplazan solas: <code>{nombre}</code> <code>{producto}</code> <code>{fin}</code> <code>{estado}</code> <code>{codigo}</code> <code>{dias}</code> <code>{sitio}</code></p>
+    <label>Aviso de renovación (por vencer)</label><textarea name="renovar" rows="2">${esc(t.renovar)}</textarea>
+    <label>Aviso a un cliente vencido</label><textarea name="vencido" rows="2">${esc(t.vencido)}</textarea>
+    <label>Mensaje con el código de activación</label><textarea name="codigo" rows="6">${esc(t.codigo)}</textarea>
+    <label>Aviso de cambio de contraseña</label><textarea name="clave" rows="3">${esc(t.clave)}</textarea>
+    <h3>🧩 Cuentas</h3>
+    <label>Tope de clientes por cuenta</label><input name="cap" type="number" min="1" max="500" value="${getCap()}">
+    <h3>🎨 Apariencia</h3>
+    <label class="chk" style="margin:4px 0"><input type="checkbox" name="dark" ${load("iap_theme")==="dark"?"checked":""}> Modo oscuro</label>
+    <h3>💾 Respaldo</h3>
+    <div class="acts"><button class="btn s" type="button" id="bkJson">Descargar respaldo (JSON)</button><button class="btn s" type="button" id="bkCsv">Descargar cuentas (CSV)</button><button class="btn s d" type="button" id="tplReset">Restablecer mensajes</button></div>
+    <div class="acts" style="margin-top:18px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cerrar</button><button class="btn p" value="ok">Guardar</button></div></form>`;
+  document.body.appendChild(d); d.showModal();
+  d.querySelector("#bkJson").onclick = backupJson; d.querySelector("#bkCsv").onclick = exportCsv;
+  d.querySelector("#tplReset").onclick = () => { if(confirm("¿Volver a los mensajes originales?")){ lsSet("iap_tpl", {}); d.close(); toast("Mensajes restablecidos ✔"); refresh(); } };
+  d.addEventListener("close", () => {
+    if(d.returnValue==="ok"){
+      const f = new FormData(d.querySelector("form")), nt = {};
+      for(const k of Object.keys(TPL_DEFAULT)){ const v = String(f.get(k)||"").trim(); if(v && v!==TPL_DEFAULT[k]) nt[k]=v; }
+      lsSet("iap_tpl", nt);
+      const cap = Math.max(1, Math.min(500, +f.get("cap")||25)); lsSet(CAP_KEY, cap);
+      lsSet("iap_theme", f.get("dark") ? "dark" : ""); applyTheme();
+      toast("Ajustes guardados ✔"); refresh();
+    }
+    d.remove();
+  });
+}
+
+/* ---------- Eventos de las funciones nuevas ---------- */
+document.addEventListener("click", e=>{
+  const av = e.target.closest("[data-av]"); // al abrir WhatsApp se anota que ya se avisó
+  if(av){ const i = items.find(x=>String(x.fila)===av.dataset.av); if(i){ markAv(i); setTimeout(()=>{ if($("#attn")) $("#attn").innerHTML = attentionHtml(); if($("#alerts")) $("#alerts").innerHTML = alertsHtml(); },150); } return; }
+  const g = e.target.closest("[data-goto]");
+  if(g){ setTab(g.dataset.goto); const el = g.dataset.el && $(g.dataset.el); setTimeout(()=>{ (el||document.body).scrollIntoView({behavior:"smooth",block:"start"}); },80); return; }
+  if(e.target.closest("#gSearch")){ openSearch(); return; }
+  if(e.target.closest("#gSettings")){ openSettings(); return; }
+});
+document.addEventListener("change", e=>{
+  const c = e.target.closest(".cost-in"); if(!c) return;
+  const all = COSTS(); const v = Math.max(0, +c.value||0); if(v) all[c.dataset.ck]=v; else delete all[c.dataset.ck]; lsSet(COST_KEY, all);
+  $("#profit").innerHTML = profitHtml(); const n=document.querySelector(`.cost-in[data-ck="${CSS.escape(c.dataset.ck)}"]`); if(n) n.focus();
+});
+document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); if(!document.querySelector("dialog[open].gs") && $("#gSearch")) openSearch(); } });
