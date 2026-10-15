@@ -13,7 +13,7 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", dark:true, price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.png", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.png", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.png", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
@@ -67,7 +67,7 @@ function renderGrid(){
   $("#grid").innerHTML = list.map((p,n)=>`
     <article class="card reveal" style="--d:${n*90}ms">
       ${p.hot?'<span class="badge">🔥 Popular</span>':''}
-      <div class="ico ${p.lt?"lt":""}">${iconOf(p)}</div>
+      <div class="ico ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
@@ -128,7 +128,7 @@ $("#loginModal").addEventListener("click", e => { if(e.target.id==="loginModal")
 
 function avatarOf(sz){
   return user.picture ? `<img src="${esc(user.picture)}" alt="" referrerpolicy="no-referrer">`
-    : `<img alt="" src="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'"><rect width="'+sz+'" height="'+sz+'" fill="#1e6bff"/><text x="'+sz/2+'" y="'+sz*0.68+'" font-size="'+sz/2+'" text-anchor="middle" fill="#fff" font-family="Arial">'+esc(user.name[0].toUpperCase())+'</text></svg>')}">`;
+    : `<img alt="" src="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'"><rect width="'+sz+'" height="'+sz+'" fill="#ef5350"/><text x="'+sz/2+'" y="'+sz*0.68+'" font-size="'+sz/2+'" text-anchor="middle" fill="#fff" font-family="Arial">'+esc(user.name[0].toUpperCase())+'</text></svg>')}">`;
 }
 function logout(){
   try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{}
@@ -260,7 +260,7 @@ document.addEventListener("pointermove", e => {
   if(so) so.addEventListener("change", renderGrid);
   // franja de productos que se desplaza
   const mq=$("#mq");
-  if(mq){ const one=PRODUCTS.map(p=>`<a class="mq-i" href="#catalogo"><span class="mq-ic ${p.lt?"lt":""}">${iconOf(p)}</span><b>${esc(p.name)}</b><small>${cop(p.price)}</small></a>`).join(""); mq.innerHTML=one+one; }
+  if(mq){ const one=PRODUCTS.map(p=>`<a class="mq-i" href="#catalogo"><span class="mq-ic ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</span><b>${esc(p.name)}</b><small>${cop(p.price)}</small></a>`).join(""); mq.innerHTML=one+one; }
   // "desde $X" en la portada
   const from=Math.min(...PRODUCTS.map(p=>p.price)), hs=document.querySelector(".hero-from");
   if(hs) hs.textContent="Desde "+cop(from)+" al mes";

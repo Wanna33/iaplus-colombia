@@ -342,3 +342,61 @@ html{scroll-padding-top:72px}
 .card ul{margin-bottom:14px}
 @media(max-width:860px){.mq-track{animation-duration:26s}}
 @media(prefers-reduced-motion:reduce){.mq-track{animation:none}}
+
+/* =====================================================
+   TEMA CLARO CORAL (estilo tienda de suscripciones)
+   ===================================================== */
+:root{--bg:#f5f5f7;--bg2:#f0f0f3;--card:#fff;--line:#ececf0;--blue:#ef5350;--cyan:#ff6f6b;--navy:#1d1d22;--text:#1d1d22;--mut:#7d7d88;--grad:linear-gradient(90deg,#f0524f,#ff6f6b);--shadow:0 10px 30px rgba(40,30,30,.08);--shadow-lg:0 18px 50px rgba(239,83,80,.22)}
+body{font-family:'Nunito','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+.nav,.nav-in{background:linear-gradient(135deg,#f0524f,#ee5a56)!important}
+.nav{border-bottom:0;box-shadow:0 4px 18px rgba(239,83,80,.28);-webkit-backdrop-filter:none;backdrop-filter:none}
+.links a{color:#fff;font-weight:700;font-size:17px;padding:8px 14px;border-radius:14px}
+.links a:hover{background:rgba(255,255,255,.18);color:#fff}
+.burger{color:#fff}
+.nav .user .uname,.nav .user .uname small{color:#fff}
+.nav .user img{border-color:rgba(255,255,255,.7)}
+.nav .user button{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35);color:#fff}
+.nav .btn-ghost{background:rgba(255,255,255,.2);border-color:transparent;color:#fff}
+.nav .btn-primary{background:#fff;color:var(--blue);box-shadow:none}
+.btn-primary{box-shadow:0 8px 22px rgba(239,83,80,.32)}
+.btn-primary:hover{box-shadow:0 12px 28px rgba(239,83,80,.42)}
+.hero{background:linear-gradient(180deg,#fff0ef 0%,#f5f5f7 100%)}
+.g1{background:#ff8a80}.g2{background:#ffb199}.glow{opacity:.35}
+.pill{background:#fff;color:var(--blue);border-color:#f8d4d2}
+.login-card{box-shadow:0 20px 50px rgba(239,83,80,.18)}
+.login-card .legal,.hero p,.trust{color:var(--mut)}
+.section.alt{background:#fff}
+.card{background:#fff}
+.card::after{background:radial-gradient(circle at var(--mx,50%) var(--my,0%),rgba(239,83,80,.12),transparent 55%)}
+.card:hover{border-color:var(--blue)}
+.card .ico{background:#f4f4f6}
+.card .badge{background:#fff1e0;border:1px solid #ffd9a8;color:#b45f00}
+.card li::before{color:var(--blue)}
+.card .price{color:var(--text)}
+.marquee{background:#fff}
+.mq-i:hover{border-color:var(--blue)}
+.mq-ic{background:#f4f4f6}
+.step:hover,.why-i:hover{border-color:var(--blue)}
+.why-i i{background:#fdeceb}
+details:hover,details[open]{border-color:var(--blue)}
+.search:focus-within{box-shadow:0 0 0 3px rgba(239,83,80,.15)}
+.footer{background:#2c2c30}
+.bn{background:rgba(255,255,255,.97)!important;border-top:1px solid var(--line)!important;box-shadow:0 -6px 24px rgba(40,30,30,.08)}
+.bn a,.bn button{color:var(--mut)!important}
+.bn a.on,.bn a:active,.bn button:active{color:var(--blue)!important;background:#fdeceb!important}
+.totop:hover{border-color:var(--blue);color:var(--blue)}
+.redeem-form input{background:#fff}
+.unlock-card{box-shadow:0 14px 40px rgba(239,83,80,.14)}
+.hstats b{color:var(--text)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.progress{background:linear-gradient(90deg,#ff6f6b,#f0524f)}
+.buy-link,.linkbtn{color:var(--blue)}
+.nores .linkbtn{color:var(--blue)}
+.hero h1 .grad{background-image:linear-gradient(90deg,#f0524f,#ff8a65,#f0524f);background-size:200% 100%}
+.step b{background:var(--grad)}
+.step b{box-shadow:0 6px 16px rgba(239,83,80,.3)}
+@keyframes pulse{0%,100%{box-shadow:0 6px 16px rgba(239,83,80,.3)}50%{box-shadow:0 6px 28px rgba(255,111,107,.65)}}
+.pulse-btn{animation:none}
+.chip.on{box-shadow:0 6px 16px rgba(239,83,80,.3)}
+.wa-float{box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.card .ico.dk,.mq-ic.dk{background:#000}

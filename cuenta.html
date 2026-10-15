@@ -2,160 +2,220 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tu cuenta | IA Plus Colombia</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi suscripción | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo.webp" type="image/webp">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="IA Plus">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<meta name="theme-color" content="#1e6bff">
+<meta name="theme-color" content="#ef5350">
 <style>
-:root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--soft:#eef4ff}
+:root{--bg:#f5f5f7;--card:#fff;--line:#ececf0;--text:#1d1d22;--mut:#85858f;--red:#ef5350;--red2:#ff6f6b;--redbg:#fdeceb;--dark:#2c2c30;--ok:#12a36b;--okbg:#e3f7ee;--acc:#ef5350;--soft:#fdeceb}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Nunito','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.bar-in{max-width:1240px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--line)}
-.brand img{height:40px;background:#000;border-radius:10px;padding:2px 5px}
-.prod{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
-.badge{display:inline-flex;align-items:center;gap:6px;background:var(--okbg);color:var(--ok);font-size:14px;font-weight:700;padding:5px 12px;border-radius:99px}
-.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
-.badge.off{background:#fde8e8;color:#d33}.badge.off::before{background:#d33}
-.meta{margin-left:auto;display:flex;gap:18px;color:var(--mut);font-size:15px;flex-wrap:wrap;align-items:center}
-.meta b{color:var(--text)}
-.meta .sep{width:1px;height:22px;background:var(--line)}
-.back{border:1px solid var(--line);border-radius:99px;padding:8px 16px;font-size:14px;color:var(--text);background:#fff}
-.back:hover{border-color:var(--acc);color:var(--acc)}
-main{max-width:1240px;margin:0 auto;padding:26px 22px 60px}
-.acct{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:26px;align-items:start}
-.acct+.acct{margin-top:40px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:30px;box-shadow:0 10px 30px rgba(30,60,120,.06)}
-.card h1{font-size:clamp(24px,3.4vw,32px);line-height:1.2;letter-spacing:-.01em}
-.card .lead{color:var(--mut);margin:12px 0 20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
-.lbl{display:flex;align-items:center;gap:8px;font-weight:800;color:#33425f;margin:18px 0 8px;font-size:17px}
-.lbl svg{width:20px;height:20px;stroke:#7b8aa6;fill:none;stroke-width:1.8}
-.field{display:flex;align-items:center;gap:10px;background:#f7f9fd;border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 20px}
-.field code{flex:1;min-width:0;font-family:inherit;font-size:clamp(17px,2.4vw,23px);font-weight:600;word-break:break-all}
-.ib{width:48px;height:48px;border-radius:13px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--acc);transition:.15s;flex:none}
-.ib:hover{border-color:var(--acc);background:var(--soft)}
+button{font-family:inherit}
+/* ---------- encabezado coral ---------- */
+.top{background:linear-gradient(135deg,#f0524f,#ee5a56);color:#fff;position:sticky;top:0;z-index:30;box-shadow:0 4px 18px rgba(239,83,80,.28)}
+.top-in{max-width:1320px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;gap:22px}
+.logo img{height:46px;background:#000;border-radius:12px;padding:3px 7px;display:block}
+.nav{display:flex;gap:6px}
+.nav a{padding:10px 16px;border-radius:14px;font-weight:700;font-size:17px;white-space:nowrap;transition:.2s}
+.nav a:hover{background:rgba(255,255,255,.18)}
+.search{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.2);border-radius:16px;padding:0 18px;max-width:640px;transition:.2s}
+.search:focus-within{background:rgba(255,255,255,.3);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.search svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;flex:none}
+.search input{flex:1;min-width:0;background:none;border:0;color:#fff;font:inherit;font-size:17px;font-weight:600;padding:14px 0;outline:none}
+.search input::placeholder{color:rgba(255,255,255,.85)}
+.pill{background:rgba(255,255,255,.2);padding:12px 20px;border-radius:16px;font-weight:700;font-size:17px;white-space:nowrap;transition:.2s}
+.pill:hover{background:rgba(255,255,255,.32)}
+.ibtn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:none;border:0;color:#fff;cursor:pointer;transition:.2s}
+.ibtn:hover{background:rgba(255,255,255,.2)}
+.ibtn svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.9}
+.avatar{width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.55);overflow:hidden;cursor:pointer;background:#fff3;padding:0;display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.menuwrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 12px);width:360px;max-width:92vw;background:#fff;color:var(--text);border-radius:22px;box-shadow:0 22px 60px rgba(30,20,20,.25);padding:22px 24px;display:none;z-index:50;animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+.menu.on{display:block}
+.menu .who{font-size:20px;font-weight:800;word-break:break-all}
+.menu .sub{color:var(--mut);font-weight:600;margin:2px 0 14px}
+.menu .saved{background:linear-gradient(90deg,#14143c,#1d1d6b,#7a1f4a);color:#fff;border-radius:99px;text-align:center;padding:11px 14px;font-weight:700;font-size:15px;margin-bottom:12px}
+.menu hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.menu a,.menu button.mi{display:flex;align-items:center;gap:16px;width:100%;background:none;border:0;text-align:left;padding:12px 4px;font-size:18px;font-weight:600;color:var(--text);cursor:pointer;border-radius:12px;transition:.15s}
+.menu a:hover,.menu button.mi:hover{background:var(--redbg);color:var(--red)}
+.menu .ic{width:34px;text-align:center;font-size:24px}
+.menu .on{color:var(--red)}
+@keyframes pop{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:none}}
+/* ---------- contenido ---------- */
+main{max-width:1320px;margin:0 auto;padding:46px 28px 90px}
+.ttl{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ttl h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.01em}
+.ttl h1 em{font-style:normal;text-decoration:underline;text-decoration-color:rgba(239,83,80,.35);text-decoration-thickness:4px;text-underline-offset:6px}
+.tag{background:var(--red);color:#fff;border-radius:8px;padding:3px 12px;font-weight:800;font-size:15px}
+.tabs{display:flex;gap:34px;border-bottom:1.5px solid var(--line);margin:34px 0 30px}
+.tabs button{background:none;border:0;padding:14px 4px;font-size:20px;font-weight:700;color:var(--text);cursor:pointer;position:relative}
+.tabs button.on{color:var(--red)}
+.tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1.5px;height:3px;background:var(--red);border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:30px;align-items:start}
+/* tarjeta de suscripción */
+.sub-card{background:var(--card);border-radius:28px;box-shadow:0 10px 36px rgba(40,30,30,.08);overflow:hidden;position:relative;animation:up .55s cubic-bezier(.2,.7,.2,1) both}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.sub-head{display:flex;align-items:center;gap:18px;padding:26px 26px 22px;background:#f4f4f6;flex-wrap:wrap}
+.picon{width:70px;height:70px;border-radius:18px;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.08);flex:none;font-size:34px}
+.picon img{width:100%;height:100%;object-fit:cover}
+.pname{flex:1;min-width:140px}
+.pname h2{font-size:27px;font-weight:800;line-height:1.1}
+.pname small{color:var(--mut);font-weight:700;font-size:15px}
+.buyagain{background:var(--red);color:#fff;border-radius:99px;padding:15px 24px;font-weight:800;font-size:18px;box-shadow:0 8px 20px rgba(239,83,80,.32);white-space:nowrap;transition:.2s}
+.buyagain:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(239,83,80,.4)}
+.sub-body{padding:22px 26px 6px}
+.banner{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--dark);color:#fff;border:0;border-radius:18px;padding:22px 24px;font-size:19px;font-weight:700;cursor:pointer;text-align:left;position:relative;transition:.2s}
+.banner:hover{background:#38383d}
+.banner::after{content:"";position:absolute;left:12%;right:55%;bottom:-8px;height:12px;background:linear-gradient(90deg,#ef5350,#7c4dff);filter:blur(10px);opacity:.7}
+.banner .chev{font-size:22px;transition:transform .3s}
+.banner[aria-expanded=true] .chev{transform:rotate(180deg)}
+.banner b{color:#ff6f6b;font-size:24px}
+.rows{margin-top:14px;position:relative}
+.rw{display:flex;justify-content:space-between;gap:12px;padding:20px 2px;border-bottom:1.5px solid var(--line);font-size:19px}
+.rw span:first-child{color:var(--mut);font-weight:600}
+.rw span:last-child{font-weight:700;text-align:right}
+.rw:last-child{border-bottom:0}
+.stamp{position:absolute;right:6px;top:34px;transform:rotate(-14deg);border:4px double rgba(239,83,80,.55);color:rgba(239,83,80,.6);border-radius:50%;width:150px;height:150px;display:grid;place-items:center;font-size:30px;font-weight:800;letter-spacing:.04em;pointer-events:none;background:rgba(255,255,255,.35);animation:stamp .5s cubic-bezier(.2,.9,.3,1.4) both}
+.stamp.okst{border-color:rgba(18,163,107,.5);color:rgba(18,163,107,.65);font-size:24px}
+@keyframes stamp{from{opacity:0;transform:rotate(-14deg) scale(1.8)}to{opacity:1;transform:rotate(-14deg) scale(1)}}
+.prog{height:10px;border-radius:99px;background:#eee;margin:6px 2px 18px;overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red2),var(--red))}
+.foot{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--line);margin-top:10px;background:#f4f4f6}
+.foot a{display:flex;align-items:center;justify-content:center;gap:10px;padding:24px 10px;font-size:19px;font-weight:700;color:#a1a1ab;transition:.2s}
+.foot a:first-child{border-right:1.5px solid var(--line)}
+.foot a:hover{color:var(--red);background:var(--redbg)}
+.foot .q{width:34px;height:34px;border-radius:50%;background:#b8b8c0;color:#fff;display:grid;place-items:center;font-weight:800;font-size:19px}
+.foot a:hover .q{background:var(--red)}
+.expired .sub-head{background:#f0f0f2}
+.expired .picon,.expired .pname h2{opacity:.55}
+/* datos de acceso */
+.access{display:none;padding:6px 26px 22px}
+.access.on{display:block;animation:up .35s ease both}
+.lbl{display:flex;align-items:center;gap:8px;font-weight:800;color:#44444c;margin:18px 0 8px;font-size:17px}
+.lbl svg{width:20px;height:20px;stroke:#a0a0aa;fill:none;stroke-width:1.8}
+.field{display:flex;align-items:center;gap:10px;background:#f7f7f9;border:1.5px solid var(--line);border-radius:16px;padding:10px 10px 10px 18px}
+.field code{flex:1;min-width:0;font-family:inherit;font-size:clamp(17px,2.2vw,22px);font-weight:700;word-break:break-all}
+.ib{width:46px;height:46px;border-radius:13px;border:1.5px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--red);transition:.15s;flex:none}
+.ib:hover{border-color:var(--red);background:var(--redbg)}
 .ib svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9}
 .ib.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
-.tbox{border:2px solid var(--acc);border-radius:18px;padding:14px 14px 12px 20px;background:#f3f8ff}
+.tbox{border:2px solid var(--red);border-radius:18px;padding:14px 14px 12px 20px;background:#fff7f7}
 .trow{display:flex;align-items:center;gap:12px}
-.tcode{flex:1;font-size:clamp(30px,5vw,42px);font-weight:800;letter-spacing:.14em;color:var(--acc);font-variant-numeric:tabular-nums}
-.tcnt{width:46px;height:46px;border-radius:50%;background:var(--soft);color:var(--acc);display:grid;place-items:center;font-size:18px}
-.tline{height:5px;border-radius:99px;background:#dbe6fb;margin-top:10px;overflow:hidden}
-.tbar{display:block;height:100%;background:var(--acc);transition:width 1s linear}
+.tcode{flex:1;font-size:clamp(30px,5vw,40px);font-weight:800;letter-spacing:.14em;color:var(--red);font-variant-numeric:tabular-nums}
+.tcnt{width:46px;height:46px;border-radius:50%;background:var(--redbg);color:var(--red);display:grid;place-items:center;font-size:18px}
+.tline{height:5px;border-radius:99px;background:#f6d4d3;margin-top:10px;overflow:hidden}
+.tbar{display:block;height:100%;background:var(--red);transition:width 1s linear}
+.cta{display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:99px;background:var(--red);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(239,83,80,.3);border:0;cursor:pointer;font-size:16px;transition:.2s}
+.cta:hover{transform:translateY(-2px)}
 .tbtn:disabled{opacity:.5;cursor:not-allowed!important;box-shadow:none}
 .tnote{color:var(--mut);font-size:14px;margin-top:8px}
-.plan{margin-top:26px;border:1.5px solid #cfe0ff;background:linear-gradient(180deg,#f3f8ff,#fff);border-radius:20px;padding:20px}
-.plan h3{font-size:17px;color:#33425f;display:flex;align-items:center;gap:8px}
-.days{font-size:46px;font-weight:800;color:var(--acc);line-height:1.1;margin-top:6px}
-.days small{font-size:16px;color:var(--mut);font-weight:600;margin-left:6px}
-.clock{color:var(--mut);margin-top:2px}.clock b{color:var(--text);font-variant-numeric:tabular-nums}
-.prog{height:10px;border-radius:99px;background:#e3eaf8;margin:14px 0 8px;overflow:hidden}
-.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
-.dates{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--mut);font-size:13px}
-.wa{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:14px;border-radius:14px;border:1px solid var(--line);font-weight:700;color:#1a8f55;background:#f1fbf6}
-.wa:hover{border-color:#1a8f55}
-.steps{padding:6px 4px}
-.steps h2{font-size:22px;margin:0 0 18px 6px}
-.step{position:relative;display:grid;grid-template-columns:44px 1fr;gap:16px;padding-bottom:26px}
-.step:not(:last-child)::before{content:"";position:absolute;left:21px;top:46px;bottom:4px;width:2px;background:#dfe6f3}
-.num{width:44px;height:44px;border-radius:50%;background:var(--acc);color:#fff;font-weight:800;font-size:18px;display:grid;place-items:center;box-shadow:0 6px 16px rgba(30,107,255,.35)}
-.step h3{font-size:20px;margin:8px 0 4px}
-.step p{color:var(--mut)}
-.mock{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:520px;box-shadow:0 8px 24px rgba(30,60,120,.08)}
-.mock .t{font-size:22px;font-weight:700;margin-bottom:14px;text-align:center}
-.mock .in{border:1.5px solid #d6deec;border-radius:12px;padding:13px 16px;color:#7b8aa6;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.mock .in.hl{border-color:var(--acc);color:var(--text);box-shadow:0 0 0 3px rgba(30,107,255,.15)}
-.mock .go{background:#0b0f1a;color:#fff;text-align:center;padding:13px;border-radius:99px;font-weight:700}
-.cta{display:inline-flex;margin-top:14px;padding:13px 22px;border-radius:12px;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;font-weight:700;box-shadow:0 8px 22px rgba(30,107,255,.3)}
-.cta:hover{transform:translateY(-2px)}
-.note{margin-top:6px;background:var(--soft);border:1px solid #d6e4ff;border-radius:16px;padding:16px 18px;color:#33425f;font-size:15px}
-.note b{color:var(--acc)}
-.msg{max-width:560px;margin:70px auto;text-align:center}
-.msg h2{font-size:28px;margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:22px}
-.expired .days{color:#d33}
-.addbox{margin-top:34px;background:var(--card);border:2px dashed #b9d0ff;border-radius:22px;padding:22px;max-width:640px}
-.addbox h3{font-size:19px;margin-bottom:4px}.addbox p{color:var(--mut);font-size:14px;margin-bottom:12px}
+.how{margin-top:22px;border-top:1.5px dashed var(--line);padding-top:16px}
+.how h3{font-size:18px;margin-bottom:10px}
+.how ol{margin-left:22px;display:grid;gap:8px;color:#55555e;font-weight:600}
+.how a.l{color:var(--red);font-weight:800}
+.note{margin-top:14px;background:var(--redbg);border-radius:14px;padding:14px 16px;color:#5a3a39;font-size:15px;font-weight:600}
+.note b{color:var(--red)}
+.note summary{cursor:pointer;font-weight:800}
+.note ol{margin:10px 0 0 18px;display:grid;gap:6px}
+/* historial */
+.hist{background:#fff;border-radius:24px;box-shadow:0 10px 36px rgba(40,30,30,.08);overflow:hidden}
+.hist table{width:100%;border-collapse:collapse;font-size:17px}
+.hist th{text-align:left;color:var(--mut);font-size:14px;text-transform:uppercase;letter-spacing:.05em;padding:18px 22px;background:#f4f4f6}
+.hist td{padding:18px 22px;border-top:1.5px solid var(--line);font-weight:600}
+.st{display:inline-block;border-radius:99px;padding:5px 14px;font-size:14px;font-weight:800}
+.st.a{background:var(--okbg);color:var(--ok)}.st.e{background:var(--redbg);color:var(--red)}
+.nores{grid-column:1/-1;text-align:center;color:var(--mut);padding:50px 0;font-size:18px;font-weight:600}
+/* agregar código */
+.addbox{margin-top:46px;background:#fff;border:2px dashed #f3b7b5;border-radius:26px;padding:28px;max-width:680px;animation:up .6s .1s both}
+.addbox h3{font-size:22px;margin-bottom:4px}.addbox p{color:var(--mut);font-size:16px;margin-bottom:14px;font-weight:600}
 .addrow{display:flex;gap:10px;flex-wrap:wrap}
-.addrow input{flex:1;min-width:180px;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:inherit;font-size:16px;letter-spacing:.05em;text-transform:uppercase;background:#fff;color:var(--text)}
-.addrow input:focus{outline:2px solid rgba(30,107,255,.3);border-color:var(--acc)}
-.addrow button{border:0;cursor:pointer;font:inherit}
-.adderr{color:#d33;font-weight:600;margin-top:10px;font-size:14px}
-.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+.addrow input{flex:1;min-width:190px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;font:inherit;font-size:17px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:#fff;color:var(--text)}
+.addrow input:focus{outline:3px solid rgba(239,83,80,.2);border-color:var(--red)}
+.adderr{color:var(--red);font-weight:700;margin-top:10px;font-size:15px}
+.msg{max-width:560px;margin:90px auto;text-align:center}
+.msg h2{font-size:28px;margin-bottom:10px}.msg p{color:var(--mut);margin-bottom:22px;font-weight:600}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}
 .confetti i{position:absolute;top:-12px;width:9px;height:14px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.3}}
-@media(max-width:980px){.acct{grid-template-columns:1fr}.brand{border:0;padding:0}.meta{margin-left:0}.meta .sep{display:none}}
-html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
-@media(max-width:600px){
-  .bar{position:static}
-  .bar-in{padding:10px 14px;gap:10px}
-  .brand img{height:34px}
-  .prod{font-size:17px}
-  .meta{width:100%;gap:10px;font-size:13px;justify-content:space-between}
-  main{padding:14px 12px 50px}
-  .acct{gap:16px}
-  .card{padding:20px 16px;border-radius:20px}
-  .card h1{font-size:23px}
-  .field{padding:8px 8px 8px 14px;gap:8px}
-  .field code{font-size:16px}
-  .ib{width:44px;height:44px}
-  .days{font-size:38px}
-  .dates{font-size:12px}
-  .tcode{font-size:30px;letter-spacing:.08em}
-  .steps h2{font-size:19px}
-  .step{grid-template-columns:36px 1fr;gap:12px}
-  .num{width:36px;height:36px;font-size:15px}
-  .step:not(:last-child)::before{left:17px;top:38px}
-  .step h3{font-size:17px;margin-top:4px}
-  .mock{padding:16px;max-width:100%}
-  .mock .t{font-size:18px}
-  .cta{width:100%;justify-content:center}
-}
-
+.toastc{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1d1d22;color:#fff;padding:11px 20px;border-radius:14px;font-weight:700;z-index:70;animation:up .25s both}
+/* barra inferior (celular) */
 .bn{display:none}
-@media(max-width:760px){
-  .bn{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(30,60,120,.08)}
-  .bn a,.bn button{display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;color:var(--mut);font:inherit;font-size:11px;font-weight:700;padding:6px 2px;border-radius:12px;cursor:pointer;min-height:52px;justify-content:center}
-  .bn i{font-style:normal;font-size:21px;line-height:1.1}
-  .bn a.on{color:var(--acc);background:var(--soft)}.bn a:active,.bn button:active{background:var(--soft)}
-  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-  .back{display:none}
-  .meta{justify-content:flex-start}
-  .field{flex-wrap:nowrap}
-  .ib{width:48px;height:48px}
-  .tcode{font-size:34px}
-  .card{animation:cup .5s cubic-bezier(.2,.7,.2,1) both}
-  .steps{animation:cup .6s .1s cubic-bezier(.2,.7,.2,1) both}
+@media(max-width:1100px){
+  .nav,.pill.hide-m{display:none}
 }
-@keyframes cup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(max-width:860px){
+  .top-in{padding:12px 16px;gap:12px}
+  .logo img{height:40px}
+  .search{max-width:none}
+  .search input{padding:11px 0;font-size:16px}
+  .pill,.ibtn.hide-m{display:none}
+  .avatar{width:44px;height:44px;font-size:18px}
+  main{padding:26px 14px 100px}
+  .tabs{gap:22px;margin:22px 0 20px}.tabs button{font-size:18px}
+  .grid{grid-template-columns:1fr;gap:22px}
+  .sub-head{padding:20px 18px 18px;gap:14px}
+  .picon{width:60px;height:60px}.pname h2{font-size:23px}
+  .buyagain{width:100%;text-align:center;padding:14px}
+  .sub-body{padding:18px 18px 4px}.access{padding:4px 18px 18px}
+  .banner{font-size:17px;padding:18px}
+  .rw{font-size:17px;padding:17px 2px}
+  .stamp{width:118px;height:118px;font-size:23px;top:26px}
+  .foot a{padding:20px 6px;font-size:17px}
+  .menu{position:fixed;left:12px;right:12px;top:68px;width:auto;max-width:none}
+  .hist{overflow-x:auto}.hist table{min-width:560px}
+  .addbox{padding:20px;border-radius:22px}
+  .bn{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(40,30,30,.08)}
+  .bn a,.bn button{display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;color:var(--mut);font:inherit;font-size:11px;font-weight:800;padding:6px 2px;border-radius:12px;cursor:pointer;min-height:52px;justify-content:center}
+  .bn i{font-style:normal;font-size:21px;line-height:1.1}
+  .bn a.on{color:var(--red);background:var(--redbg)}.bn a:active,.bn button:active{background:var(--redbg)}
+  #relogin{bottom:calc(84px + env(safe-area-inset-bottom))!important}
+}
 @media (display-mode: standalone){.bn button[data-install]{display:none}.bn{grid-template-columns:repeat(4,1fr)}}
-.toastc{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#101a33;color:#fff;padding:10px 18px;border-radius:12px;font-weight:600;z-index:60;animation:cup .25s both}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
-<header class="bar"><div class="bar-in" id="bar">
-  <a class="brand" href="index.html?tienda=1"><img src="logo.webp" alt="IA Plus Colombia"></a>
-  <div class="prod">Mi cuenta</div>
-  <div class="meta"><a class="back" href="index.html?tienda=1">← Volver a la tienda</a></div>
+<header class="top"><div class="top-in">
+  <a class="logo" href="index.html?tienda=1"><img src="logo.webp" alt="IA Plus Colombia"></a>
+  <nav class="nav"><a href="index.html?tienda=1#catalogo">Catálogo</a><a href="index.html?tienda=1#porque">Beneficios</a><a href="index.html?tienda=1#faq">Ayuda</a></nav>
+  <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="q" type="search" placeholder="Buscar en mis suscripciones" autocomplete="off" aria-label="Buscar en mis suscripciones"></label>
+  <a class="pill hide-m" href="cuenta.html">Mi suscripción</a>
+  <a class="ibtn hide-m" id="topWa" target="_blank" rel="noopener" aria-label="Soporte por WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.7 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12Z"/><path d="M9 10.5c.5 2 2.5 4 4.5 4.5l1.5-1.5-2-1-1 .5c-.7-.3-1.5-1.1-1.8-1.8l.5-1-1-2-1.5 1.5"/></svg></a>
+  <div class="menuwrap"><button class="avatar" id="avBtn" aria-label="Menú de usuario" aria-haspopup="true">👤</button><div class="menu" id="menu" role="menu"></div></div>
 </div></header>
-<main id="app"><div class="msg"><p>Cargando tu cuenta…</p></div></main>
+<main id="app"><div class="msg"><p>Cargando tu suscripción…</p></div></main>
+
+<nav class="bn" aria-label="Navegación">
+  <a href="cuenta.html" class="on"><i>🔑</i><span>Mi cuenta</span></a>
+  <a href="index.html?tienda=1#catalogo"><i>🛍️</i><span>Tienda</span></a>
+  <a href="#" id="bnTop"><i>➕</i><span>Otro código</span></a>
+  <a id="bnWa" target="_blank" rel="noopener"><i>💬</i><span>Ayuda</span></a>
+  <button type="button" data-install><i>📲</i><span>Instalar</span></button>
+</nav>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const WHATSAPP = "573102035327";
 const DAY = 86400000;
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
+const ADMIN = "j03l1525@gmail.com";
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"});
+const fmtT = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"2-digit",year:"numeric"})+", "+d.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit",hour12:false});
 function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
 let credP = null;
 function ensureCred(){
@@ -166,7 +226,7 @@ function ensureCred(){
     let bar = document.getElementById("relogin");
     if(!bar){ bar = document.createElement("div"); bar.id="relogin";
       bar.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:460px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(20,40,90,.25);z-index:60;text-align:center";
-      bar.innerHTML='<div style="font-weight:700;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div>';
+      bar.innerHTML='<div style="font-weight:800;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div>';
       document.body.appendChild(bar); }
     const init = () => {
       if(!window.google?.accounts?.id){ return setTimeout(init,300); }
@@ -189,6 +249,7 @@ async function callApi(body){
   if(!j.ok && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return callApi(body); }
   return j;
 }
+/* ---------- código de autenticación (2FA) ---------- */
 const totpState = {};
 function totpRest(box){
   const st=totpState[box.dataset.totp]||{};
@@ -238,10 +299,6 @@ function copyText(t){
   const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
   return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();
 }
-const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
-const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
 const I = {
   mail:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>',
   lock:'<svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
@@ -255,94 +312,87 @@ function message(title, text){
 }
 function confetti(){
   const box=document.createElement("div"); box.className="confetti";
-  const cols=["#1e6bff","#12a8ff","#12a36b","#fbbf24","#7c3aed"];
+  const cols=["#ef5350","#ff8a80","#12a36b","#fbbf24","#7c4dff"];
   for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=Math.random()*100+"%";p.style.background=cols[i%5];
     p.style.animationDuration=(2.4+Math.random()*2.4)+"s";p.style.animationDelay=Math.random()+"s";box.appendChild(p);}
   document.body.appendChild(box); setTimeout(()=>box.remove(),6500);
 }
-const APPS=[{k:"youtube",n:"YouTube Premium",url:"https://www.youtube.com/",host:"youtube.com",dur:"3 meses"},{k:"davinci",n:"DaVinci Resolve",url:"https://www.blackmagicdesign.com/products/davinciresolve",host:"DaVinci Resolve en tu PC"},{k:"photoshop",n:"Adobe Photoshop",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},{k:"premiere",n:"Adobe Premiere Pro",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},{k:"xbox",n:"Xbox Game Pass Ultimate",url:"https://www.xbox.com/es-CO/auth/msa?action=logIn",host:"xbox.com"},{k:"canva",n:"Canva",url:"https://www.canva.com/login",host:"canva.com"},{k:"duolingo",n:"Duolingo",url:"https://www.duolingo.com/log-in",host:"duolingo.com",dur:"12 meses"},{k:"claude",n:"Claude Code",url:"https://claude.ai/login",host:"claude.ai",dev:1},{k:"gemini",n:"Gemini Pro",url:"https://gemini.google.com/",host:"gemini.google.com"},{k:"flow",n:"Flow",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
+/* ---------- productos ---------- */
+const APPS=[
+  {k:"youtube",n:"YouTube Premium",img:"youtube.png",url:"https://www.youtube.com/",host:"youtube.com",dur:"3 meses"},
+  {k:"davinci",n:"DaVinci Resolve",img:"davinci.png",url:"https://www.blackmagicdesign.com/products/davinciresolve",host:"DaVinci Resolve en tu PC"},
+  {k:"photoshop",n:"Adobe Photoshop",img:"photoshop.png",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
+  {k:"premiere",n:"Adobe Premiere Pro",img:"premiere.png",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
+  {k:"xbox",n:"Xbox Game Pass Ultimate",img:"xbox.png",url:"https://www.xbox.com/es-CO/auth/msa?action=logIn",host:"xbox.com"},
+  {k:"canva",n:"Canva",img:"canva.png",url:"https://www.canva.com/login",host:"canva.com"},
+  {k:"duolingo",n:"Duolingo",img:"duolingo.png",url:"https://www.duolingo.com/log-in",host:"duolingo.com",dur:"12 meses"},
+  {k:"claude",n:"Claude Code",img:"claude.png",url:"https://claude.ai/login",host:"claude.ai",dev:1},
+  {k:"gemini",n:"Gemini Pro",img:"gemini.png",url:"https://gemini.google.com/",host:"gemini.google.com"},
+  {k:"flow",n:"Flow",img:"flow.png",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},
+  {k:"capcut",n:"CapCut Pro",img:"capcut.png",url:"https://www.capcut.com/login",host:"capcut.com"},
+  {k:"filmora",n:"Filmora",img:"filmora.png",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},
+  {k:"chatgpt",n:"ChatGPT",img:"chatgpt.png",dark:true,url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}
+];
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
-function section(it){
-  const app=appOf(it);
+let ITEMS = [], tab = "sub", filterQ = "";
+function card(it, idx){
+  const app=appOf(it), ex=it.vencida;
   const start = it.inicio ? new Date(it.inicio) : null;
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const pct = start && end ? Math.min(100, Math.max(0,(Date.now()-start)/(end-start)*100)) : 0;
-  const ex = it.vencida;
-  const left_col = ex ? `
-    <div class="card"><h1>Tu plan venció</h1><p class="lead">El acceso a esta cuenta terminó. Escríbenos y la renovamos.</p>
-    <a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto)}">Renovar por WhatsApp</a></div>` : `
-    <div class="card">
-      <h1>Inicio de sesión directo</h1>
-      <p class="lead">Usa los datos de la cuenta que aparecen abajo y sigue los pasos para iniciar sesión en ${esc(app.n)}.</p>
-      ${it.cliente!==undefined?`<div class="note" style="margin:0 0 6px"><b>Admin:</b> código ${esc(it.codigo||'—')} · cliente ${esc(it.cliente||'sin asignar')}</div>`:''}
+  const renew = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, quiero renovar mi "+it.producto+" ("+it.correo+")");
+  const prob = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, tengo un problema con mi cuenta "+it.producto+" ("+it.correo+"). ¿Me ayudan o me dan otra cuenta?");
+  const icon = app.img ? `<img src="${app.img}" alt="" style="${app.dark?"background:#000;padding:8px":""}">` : "📦";
+  const access = ex ? "" : `
+    <div class="access on" id="acc${idx}">
       <div class="lbl">${I.mail} Cuenta de acceso</div>
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||3}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
-        <div class="task"><button class="cta tbtn" type="button" data-ask style="border:0;cursor:pointer;font:inherit;font-weight:700;margin:0">Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
-        <p class="tnote"></p></div>`:''}
-      <div class="plan"><h3>⏳ ${left<=5&&end?'Tu plan está por vencer':'Tu plan está corriendo'}</h3>
-        <div class="days">${left}<small>${left===1?'día restante':'días restantes'}</small></div>
-        <div class="clock">Vence en <b data-end="${it.fin||''}">--</b></div>
-        <div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>
-        <div class="dates"><span>Inicio: ${start?fmt(start):'—'}</span><span>Vence: ${end?fmt(end):'—'}</span></div></div>
-      ${left<=5&&end?`<a class="cta" style="display:flex;justify-content:center;margin-top:16px" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero renovar mi '+it.producto+' ('+it.correo+')')}">🔄 Renovar mi plan</a>`:''}
-      <a class="wa" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}">💬 ¿Necesitas ayuda? Escríbenos por WhatsApp</a>
-      <a class="wa" style="margin-top:10px;color:#b45f00;background:#fff8ec" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, tengo un problema con mi cuenta '+it.producto+' ('+it.correo+'). ¿Me ayudan o me dan otra cuenta?')}">⚠️ Tengo un problema con esta cuenta</a>
-    </div>`;
-  const right_col = ex ? '' : `
-    <div class="steps"><h2>Cómo iniciar sesión</h2>
-      <div class="step"><div class="num">1</div><div><h3>Abre ${esc(app.n)}</h3><p>${app.host?`Entra a ${esc(app.host)} e inicia sesión.`:`Abre la aplicación e inicia sesión.`}</p>${app.url?`<a class="cta" href="${app.url}" target="_blank" rel="noopener">Ir a ${esc(app.n)} →</a>`:""}</div></div>
-      <div class="step"><div class="num">2</div><div><h3>Pega tu correo</h3><p>Copia la "Cuenta de acceso" con el botón de copiar, pégala en el campo de correo y pulsa "Continuar".</p>
-        <div class="mock"><div class="t">Inicia sesión</div><div class="in hl"><span>${esc(it.correo)}</span><span>Editar</span></div><div class="go">Continuar</div></div></div></div>
-      <div class="step"><div class="num">3</div><div><h3>Escribe la contraseña</h3><p>Copia la "Contraseña de acceso", pégala y pulsa "Continuar". Si te pide verificación, escríbenos por WhatsApp y te ayudamos.</p>
-        <div class="mock"><div class="t">Introduce tu contraseña</div><div class="in hl"><span>Contraseña</span><span>👁</span></div><div class="go">Continuar</div></div></div></div>
-      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña de la cuenta. ${app.dev===1?"Úsala en 1 solo dispositivo":"Puedes usarla en hasta 2 dispositivos"} y tiene acceso por ${app.dur||"1 mes"}.</div>
-      ${app.k==="chatgpt"?`<details class="note" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
-        <ol style="margin:10px 0 0 18px;display:grid;gap:6px">
-          <li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
+        <div class="task"><button class="cta tbtn" type="button" data-ask>Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
+        <p class="tnote"></p></div>`:""}
+      <div class="how"><h3>Cómo iniciar sesión</h3>
+        <ol><li>Abre ${esc(app.n)}${app.url?` → <a class="l" href="${app.url}" target="_blank" rel="noopener">${esc(app.host||"ir al sitio")}</a>`:""}.</li>
+        <li>Copia la <b>cuenta de acceso</b>, pégala y pulsa "Continuar".</li>
+        <li>Copia la <b>contraseña</b>, pégala y entra. Si te pide verificación, usa el código de dos pasos o escríbenos.</li></ol></div>
+      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña. ${app.dev===1?"Úsala en 1 solo dispositivo":"Puedes usarla en hasta 2 dispositivos"} y tiene acceso por ${app.dur||"1 mes"}.</div>
+      ${app.k==="chatgpt"?`<details class="note"><summary>¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
+        <ol><li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
           <li>En tu navegador normal borra las <b>cookies y la caché</b> de chatgpt.com y vuelve a entrar.</li>
-          <li>Desactiva extensiones (bloqueadores de anuncios, VPN, extensiones de ChatGPT) o prueba con <b>Google Chrome</b> actualizado.</li>
-          <li>Abre un <b>chat nuevo</b> y elige el modelo desde la lista de arriba (no uses chats ni enlaces antiguos).</li>
-          <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li>
-        </ol></details>`:""}
+          <li>Desactiva extensiones (bloqueadores de anuncios, VPN) o prueba con <b>Google Chrome</b> actualizado.</li>
+          <li>Abre un <b>chat nuevo</b> y elige el modelo desde la lista de arriba.</li>
+          <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li></ol></details>`:""}
     </div>`;
-  return `<section class="acct ${ex?'expired':''}" data-prod="${esc(it.producto)}">${left_col}${right_col}</section>`;
+  return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${idx*80}ms" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
+    <div class="sub-head"><div class="picon">${icon}</div>
+      <div class="pname"><h2>${esc(app.n==="tu cuenta"?it.producto:app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
+      <a class="buyagain" href="${renew}" target="_blank" rel="noopener">${ex?"Renovar":"Comprar otra vez"}</a></div>
+    <div class="sub-body">
+      ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-expanded="true"><span>🔑 Mis datos de acceso · <b data-end="${it.fin||""}">--</b></span><span class="chev">⌃</span></button>`}
+      <div class="rows">
+        ${ex?`<div class="stamp">EXPIRADO</div>`:`<div class="stamp okst">ACTIVO<br><small style="font-size:15px">${left} ${left===1?"día":"días"}</small></div>`}
+        <div class="rw"><span>Tiempo de inicio</span><span>${start?fmtT(start):"—"}</span></div>
+        <div class="rw"><span>Expira el tiempo</span><span>${end?fmtT(end):"—"}</span></div>
+      </div>
+      ${ex?"":`<div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>`}
+    </div>
+    ${access}
+    <div class="foot"><a href="index.html?tienda=1#faq"><span class="q">?</span> Ayuda</a><a href="${prob}" target="_blank" rel="noopener"><span class="q">!</span> Soporte</a></div>
+  </article>`;
 }
-function header(items){
-  const it = items[0], ex = it.vencida;
-  const end = it.fin ? new Date(it.fin) : null;
-  const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
-  const u = load("iap_user"); const mail = u && u.email ? u.email.replace(/^(.{2}).*(@.*)$/,"$1****$2") : "";
-  $("#bar").innerHTML = `<a class="brand" href="index.html?tienda=1"><img src="logo.webp" alt="IA Plus Colombia"></a>
-    <div class="prod">${esc(it.producto)} <span class="badge ${ex?'off':''}">${ex?'Vencido':'Activo'}</span></div>
-    <div class="meta">${mail?`<span>Cuenta <b>${esc(mail)}</b></span><span class="sep"></span>`:''}<span>Tiempo restante <b>${ex?'0 días':left+(left===1?' día':' días')}</b></span>${u&&String(u.email).toLowerCase()==="j03l1525@gmail.com"?'<a class="back" href="admin.html">Panel admin</a>':''}<a class="back" href="index.html?tienda=1">← Tienda</a></div>`;
+function histHtml(){
+  return `<div class="hist"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Inicio</th><th>Vence</th><th>Plan</th><th>Estado</th></tr></thead><tbody>
+    ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${it.vencida?"e":"a"}">${it.vencida?"Expirado":"Activo"}</span></td></tr>`).join("")}</tbody></table></div>`;
 }
-function tick(){
-  document.querySelectorAll("[data-end]").forEach(el=>{
-    const e = el.dataset.end; if(!e) return;
-    const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="0 días"; return; }
-    const d=Math.floor(ms/DAY), h=Math.floor(ms%DAY/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
-    el.textContent = d+" d  "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-  });
-}
-document.addEventListener("click", e=>{
-  const c = e.target.closest("[data-copy]");
-  if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); }); return; }
-  const ask = e.target.closest("[data-ask]");
-  if(ask){ askTotp(ask.closest("[data-totp]")); return; }
-  const g = e.target.closest(".tog");
-  if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; }
-});
 function addBox(first){
-  return `<div class="addbox" id="addbox"><h3>➕ ${first?'Desbloquea tu cuenta':'Agregar otra cuenta'}</h3>
-    <p>${first?'Escribe el código que te enviamos por WhatsApp.':'¿Compraste otra cuenta? Escribe aquí su código de activación.'}</p>
-    <form class="addrow" id="addForm"><input id="addCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="cta" style="margin:0" type="submit">Desbloquear</button></form>
+  return `<div class="addbox" id="addbox"><h3>➕ ${first?"Desbloquea tu primera suscripción":"Agregar otra suscripción"}</h3>
+    <p>${first?"Escribe el código que te enviamos por WhatsApp.":"¿Compraste otra cuenta? Escribe aquí su código de activación."}</p>
+    <form class="addrow" id="addForm"><input id="addCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="cta" type="submit">Desbloquear</button></form>
     <div class="adderr" id="addErr" hidden></div>
-    <p style="margin:12px 0 0"><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar otra cuenta')}" target="_blank" rel="noopener" style="color:var(--acc);font-weight:700">¿No tienes código? Cómpralo por WhatsApp →</a></p></div>`;
+    <p style="margin:14px 0 0"><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero comprar otra cuenta")}" target="_blank" rel="noopener" style="color:var(--red);font-weight:800">¿No tienes código? Cómpralo por WhatsApp →</a></p></div>`;
 }
 function bindAdd(){
   const f=$("#addForm"); if(!f) return;
@@ -354,34 +404,83 @@ function bindAdd(){
     }catch(ex){ err.textContent=ex.message; err.hidden=false; btn.disabled=false; btn.textContent="Desbloquear"; }
   };
 }
+function renderMain(){
+  const act = ITEMS.filter(i=>!i.vencida).length;
+  $("#app").innerHTML = `
+    <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span></div>
+    <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
+    <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
+    ${addBox(false)}`;
+  bindAdd(); applyFilter(); tick(); refreshTotp();
+}
+function applyFilter(){
+  const g=$("#grid"); if(!g) return; let n=0;
+  g.querySelectorAll(".sub-card").forEach(c=>{ const ok=!filterQ||c.dataset.s.includes(filterQ); c.style.display=ok?"":"none"; if(ok) n++; });
+  $("#nores").hidden = n>0;
+}
+function tick(){
+  document.querySelectorAll("[data-end]").forEach(el=>{
+    const e = el.dataset.end; if(!e) return;
+    const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="0 días"; return; }
+    const d=Math.floor(ms/DAY), h=Math.floor(ms%DAY/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
+    el.textContent = d+" d "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  });
+}
+/* ---------- menú de usuario ---------- */
+function buildMenu(){
+  const u = load("iap_user") || {}; const em = String(u.email||"");
+  const av = $("#avBtn");
+  av.innerHTML = u.picture ? `<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">` : esc((u.name||em||"?")[0].toUpperCase());
+  const act = ITEMS.filter(i=>!i.vencida).length;
+  $("#menu").innerHTML = `<div class="who">${esc(em||"Mi cuenta")}</div><div class="sub">${esc(u.name||"Información personal")}</div>
+    <div class="saved">${act} ${act===1?"suscripción activa":"suscripciones activas"} en IA Plus</div><hr>
+    <button class="mi on" data-go="sub"><span class="ic">🔑</span>Mi suscripción</button>
+    <button class="mi" data-go="hist"><span class="ic">🧾</span>Pedidos históricos</button>
+    <a href="index.html?tienda=1#catalogo"><span class="ic">🛍️</span>Comprar más cuentas</a>
+    <a href="https://wa.me/${WHATSAPP}" target="_blank" rel="noopener"><span class="ic">🎧</span>Soporte</a>
+    <a href="index.html?tienda=1#faq"><span class="ic">📖</span>Centro de ayuda</a>
+    <button class="mi" data-install><span class="ic">📲</span>Instalar la app</button>
+    ${em.toLowerCase()===ADMIN?`<a href="admin.html"><span class="ic">🛠️</span>Panel admin</a>`:""}
+    <hr><button class="mi" id="logout"><span class="ic">🚪</span>Cerrar sesión</button>`;
+}
+document.addEventListener("click", e=>{
+  const c = e.target.closest("[data-copy]");
+  if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
+  const ask = e.target.closest("[data-ask]");
+  if(ask){ askTotp(ask.closest("[data-totp]")); return; }
+  const g = e.target.closest(".tog");
+  if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; return; }
+  const ba = e.target.closest("[data-acc]");
+  if(ba){ const p=document.getElementById(ba.dataset.acc); const on=p.classList.toggle("on"); ba.setAttribute("aria-expanded",on); return; }
+  const tb = e.target.closest("[data-tab]");
+  if(tb){ tab=tb.dataset.tab; renderMain(); return; }
+  const go = e.target.closest("[data-go]");
+  if(go){ tab=go.dataset.go; $("#menu").classList.remove("on"); renderMain(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if(e.target.closest("#logout")){ try{ ["iap_user","iap_cred","iap_has","iap_pwa_seen"].forEach(k=>localStorage.removeItem(k)); sessionStorage.clear(); }catch{} try{ google.accounts.id.disableAutoSelect(); }catch{} location.href="index.html?tienda=1"; return; }
+  if(e.target.closest("#avBtn")){ $("#menu").classList.toggle("on"); return; }
+  if(!e.target.closest("#menu")) $("#menu").classList.remove("on");
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
+$("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
 let timer=null;
 async function loadAll(){
   try{
     const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
-    save("iap_has", j.items.length>0);
-    if(!j.items.length){ $("#app").innerHTML = addBox(true); bindAdd(); return; }
-    header(j.items);
-    $("#app").innerHTML = j.items.map(section).join("") + addBox(false);
-    bindAdd();
-    tick(); refreshTotp(); if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
-    if(j.items.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
+    ITEMS = j.items; save("iap_has", ITEMS.length>0); buildMenu();
+    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); return; }
+    renderMain();
+    if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
+    if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message)); }
 }
 loadAll();
 (function(){
-  const wa=document.getElementById("bnWa"); if(wa) wa.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, necesito ayuda con mi cuenta");
-  const add=document.getElementById("bnTop");
-  if(add) add.addEventListener("click",e=>{ e.preventDefault(); const b=document.getElementById("addbox"); if(b){ b.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>{ const i=document.getElementById("addCode"); if(i) i.focus(); },500); } });
-  document.addEventListener("click",e=>{ const c=e.target.closest("[data-copy]"); if(!c) return; const t=document.createElement("div"); t.className="toastc"; t.textContent="Copiado ✔"; document.body.appendChild(t); setTimeout(()=>t.remove(),1400); });
+  const link="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, necesito ayuda con mi cuenta");
+  const w=$("#bnWa"); if(w) w.href=link; const t=$("#topWa"); if(t) t.href=link;
+  const add=$("#bnTop");
+  if(add) add.addEventListener("click",e=>{ e.preventDefault(); const b=$("#addbox"); if(b){ b.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>{ const i=$("#addCode"); if(i) i.focus(); },500); } });
 })();
 </script>
-<nav class="bn" aria-label="Navegación">
-  <a href="cuenta.html" class="on"><i>🔑</i><span>Mi cuenta</span></a>
-  <a href="index.html?tienda=1#catalogo"><i>🛍️</i><span>Tienda</span></a>
-  <a href="#" id="bnTop" data-addcode><i>➕</i><span>Otro código</span></a>
-  <a id="bnWa" target="_blank" rel="noopener"><i>💬</i><span>Ayuda</span></a>
-  <button type="button" data-install><i>📲</i><span>Instalar</span></button>
-</nav>
 <script src="pwa.js"></script>
 </body>
 </html>
