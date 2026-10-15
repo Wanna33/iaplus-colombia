@@ -214,7 +214,7 @@ function setTab(t){
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
   document.querySelectorAll("[id^=tab-]").forEach(s=>s.classList.toggle("hide", s.id!=="tab-"+t));
-  if(t==="log") loadLog();
+  if(t==="log"){ loadLog(); loadPagos(); }
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
@@ -317,6 +317,11 @@ function render(){
   </section>
 
   <section id="tab-log" class="hide">
+    <div class="card"><h2>💳 Pagos en línea (Wompi)</h2>
+      <div id="payCfg" class="paycfg"></div>
+      <div class="tools"><button class="btn s" id="payReload">↻ Recargar pedidos</button></div>
+      <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Estado</th><th>Referencia</th><th></th></tr></thead><tbody id="payRows"><tr><td colspan="7" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
+    </div>
     <div class="card"><h2>🕘 Registro de actividad</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Canjes, códigos de autenticación pedidos y acciones que haces en este panel (últimos 300 eventos).</p>
       <div class="tools"><button class="btn s" id="logReload">↻ Recargar registro</button><input id="lq" placeholder="Filtrar el registro…"></div>
@@ -340,7 +345,7 @@ function render(){
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
   $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
-  $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
+  $("#payReload").onclick = loadPagos; $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
   document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>quick(b.dataset.qa));
   updateViews(); setTab(curTab);
 }
@@ -926,3 +931,38 @@ document.addEventListener("change", e=>{
   $("#profit").innerHTML = profitHtml(); const n=document.querySelector(`.cost-in[data-ck="${CSS.escape(c.dataset.ck)}"]`); if(n) n.focus();
 });
 document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); if(!document.querySelector("dialog[open].gs") && $("#gSearch")) openSearch(); } });
+
+
+/* ---------- Pagos en línea (Wompi) ---------- */
+let PEDIDOS = [];
+const PAY_TAG = {ENTREGADO:["t-ok","Entregado"], PENDIENTE:["t-w","Pendiente"], APROBADO_SIN_STOCK:["t-b","Aprobado · sin cupo"], RECHAZADO:["t-g","Rechazado"]};
+async function loadPagos(){
+  const cfgBox = $("#payCfg"), rowsEl = $("#payRows"); if(!cfgBox) return;
+  try{
+    const c = await api("admin_pay_config");
+    const ck = (ok, t, opt) => `<span class="tag ${ok?"t-ok":(opt?"t-g":"t-b")}">${ok?"✔":(opt?"opcional":"falta")} ${t}</span>`;
+    cfgBox.innerHTML = `<p style="color:var(--mut);font-size:14px;margin-bottom:8px">Ambiente: <b>${c.env==="production"?"PRODUCCIÓN (dinero real)":"PRUEBAS (sandbox, sin dinero real)"}</b> · ${c.productos} productos en el servidor</p>
+      <div class="acts" style="margin-bottom:12px">${ck(c.publica,"Llave pública")}${ck(c.privada,"Llave privada")}${ck(c.integridad,"Secreto de integridad")}${ck(c.eventos,"Secreto de eventos",true)}</div>${(c.publica&&c.privada&&c.integridad)?"":'<div class="capwarn">Faltan llaves: agrégalas en Apps Script → Configuración del proyecto → Propiedades del script (WOMPI_PUBLIC, WOMPI_PRIVATE, WOMPI_INTEGRITY). Hasta entonces el botón «Pagar ahora» avisa que no está disponible.</div>'}`;
+  }catch(ex){
+    cfgBox.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para activar los pagos en línea.":ex.message)+"</div>";
+    rowsEl.innerHTML = '<tr><td colspan="7" class="empty">—</td></tr>'; return;
+  }
+  try{ PEDIDOS = (await api("admin_orders")).pedidos; drawPagos(); }catch(ex){ rowsEl.innerHTML = '<tr><td colspan="7" class="empty">'+esc(ex.message)+'</td></tr>'; }
+}
+function drawPagos(){
+  const el = $("#payRows"); if(!el) return;
+  el.innerHTML = PEDIDOS.length ? PEDIDOS.map(p=>{
+    const [cls, txt] = PAY_TAG[p.estado] || ["t-g", p.estado];
+    return `<tr><td data-l="Fecha">${fdt(p.creado)}</td><td data-l="Cliente" style="word-break:break-all">${esc(p.cliente)}</td><td data-l="Producto">${EMO(p.nombre)} ${esc(p.nombre)}</td><td data-l="Monto"><b>${money(p.monto)}</b></td>
+      <td data-l="Estado"><span class="tag ${cls}">${txt}</span>${p.nota?`<div class="note">${esc(p.nota)}</div>`:""}</td><td data-l="Referencia" class="mono" style="font-size:12px;word-break:break-all">${esc(p.ref)}${p.tx?`<div class="exp">tx ${esc(p.tx)}</div>`:""}</td>
+      <td class="acts-td">${p.estado==="ENTREGADO"?`<small style="color:var(--mut)">${esc(p.cuenta)}</small>`:`<button class="btn s p" data-deliver="${esc(p.ref)}">Entregar</button>`}</td></tr>`; }).join("")
+    : '<tr><td colspan="7" class="empty">Todavía no hay pedidos.</td></tr>';
+}
+document.addEventListener("click", async e=>{
+  const b = e.target.closest("[data-deliver]"); if(!b) return;
+  const p = PEDIDOS.find(x=>x.ref===b.dataset.deliver); if(!p) return;
+  if(!confirm("¿Entregar «"+p.nombre+"» a "+p.cliente+"?\n\nHazlo solo si ya verificaste en tu panel de Wompi que el pago "+p.ref+" fue APROBADO.")) return;
+  b.disabled = true;
+  try{ const j = await api("admin_order_deliver",{ref:p.ref, forzar:p.estado==="RECHAZADO"}); toast(j.estado==="ENTREGADO"?"Cuenta entregada ✔":"Sin cupo: agrega una cuenta nueva y vuelve a intentar"); await loadPagos(); await refresh(); }
+  catch(ex){ toast(ex.message); b.disabled = false; }
+});

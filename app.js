@@ -5,6 +5,7 @@ const CONFIG = {
   GOOGLE_CLIENT_ID: "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com",
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
   WHATSAPP: "573102035327",
+  PAGOS: true, // pagos en línea con Wompi (el servidor decide precio y firma; si no están activos, se avisa y queda WhatsApp)
   STORE: "IA Plus Colombia",
   // URL de la API (Apps Script) que entrega las cuentas con el código de activación
   API_URL: "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec",
@@ -72,7 +73,9 @@ function renderGrid(){
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
-      <a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">💬 Comprar por WhatsApp</a>
+      ${CONFIG.PAGOS?`<button class="btn btn-primary full buy-btn pay-btn" type="button" data-pay="${p.id}">💳 Pagar ahora</button>
+      <a class="buy-alt" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">o compra por WhatsApp</a>`
+      :`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">💬 Comprar por WhatsApp</a>`}
     </article>`).join("") || `<div class="nores">No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); renderGrid(); };
   observeReveal();
@@ -279,3 +282,31 @@ document.addEventListener("pointermove", e => {
   // contador animado en la portada
   document.querySelectorAll("[data-count]").forEach(el=>{ const to=el.dataset.count==="auto"?PRODUCTS.length:+el.dataset.count; let n=0; const t0=performance.now(); const step=t=>{ const p=Math.min(1,(t-t0)/1100); el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); }; requestAnimationFrame(step); });
 })();
+
+
+/* ============ PAGOS EN LÍNEA (Wompi) ============ */
+async function apiRaw(body){
+  const cred = load("iap_cred", null);
+  if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Pulsa Salir y vuelve a entrar con Google.");
+  const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({...body, idToken:cred.token})});
+  const j = await r.json(); if(!j.ok) throw new Error(j.error || "Error"); return j;
+}
+// Dirección del Web Checkout de Wompi (la firma y el precio ya vienen firmados desde el servidor)
+function wompiUrl(j){
+  const back = location.origin + location.pathname.replace(/[^/]*$/, "") + "pago.html";
+  const q = (k,v) => k + "=" + encodeURIComponent(v);
+  return "https://checkout.wompi.co/p/?" + [q("public-key", j.publicKey), q("currency", j.currency), q("amount-in-cents", j.cents), q("reference", j.ref), "signature:integrity=" + encodeURIComponent(j.signature), q("redirect-url", back)].join("&");
+}
+async function payNow(id, btn){
+  if(!user){ toast("Primero inicia sesión con tu Gmail para pagar"); openLogin(); return; }
+  const label = btn.textContent; btn.disabled = true; btn.textContent = "Abriendo el pago…";
+  try{
+    const j = await apiRaw({action:"pay_create", producto:id});
+    save("iap_pay", {ref:j.ref, t:Date.now()});
+    location.href = wompiUrl(j);
+  }catch(ex){
+    btn.disabled = false; btn.textContent = label;
+    toast(/Acción no válida|aún no están activos/i.test(ex.message) ? "Los pagos en línea aún no están disponibles. Compra por WhatsApp." : ex.message);
+  }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-pay]"); if(b) payNow(b.dataset.pay, b); });
