@@ -115,6 +115,8 @@ dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 .pr-info{display:flex;flex-direction:column;min-width:0}.pr-info .mono{font-size:14px;word-break:break-all}.pr-info small{color:var(--mut)}
 .pr-in{font-family:Consolas,monospace;font-weight:700}
 @media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:12px;cursor:pointer}.chk input{width:auto}
+.capfree{color:var(--mut);font-size:12px;white-space:nowrap}
 .capinfo{margin-top:14px}.capsum{font-size:14px;margin-bottom:8px}
 .caprow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
 .caprow .capm{flex:1;min-width:0;word-break:break-all}
@@ -442,7 +444,7 @@ function render(){
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cambia la contraseña de una cuenta y se actualiza sola para todos los clientes que la comparten. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
       <div id="passList"></div></div>
     <div class="card"><h2>🎲 Generar códigos automáticos</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. Cuentan los clientes activos y los códigos que ya generaste y nadie ha canjeado.</p>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. El cupo se mide con los clientes que <b>ya canjearon</b> su código; los códigos sin canjear no ocupan lugar (puedes cambiarlo con la casilla de abajo).</p>
       <form id="autoForm" class="form">
         <div><label>Producto</label><select id="aProd" required></select></div>
         <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="200" value="5" required></div>
@@ -451,6 +453,7 @@ function render(){
         <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" max="500" value="25" required></div>
         <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
       </form>
+      <label class="chk"><input type="checkbox" id="aCount"> Contar también los códigos generados que todavía no se han canjeado</label>
       <div id="capInfo" class="capinfo"></div>
       <div class="newcode" id="autoOut"></div>
     </div>
@@ -503,6 +506,8 @@ function render(){
   restoreDraft();
   $("#genForm").onsubmit = genCode;
   $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
+  $("#aCount").checked = countFree();
+  $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#aCap").oninput = () => { const v=+$("#aCap").value; if(v>0){ try{ localStorage.setItem(CAP_KEY, JSON.stringify(v)); }catch{} } $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
@@ -560,7 +565,7 @@ async function editClient(c){
 /* ---------- Cupos por cuenta y generación automática ---------- */
 const CAP_KEY = "iap_cap";
 const getCap = () => { const v = +load(CAP_KEY); return v > 0 ? Math.floor(v) : 25; };
-// Una "cuenta" es un correo. Ocupa cupo: cada cliente activo + cada código generado que nadie ha canjeado.
+// Una "cuenta" es un correo. Ocupa cupo cada cliente que YA canjeó su código (y sigue activo). Los códigos sin canjear solo cuentan si activas la casilla.
 function capMap(){
   const m = new Map();
   items.forEach(i=>{
@@ -574,7 +579,9 @@ function capMap(){
   });
   return m;
 }
-const used = a => a.act + a.libres;
+const COUNT_KEY = "iap_cap_free";
+const countFree = () => !!load(COUNT_KEY);   // por defecto NO: solo cuentan los clientes que ya canjearon
+const used = a => a.act + (countFree() ? a.libres : 0);
 function planAuto(prod, qty, cap){
   const pool = [...capMap().values()].filter(a=>!a.prob && a.filas[prod]!==undefined).map(a=>({...a, room:cap-used(a)})).filter(a=>a.room>0);
   const plan = new Map(); let left = qty;
@@ -587,7 +594,7 @@ function planAuto(prod, qty, cap){
 }
 function capBar(a, cap){
   const u = used(a), pct = Math.min(100, u/cap*100), cls = u>=cap ? "full" : (pct>=80 ? "hi" : "");
-  return `<span class="capbar ${cls}" title="${a.act} activos + ${a.libres} códigos sin canjear"><i style="width:${pct}%"></i></span><b class="capn ${cls}">${u}/${cap}</b>`;
+  return `<span class="capbar ${cls}" title="${a.act} clientes activos · ${a.libres} códigos sin canjear"><i style="width:${pct}%"></i></span><b class="capn ${cls}">${u}/${cap}</b>`;
 }
 function capInfoHtml(){
   const prod = $("#aProd")?.value, cap = +$("#aCap")?.value || getCap(); if(!prod) return "";
@@ -596,7 +603,7 @@ function capInfoHtml(){
   const cupo = abiertas.reduce((s,a)=>s+cap-used(a),0);
   const prob = todas.filter(a=>a.prob).length;
   return `<div class="capsum"><b>${esc(prod)}</b>: hay cupo para <b>${cupo}</b> código${cupo===1?"":"s"} más en <b>${abiertas.length}</b> cuenta${abiertas.length===1?"":"s"} de ${todas.length}${prob?` · ${prob} marcada${prob===1?"":"s"} con problemas (no se usan)`:""}.</div>
-    ${todas.sort((a,b)=>used(b)-used(a)).map(a=>`<div class="caprow"><span class="capm">${esc(a.correo)}${a.prob?' <small class="tag t-pr">con problemas</small>':""}</span>${capBar(a,cap)}</div>`).join("")}
+    ${todas.sort((a,b)=>used(b)-used(a)).map(a=>`<div class="caprow"><span class="capm">${esc(a.correo)}${a.prob?' <small class="tag t-pr">con problemas</small>':""}</span>${capBar(a,cap)}${a.libres?`<small class="capfree">+${a.libres} sin canjear</small>`:""}</div>`).join("")}
     ${abiertas.length===0?`<div class="capwarn">⚠️ No hay cuentas con cupo para ${esc(prod)}. Agrega una cuenta nueva (más abajo) para poder generar códigos.</div>`:""}`;
 }
 function fillAuto(){
@@ -625,7 +632,7 @@ async function autoGen(e){
   try{ localStorage.setItem(CAP_KEY, JSON.stringify(cap)); }catch{}
   const {plan, hechos, faltan} = planAuto(prod, qty, cap);
   if(!hechos){ $("#capInfo").innerHTML = capInfoHtml(); return toast("No hay cuentas con cupo para "+prod+". Agrega una cuenta nueva."); }
-  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" ("+p.antes+" → "+(p.antes+p.n)+" de "+cap+")").join("\n");
+  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" códigos ("+p.antes+" clientes canjeados → hasta "+(p.antes+p.n)+" de "+cap+")").join("\n");
   if(!confirm("Se crearán "+hechos+" código"+(hechos===1?"":"s")+" de "+prod+" en "+plan.size+" cuenta"+(plan.size===1?"":"s")+":\n\n"+resumen+(faltan?"\n\n⚠️ Pediste "+qty+", pero solo hay cupo para "+hechos+". Agrega más cuentas para el resto.":"")+"\n\n¿Generar?")) return;
   const b=e.target.querySelector("button"); b.disabled=true; b.textContent="Generando…";
   const res=[]; let total=0;
