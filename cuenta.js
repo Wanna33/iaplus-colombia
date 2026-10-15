@@ -56,7 +56,7 @@ async function fetchTotp(box, ask){
   try{
     const j=await callApi({action:"totp",v:2,ask:!!ask,correo:mail});
     if(!j.ok){ if(/SESION_2FA/.test(j.error||"")){ st.sesion=0; st.code=""; } else throw new Error(j.error||"Error"); }
-    else { st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes; st.sesion=j.hasta||(Date.now()+600000); st.err=""; }
+    else { st.code=j.code; st.until=Date.now()+j.left*1000; st.rest=j.restantes; document.querySelectorAll("[data-totp]").forEach(b=>{ (totpState[b.dataset.totp]=totpState[b.dataset.totp]||{}).rest=j.restantes; }); st.sesion=j.hasta||(Date.now()+600000); st.err=""; }
   }catch(err){ st.err=err.message; if(ask) st.sesion=0; }
   st.busy=false; renderTotp();
 }
@@ -143,6 +143,8 @@ function card(it, idx){
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
+      ${it.producto_key&&!it.adicional?`<div class="morebox"><button class="cta" type="button" data-more="${esc(String(it.correo).toLowerCase())}">➕ Elegir otra cuenta de ${esc(app.n)}</button><small>Sin costo: vence el mismo día que esta y comparte tus pedidos de código de hoy.</small></div>`:""}
+      ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||5}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
@@ -239,6 +241,8 @@ function buildMenu(){
 document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
+  const more = e.target.closest("[data-more]");
+  if(more){ openMore(more.dataset.more); return; }
   const ask = e.target.closest("[data-ask]");
   if(ask){ askTotp(ask.closest("[data-totp]")); return; }
   const g = e.target.closest(".tog");
@@ -255,6 +259,26 @@ document.addEventListener("click", e=>{
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
 $("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
+/* ---------- elegir otras cuentas (mismo producto, mismo vencimiento) ---------- */
+async function openMore(desde){
+  let m=document.getElementById("moreM"); if(m) m.remove();
+  m=document.createElement("div"); m.id="moreM"; m.className="moremodal";
+  m.innerHTML=`<div class="morecard"><button class="x" type="button" aria-label="Cerrar">×</button><h3>Elegir otra cuenta</h3><div class="mbody">Buscando cuentas disponibles…</div></div>`;
+  document.body.appendChild(m);
+  const body=m.querySelector(".mbody"), close=()=>m.remove();
+  m.addEventListener("click",e=>{ if(e.target===m||e.target.closest(".x")) close(); });
+  try{
+    const j=await callApi({action:"acct_options",desde}); if(!j.ok) throw new Error(j.error||"Error");
+    if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas de este producto.</p>`; return; }
+    if(!j.opciones.length){ body.innerHTML=`<p>Por ahora no hay otras cuentas disponibles. Escríbenos y te ayudamos.</p>`; return; }
+    body.innerHTML=`<p>Elige una. Tendrá la misma fecha de vencimiento que tu primera cuenta y comparte tus pedidos de código de cada día.</p>`+j.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
+    body.onclick=async e=>{
+      const b=e.target.closest("[data-pick]"); if(!b) return; b.disabled=true; b.textContent="Agregando…";
+      try{ const r=await callApi({action:"acct_add",desde,fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
+      catch(ex){ const er=body.querySelector("#moreErr"); er.textContent=ex.message; er.hidden=false; b.disabled=false; b.textContent="Elegir"; }
+    };
+  }catch(ex){ body.innerHTML="<p>"+esc(ex.message)+"</p>"; }
+}
 let timer=null;
 async function loadAll(){
   try{

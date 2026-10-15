@@ -419,3 +419,13 @@ details:hover,details[open]{border-color:var(--blue)}
 .buy-alt{display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--mut);text-decoration:underline}
 .buy-alt:hover{color:var(--blue)}
 .pay-btn:disabled{opacity:.7;cursor:wait}
+
+/* elegir otra cuenta */
+.morebox{margin:12px 0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.morebox small{color:var(--mut);font-weight:600}
+.moremodal{position:fixed;inset:0;background:rgba(20,30,50,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:80}
+.morecard{position:relative;background:#fff;border-radius:20px;padding:22px 20px;max-width:440px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.morecard h3{margin:0 0 10px}
+.morecard .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:26px;cursor:pointer;line-height:1}
+.mopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.mopt small{display:block;color:var(--mut)}
