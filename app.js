@@ -17,6 +17,7 @@ const PRODUCTS = [
   {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.png", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.png", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.png", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"duolingo", name:"Duolingo", cat:"Educación", ico:"🦉", img:"duolingo.png", lt:true, price:30000, per:"/12 meses", days:365, feats:["Duolingo por 12 meses completos","Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía incluida"]},
   {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.png", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.png", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
@@ -65,8 +66,8 @@ function renderGrid(){
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
-      <div class="perday">≈ ${cop(Math.round(p.price/30/100)*100)} al día</div>
-      <a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP/mes)')}">💬 Comprar por WhatsApp</a>
+      <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
+      <a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">💬 Comprar por WhatsApp</a>
     </article>`).join("") || `<div class="nores">No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); renderGrid(); };
   observeReveal();
