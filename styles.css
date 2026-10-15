@@ -400,3 +400,10 @@ details:hover,details[open]{border-color:var(--blue)}
 .chip.on{box-shadow:0 6px 16px rgba(239,83,80,.3)}
 .wa-float{box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .card .ico.dk,.mq-ic.dk{background:#000}
+
+/* ===== logo nuevo ===== */
+.brand img{height:50px;width:auto}
+.foot-logo{height:84px;width:auto}
+.modal-logo{height:64px;width:auto;margin:0 auto 14px}
+@media(max-width:860px){.brand img{height:42px}}
+@media(max-width:600px){.foot-logo{height:66px}}
