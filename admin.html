@@ -164,12 +164,12 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
-const PRICES = {"ChatGPT":10000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"Filmora":10000,"Duolingo":30000};
+const PRICES = {"ChatGPT":10000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"Filmora":10000,"Duolingo":30000,"Canva":10000};
 const DAYS = {"Duolingo":365};
 const daysOf = p => { const k = Object.keys(DAYS).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? DAYS[k] : 30; };
 const DEFAULT_PRICE = 10000;
 const priceOf = p => { const k = Object.keys(PRICES).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? PRICES[k] : DEFAULT_PRICE; };
-const EMO = p => /capcut/i.test(p)?"🎬":/filmora/i.test(p)?"🎞️":/chatgpt/i.test(p)?"🤖":/claude/i.test(p)?"🧠":/duolingo/i.test(p)?"🦉":/gemini/i.test(p)?"✨":/flow/i.test(p)?"🎥":"📦";
+const EMO = p => /capcut/i.test(p)?"🎬":/filmora/i.test(p)?"🎞️":/chatgpt/i.test(p)?"🤖":/claude/i.test(p)?"🧠":/canva/i.test(p)?"🎨":/duolingo/i.test(p)?"🦉":/gemini/i.test(p)?"✨":/flow/i.test(p)?"🎥":"📦";
 function copyText(t){
   const fb=()=>new Promise(r=>{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0"; document.body.appendChild(a); a.select(); try{document.execCommand("copy");}catch{} a.remove(); r(); });
   return navigator.clipboard?.writeText ? navigator.clipboard.writeText(t).catch(fb) : fb();

@@ -260,7 +260,7 @@ function confetti(){
     p.style.animationDuration=(2.4+Math.random()*2.4)+"s";p.style.animationDelay=Math.random()+"s";box.appendChild(p);}
   document.body.appendChild(box); setTimeout(()=>box.remove(),6500);
 }
-const APPS=[{k:"duolingo",n:"Duolingo",url:"https://www.duolingo.com/log-in",host:"duolingo.com",long:true},{k:"claude",n:"Claude Code",url:"https://claude.ai/login",host:"claude.ai",dev:1},{k:"gemini",n:"Gemini Pro",url:"https://gemini.google.com/",host:"gemini.google.com"},{k:"flow",n:"Flow",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
+const APPS=[{k:"canva",n:"Canva",url:"https://www.canva.com/login",host:"canva.com"},{k:"duolingo",n:"Duolingo",url:"https://www.duolingo.com/log-in",host:"duolingo.com",long:true},{k:"claude",n:"Claude Code",url:"https://claude.ai/login",host:"claude.ai",dev:1},{k:"gemini",n:"Gemini Pro",url:"https://gemini.google.com/",host:"gemini.google.com"},{k:"flow",n:"Flow",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},{k:"capcut",n:"CapCut Pro",url:"https://www.capcut.com/login",host:"capcut.com"},{k:"filmora",n:"Filmora",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},{k:"chatgpt",n:"ChatGPT",url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}];
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 function section(it){
   const app=appOf(it);
