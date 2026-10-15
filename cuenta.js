@@ -204,7 +204,6 @@ function renderMain(){
     <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span></div>
     <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
-    ${act?`<div class="morebox"><button class="cta" type="button" data-more="1">➕ Ver más cuentas disponibles</button><small>Como ya tienes una cuenta activa, puedes elegir otras sin costo. Vencen igual que la primera.</small></div>`:""}
     ${addBox(false)}`;
   bindAdd(); applyFilter(); tick(); refreshTotp();
 }
