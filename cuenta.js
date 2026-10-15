@@ -143,7 +143,6 @@ function card(it, idx){
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
-      ${it.producto_key&&!it.adicional?`<div class="morebox"><button class="cta" type="button" data-more="${esc(String(it.correo).toLowerCase())}">➕ Elegir otra cuenta de ${esc(app.n)}</button><small>Sin costo: vence el mismo día que esta y comparte tus pedidos de código de hoy.</small></div>`:""}
       ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||5}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
@@ -205,6 +204,7 @@ function renderMain(){
     <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span></div>
     <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
+    ${act?`<div class="morebox"><button class="cta" type="button" data-more="1">➕ Ver más cuentas disponibles</button><small>Como ya tienes una cuenta activa, puedes elegir otras sin costo. Vencen igual que la primera.</small></div>`:""}
     ${addBox(false)}`;
   bindAdd(); applyFilter(); tick(); refreshTotp();
 }
@@ -242,7 +242,7 @@ document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
   const more = e.target.closest("[data-more]");
-  if(more){ openMore(more.dataset.more); return; }
+  if(more){ openMore(); return; }
   const ask = e.target.closest("[data-ask]");
   if(ask){ askTotp(ask.closest("[data-totp]")); return; }
   const g = e.target.closest(".tog");
@@ -260,21 +260,21 @@ document.addEventListener("click", e=>{
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
 $("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
 /* ---------- elegir otras cuentas (mismo producto, mismo vencimiento) ---------- */
-async function openMore(desde){
+async function openMore(){
   let m=document.getElementById("moreM"); if(m) m.remove();
   m=document.createElement("div"); m.id="moreM"; m.className="moremodal";
-  m.innerHTML=`<div class="morecard"><button class="x" type="button" aria-label="Cerrar">×</button><h3>Elegir otra cuenta</h3><div class="mbody">Buscando cuentas disponibles…</div></div>`;
+  m.innerHTML=`<div class="morecard"><button class="x" type="button" aria-label="Cerrar">×</button><h3>Más cuentas para ti</h3><div class="mbody">Buscando cuentas disponibles…</div></div>`;
   document.body.appendChild(m);
   const body=m.querySelector(".mbody"), close=()=>m.remove();
   m.addEventListener("click",e=>{ if(e.target===m||e.target.closest(".x")) close(); });
   try{
-    const j=await callApi({action:"acct_options",desde}); if(!j.ok) throw new Error(j.error||"Error");
-    if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas de este producto.</p>`; return; }
-    if(!j.opciones.length){ body.innerHTML=`<p>Por ahora no hay otras cuentas disponibles. Escríbenos y te ayudamos.</p>`; return; }
-    body.innerHTML=`<p>Elige una. Tendrá la misma fecha de vencimiento que tu primera cuenta y comparte tus pedidos de código de cada día.</p>`+j.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
+    const j=await callApi({action:"acct_options"}); if(!j.ok) throw new Error(j.error||"Error");
+    if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas activas.</p>`; return; }
+    if(!j.grupos.length){ body.innerHTML=`<p>Por ahora no hay otras cuentas disponibles. Escríbenos y te ayudamos.</p>`; return; }
+    body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus 5 pedidos de código de cada día.</p>`+j.grupos.map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
     body.onclick=async e=>{
       const b=e.target.closest("[data-pick]"); if(!b) return; b.disabled=true; b.textContent="Agregando…";
-      try{ const r=await callApi({action:"acct_add",desde,fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
+      try{ const r=await callApi({action:"acct_add",fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
       catch(ex){ const er=body.querySelector("#moreErr"); er.textContent=ex.message; er.hidden=false; b.disabled=false; b.textContent="Elegir"; }
     };
   }catch(ex){ body.innerHTML="<p>"+esc(ex.message)+"</p>"; }

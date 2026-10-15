@@ -429,3 +429,4 @@ details:hover,details[open]{border-color:var(--blue)}
 .morecard .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:26px;cursor:pointer;line-height:1}
 .mopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .mopt small{display:block;color:var(--mut)}
+.mgrp{margin:14px 0 2px;font-size:15px}.morebox{margin:18px 0}
