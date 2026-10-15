@@ -110,6 +110,11 @@ tbody tr{animation:up .35s ease both}
 .btn{transition:.2s}.btn:active{transform:scale(.96)}
 dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.passrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.passrow:last-child{border-bottom:0}
+.pr-info{display:flex;flex-direction:column;min-width:0}.pr-info .mono{font-size:14px;word-break:break-all}.pr-info small{color:var(--mut)}
+.pr-in{font-family:Consolas,monospace;font-weight:700}
+@media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}}
 .prog2{height:6px;border-radius:9px;background:#e3eaf8;overflow:hidden}.prog2 i{display:block;height:100%;background:var(--acc);transition:width .5s linear}
 .skel{height:90px;border-radius:16px;background:linear-gradient(90deg,#eef1f7 25%,#f8faff 50%,#eef1f7 75%);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:12px}
 @keyframes sk{to{background-position:-200% 0}}
@@ -347,6 +352,25 @@ function byProductHtml(){
   items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,act:0,tot:0,libre:0,ing:0}; if(i.cliente){ a.tot++; if(!i.vencida) a.act++; a.ing+=Number(i.precio)||0; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="pcard"><div class="pe">${EMO(a.k)}</div><b>${esc(a.k)}</b><div class="pn">${a.act} <small>activos</small></div><div class="pm">${a.tot} vendidos · ${a.libre} libres</div><div class="pm"><b>${money(a.ing)}</b> ingresos</div></div>`).join("") || '<div class="empty">Aún no hay productos.</div>';
 }
+function passListHtml(){
+  const m = new Map();
+  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente) a.clientes++; m.set(k,a); });
+  return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente":"clientes"} · ${a.total} ${a.total===1?"código":"códigos"}</small></div>
+    <input class="pr-in" data-pk="${esc(a.k)}" data-orig="${esc(a.clave)}" value="${esc(a.clave)}" autocomplete="off" aria-label="Contraseña de ${esc(a.correo)}">
+    <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+}
+async function savePass(k){
+  const inp = document.querySelector(`.pr-in[data-pk="${CSS.escape(k)}"]`), btn = document.querySelector(`[data-ps="${CSS.escape(k)}"]`); if(!inp) return;
+  const nueva = inp.value.trim(), i = items.find(x=>((x.producto||"")+"|"+x.correo.toLowerCase())===k);
+  if(!i || !nueva || nueva===i.clave) return;
+  btn.disabled = true; btn.textContent = "Guardando…";
+  try{
+    const fin = await setPasswordEverywhere(i.correo, nueva);
+    const mal = fin.filter(x=>x.clave!==nueva).length, cli = fin.filter(x=>x.cliente).length;
+    toast(mal ? "⚠️ "+mal+" código(s) no se actualizaron. Pulsa Guardar otra vez" : "Contraseña actualizada ✔ para "+cli+(cli===1?" cliente":" clientes"));
+  }catch(ex){ toast(ex.message); }
+  const pl = $("#passList"); if(pl) pl.innerHTML = passListHtml();
+}
 function byAccountHtml(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,fila:i.fila,act:0,tot:0,libre:0,v:0};
@@ -372,6 +396,7 @@ function setTab(t){
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
+  if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
   $("#byAcc").innerHTML = byAccountHtml(); $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); crows(); rows();
 }
 function render(){
@@ -403,6 +428,9 @@ function render(){
   </section>
 
   <section id="tab-cta" class="hide">
+    <div class="card"><h2>🔐 Contraseñas de mis cuentas</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cambia la contraseña de una cuenta y se actualiza sola para todos los clientes que la comparten. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
+      <div id="passList"></div></div>
     <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Puedes crear hasta 20 de una vez.</p>
       <form id="genForm" class="form">
@@ -657,7 +685,11 @@ async function changePassword(i){
   const mal = fin.filter(x=>x.clave!==nueva).length;
   toast(mal ? "⚠️ "+mal+" código(s) no se actualizaron. Pulsa de nuevo en Cambiar contraseña" : "Contraseña actualizada ✔ para "+conCli+(conCli===1?" cliente":" clientes")+" ("+fin.length+(fin.length===1?" código":" códigos")+")");
 }
+document.addEventListener("input", e=>{ const inp=e.target.closest(".pr-in"); if(!inp) return; const b=document.querySelector(`[data-ps="${CSS.escape(inp.dataset.pk)}"]`); if(b) b.disabled = inp.value.trim()==="" || inp.value.trim()===inp.dataset.orig; });
+document.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.classList && e.target.classList.contains("pr-in")){ e.preventDefault(); savePass(e.target.dataset.pk); } });
 document.addEventListener("click", async e=>{
+  const ps = e.target.closest("[data-ps]");
+  if(ps){ await savePass(ps.dataset.ps); return; }
   const pa = e.target.closest("[data-pa]");
   if(pa){ const i=items.find(x=>String(x.fila)===pa.dataset.pa); if(i){ try{ await changePassword(i); }catch(ex){ toast(ex.message); } } return; }
   const ca = e.target.closest("[data-ca]");
