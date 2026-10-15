@@ -64,7 +64,7 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tr:hover td{background:#fafcff}
 .mono{font-family:Consolas,monospace;font-weight:700;letter-spacing:.03em}
 .tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}.t-g{background:#eef1f7;color:var(--mut)}.t-pr{background:#2b1a05;color:#ffb347}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-av{background:var(--soft);color:var(--acc)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}.t-g,.t-nc{background:#eef1f7;color:var(--mut)}.t-pr{background:#2b1a05;color:#ffb347}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
 .msg{max-width:480px;margin:90px auto;text-align:center}
 .msg h2{font-size:26px;margin-bottom:8px}.msg p{color:var(--mut);margin-bottom:18px}
@@ -117,6 +117,9 @@ dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 @media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}}
 .chk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin-top:12px;cursor:pointer}.chk input{width:auto}
 .capfree{color:var(--mut);font-size:12px;white-space:nowrap}
+.ttlbox{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;background:#f1f6ff;border:1px solid #d6e4ff;border-radius:12px;padding:10px 14px;font-size:14px}
+.ttlbox select{width:auto}
+.exp{font-family:inherit;font-size:12px;font-weight:700;color:var(--acc);letter-spacing:0;margin-top:2px}.exp.low{color:var(--warn)}.exp.over{color:var(--bad)}
 .capinfo{margin-top:14px}.capsum{font-size:14px;margin-bottom:8px}
 .caprow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
 .caprow .capm{flex:1;min-width:0;word-break:break-all}
@@ -198,7 +201,7 @@ const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
 const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
 const money = n => "$"+Math.round(Number(n)||0).toLocaleString("es-CO");
-let items = [], busy = false, hlCode = "", curTab = "res";
+let items = [], busy = false, hlCode = "", curTab = "res", TTL = null; // TTL: minutos que dura un código sin canjear (0 = nunca)
 try{ curTab = sessionStorage.getItem("iap_tab") || "res"; }catch{}
 const DRAFT = "iap_admin_draft";
 // Permanente (localStorage): producto, correo y días. Las contraseñas y claves 2FA solo duran mientras la pestaña esté abierta (sessionStorage).
@@ -246,7 +249,7 @@ function showLogin(){
 
 async function refresh(){
   if(busy) return; busy = true;
-  try{ const j = await api("admin_list"); items = j.items; render(); }
+  try{ const j = await api("admin_list"); items = j.items; if(j.ttl!==undefined) TTL = j.ttl; render(); }
   catch(e){
     if(/administrador/i.test(e.message)) message("Acceso denegado","Esta cuenta no es administradora.",'<a class="btn" href="index.html">Volver a la tienda</a>');
     else if(/sesión|venció|Inicia/i.test(e.message)) showLogin();
@@ -264,6 +267,7 @@ function start(){
 /* ---------- Utilidades de datos ---------- */
 function state(it){
   if(it.estado==="Con problemas" && !it.cliente) return {k:"pr", t:"Con problemas"};
+  if(!it.cliente && (it.estado==="Sin código" || !it.codigo)) return {k:"nc", t:"Sin código"};
   if(!it.cliente) return {k:"av", t:"Disponible"};
   if(it.vencida) return {k:"b", t:"Vencida"};
   if(it.restante!==null && it.restante<=5) return {k:"w", t:"Por vencer"};
@@ -329,7 +333,7 @@ function statsHtml(){
   const ingMes = withClient.filter(inMonth).reduce((s,i)=>s+(Number(i.precio)||0),0);
   const ingTot = withClient.reduce((s,i)=>s+(Number(i.precio)||0),0);
   const prob = items.filter(i=>state(i).k==="pr").length;
-  const libres = items.filter(i=>!i.cliente && state(i).k!=="pr").length;
+  const libres = items.filter(i=>!i.cliente && state(i).k==="av").length;
   return `<div class="stat big"><span>👥 Clientes activos ahora</span><b data-n="${activos}">0</b><small>${total} clientes en total desde el inicio · +${hoy} hoy · +${semana} esta semana</small></div>
     <div class="stat"><b>${money(ingMes)}</b><span>Ingresos este mes</span></div>
     <div class="stat"><b>${money(ingTot)}</b><span>Ingresos totales</span></div>
@@ -447,18 +451,21 @@ function render(){
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. El cupo se mide con los clientes que <b>ya canjearon</b> su código; los códigos sin canjear no ocupan lugar (puedes cambiarlo con la casilla de abajo).</p>
       <form id="autoForm" class="form">
         <div><label>Producto</label><select id="aProd" required></select></div>
-        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="200" value="5" required></div>
+        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="50" value="1" required></div>
         <div><label>Días del plan</label><input id="aDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="aPrice" type="number" min="0" step="500" value="10000"></div>
         <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" max="500" value="25" required></div>
         <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
       </form>
+      <div class="ttlbox"><span>🛡️ <b>Seguridad:</b> los códigos que nadie canjee se borran solos a los</span>
+        <select id="aTtl"><option value="0">Nunca</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="120">2 horas</option><option value="360">6 horas</option><option value="1440">24 horas</option></select>
+        <button class="btn s" type="button" id="aClean" title="Invalida ahora mismo los códigos que ya pasaron el tiempo">🧹 Limpiar ahora</button></div>
       <label class="chk"><input type="checkbox" id="aCount"> Contar también los códigos generados que todavía no se han canjeado</label>
       <div id="capInfo" class="capinfo"></div>
       <div class="newcode" id="autoOut"></div>
     </div>
     <div class="card"><h2>🔑 Generar código de una cuenta en particular</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Puedes crear hasta 20 de una vez.</p>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Se crea 1 código por defecto; puedes subir la cantidad si lo necesitas.</p>
       <form id="genForm" class="form">
         <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
         <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
@@ -507,6 +514,8 @@ function render(){
   $("#genForm").onsubmit = genCode;
   $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
   $("#aCount").checked = countFree();
+  $("#aTtl").onchange = async () => { try{ await api("admin_set_ttl",{minutos:$("#aTtl").value}); TTL = +$("#aTtl").value; toast(TTL? "Los códigos sin canjear se borrarán a los "+$("#aTtl").selectedOptions[0].textContent+" ✔" : "Los códigos ya no caducan"); rows(); }catch(ex){ $("#aTtl").value = String(TTL??60); toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar la caducidad":ex.message); } };
+  $("#aClean").onclick = async () => { try{ const j = await api("admin_cleanup"); toast(j.borrados? j.borrados+" código(s) vencido(s) invalidados ✔" : "No había códigos vencidos"); await refresh(); }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs)":ex.message); } };
   $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#aCap").oninput = () => { const v=+$("#aCap").value; if(v>0){ try{ localStorage.setItem(CAP_KEY, JSON.stringify(v)); }catch{} } $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
@@ -574,7 +583,7 @@ function capMap(){
     if(a.filas[i.producto]===undefined) a.filas[i.producto] = i.fila;
     if(i.cliente){ if(!i.vencida) a.act++; }
     else if(i.estado==="Con problemas") a.prob = true;
-    else a.libres++;
+    else if(i.codigo && i.estado!=="Sin código") a.libres++;
     m.set(k,a);
   });
   return m;
@@ -608,6 +617,7 @@ function capInfoHtml(){
 }
 function fillAuto(){
   const sel = $("#aProd"); if(!sel) return;
+  const tt = $("#aTtl"); if(tt && TTL!==null) tt.value = [0,15,30,60,120,360,1440].includes(TTL) ? String(TTL) : "60";
   const prev = sel.value, ps = [...new Set(items.map(i=>i.producto))];
   sel.innerHTML = ps.length ? ps.map(p=>`<option>${esc(p)}</option>`).join("") : "<option value=\"\">Primero agrega una cuenta</option>";
   if(ps.includes(prev)) sel.value = prev; else onAutoProd();
@@ -627,7 +637,7 @@ async function makeCodes(fila, n, dias, precio){
 }
 async function autoGen(e){
   e.preventDefault();
-  const prod=$("#aProd").value, qty=Math.max(1,Math.min(200,+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
+  const prod=$("#aProd").value, qty=Math.max(1,Math.min(50,+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
   const dias=$("#aDays").value, precio=$("#aPrice").value; if(!prod) return toast("Primero agrega una cuenta");
   try{ localStorage.setItem(CAP_KEY, JSON.stringify(cap)); }catch{}
   const {plan, hechos, faltan} = planAuto(prod, qty, cap);
@@ -646,7 +656,7 @@ async function autoGen(e){
   if(res.length){
     const all = res.flatMap(r=>r.codes);
     const out = $("#autoOut"); out.classList.add("on");
-    out.innerHTML = `<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
+    out.innerHTML = `${TTL?`<div class="capwarn" style="margin:0 0 10px">⏱ Si nadie los canjea, se borran solos en ${TTL>=60?(TTL/60)+" h":TTL+" min"}.</div>`:""}<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
       ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
       <div class="acts" style="margin-top:10px"><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
     out.querySelectorAll("[data-cp]").forEach(x=>x.onclick=()=>copy(x.dataset.cp));
@@ -703,6 +713,13 @@ function filtered(){
   return items.filter(i => (!st || state(i).k===st) && (!pf || i.producto===pf) && (!q || [i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ").toLowerCase().includes(q)))
     .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
+// Cuenta regresiva de un código sin canjear (se borra solo a los TTL minutos)
+function expiraHtml(i){
+  if(i.cliente || !i.codigo || !i.creado || !TTL) return "";
+  const left = Math.ceil((new Date(i.creado).getTime() + TTL*60000 - Date.now())/60000);
+  if(left<=0) return `<div class="exp over">⏱ vencido · se borra solo</div>`;
+  return `<div class="exp ${left<=10?"low":""}">⏱ vence en ${left>=60?Math.floor(left/60)+" h "+(left%60)+" min":left+" min"}</div>`;
+}
 function rows(){
   const el = $("#rows"); if(!el) return;
   const list = filtered();
@@ -710,7 +727,7 @@ function rows(){
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
     return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${EMO(i.producto)} ${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
-      <td class="mono" data-l="Código">${esc(i.codigo||"—")}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
+      <td class="mono" data-l="Código">${esc(i.codigo||"—")}${expiraHtml(i)}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||3)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||3}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
         ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
@@ -792,7 +809,7 @@ async function setPasswordEverywhere(correo, nueva){
     toast("Actualizando contraseña… "+(n+1)+" de "+pend.length);
     await api("admin_update",{fila:pend[n].fila,clave:nueva});
     if(!revisado){ revisado = true; // con el backend nuevo la primera llamada ya actualiza todas: se revisa para no repetir
-      const j = await api("admin_list"); items = j.items;
+      const j = await api("admin_list"); items = j.items; if(j.ttl!==undefined) TTL = j.ttl;
       pend = items.filter(x=>x.correo.toLowerCase()===mail && x.clave!==nueva); n = -1; if(!pend.length) break;
     }
   }
