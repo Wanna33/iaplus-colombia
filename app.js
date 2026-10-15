@@ -6,7 +6,6 @@ const CONFIG = {
   // 2) Tu número de WhatsApp con código de país, sin + ni espacios (Colombia = 57)
   WHATSAPP: "573102035327",
   STORE: "IA Plus Colombia",
-  ADMIN: "j03l1525@gmail.com", // solo muestra el botón; el permiso real lo valida el servidor
   // URL de la API (Apps Script) que entrega las cuentas con el código de activación
   API_URL: "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec",
 };
@@ -132,7 +131,7 @@ function avatarOf(sz){
 }
 function logout(){
   try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{}
-  user = null; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", null); save("iap_cred", null); save("iap_has", false); cart = []; save("iap_cart", []);
+  user = null; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", null); save("iap_cred", null); save("iap_has", false); save("iap_admin", false); cart = []; save("iap_cart", []);
   renderAuth(); renderCart(); renderHeroCard(); renderRedeem(); toast("Sesión cerrada");
 }
 function renderAuth(){
@@ -143,7 +142,7 @@ function renderAuth(){
     return;
   }
   const mine = (myItems&&myItems.length) ? '<a class="btn btn-ghost" href="cuenta.html" style="padding:8px 14px">Mi cuenta</a> ' : '';
-  const adm = (user.email||"").toLowerCase()===CONFIG.ADMIN ? '<a class="btn btn-primary" href="admin.html" style="padding:8px 14px">Panel admin</a> ' : '';
+  const adm = load("iap_admin", false) ? '<a class="btn btn-primary" href="admin.html" style="padding:8px 14px">Panel admin</a> ' : '';
   a.innerHTML = `${adm}${mine}<div class="user">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
   $("#logout").onclick = logout;
 }
@@ -186,6 +185,7 @@ async function callApi(action, code){
   const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action, code, idToken:cred.token})});
   const j = await r.json();
   if(!j.ok) throw new Error(j.error || "Error");
+  if(j.admin !== undefined) save("iap_admin", !!j.admin); // lo decide el servidor, no el navegador
   return j.items;
 }
 function renderRedeem(){
