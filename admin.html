@@ -115,6 +115,16 @@ dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 .pr-info{display:flex;flex-direction:column;min-width:0}.pr-info .mono{font-size:14px;word-break:break-all}.pr-info small{color:var(--mut)}
 .pr-in{font-family:Consolas,monospace;font-weight:700}
 @media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}}
+.capinfo{margin-top:14px}.capsum{font-size:14px;margin-bottom:8px}
+.caprow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.caprow .capm{flex:1;min-width:0;word-break:break-all}
+.capbar{display:inline-block;width:120px;height:10px;border-radius:9px;background:#e3eaf8;overflow:hidden;vertical-align:middle}
+.capbar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.capbar.hi i{background:linear-gradient(90deg,#f6b73c,#f08a1c)}.capbar.full i{background:linear-gradient(90deg,#f2706b,#d33)}
+.capn{font-size:13px;min-width:48px;text-align:right}.capn.hi{color:var(--warn)}.capn.full{color:var(--bad)}
+.caprow2{display:inline-flex;align-items:center;gap:8px}
+.capwarn{margin-top:10px;background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 14px;font-weight:700;font-size:14px}
+.grp{margin-top:10px}.grp small{color:var(--mut);display:block}
 .prog2{height:6px;border-radius:9px;background:#e3eaf8;overflow:hidden}.prog2 i{display:block;height:100%;background:var(--acc);transition:width .5s linear}
 .skel{height:90px;border-radius:16px;background:linear-gradient(90deg,#eef1f7 25%,#f8faff 50%,#eef1f7 75%);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:12px}
 @keyframes sk{to{background-position:-200% 0}}
@@ -376,7 +386,7 @@ function byAccountHtml(){
   items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,fila:i.fila,act:0,tot:0,libre:0,v:0};
     if(i.cliente){ a.tot++; if(i.vencida) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="accrow"><div class="accname">${esc(a.k)}</div>
-    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span><button class="btn s p" data-pa="${a.fila}">🔑 Cambiar contraseña</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+    <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span><span class="caprow2">${(()=>{ const c=capMap().get(a.k.split(" — ").slice(1).join(" — ").toLowerCase()); return c?capBar(c,getCap()):""; })()}</span><button class="btn s p" data-pa="${a.fila}">🔑 Cambiar contraseña</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
 const prevN = [];
 function countUp(){
@@ -397,7 +407,7 @@ function setTab(t){
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#attn").innerHTML = attentionHtml(); $("#months").innerHTML = monthsHtml();
   if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
-  $("#byAcc").innerHTML = byAccountHtml(); $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); crows(); rows();
+  $("#byAcc").innerHTML = byAccountHtml(); $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); fillAuto(); crows(); rows();
 }
 function render(){
   if($("#addForm")){ updateViews(); return; }
@@ -431,7 +441,20 @@ function render(){
     <div class="card"><h2>🔐 Contraseñas de mis cuentas</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cambia la contraseña de una cuenta y se actualiza sola para todos los clientes que la comparten. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
       <div id="passList"></div></div>
-    <div class="card"><h2>🔑 Generar código de desbloqueo</h2>
+    <div class="card"><h2>🎲 Generar códigos automáticos</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. Cuentan los clientes activos y los códigos que ya generaste y nadie ha canjeado.</p>
+      <form id="autoForm" class="form">
+        <div><label>Producto</label><select id="aProd" required></select></div>
+        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="200" value="5" required></div>
+        <div><label>Días del plan</label><input id="aDays" type="number" min="1" max="366" value="30" required></div>
+        <div><label>Precio (COP)</label><input id="aPrice" type="number" min="0" step="500" value="10000"></div>
+        <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" max="500" value="25" required></div>
+        <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
+      </form>
+      <div id="capInfo" class="capinfo"></div>
+      <div class="newcode" id="autoOut"></div>
+    </div>
+    <div class="card"><h2>🔑 Generar código de una cuenta en particular</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Puedes crear hasta 20 de una vez.</p>
       <form id="genForm" class="form">
         <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
@@ -479,6 +502,8 @@ function render(){
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
   $("#genForm").onsubmit = genCode;
+  $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
+  $("#aCap").oninput = () => { const v=+$("#aCap").value; if(v>0){ try{ localStorage.setItem(CAP_KEY, JSON.stringify(v)); }catch{} } $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
@@ -532,6 +557,98 @@ async function editClient(c){
 }
 
 /* ---------- Cuentas / códigos ---------- */
+/* ---------- Cupos por cuenta y generación automática ---------- */
+const CAP_KEY = "iap_cap";
+const getCap = () => { const v = +load(CAP_KEY); return v > 0 ? Math.floor(v) : 25; };
+// Una "cuenta" es un correo. Ocupa cupo: cada cliente activo + cada código generado que nadie ha canjeado.
+function capMap(){
+  const m = new Map();
+  items.forEach(i=>{
+    const k = i.correo.toLowerCase();
+    const a = m.get(k) || {correo:i.correo, filas:{}, act:0, libres:0, prob:false};
+    if(a.filas[i.producto]===undefined) a.filas[i.producto] = i.fila;
+    if(i.cliente){ if(!i.vencida) a.act++; }
+    else if(i.estado==="Con problemas") a.prob = true;
+    else a.libres++;
+    m.set(k,a);
+  });
+  return m;
+}
+const used = a => a.act + a.libres;
+function planAuto(prod, qty, cap){
+  const pool = [...capMap().values()].filter(a=>!a.prob && a.filas[prod]!==undefined).map(a=>({...a, room:cap-used(a)})).filter(a=>a.room>0);
+  const plan = new Map(); let left = qty;
+  while(left>0){
+    const open = pool.filter(a=>a.room>0); if(!open.length) break;
+    const a = open[Math.floor(Math.random()*open.length)]; a.room--; left--;
+    const p = plan.get(a.correo) || {correo:a.correo, fila:a.filas[prod], n:0, antes:used(a)}; p.n++; plan.set(a.correo,p);
+  }
+  return {plan, hechos:qty-left, faltan:left, cuentas:pool.length};
+}
+function capBar(a, cap){
+  const u = used(a), pct = Math.min(100, u/cap*100), cls = u>=cap ? "full" : (pct>=80 ? "hi" : "");
+  return `<span class="capbar ${cls}" title="${a.act} activos + ${a.libres} códigos sin canjear"><i style="width:${pct}%"></i></span><b class="capn ${cls}">${u}/${cap}</b>`;
+}
+function capInfoHtml(){
+  const prod = $("#aProd")?.value, cap = +$("#aCap")?.value || getCap(); if(!prod) return "";
+  const todas = [...capMap().values()].filter(a=>a.filas[prod]!==undefined);
+  const abiertas = todas.filter(a=>!a.prob && used(a)<cap);
+  const cupo = abiertas.reduce((s,a)=>s+cap-used(a),0);
+  const prob = todas.filter(a=>a.prob).length;
+  return `<div class="capsum"><b>${esc(prod)}</b>: hay cupo para <b>${cupo}</b> código${cupo===1?"":"s"} más en <b>${abiertas.length}</b> cuenta${abiertas.length===1?"":"s"} de ${todas.length}${prob?` · ${prob} marcada${prob===1?"":"s"} con problemas (no se usan)`:""}.</div>
+    ${todas.sort((a,b)=>used(b)-used(a)).map(a=>`<div class="caprow"><span class="capm">${esc(a.correo)}${a.prob?' <small class="tag t-pr">con problemas</small>':""}</span>${capBar(a,cap)}</div>`).join("")}
+    ${abiertas.length===0?`<div class="capwarn">⚠️ No hay cuentas con cupo para ${esc(prod)}. Agrega una cuenta nueva (más abajo) para poder generar códigos.</div>`:""}`;
+}
+function fillAuto(){
+  const sel = $("#aProd"); if(!sel) return;
+  const prev = sel.value, ps = [...new Set(items.map(i=>i.producto))];
+  sel.innerHTML = ps.length ? ps.map(p=>`<option>${esc(p)}</option>`).join("") : "<option value=\"\">Primero agrega una cuenta</option>";
+  if(ps.includes(prev)) sel.value = prev; else onAutoProd();
+  const capIn = $("#aCap"); if(capIn && document.activeElement!==capIn) capIn.value = getCap();
+  $("#capInfo").innerHTML = capInfoHtml();
+}
+function onAutoProd(){ const p=$("#aProd").value; if(!p) return; $("#aDays").value = daysOf(p); $("#aPrice").value = priceOf(p); $("#capInfo").innerHTML = capInfoHtml(); }
+// Crea n códigos de una cuenta (bulk si el backend lo permite; si no, uno por uno)
+async function makeCodes(fila, n, dias, precio){
+  const out = [];
+  while(out.length<n){
+    const k = Math.min(20, n-out.length);
+    try{ out.push(...(await api("admin_bulk",{fila,cantidad:k,dias,precio})).codigos); }
+    catch(ex){ if(!/no válida|Acción/i.test(ex.message)) throw ex; for(let t=0;t<k;t++) out.push((await api("admin_clone",{fila,dias,precio})).codigo); }
+  }
+  return out;
+}
+async function autoGen(e){
+  e.preventDefault();
+  const prod=$("#aProd").value, qty=Math.max(1,Math.min(200,+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
+  const dias=$("#aDays").value, precio=$("#aPrice").value; if(!prod) return toast("Primero agrega una cuenta");
+  try{ localStorage.setItem(CAP_KEY, JSON.stringify(cap)); }catch{}
+  const {plan, hechos, faltan} = planAuto(prod, qty, cap);
+  if(!hechos){ $("#capInfo").innerHTML = capInfoHtml(); return toast("No hay cuentas con cupo para "+prod+". Agrega una cuenta nueva."); }
+  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" ("+p.antes+" → "+(p.antes+p.n)+" de "+cap+")").join("\n");
+  if(!confirm("Se crearán "+hechos+" código"+(hechos===1?"":"s")+" de "+prod+" en "+plan.size+" cuenta"+(plan.size===1?"":"s")+":\n\n"+resumen+(faltan?"\n\n⚠️ Pediste "+qty+", pero solo hay cupo para "+hechos+". Agrega más cuentas para el resto.":"")+"\n\n¿Generar?")) return;
+  const b=e.target.querySelector("button"); b.disabled=true; b.textContent="Generando…";
+  const res=[]; let total=0;
+  try{
+    for(const p of plan.values()){
+      toast("Creando códigos… "+total+" de "+hechos);
+      const codes = await makeCodes(p.fila, p.n, dias, precio); total += codes.length; res.push({correo:p.correo, codes});
+    }
+  }catch(ex){ toast("Se detuvo: "+ex.message); }
+  await refresh();
+  if(res.length){
+    const all = res.flatMap(r=>r.codes);
+    const out = $("#autoOut"); out.classList.add("on");
+    out.innerHTML = `<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
+      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
+      <div class="acts" style="margin-top:10px"><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
+    out.querySelectorAll("[data-cp]").forEach(x=>x.onclick=()=>copy(x.dataset.cp));
+    out.querySelectorAll("[data-cm]").forEach(x=>x.onclick=()=>copy(msgFor({producto:prod,codigo:x.dataset.cm,dias})));
+    $("#cpAllAuto").onclick=()=>copy(all.join("\n"));
+    copy(all.join("\n")); toast(all.length+" códigos creados ✔ (copiados)");
+  }
+  b.disabled=false; b.textContent="🎲 Generar";
+}
 function accounts(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
@@ -544,7 +661,7 @@ function fillProducts(){
 function fillAccounts(){
   fillProducts();
   const sel=$("#gAcc"); if(!sel) return; const prev=sel.value; const list=accounts();
-  sel.innerHTML = list.length ? list.map(a=>`<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)}</option>`).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
+  sel.innerHTML = list.length ? list.map(a=>{ const c=capMap().get(a.correo.toLowerCase()); const u=c?used(c):0, cap=getCap(); return `<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)} (${u}/${cap}${u>=cap?" · LLENA":""})</option>`; }).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
 }
 function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a){ $("#gDays").value=a.dias; $("#gPrice").value=priceOf(a.producto); } }
@@ -561,6 +678,8 @@ async function genCode(e){
   e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
   const b=e.target.querySelector("button"); b.disabled=true;
   const dias=$("#gDays").value, precio=$("#gPrice").value, qty=Math.max(1,Math.min(20,+$("#gQty").value||1));
+  const ci=capMap().get(a.correo.toLowerCase()), cap=getCap();
+  if(ci && used(ci)+qty>cap && !confirm("Esta cuenta ya tiene "+used(ci)+" de "+cap+" cupos ocupados. Con "+qty+" código(s) más pasaría del tope y se puede saturar.\n\nSugerencia: usa «Generar códigos automáticos» para repartirlos en cuentas con cupo.\n\n¿Generar de todos modos?")){ b.disabled=false; return; }
   try{
     let codes;
     if(qty>1) codes = (await api("admin_bulk",{fila:a.fila,dias,precio,cantidad:qty})).codigos;
