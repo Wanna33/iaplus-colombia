@@ -23,6 +23,7 @@ const PRODUCTS = [
   {id:"premiere", name:"Adobe Premiere Pro", cat:"Edición de video", ico:"🎞️", img:"premiere.png", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de video profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.png", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.png", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"youtube", name:"YouTube Premium", cat:"Streaming", ico:"▶️", img:"youtube.png", lt:true, price:30000, per:"/3 meses", days:90, feats:["YouTube Premium por 3 meses","Sin anuncios y con reproducción en segundo plano","Entrega rápida por WhatsApp","Garantía incluida"]},
   {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.png", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.png", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
