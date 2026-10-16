@@ -369,15 +369,16 @@ function render(){
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. El cupo se mide con los clientes que <b>ya canjearon</b> su código; los códigos sin canjear no ocupan lugar (puedes cambiarlo con la casilla de abajo).</p>
       <form id="autoForm" class="form">
         <div><label>Producto</label><select id="aProd" required></select></div>
-        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="50" value="1" required></div>
+        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" value="1" required></div>
         <div><label>Días del plan</label><input id="aDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="aPrice" type="number" min="0" step="500" value="10000"></div>
-        <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" max="500" value="25" required></div>
+        <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" value="25" required></div>
         <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
       </form>
       <div class="ttlbox"><span>🛡️ <b>Seguridad:</b> los códigos que nadie canjee se borran solos a los</span>
         <select id="aTtl"><option value="0">Nunca</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="120">2 horas</option><option value="360">6 horas</option><option value="1440">24 horas</option></select>
         <button class="btn s" type="button" id="aClean" title="Invalida ahora mismo los códigos que ya pasaron el tiempo">🧹 Limpiar ahora</button></div>
+      <label class="chk"><input type="checkbox" id="aNoCap"> <b>Sin tope por cuenta (ilimitado):</b> genera todos los que pidas y los reparte entre las cuentas menos ocupadas</label>
       <label class="chk"><input type="checkbox" id="aCount"> Contar también los códigos generados que todavía no se han canjeado</label>
       <div id="capInfo" class="capinfo"></div>
       <div class="newcode" id="autoOut"></div>
@@ -388,7 +389,7 @@ function render(){
         <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
         <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="gPrice" type="number" min="0" step="500" value="${DEFAULT_PRICE}"></div>
-        <div><label>Cantidad de códigos</label><input id="gQty" type="number" min="1" max="20" value="1" required></div>
+        <div><label>Cantidad de códigos</label><input id="gQty" type="number" min="1" value="1" required></div>
         <div><button class="btn p" style="width:100%" type="submit">Generar</button></div>
       </form>
       <div class="newcode" id="newcode"></div>
@@ -440,6 +441,9 @@ function render(){
   $("#genForm").onsubmit = genCode;
   $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
   $("#aCount").checked = countFree();
+  $("#aNoCap").checked = noCap();
+  $("#aNoCap").onchange = () => { try{ localStorage.setItem(NOCAP_KEY, JSON.stringify($("#aNoCap").checked)); }catch{} $("#aCap").disabled = $("#aNoCap").checked; $("#capInfo").innerHTML = capInfoHtml(); };
+  $("#aCap").disabled = noCap();
   $("#aTtl").onchange = async () => { try{ await api("admin_set_ttl",{minutos:$("#aTtl").value}); TTL = +$("#aTtl").value; toast(TTL? "Los códigos sin canjear se borrarán a los "+$("#aTtl").selectedOptions[0].textContent+" ✔" : "Los códigos ya no caducan"); rows(); }catch(ex){ $("#aTtl").value = String(TTL??60); toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar la caducidad":ex.message); } };
   $("#aClean").onclick = async () => { try{ const j = await api("admin_cleanup"); toast(j.borrados? j.borrados+" código(s) vencido(s) invalidados ✔" : "No había códigos vencidos"); await refresh(); }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs)":ex.message); } };
   $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
@@ -528,12 +532,18 @@ function capMap(){
 const COUNT_KEY = "iap_cap_free";
 const countFree = () => !!load(COUNT_KEY);   // por defecto NO: solo cuentan los clientes que ya canjearon
 const used = a => a.act + (countFree() ? a.libres : 0);
+const NOCAP_KEY = "iap_nocap";
+const noCap = () => load(NOCAP_KEY) !== false; // por defecto SIN tope: el administrador genera los que quiera
 function planAuto(prod, qty, cap){
-  const pool = [...capMap().values()].filter(a=>!a.prob && a.filas[prod]!==undefined).map(a=>({...a, room:cap-used(a)})).filter(a=>a.room>0);
+  const base = [...capMap().values()].filter(a=>!a.prob && a.filas[prod]!==undefined);
+  const pool = noCap() ? base.map(a=>({...a, room:Infinity, load:used(a)})) : base.map(a=>({...a, room:cap-used(a), load:used(a)})).filter(a=>a.room>0);
   const plan = new Map(); let left = qty;
   while(left>0){
     const open = pool.filter(a=>a.room>0); if(!open.length) break;
-    const a = open[Math.floor(Math.random()*open.length)]; a.room--; left--;
+    let a;
+    if(noCap()){ const min = Math.min(...open.map(x=>x.load)); const lo = open.filter(x=>x.load===min); a = lo[Math.floor(Math.random()*lo.length)]; } // la menos ocupada
+    else a = open[Math.floor(Math.random()*open.length)];
+    a.room--; a.load++; left--;
     const p = plan.get(a.correo) || {correo:a.correo, fila:a.filas[prod], n:0, antes:used(a)}; p.n++; plan.set(a.correo,p);
   }
   return {plan, hechos:qty-left, faltan:left, cuentas:pool.length};
@@ -545,12 +555,12 @@ function capBar(a, cap){
 function capInfoHtml(){
   const prod = $("#aProd")?.value, cap = +$("#aCap")?.value || getCap(); if(!prod) return "";
   const todas = [...capMap().values()].filter(a=>a.filas[prod]!==undefined);
-  const abiertas = todas.filter(a=>!a.prob && used(a)<cap);
+  const abiertas = todas.filter(a=>!a.prob && (noCap() || used(a)<cap));
   const cupo = abiertas.reduce((s,a)=>s+cap-used(a),0);
   const prob = todas.filter(a=>a.prob).length;
-  return `<div class="capsum"><b>${esc(prod)}</b>: hay cupo para <b>${cupo}</b> código${cupo===1?"":"s"} más en <b>${abiertas.length}</b> cuenta${abiertas.length===1?"":"s"} de ${todas.length}${prob?` · ${prob} marcada${prob===1?"":"s"} con problemas (no se usan)`:""}.</div>
+  return `<div class="capsum"><b>${esc(prod)}</b>: ${noCap()?`<b>sin tope</b> · se reparten entre <b>${abiertas.length}</b> cuenta${abiertas.length===1?"":"s"} de ${todas.length}`:`hay cupo para <b>${cupo}</b> código${cupo===1?"":"s"} más en <b>${abiertas.length}</b> cuenta${abiertas.length===1?"":"s"} de ${todas.length}`}${prob?` · ${prob} marcada${prob===1?"":"s"} con problemas (no se usan)`:""}.</div>
     ${todas.sort((a,b)=>used(b)-used(a)).map(a=>`<div class="caprow"><span class="capm">${esc(a.correo)}${a.prob?' <small class="tag t-pr">con problemas</small>':""}</span>${capBar(a,cap)}${a.libres?`<small class="capfree">+${a.libres} sin canjear</small>`:""}</div>`).join("")}
-    ${abiertas.length===0?`<div class="capwarn">⚠️ No hay cuentas con cupo para ${esc(prod)}. Agrega una cuenta nueva (más abajo) para poder generar códigos.</div>`:""}`;
+    ${abiertas.length===0?`<div class="capwarn">⚠️ No hay cuentas ${noCap()?"disponibles":"con cupo"} para ${esc(prod)}. Agrega una cuenta nueva (más abajo) para poder generar códigos.</div>`:""}`;
 }
 function fillAuto(){
   const sel = $("#aProd"); if(!sel) return;
@@ -566,7 +576,8 @@ function onAutoProd(){ const p=$("#aProd").value; if(!p) return; $("#aDays").val
 async function makeCodes(fila, n, dias, precio){
   const out = [];
   while(out.length<n){
-    const k = Math.min(20, n-out.length);
+    const k = Math.min(100, n-out.length);
+    if(n>k) toast("Creando códigos… "+out.length+" de "+n);
     try{ out.push(...(await api("admin_bulk",{fila,cantidad:k,dias,precio})).codigos); }
     catch(ex){ if(!/no válida|Acción/i.test(ex.message)) throw ex; for(let t=0;t<k;t++) out.push((await api("admin_clone",{fila,dias,precio})).codigo); }
   }
@@ -574,12 +585,12 @@ async function makeCodes(fila, n, dias, precio){
 }
 async function autoGen(e){
   e.preventDefault();
-  const prod=$("#aProd").value, qty=Math.max(1,Math.min(50,+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
+  const prod=$("#aProd").value, qty=Math.max(1,Math.floor(+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
   const dias=$("#aDays").value, precio=$("#aPrice").value; if(!prod) return toast("Primero agrega una cuenta");
   try{ localStorage.setItem(CAP_KEY, JSON.stringify(cap)); }catch{}
   const {plan, hechos, faltan} = planAuto(prod, qty, cap);
   if(!hechos){ $("#capInfo").innerHTML = capInfoHtml(); return toast("No hay cuentas con cupo para "+prod+". Agrega una cuenta nueva."); }
-  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" códigos ("+p.antes+" clientes canjeados → hasta "+(p.antes+p.n)+" de "+cap+")").join("\n");
+  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" códigos ("+p.antes+" clientes canjeados → hasta "+(p.antes+p.n)+(noCap()?"":" de "+cap)+")").join("\n");
   if(!confirm("Se crearán "+hechos+" código"+(hechos===1?"":"s")+" de "+prod+" en "+plan.size+" cuenta"+(plan.size===1?"":"s")+":\n\n"+resumen+(faltan?"\n\n⚠️ Pediste "+qty+", pero solo hay cupo para "+hechos+". Agrega más cuentas para el resto.":"")+"\n\n¿Generar?")) return;
   const b=e.target.querySelector("button"); b.disabled=true; b.textContent="Generando…";
   const res=[]; let total=0;
@@ -636,12 +647,12 @@ function showCodes(codes, it){
 async function genCode(e){
   e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
   const b=e.target.querySelector("button"); b.disabled=true;
-  const dias=$("#gDays").value, precio=$("#gPrice").value, qty=Math.max(1,Math.min(20,+$("#gQty").value||1));
+  const dias=$("#gDays").value, precio=$("#gPrice").value, qty=Math.max(1,Math.floor(+$("#gQty").value||1));
   const ci=capMap().get(a.correo.toLowerCase()), cap=getCap();
-  if(ci && used(ci)+qty>cap && !confirm("Esta cuenta ya tiene "+used(ci)+" de "+cap+" cupos ocupados. Con "+qty+" código(s) más pasaría del tope y se puede saturar.\n\nSugerencia: usa «Generar códigos automáticos» para repartirlos en cuentas con cupo.\n\n¿Generar de todos modos?")){ b.disabled=false; return; }
+  if(!noCap() && ci && used(ci)+qty>cap && !confirm("Esta cuenta ya tiene "+used(ci)+" de "+cap+" cupos ocupados. Con "+qty+" código(s) más pasaría del tope y se puede saturar.\n\nSugerencia: usa «Generar códigos automáticos» para repartirlos en cuentas con cupo.\n\n¿Generar de todos modos?")){ b.disabled=false; return; }
   try{
     let codes;
-    if(qty>1) codes = (await api("admin_bulk",{fila:a.fila,dias,precio,cantidad:qty})).codigos;
+    if(qty>1) codes = await makeCodes(a.fila, qty, dias, precio);
     else codes = [(await api("admin_clone",{fila:a.fila,dias,precio})).codigo];
     await copyText(codes.length>1?codes.map(linkFor).join("\n"):msgFor({producto:a.producto,codigo:codes[0],dias}));
     await refresh(); showCodes(codes,{producto:a.producto,dias});
