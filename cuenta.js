@@ -144,7 +144,7 @@ function card(it, idx){
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
       ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
-      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||5}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
+      ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||2}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>🔐 Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
         <p class="tnote"></p></div>`:""}
@@ -281,7 +281,7 @@ async function openMore(){
   try{
     const j=await callApi({action:"acct_options"}); if(!j.ok) throw new Error(j.error||"Error");
     if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas activas.</p>`; return; }
-        body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus 5 pedidos de código de cada día.</p>`+(j.grupos||[]).map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+(g.opciones.length?"":`<div class="mopt"><div><small>Sin cuentas libres por ahora</small></div><a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero una cuenta de "+g.producto)}">Pedir</a></div>`)+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
+        body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus pedidos de código de cada día.</p>`+(j.grupos||[]).map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+(g.opciones.length?"":`<div class="mopt"><div><small>Sin cuentas libres por ahora</small></div><a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero una cuenta de "+g.producto)}">Pedir</a></div>`)+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
     body.onclick=async e=>{
       const b=e.target.closest("[data-pick]"); if(!b) return; b.disabled=true; b.textContent="Agregando…";
       try{ const r=await callApi({action:"acct_add",fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
