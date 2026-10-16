@@ -33,12 +33,16 @@
   window.IAP_API = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
   window.postJson = async function(url, body){
     if(body && !body.dev) body = {...body, dev: device()};
-    try{ return await once(url, body); }
+    let j;
+    try{ j = await once(url, body); }
     catch(e){
       if(!e.network || navigator.onLine === false || !isSafe(body)) throw e;
       await new Promise(r => setTimeout(r, 1200));
-      return once(url, body);
+      j = await once(url, body);
     }
+    // sesión larga: el servidor la entrega al entrar con Google y la renueva con el uso (dura hasta pulsar «Salir»)
+    if(j && j.ses && j.sesExp){ try{ localStorage.setItem("iap_cred", JSON.stringify({token:j.ses, exp:j.sesExp})); }catch{} }
+    return j;
   };
   window.iapTrack = function(tipo, detalle){
     try{
