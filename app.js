@@ -75,17 +75,17 @@ function renderGrid(){
   const first = gridFirst; gridFirst = false;
   $("#grid").innerHTML = list.map((p,n)=>`
     <article class="card ${first?"reveal":"anim"}" style="--d:${Math.min(n,8)*(first?80:55)}ms">
-      ${p.hot?'<span class="badge">🔥 Popular</span>':''}
+      ${p.hot?'<span class="badge">Más vendido</span>':''}
       <div class="ico ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
-      ${(CONFIG.PAGOS||/[?&]pagos=1/.test(location.search))?`<button class="btn btn-primary full buy-btn pay-btn" type="button" data-pay="${p.id}">💳 Pagar ahora</button>
+      ${(CONFIG.PAGOS||/[?&]pagos=1/.test(location.search))?`<button class="btn btn-primary full buy-btn pay-btn" type="button" data-pay="${p.id}"><svg class="ic"><use href="#i-card"/></svg>Pagar ahora</button>
       <a class="buy-alt" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">o compra por WhatsApp</a>`
-      :`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">💬 Comprar por WhatsApp</a>`}
-    </article>`).join("") || `<div class="nores"><span class="big">🔎</span>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
+      :`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
+    </article>`).join("") || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); swapGrid(); };
   observeReveal();
 }
@@ -105,7 +105,7 @@ function parseJwt(t){
   const b = t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
   return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")));
 }
-function setUser(u){ user = u; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]} 👋`); loadMine(); setTimeout(()=>window.iapAskInstall&&window.iapAskInstall(),1200); }
+function setUser(u){ user = u; try{ localStorage.removeItem("iap_pwa_seen"); }catch{} save("iap_user", u); renderAuth(); renderHeroCard(); renderRedeem(); closeLogin(); toast(`Bienvenido, ${u.name.split(" ")[0]}`); loadMine(); setTimeout(()=>window.iapAskInstall&&window.iapAskInstall(),1200); }
 
 function onGoogle(resp){
   // Para máxima seguridad, verifica resp.credential también en tu servidor.
@@ -162,19 +162,19 @@ function renderAuth(){
 function hasAccount(){ return !!(user && (load("iap_has", false) || (myItems&&myItems.length))); }
 async function redeemCode(code, err, btn, label){
   err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
-  try{ myItems = await callApi("redeem", code); toast("Cuenta desbloqueada ✔"); location.href = "cuenta.html"; }
+  try{ myItems = await callApi("redeem", code); toast("Cuenta desbloqueada"); location.href = "cuenta.html"; }
   catch(ex){ err.textContent = ex.message; err.hidden=false; btn.disabled=false; btn.textContent=label; }
 }
 function renderHeroCard(){
   const c = $("#heroCard");
   if(user && hasAccount()){
-    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])} 👋</h3><p>Tu cuenta ya está activa.</p></div>
-      <a href="cuenta.html" class="btn btn-primary full pulse-btn">🔓 Ver mi cuenta</a>
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])}</h3><p>Tu cuenta ya está activa.</p></div>
+      <a href="cuenta.html" class="btn btn-primary full pulse-btn"><svg class="ic"><use href="#i-unlock"/></svg>Ver mi cuenta</a>
       <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">Comprar otra cuenta</a>
       <button class="linkbtn" id="heroLogout">Cerrar sesión</button>`;
     $("#heroLogout").onclick = logout;
   } else if(user){
-    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])} 👋</h3><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])}</h3><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
       <form id="heroForm" class="redeem-form" style="flex-direction:column"><input id="heroCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar mi código</button></form>
       <p class="note err" id="heroErr" hidden></p>
       <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">¿Aún no tienes código? Ver catálogo</a>
@@ -205,18 +205,18 @@ function renderRedeem(){
   const box = $("#redeemBox"); if(!box) return;
   // quien ya tiene una cuenta activa no ve el panel de desbloqueo: va directo a su cuenta
   if(user && (load("iap_has", false) || (myItems&&myItems.length))){
-    box.innerHTML = '<a class="btn btn-primary full" href="cuenta.html">🔓 Abrir mi cuenta</a><p class="note" style="margin-top:8px;color:var(--mut)">¿Compraste otra? Agrégala desde Mi cuenta.</p>';
+    box.innerHTML = '<a class="btn btn-primary full" href="cuenta.html"><svg class="ic"><use href="#i-unlock"/></svg>Abrir mi cuenta</a><p class="note" style="margin-top:8px;color:var(--mut)">¿Compraste otra? Agrégala desde Mi cuenta.</p>';
     return;
   }
   if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
-  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html">🔓 Abrir mi cuenta</a>' : '';
+  const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html"><svg class="ic"><use href="#i-unlock"/></svg>Abrir mi cuenta</a>' : '';
   box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
     <div id="acctList">${myItems===null?'':(list||'')}</div>`;
   $("#redeemForm").onsubmit = async e => {
     e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
     const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
-    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada ✔"); location.href = "cuenta.html"; return; }
+    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada"); location.href = "cuenta.html"; return; }
     catch(ex){ err.textContent = ex.message; err.hidden=false; }
     renderRedeem_keep(err.textContent, !err.hidden);
   };
@@ -224,7 +224,7 @@ function renderRedeem(){
 function renderRedeem_keep(msg, show){ renderRedeem(); if(show){ const e=$("#redeemErr"); e.textContent=msg; e.hidden=false; } }
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-copy]"); if(!t) return;
-  copyText(t.dataset.copy).then(()=>toast("Copiado ✔"));
+  copyText(t.dataset.copy).then(()=>toast("Copiado"));
 });
 async function loadMine(){
   if(!user || !CONFIG.API_URL) return;
@@ -236,7 +236,7 @@ async function loadMine(){
 }
 
 /* ============ INIT ============ */
-$("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión ✔"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
+$("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
 $("#burger").onclick = () => { const on = $("#links").classList.toggle("on"); $("#burger").setAttribute("aria-expanded", on); };
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
@@ -288,7 +288,7 @@ document.addEventListener("pointerdown", e => {
   // íconos flotando alrededor de la tarjeta de ingreso
   const ob=$("#orbit");
   if(ob){
-    const pos=[[2,8,-8],[86,4,7],[-4,52,6],[92,46,-6],[8,88,5],[80,90,-7]];
+    const pos=[[-2,4,-8],[90,0,7],[-8,48,6],[98,44,-6],[2,90,5],[88,92,-7]];
     ob.innerHTML=PRODUCTS.filter(p=>p.img).slice(0,6).map((p,i)=>`<span class="orb ${p.dark?"dk":""}" style="left:${pos[i][0]}%;top:${pos[i][1]}%;--rt:${pos[i][2]}deg;--dl:${(i*.7).toFixed(1)}s"><img src="${p.img}" alt=""></span>`).join("");
     requestAnimationFrame(()=>ob.classList.add("on"));
   }

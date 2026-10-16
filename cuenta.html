@@ -13,14 +13,14 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<meta name="theme-color" content="#ef5350">
+<meta name="theme-color" content="#ffffff">
 <style>
 :root{--bg:#f5f5f7;--card:#fff;--line:#ececf0;--text:#1d1d22;--mut:#85858f;--red:#ef5350;--red2:#ff6f6b;--redbg:#fdeceb;--dark:#2c2c30;--ok:#12a36b;--okbg:#e3f7ee;--acc:#ef5350;--soft:#fdeceb}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:'Nunito','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit}
 /* ---------- encabezado coral ---------- */
@@ -288,6 +288,39 @@ body{-webkit-font-smoothing:antialiased;background:radial-gradient(1000px 420px 
 .mopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .mopt small{display:block;color:var(--mut)}
 .mgrp{margin:14px 0 2px;font-size:15px}
+/* ===== estilo profesional: encabezado blanco, tipografía y paleta sobria ===== */
+:root{--text:#0f172a;--mut:#64748b;--line:#e8edf3;--bg:#f8fafc;--dark:#0f172a}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:radial-gradient(900px 400px at 90% -10%,rgba(255,106,92,.08),transparent 60%),var(--bg)}
+.top{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(16px) saturate(1.6);backdrop-filter:blur(16px) saturate(1.6);color:var(--text);box-shadow:none;border-bottom:1px solid transparent}
+.top.scrolled{border-bottom-color:var(--line);box-shadow:0 4px 20px rgba(15,23,42,.06)}
+.nav a{color:var(--mut);font-weight:600;font-size:15px}
+.nav a:hover{background:#f1f5f9;color:var(--text)}
+.search{background:#f1f5f9;border:1px solid var(--line)}
+.search:focus-within{background:#fff;border-color:var(--red);box-shadow:0 0 0 4px rgba(239,83,80,.12)}
+.search svg{stroke:#94a3b8}
+.search input{color:var(--text);font-weight:500;font-size:15px}
+.search input::placeholder{color:#94a3b8}
+.pill{background:#fff;border:1px solid var(--line);color:var(--text);font-weight:600;font-size:15px}
+.pill:hover{background:#f1f5f9}
+.ibtn svg{stroke:var(--text)}
+.ibtn:hover{background:#f1f5f9}
+.avatar{border:2px solid #fff;box-shadow:0 0 0 1px var(--line);background:var(--redbg);color:var(--red)}
+.avatar:hover{box-shadow:0 0 0 3px rgba(239,83,80,.2)}
+.ttl h1{font-weight:800;letter-spacing:-.03em}
+.tabs button{font-weight:600;font-size:18px}
+.pname h2{font-weight:800;letter-spacing:-.02em}
+.rw span:first-child{font-weight:500}
+.rw span:last-child{font-weight:700}
+.sub-card{border-radius:22px;box-shadow:0 1px 3px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06)}
+.sub-card:hover{box-shadow:0 2px 6px rgba(15,23,42,.05),0 20px 48px rgba(15,23,42,.10)}
+.banner{border-radius:14px;font-weight:700}
+.banner .chev{animation:none}
+.foot .buyagain{animation:none}
+.tbtn,.warn a,.morebox .cta{animation:none}
+.foot a{font-weight:600}
+.how ol,.note{font-weight:500}
+.menu{border-radius:18px}
+.menu a,.menu button.mi{font-weight:600;font-size:16px}
 @media(max-width:860px){
   .bn{background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4)}
   .bn i{transition:transform .35s var(--spring)}
