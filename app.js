@@ -132,7 +132,7 @@ function initGoogle(){
   google.accounts.id.renderButton($("#gBtn"), opts);
   google.accounts.id.renderButton($("#gBtnHero"), opts);
 }
-function openLogin(){ const m=$("#loginModal"); m.classList.add("on"); m.setAttribute("aria-hidden","false"); initGoogle(); const em=$("#emailModal"); if(em && !em.firstChild && window.iapEmailLogin) iapEmailLogin(em, u=>setUser(u)); setTimeout(()=>$("#closeLogin").focus(),50); }
+function openLogin(){ const m=$("#loginModal"); m.classList.add("on"); m.setAttribute("aria-hidden","false"); initGoogle(); setTimeout(()=>$("#closeLogin").focus(),50); }
 function closeLogin(){ const m=$("#loginModal"); m.classList.remove("on"); m.setAttribute("aria-hidden","true"); }
 document.addEventListener("keydown", e => { if(e.key==="Escape" && $("#loginModal").classList.contains("on")) closeLogin(); });
 $("#closeLogin").onclick = closeLogin;
@@ -151,7 +151,7 @@ function logout(){
 function renderAuth(){
   const a = $("#authArea");
   if(!user){
-    a.innerHTML = `<button class="btn btn-google" id="loginBtn">Ingresar</button>`;
+    a.innerHTML = `<button class="btn btn-google" id="loginBtn">Ingresar con Gmail</button>`;
     $("#loginBtn").onclick = openLogin;
     return;
   }
@@ -183,11 +183,10 @@ function renderHeroCard(){
     $("#heroLogout").onclick = logout;
     $("#heroForm").onsubmit = e => { e.preventDefault(); redeemCode($("#heroCode").value, $("#heroErr"), e.target.querySelector("button"), "Activar mi código"); };
   } else {
-    c.innerHTML = `<h3>Entra a tu cuenta</h3><p>¿Ya activaste tu código? Inicia sesión con Google o con tu correo y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
-      <div id="gBtnHero" class="gbtn"></div><div id="emailHero"></div><small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
+    c.innerHTML = `<h3>Entra a tu cuenta</h3><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
+      <div id="gBtnHero" class="gbtn"></div><small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
       <a href="#catalogo" class="linkbtn" style="display:block;margin-top:12px">¿Aún no tienes código? Ver catálogo ↓</a>`;
     initGoogle();
-    if(window.iapEmailLogin) iapEmailLogin($("#emailHero"), u=>setUser(u));
   }
 }
 
@@ -209,7 +208,7 @@ function renderRedeem(){
     box.innerHTML = '<a class="btn btn-primary full" href="cuenta.html"><svg class="ic"><use href="#i-unlock"/></svg>Abrir mi cuenta</a><p class="note" style="margin-top:8px;color:var(--mut)">¿Compraste otra? Agrégala desde Mi cuenta.</p>';
     return;
   }
-  if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
+  if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
   const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html"><svg class="ic"><use href="#i-unlock"/></svg>Abrir mi cuenta</a>' : '';
   box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
