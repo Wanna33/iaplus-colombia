@@ -211,6 +211,111 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
   .kv{grid-template-columns:1fr}
 }
 
+/* ===== estructura profesional: menú lateral, barra superior, tablero ===== */
+:root{--night:#0a0e1a;--side-w:256px}
+.side{position:fixed;inset:0 auto 0 0;width:var(--side-w);background:var(--night);color:#cbd5e1;display:flex;flex-direction:column;z-index:60;border-right:1px solid rgba(255,255,255,.06);background-image:radial-gradient(400px 260px at 0 0,rgba(244,63,94,.22),transparent 70%),radial-gradient(360px 300px at 100% 100%,rgba(124,58,237,.18),transparent 70%)}
+.side-brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;color:#fff}
+.side-brand img{height:40px;width:auto}
+.side-brand span{font-weight:800;font-size:17px;line-height:1.1;letter-spacing:-.01em}.side-brand small{display:block;font-weight:500;font-size:11.5px;color:#94a3b8;letter-spacing:0}
+.side-nav{flex:1;overflow:auto;padding:6px 12px}
+.nvg{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:#8391a7;font-weight:700;margin:16px 10px 6px}
+.nv{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;color:#cbd5e1;font:inherit;font-weight:600;font-size:14.5px;padding:10px 12px;border-radius:11px;cursor:pointer;text-align:left;position:relative;transition:background .2s,color .2s}
+.nv:hover{background:rgba(255,255,255,.06);color:#fff}
+.nv.on{background:linear-gradient(135deg,rgba(244,63,94,.95),rgba(139,92,246,.9));color:#fff;box-shadow:0 8px 22px rgba(244,63,94,.28)}
+.nvi{width:19px;height:19px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.nvb{margin-left:auto;font-style:normal;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.12);color:#fff;padding:1px 8px;border-radius:99px}
+.nvb.w{background:#f59e0b;color:#1f1300}
+.side-foot{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+.side-user{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#94a3b8;padding:4px 6px 10px;overflow:hidden}
+.side-user #who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-user .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);flex:none}
+.side-acts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sbtn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#e2e8f0;border-radius:10px;padding:8px 4px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:background .2s}
+.sbtn:hover{background:rgba(255,255,255,.1)}
+.side-shade{display:none}
+body.has-side .main-col{margin-left:var(--side-w)}
+.burger{display:none;border:1px solid var(--line);background:var(--card);border-radius:10px;width:42px;height:42px;font-size:20px;cursor:pointer;color:var(--text)}
+.bar-logo{display:none}
+.bar .ttl{min-width:0;flex:1}
+.bar h1{font-size:20px;line-height:1.15}
+.bar .ttl p{color:var(--mut);font-size:13px;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-btn{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:11px;padding:8px 10px 8px 12px;font:inherit;font-size:13.5px;cursor:pointer;min-width:260px;min-height:40px;justify-content:space-between;transition:border-color .2s}
+.search-btn:hover{border-color:var(--acc)}
+.search-btn kbd{font:inherit;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;background:var(--bg)}
+body.has-side .tabs{display:none}
+main{max-width:1320px}
+/* tablero */
+.dash-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.hello{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.2}.hello small{display:block;font-size:13px;color:var(--mut);font-weight:500;margin-top:2px}
+.hello small::first-letter{text-transform:uppercase}
+.qa{display:flex;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:0 1px 3px rgba(15,23,42,.04);transition:transform .25s,box-shadow .25s,border-color .25s;animation:up .5s cubic-bezier(.2,.7,.2,1) both;min-width:0}
+.kpi[data-goto]{cursor:pointer}.kpi[data-goto]:hover{transform:translateY(-3px);border-color:rgba(244,63,94,.35);box-shadow:0 12px 26px rgba(244,63,94,.12)}
+.kpi-h{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut);font-weight:600}
+.kpi-ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--soft);font-size:14px;flex:none}
+.kpi b{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi small{font-size:12px;color:var(--mut)}
+.kpi .up{color:var(--ok);font-weight:800}.kpi .down{color:var(--bad);font-weight:800}
+.kpi.big{grid-column:span 2;background:linear-gradient(135deg,#f04c48,#f43f5e 55%,#8b5cf6);border:0;color:#fff}
+.kpi.big .kpi-h,.kpi.big small{color:rgba(255,255,255,.9)}.kpi.big .kpi-ic{background:rgba(255,255,255,.2)}
+.kpi.big b{font-size:32px}.kpi.big .up,.kpi.big .down{color:#fff;background:rgba(255,255,255,.2);padding:0 6px;border-radius:6px}
+.kpi.w b{color:var(--warn)}.kpi.b b{color:var(--bad)}.kpi.g b{color:var(--ok)}
+.kpis .kpi:nth-child(2){animation-delay:.04s}.kpis .kpi:nth-child(3){animation-delay:.08s}.kpis .kpi:nth-child(4){animation-delay:.12s}.kpis .kpi:nth-child(5){animation-delay:.16s}.kpis .kpi:nth-child(6){animation-delay:.2s}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.dgrid>.card{margin:0;min-width:0}
+.span2{grid-column:span 2}.span3{grid-column:1/-1}
+.card h2{font-size:16px;display:flex;align-items:center;gap:8px}
+.btn.ghost{border-color:transparent;background:var(--soft);color:var(--acc);margin-left:auto}
+.hint{color:var(--mut);font-size:12px;margin-top:8px}
+.chart-h{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px}
+.chart-h b{font-size:24px;font-weight:800;letter-spacing:-.02em;display:block}.chart-h small{color:var(--mut);font-size:12.5px}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart .bg{fill:var(--soft);opacity:.55}
+.chart .fg{fill:url(#gBar);transition:opacity .2s}
+.chart .bar:hover .fg{opacity:.8}
+.chart .bar.cur .bg{fill:rgba(244,63,94,.12);opacity:1}
+.chart .val{font-size:11px;font-weight:700;fill:var(--text);text-anchor:middle}
+.chart .lbl{font-size:11px;fill:var(--mut);text-anchor:middle}
+.chart.line .ln{fill:none;stroke:#f43f5e;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart.line circle{fill:#fff;stroke:#f43f5e;stroke-width:2}
+.mix{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.donut{width:150px;height:150px;flex:none}
+.donut circle{transition:stroke-width .2s}.donut circle:hover{stroke-width:22}
+.donut .dn{font-size:26px;font-weight:800;fill:var(--text);text-anchor:middle}.donut .dl{font-size:11px;fill:var(--mut);text-anchor:middle}
+.legend{list-style:none;display:grid;gap:7px;flex:1;min-width:150px;font-size:13px}
+.legend li{display:grid;grid-template-columns:12px 1fr auto auto;gap:8px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:3px}.legend small{color:var(--mut);min-width:34px;text-align:right}
+.feed{list-style:none;display:grid;gap:2px;max-height:330px;overflow:auto}
+.feed li{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.feed li:last-child{border-bottom:0}
+.feed li.empty{display:block}
+.feed .fd-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#f43f5e,#8b5cf6);margin-top:6px}
+.feed b{display:block;font-weight:700}.feed small{color:var(--mut);word-break:break-all}.feed time{color:var(--mut);font-size:11.5px;white-space:nowrap}
+.ptable{min-width:900px}
+@media(max-width:1400px){.kpis{grid-template-columns:repeat(4,1fr)}.kpi.big{grid-column:span 2}}
+@media(max-width:1100px){.dgrid{grid-template-columns:1fr 1fr}.span2,.span3{grid-column:1/-1}.search-btn{min-width:0}.search-btn span,.search-btn kbd{display:none}.search-btn::before{content:"🔎"}}
+@media(max-width:1023px){
+  body.has-side .main-col{margin-left:0}
+  .side{transform:translateX(-100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);box-shadow:20px 0 60px rgba(0,0,0,.35)}
+  body.side-open .side{transform:none}
+  body.side-open .side-shade{display:block;position:fixed;inset:0;background:rgba(10,14,26,.5);z-index:55;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+  .burger{display:grid;place-items:center}
+  body.has-side .bar-logo{display:block}.bar-logo img{height:34px;width:auto}
+  body.has-side .tabs{display:flex}
+}
+@media(max-width:760px){
+  .kpis{grid-template-columns:1fr 1fr}.kpi.big{grid-column:1/-1}
+  .dgrid{grid-template-columns:1fr}
+  .bar .ttl p{display:none}.bar h1{font-size:17px}
+  .tabs button .nvi{width:22px;height:22px;margin-bottom:2px}
+  .dash-top .qa .btn{flex:1 1 calc(50% - 8px)}
+  .hello{font-size:19px}
+  .ptable{min-width:0}
+  .kpi b{font-size:22px}.kpi.big b{font-size:28px}
+}
+[data-theme=dark] .chart.line circle{fill:var(--card)}
+
 /* ===== identidad IA Plus: acabado profesional ===== */
 .bar{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
 .bar h1{font-weight:800;letter-spacing:-.02em}
@@ -238,13 +343,24 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 </head>
 <body>
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
+<aside class="side hide" id="side" aria-label="Menú del panel">
+  <a class="side-brand" href="index.html" title="Ir a la tienda"><img src="logo-main.webp" alt="IA Plus Colombia" width="58" height="40"><span>Panel<small>IA Plus Colombia</small></span></a>
+  <nav class="side-nav" id="sideNav"></nav>
+  <div class="side-foot">
+    <div class="side-user"><span class="av" aria-hidden="true">👤</span><span id="who"></span></div>
+    <div class="side-acts"><button class="sbtn" id="gTheme" type="button" title="Modo claro / oscuro">🌓 Tema</button><a class="sbtn" href="index.html">🏪 Tienda</a><button class="sbtn" id="gLogout" type="button">↩ Salir</button></div>
+  </div>
+</aside>
+<div class="side-shade" id="sideShade"></div>
+<div class="main-col">
 <header class="bar"><div class="bar-in">
-  <a href="index.html"><img src="logo-main.webp" alt="IA Plus Colombia"></a>
-  <h1>Panel de administrador</h1>
-  <div class="sp"><span id="who"></span><a class="btn s" href="index.html">← Tienda</a><button class="btn s hide" id="gSearch" title="Buscar (Ctrl+K)" aria-label="Buscar">🔎</button><button class="btn s hide" id="gSettings" title="Ajustes" aria-label="Ajustes">⚙️</button><button class="btn s hide" id="reload">↻ Actualizar</button></div>
+  <button class="burger" id="sideBtn" type="button" aria-label="Abrir menú">☰</button>
+  <a class="bar-logo" href="index.html"><img src="logo-main.webp" alt="IA Plus Colombia" width="58" height="40"></a>
+  <div class="ttl"><h1 id="pageTitle">Panel de administrador</h1><p id="pageSub"></p></div>
+  <div class="sp"><button class="search-btn hide" id="gSearch" type="button" title="Buscar (Ctrl+K)"><span>🔎 Buscar cliente, código, cuenta…</span><kbd>Ctrl K</kbd></button><button class="btn s hide" id="gSettings" title="Ajustes" aria-label="Ajustes">⚙️</button><button class="btn s hide" id="reload">↻ Actualizar</button></div>
 </div></header>
-
 <main id="app"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
+</div>
 <div class="toast" id="toast"></div>
 
 <script src="net.js"></script>

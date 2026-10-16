@@ -133,38 +133,89 @@ function showInfo(html){
 
 /* ---------- Vistas ---------- */
 function statsHtml(){
-  const cnt = k => items.filter(i=>state(i).k===k).length;
-  const withClient = items.filter(i=>i.cliente);
-  const uniq = arr => new Set(arr.map(i=>i.cliente.toLowerCase())).size;
-  const activos = uniq(withClient.filter(i=>!i.vencida));
-  const total = uniq(withClient);
-  const dayMs = 86400000, now = Date.now(), nd = new Date();
-  const hoy = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<dayMs).length;
-  const semana = withClient.filter(i=>i.inicio && now-new Date(i.inicio)<7*dayMs).length;
-  const inMonth = i => { if(!i.inicio) return false; const d=new Date(i.inicio); return d.getMonth()===nd.getMonth() && d.getFullYear()===nd.getFullYear(); };
-  const ingMes = withClient.filter(inMonth).reduce((s,i)=>s+(Number(i.precio)||0),0);
-  const ingTot = withClient.reduce((s,i)=>s+(Number(i.precio)||0),0);
-  const prob = items.filter(i=>state(i).k==="pr").length;
-  const libres = items.filter(i=>!i.cliente && state(i).k==="av").length;
-  return `<div class="stat big"><span>👥 Clientes activos ahora</span><b data-n="${activos}">0</b><small>${total} clientes en total desde el inicio · +${hoy} hoy · +${semana} esta semana</small></div>
-    <div class="stat"><b>${money(ingMes)}</b><span>Ingresos este mes</span></div>
-    <div class="stat"><b>${money(ingTot)}</b><span>Ingresos totales</span></div>
-    <div class="stat"><b data-n="${items.length}">0</b><span>Cuentas / códigos en total</span></div>
-    <div class="stat"><b data-n="${libres}">0</b><span>Códigos disponibles</span></div>
-    <div class="stat g"><b data-n="${cnt("ok")}">0</b><span>Planes activos</span></div>
-    <div class="stat w"><b data-n="${cnt("w")}">0</b><span>Vencen en ≤5 días</span></div>
-    <div class="stat b"><b data-n="${cnt("b")}">0</b><span>Vencidos</span></div>
-    <div class="stat w"><b data-n="${prob}">0</b><span>Cuentas con problemas</span></div>`;
+  const withClient = items.filter(i=>i.cliente), uniq = arr => new Set(arr.map(i=>i.cliente.toLowerCase())).size;
+  const nd = new Date(), now = Date.now(), D = 86400000, dia = nd.getDate();
+  const inM = (i,off,hasta) => { if(!i.inicio) return false; const d = new Date(i.inicio), m = new Date(nd.getFullYear(), nd.getMonth()-off, 1); return d.getMonth()===m.getMonth() && d.getFullYear()===m.getFullYear() && (!hasta || d.getDate()<=hasta); };
+  const sum = a => a.reduce((s,i)=>s+(Number(i.precio)||0),0);
+  const ingMes = sum(withClient.filter(i=>inM(i,0))), ingAnt = sum(withClient.filter(i=>inM(i,1,dia)));
+  const delta = ingAnt ? Math.round((ingMes-ingAnt)/ingAnt*100) : null;
+  const ventasMes = withClient.filter(i=>inM(i,0)).length;
+  const activos = uniq(withClient.filter(i=>!i.vencida)), nuevosHoy = uniq(withClient.filter(i=>i.inicio && now-new Date(i.inicio)<D));
+  const v7 = withClient.filter(i=>!i.vencida && i.restante!==null && i.restante<=7).length;
+  const libres = items.filter(i=>state(i).k==="av").length, prob = items.filter(i=>state(i).k==="pr").length;
+  const cap = getCap(), cuentas = [...capMap().values()].filter(a=>!a.prob), cupo = cuentas.reduce((t,a)=>t+Math.max(0,cap-used(a)),0);
+  const ocup = cuentas.length ? Math.round(cuentas.reduce((t,a)=>t+Math.min(cap,used(a)),0)/(cuentas.length*cap)*100) : 0;
+  const k = (ic, label, val, foot, cls="", go="") => `<div class="kpi ${cls}" ${go?`data-goto="${go}" role="button" tabindex="0"`:""}><div class="kpi-h"><span class="kpi-ic">${ic}</span>${label}</div><b>${val}</b><small>${foot}</small></div>`;
+  return k("💰","Ingresos del mes", money(ingMes), delta===null ? ventasMes+" venta"+(ventasMes===1?"":"s")+" este mes" : `<span class="${delta>=0?"up":"down"}">${delta>=0?"▲":"▼"} ${Math.abs(delta)}%</span> vs. el mes pasado a la fecha`, "big")
+    + k("👥","Clientes activos", `<span data-n="${activos}">0</span>`, nuevosHoy ? "+"+nuevosHoy+" nuevo"+(nuevosHoy===1?"":"s")+" hoy" : "Ningún cliente nuevo hoy", "", "cli")
+    + k("⏳","Vencen en 7 días", `<span data-n="${v7}">0</span>`, v7 ? "Escríbeles para renovar" : "Nadie por vencer", v7?"w":"", "cli")
+    + k("🎫","Códigos disponibles", `<span data-n="${libres}">0</span>`, "Listos para vender", libres?"":"w", "cod")
+    + k("🧩","Cupo libre", `<span data-n="${cupo}">0</span>`, ocup+"% de ocupación en "+cuentas.length+" cuenta"+(cuentas.length===1?"":"s"), ocup>=85?"w":"", "cta")
+    + k("⚠️","Con problemas", `<span data-n="${prob}">0</span>`, prob ? "Revisa y reemplaza" : "Todo funcionando", prob?"b":"g", "cod");
 }
 function monthsHtml(){
   const now = new Date(), rows = [];
-  for(let k=5;k>=0;k--){
+  for(let k=11;k>=0;k--){
     const d = new Date(now.getFullYear(), now.getMonth()-k, 1);
     const its = items.filter(i=>{ if(!i.inicio||!i.cliente) return false; const x=new Date(i.inicio); return x.getMonth()===d.getMonth()&&x.getFullYear()===d.getFullYear(); });
-    rows.push({l:d.toLocaleDateString("es-CO",{month:"short",year:"2-digit"}), n:its.length, v:its.reduce((s,i)=>s+(Number(i.precio)||0),0)});
+    rows.push({l:d.toLocaleDateString("es-CO",{month:"short"}).replace(".",""), y:d.getFullYear(), n:its.length, v:its.reduce((s,i)=>s+(Number(i.precio)||0),0), cur:k===0});
   }
-  const mx = Math.max(1,...rows.map(r=>r.n));
-  return `<div class="bars">${rows.map(r=>`<div class="brow"><span>${esc(r.l)}</span><i style="width:${Math.max(1,r.n/mx*100)}%"></i><span><b>${r.n}</b> ventas · ${money(r.v)}</span></div>`).join("")}</div>`;
+  const W=720, H=230, pl=8, pr=8, pt=26, pb=28, bw=(W-pl-pr)/rows.length, mx=Math.max(1,...rows.map(r=>r.v));
+  const tot = rows.reduce((s,r)=>s+r.v,0), nTot = rows.reduce((s,r)=>s+r.n,0);
+  const bars = rows.map((r,i)=>{ const h=Math.max(r.v?4:0,(H-pt-pb)*r.v/mx), x=pl+i*bw+bw*.18, y=H-pb-h, w=bw*.64;
+    return `<g class="bar${r.cur?" cur":""}"><title>${r.l} ${r.y}: ${money(r.v)} · ${r.n} venta${r.n===1?"":"s"}</title><rect x="${x}" y="${pt}" width="${w}" height="${H-pt-pb}" rx="6" class="bg"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" class="fg"/>${r.v?`<text x="${x+w/2}" y="${y-7}" class="val">${r.v>=1e6?(r.v/1e6).toFixed(1)+"M":Math.round(r.v/1000)+"k"}</text>`:""}<text x="${x+w/2}" y="${H-9}" class="lbl">${r.l}</text></g>`; }).join("");
+  return `<div class="chart-h"><div><b>${money(tot)}</b><small>${nTot} ventas en 12 meses</small></div></div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos por mes de los últimos 12 meses"><defs><linearGradient id="gBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>${bars}</svg>`;
+}
+function dailyHtml(){
+  const D=86400000, today=new Date(); today.setHours(0,0,0,0); const pts=[];
+  for(let k=29;k>=0;k--){ const t0=today.getTime()-k*D; pts.push({d:new Date(t0), n:items.filter(i=>i.cliente&&i.inicio&&(t=>t>=t0&&t<t0+D)(new Date(i.inicio).getTime())).length}); }
+  const W=720,H=150,p=10, mx=Math.max(1,...pts.map(x=>x.n)), sx=(W-2*p)/(pts.length-1);
+  const xy = pts.map((q,i)=>[p+i*sx, H-22-(H-44)*q.n/mx]);
+  const line = xy.map((c,i)=>(i?"L":"M")+c[0].toFixed(1)+" "+c[1].toFixed(1)).join(" ");
+  const area = line+` L${xy[xy.length-1][0].toFixed(1)} ${H-22} L${p} ${H-22} Z`;
+  const total = pts.reduce((s,q)=>s+q.n,0), last7 = pts.slice(-7).reduce((s,q)=>s+q.n,0);
+  const dots = xy.map((c,i)=>`<circle cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" r="${pts[i].n?3.5:0}"><title>${pts[i].d.toLocaleDateString("es-CO",{weekday:"short",day:"2-digit",month:"short"})}: ${pts[i].n} activación${pts[i].n===1?"":"es"}</title></circle>`).join("");
+  const ticks = [0,7,14,21,29].map(i=>`<text x="${(p+i*sx).toFixed(1)}" y="${H-5}" class="lbl" text-anchor="${i===0?"start":i===29?"end":"middle"}">${pts[i].d.toLocaleDateString("es-CO",{day:"2-digit",month:"short"}).replace(".","")}</text>`).join("");
+  return `<div class="chart-h"><div><b>${total}</b><small>activaciones en 30 días · ${last7} en los últimos 7</small></div></div><svg class="chart line" viewBox="0 0 ${W} ${H}" role="img" aria-label="Activaciones por día"><defs><linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e" stop-opacity=".28"/><stop offset="1" stop-color="#f43f5e" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#gArea)"/><path d="${line}" class="ln"/>${dots}${ticks}</svg>`;
+}
+function mixHtml(){
+  const m = new Map(); items.filter(i=>i.cliente&&!i.vencida).forEach(i=>m.set(i.producto, (m.get(i.producto)||0)+1));
+  const arr = [...m.entries()].sort((a,b)=>b[1]-a[1]), tot = arr.reduce((s,a)=>s+a[1],0);
+  if(!tot) return '<div class="empty">Aún no hay planes activos.</div>';
+  const COL = ["#f43f5e","#8b5cf6","#ff8a65","#0ea5e9","#10b981","#f59e0b","#ec4899","#64748b"];
+  const top = arr.slice(0,6), rest = arr.slice(6).reduce((s,a)=>s+a[1],0); if(rest) top.push(["Otros",rest]);
+  const R=54, C=2*Math.PI*R; let off=0;
+  const segs = top.map((a,i)=>{ const len=C*a[1]/tot, el=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${COL[i%COL.length]}" stroke-width="18" stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"><title>${esc(a[0])}: ${a[1]} (${Math.round(a[1]/tot*100)}%)</title></circle>`; off+=len; return el; }).join("");
+  return `<div class="mix"><svg viewBox="0 0 140 140" class="donut" role="img" aria-label="Planes activos por producto"><g transform="rotate(-90 70 70)">${segs}</g><text x="70" y="66" class="dn">${tot}</text><text x="70" y="84" class="dl">activos</text></svg>
+    <ul class="legend">${top.map((a,i)=>`<li><i style="background:${COL[i%COL.length]}"></i><span>${esc(a[0])}</span><b>${a[1]}</b><small>${Math.round(a[1]/tot*100)}%</small></li>`).join("")}</ul></div>`;
+}
+/* actividad reciente de clientes en el tablero */
+let FEED = {t:0, list:[]};
+const ago = iso => { const s=(Date.now()-new Date(iso))/1000; if(s<60) return "hace un momento"; if(s<3600) return "hace "+Math.floor(s/60)+" min"; if(s<86400) return "hace "+Math.floor(s/3600)+" h"; return new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short"}); };
+function drawFeed(){
+  const el = $("#feed"); if(!el) return;
+  el.innerHTML = FEED.list.length ? FEED.list.map(l=>`<li><span class="fd-dot"></span><div><b>${esc(l.evento)}</b><small>${esc(l.quien)} · ${esc(String(l.detalle).replace(/ · (Android|iPhone|Windows|Mac|Linux|Otro) · .*$/,""))}</small></div><time title="${esc(fdtL(l.fecha).replace(/<[^>]+>/g,""))}">${ago(l.fecha)}</time></li>`).join("") : '<li class="empty">Sin movimientos recientes.</li>';
+}
+async function loadFeed(force){
+  if(!$("#feed")) return;
+  if(!force && Date.now()-FEED.t < 60000){ drawFeed(); return; }
+  try{ const r = (await api("admin_log")).log; const adm = (load("iap_user")||{}).email;
+    FEED = {t:Date.now(), list:r.filter(l=>l.quien && /@/.test(l.quien) && l.quien!==adm).slice(0,9)}; drawFeed(); }
+  catch{ $("#feed").innerHTML = '<li class="empty">No se pudo cargar la actividad.</li>'; }
+}
+/* tabla de productos: ventas, ingresos y cupo */
+function prodTableHtml(){
+  const cap = getCap(), cm = capMap(), m = new Map();
+  items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,cuentas:new Set(),act:0,tot:0,libre:0,ing:0,mes:0}; a.cuentas.add(i.correo.toLowerCase());
+    if(i.cliente){ a.tot++; if(!i.vencida) a.act++; a.ing+=Number(i.precio)||0; const d=i.inicio&&new Date(i.inicio), n=new Date(); if(d&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()) a.mes+=Number(i.precio)||0; }
+    else if(state(i).k==="av") a.libre++; m.set(k,a); });
+  const list = [...m.values()].sort((a,b)=>b.ing-a.ing);
+  if(!list.length) return '<div class="empty">Aún no hay productos.</div>';
+  return `<div class="wrapt"><table class="ptable"><thead><tr><th>Producto</th><th>Precio</th><th>Plan</th><th>Activos</th><th>Códigos libres</th><th>Vendidos</th><th>Ingresos del mes</th><th>Ingresos totales</th><th>Cupo de sus cuentas</th><th></th></tr></thead><tbody>${list.map(a=>{
+    const accs=[...a.cuentas].map(c=>cm.get(c)).filter(x=>x&&!x.prob), usados=accs.reduce((t,x)=>t+Math.min(cap,used(x)),0), total=accs.length*cap, pct=total?Math.round(usados/total*100):0, cls=pct>=100?"full":pct>=80?"hi":"";
+    return `<tr><td data-l="Producto"><b>${EMO(a.k)} ${esc(a.k)}</b></td><td data-l="Precio">${money(priceOf(a.k))}</td><td data-l="Plan">${daysOf(a.k)} días</td><td data-l="Activos"><b>${a.act}</b></td><td data-l="Códigos libres">${a.libre?`<span class="tag t-av">${a.libre}</span>`:'<span class="tag t-w">0</span>'}</td><td data-l="Vendidos">${a.tot}</td><td data-l="Ingresos del mes">${money(a.mes)}</td><td data-l="Ingresos totales"><b>${money(a.ing)}</b></td>
+      <td data-l="Cupo"><span class="capbar ${cls}" title="${usados} de ${total} lugares ocupados en ${accs.length} cuenta(s)"><i style="width:${Math.min(100,pct)}%"></i></span> <b class="capn ${cls}">${pct}%</b> <small style="color:var(--mut)">${accs.length} cta${accs.length===1?"":"s"}</small></td>
+      <td class="acts-td"><button class="btn s p" data-genp="${esc(a.k)}">🎲 Generar códigos</button></td></tr>`; }).join("")}</tbody></table></div>`;
 }
 function byProductHtml(){
   const m = new Map();
@@ -209,40 +260,96 @@ function countUp(){
     requestAnimationFrame(step);
   });
 }
+/* ---------- Navegación: menú lateral (computador) y barra inferior (celular) ---------- */
+const IC = {
+  res:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  cli:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
+  pay:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/>',
+  cod:'<path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M10 7v12" stroke-dasharray="2 2"/>',
+  cta:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
+  prod:'<path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  log:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+};
+const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[k]||""}</svg>`;
+const NAV = [
+  {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
+  {g:"Ventas", t:"cli", l:"Clientes", s:"Todos tus clientes, sus planes y vencimientos"},
+  {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pagos recibidos con Wompi"},
+  {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
+  {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
+  {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
+  {g:"Control", t:"log", l:"Actividad", s:"Cada movimiento de tus clientes con fecha y hora"}
+];
+function navBadges(){
+  const porVencer = clients().filter(c=>cState(c).k==="w").length;
+  const libres = items.filter(i=>state(i).k==="av").length;
+  return {cli:porVencer?{n:porVencer,c:"w",t:"clientes por vencer"}:null, cod:{n:libres,c:"",t:"códigos disponibles"}};
+}
+function drawNav(){
+  const b = navBadges(); let g = "";
+  $("#sideNav").innerHTML = NAV.map(n=>{ const h = n.g!==g ? `<div class="nvg">${n.g}</div>` : ""; g = n.g; const bd = b[n.t];
+    return h+`<button type="button" class="nv" data-t="${n.t}">${svgI(n.t)}<span>${n.l}</span>${bd?`<em class="nvb ${bd.c}" title="${bd.n} ${bd.t}">${bd.n}</em>`:""}</button>`; }).join("");
+}
+function openSide(on){ document.body.classList.toggle("side-open", !!on); }
 function setTab(t){
+  if(!NAV.some(n=>n.t===t)) t = "res";
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  document.querySelectorAll(".nv[data-t],.tabs button[data-t]").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  const more = document.querySelector('.tabs button[data-t="more"]'); if(more) more.classList.toggle("on", !["res","cli","cod","cta"].includes(t));
   document.querySelectorAll("[id^=tab-]").forEach(s=>s.classList.toggle("hide", s.id!=="tab-"+t));
-  if(t==="log"){ loadLog(); loadPagos(); }
+  const n = NAV.find(x=>x.t===t); $("#pageTitle").textContent = n.l; $("#pageSub").textContent = n.s; document.title = n.l + " · Panel IA Plus";
+  openSide(false);
+  if(t==="log") loadLog(logCli);
+  if(t==="pay") loadPagos();
+  if(t==="res") loadFeed();
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
   if(!$("#profit").contains(document.activeElement)) $("#profit").innerHTML = profitHtml();
   if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
-  $("#byProd").innerHTML = byProductHtml(); countUp(); fillAccounts(); fillAuto(); crows(); rows();
+  $("#byProd").innerHTML = byProductHtml(); $("#prodTable").innerHTML = prodTableHtml(); $("#daily").innerHTML = dailyHtml(); $("#mix").innerHTML = mixHtml(); drawNav(); setTab(curTab); countUp(); fillAccounts(); fillAuto(); crows(); rows();
+  const u = load("iap_user")||{}; const h = new Date().getHours(); $("#hello").innerHTML = `${h<12?"Buenos días":h<19?"Buenas tardes":"Buenas noches"}${u.name?", "+esc(String(u.name).split(" ")[0]):""} 👋<small>${new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})}</small>`;
 }
 function render(){
   if($("#addForm")){ updateViews(); return; }
   $("#app").innerHTML = `
   <div class="tabs">
-    <button data-t="res"><i>📊</i><span>Resumen</span></button><button data-t="cli"><i>👥</i><span>Clientes</span></button><button data-t="cod"><i>🎫</i><span>Códigos</span></button><button data-t="cta"><i>🔑</i><span>Cuentas</span></button><button data-t="log"><i>🕘</i><span>Registro</span></button>
+    <button data-t="res">${svgI("res")}<span>Tablero</span></button><button data-t="cli">${svgI("cli")}<span>Clientes</span></button><button data-t="cod">${svgI("cod")}<span>Códigos</span></button><button data-t="cta">${svgI("cta")}<span>Cuentas</span></button><button data-t="more" id="moreBtn">${svgI("more")}<span>Más</span></button>
   </div>
 
   <section id="tab-res">
-    <div class="qa">
-      <button class="btn p" data-qa="gen">🎲 Generar código</button>
-      <button class="btn" data-qa="acc">➕ Agregar cuenta</button>
-      <button class="btn" data-qa="pass">🔑 Cambiar contraseña</button>
-      <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
+    <div class="dash-top"><h2 class="hello" id="hello"></h2>
+      <div class="qa">
+        <button class="btn p" data-qa="gen">🎲 Generar código</button>
+        <button class="btn" data-qa="acc">➕ Agregar cuenta</button>
+        <button class="btn" data-qa="pass">🔑 Cambiar contraseña</button>
+        <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
+      </div></div>
+    <div class="kpis" id="stats"></div>
+    <div class="dgrid">
+      <div class="card span2"><h2>Ingresos por mes</h2><div id="months"></div><p class="hint">Activaciones por fecha de canje; el monto es el precio anotado en cada código.</p></div>
+      <div class="card"><h2>Planes activos por producto</h2><div id="mix"></div></div>
+      <div class="card span2"><h2>Activaciones por día</h2><div id="daily"></div></div>
+      <div class="card"><h2>Actividad reciente <button class="btn s ghost" data-goto="log" style="float:right">Ver todo</button></h2><ul class="feed" id="feed"><li class="empty">Cargando…</li></ul></div>
+      <div class="card"><h2>🔔 Alertas</h2><div id="alerts" class="alerts"></div></div>
+      <div class="card span2"><h2>📅 Vencimientos de los próximos 14 días</h2><div id="due"></div></div>
+      <div class="card span3"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
+      <div class="card span3"><h2>💰 Rentabilidad por cuenta</h2><div id="profit"></div></div>
     </div>
-    <div class="stats" id="stats"></div>
-    <div class="card"><h2>🔔 Alertas</h2><div id="alerts" class="alerts"></div></div>
-    <div class="card"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
-    <div class="card"><h2>📅 Vencimientos de los próximos 14 días</h2><div id="due"></div></div>
-    <div class="card"><h2>📈 Ventas de los últimos 6 meses</h2><div id="months"></div>
-      <p style="color:var(--mut);font-size:12px;margin-top:10px">Cuenta las activaciones por fecha de canje. Los montos salen del precio que anotas en cada cuenta.</p></div>
-    <div class="card"><h2>🛍️ Ventas por producto</h2><div id="byProd" class="prodgrid"></div></div>
-    <div class="card"><h2>💰 Rentabilidad por cuenta</h2><div id="profit"></div></div>
+  </section>
+
+  <section id="tab-prod" class="hide">
+    <div class="card"><h2>🛍️ Productos</h2><p class="hint" style="margin:0 0 12px">Ordenados por ingresos. El cupo es cuántos lugares están ocupados en las cuentas de cada producto (tope de ${getCap()} clientes por cuenta).</p><div id="prodTable"></div></div>
+    <div class="card"><h2>Resumen por producto</h2><div id="byProd" class="prodgrid"></div></div>
+  </section>
+
+  <section id="tab-pay" class="hide">
+    <div class="card"><h2>💳 Pagos en línea (Wompi)</h2>
+      <div id="payCfg" class="paycfg"></div>
+      <div class="tools"><button class="btn s" id="payReload">↻ Recargar pedidos</button></div>
+      <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Estado</th><th>Referencia</th><th></th></tr></thead><tbody id="payRows"><tr><td colspan="7" class="empty">Cargando…</td></tr></tbody></table></div>
+    </div>
   </section>
 
   <section id="tab-cli" class="hide">
@@ -316,11 +423,6 @@ function render(){
   </section>
 
   <section id="tab-log" class="hide">
-    <div class="card"><h2>💳 Pagos en línea (Wompi)</h2>
-      <div id="payCfg" class="paycfg"></div>
-      <div class="tools"><button class="btn s" id="payReload">↻ Recargar pedidos</button></div>
-      <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Estado</th><th>Referencia</th><th></th></tr></thead><tbody id="payRows"><tr><td colspan="7" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
-    </div>
     <div class="card"><h2>🕘 Actividad de clientes y registro</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada movimiento con su fecha y hora de Colombia: cuándo entran, activan códigos, piden el autenticador, copian o ven la contraseña, piden ayuda, renuevan o cierran sesión, y desde qué dispositivo. Sin cliente: los últimos 500 eventos.</p>
       <div class="tools"><input id="lcli" type="email" placeholder="Correo del cliente (ver toda su actividad)" style="min-width:240px"><button class="btn s p" id="lcliGo">Ver actividad</button><button class="btn s" id="logReload">↻ Todo el registro</button><input id="lq" placeholder="Filtrar lo que se muestra…"></div>
@@ -328,7 +430,8 @@ function render(){
       <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Evento</th><th>Detalle</th><th>Quién</th></tr></thead><tbody id="lrows"><tr><td colspan="4" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
     </div>
   </section>`;
-  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.t); window.scrollTo({top:0,behavior:"smooth"}); });
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="more"){ openSide(true); return; } setTab(b.dataset.t); window.scrollTo({top:0,behavior:"smooth"}); });
+  $("#side").classList.remove("hide"); document.body.classList.add("has-side"); drawNav();
   if(!$("#fab")){ const f=document.createElement("button"); f.className="fab"; f.id="fab"; f.title="Nueva cuenta o código"; f.textContent="＋"; f.onclick=()=>{ setTab("cta"); const bx=$("#addBox"); bx.open=true; bx.scrollIntoView({behavior:"smooth",block:"start"}); setTimeout(()=>$("#fMail").focus(),400); }; document.body.appendChild(f); }
   $("#addForm").onsubmit = addAccount;
   $("#fProd").addEventListener("change",()=>{ $("#fPrice").value = priceOf($("#fProd").value); $("#fDays").value = daysOf($("#fProd").value); saveDraft(); });
@@ -567,7 +670,7 @@ function rows(){
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}${expiraHtml(i)}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||5)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||5}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
-        ${i.codigo&&!i.cliente?`<button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
+        ${i.codigo&&!i.cliente?`<button class="btn s p" data-a="link" title="Enlace que activa el plan directo en la cuenta del cliente">🔗 Copiar enlace de activación</button><a class="btn s wa" target="_blank" rel="noopener" href="${i.whatsapp?waLink(i.whatsapp, msgFor(i)):"https://wa.me/?text="+encodeURIComponent(msgFor(i))}">💬 Enviar enlace</a><button class="btn s" data-a="msg">Copiar mensaje</button><button class="btn s" data-a="assign">Asignar cliente</button>`:""}
         <button class="btn s" data-a="creds" title="Copia correo y contraseña">📋 Datos</button>
         <button class="btn s" data-a="pass" title="Cambiar la contraseña de esta cuenta">🔑 Contraseña</button>
         ${i.tiene2fa?`<button class="btn s" data-a="v2fa" title="Ver el código de autenticación ahora">🔢 Ver 2FA</button>`:""}
@@ -708,6 +811,7 @@ document.addEventListener("click", async e=>{
   const a = bt.dataset.a;
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
+    if(a==="link"){ copyText(linkFor(i.codigo)).then(()=>toast("Enlace copiado ✔ Al abrirlo, el plan se activa en su cuenta")); return; }
     if(a==="v2fa"){ await show2fa(i); return; }
     if(a==="repl"){
       const dests = accounts().filter(x=>x.correo.toLowerCase()!==i.correo.toLowerCase() && items.some(z=>z.correo===x.correo && z.estado!=="Con problemas"));
@@ -1001,4 +1105,20 @@ document.addEventListener("click", e=>{
   const b = e.target.closest("[data-actividad]"); if(!b) return;
   const em = b.dataset.actividad; const d = b.closest("dialog"); if(d) d.close();
   setTab("log"); const i = $("#lcli"); if(i) i.value = em; loadLog(em); window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* ---------- menú lateral: clics, cajón en celular y atajos ---------- */
+document.addEventListener("click", e=>{
+  const n = e.target.closest(".nv[data-t]"); if(n){ setTab(n.dataset.t); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if(e.target.closest("#sideBtn")){ openSide(!document.body.classList.contains("side-open")); return; }
+  if(e.target.closest("#sideShade")){ openSide(false); return; }
+  if(e.target.closest("#gTheme")){ lsSet("iap_theme", load("iap_theme")==="dark" ? "" : "dark"); applyTheme(); return; }
+  if(e.target.closest("#gLogout")){ if(!confirm("¿Cerrar la sesión del panel?")) return; try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{} ["iap_cred","iap_user","iap_admin"].forEach(k=>{ try{ localStorage.removeItem(k); }catch{} }); location.reload(); return; }
+  const gp = e.target.closest("[data-genp]"); if(gp){ setTab("cod"); const sel=$("#aProd"); if(sel){ sel.value = gp.dataset.genp; onAutoProd(); } setTimeout(()=>{ $("#autoForm")?.scrollIntoView({behavior:"smooth",block:"start"}); $("#aQty")?.focus(); },80); return; }
+  const k = e.target.closest(".kpi[data-goto]"); if(k){ setTab(k.dataset.goto); window.scrollTo({top:0,behavior:"smooth"}); }
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") openSide(false);
+  const k = e.target.closest && e.target.closest(".kpi[data-goto]"); if(k && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); k.click(); }
+  if(e.altKey && /^[1-7]$/.test(e.key) && $("#sideNav")?.children.length){ e.preventDefault(); setTab(NAV[+e.key-1].t); }
 });

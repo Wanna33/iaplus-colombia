@@ -19,7 +19,8 @@ function ensureCred(){
     let bar = document.getElementById("relogin");
     if(!bar){ bar = document.createElement("div"); bar.id="relogin";
       bar.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:460px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(20,40,90,.25);z-index:60;text-align:center";
-      bar.innerHTML='<div style="font-weight:800;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div>';
+      const act = !!load("iap_pending_code");
+      bar.innerHTML='<div style="font-weight:800;margin-bottom:'+(act?4:8)+'px">'+(act?'🎁 Activa tu plan con un clic':'Confirma tu cuenta para continuar')+'</div>'+(act?'<div style="color:var(--mut);font-size:14px;margin-bottom:10px">Entra con tu cuenta de Google y tu plan queda activado al instante.</div>':'')+'<div id="relBtn" style="display:flex;justify-content:center"></div>';
       document.body.appendChild(bar); }
     const init = () => {
       if(!window.google?.accounts?.id){ return setTimeout(init,300); }
