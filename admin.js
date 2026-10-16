@@ -321,9 +321,10 @@ function render(){
       <div class="tools"><button class="btn s" id="payReload">↻ Recargar pedidos</button></div>
       <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Estado</th><th>Referencia</th><th></th></tr></thead><tbody id="payRows"><tr><td colspan="7" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
     </div>
-    <div class="card"><h2>🕘 Registro de actividad</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Canjes, códigos de autenticación pedidos y acciones que haces en este panel (últimos 300 eventos).</p>
-      <div class="tools"><button class="btn s" id="logReload">↻ Recargar registro</button><input id="lq" placeholder="Filtrar el registro…"></div>
+    <div class="card"><h2>🕘 Actividad de clientes y registro</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada movimiento con su fecha y hora de Colombia: cuándo entran, activan códigos, piden el autenticador, copian o ven la contraseña, piden ayuda, renuevan o cierran sesión, y desde qué dispositivo. Sin cliente: los últimos 500 eventos.</p>
+      <div class="tools"><input id="lcli" type="email" placeholder="Correo del cliente (ver toda su actividad)" style="min-width:240px"><button class="btn s p" id="lcliGo">Ver actividad</button><button class="btn s" id="logReload">↻ Todo el registro</button><input id="lq" placeholder="Filtrar lo que se muestra…"></div>
+      <div id="lsum"></div>
       <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Evento</th><th>Detalle</th><th>Quién</th></tr></thead><tbody id="lrows"><tr><td colspan="4" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
     </div>
   </section>`;
@@ -344,7 +345,8 @@ function render(){
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
   $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
-  $("#payReload").onclick = loadPagos; $("#logReload").onclick = loadLog; $("#lq").oninput = drawLog;
+  $("#payReload").onclick = loadPagos; $("#logReload").onclick = ()=>{ $("#lcli").value=""; loadLog(); }; $("#lq").oninput = drawLog;
+  $("#lcliGo").onclick = ()=>loadLog($("#lcli").value.trim().toLowerCase()); $("#lcli").onkeydown = e=>{ if(e.key==="Enter") $("#lcliGo").click(); };
   document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>quick(b.dataset.qa));
   updateViews(); setTab(curTab);
 }
@@ -387,6 +389,7 @@ function clientDetail(c){
     <b>Cliente desde</b><span>${fdate(c.primera)}</span><b>Última activación</b><span>${fdate(c.ultima)}</span>
     <b>Total pagado</b><span><b style="color:var(--text)">${money(c.gastado)}</b></span><b>Códigos 2FA pedidos</b><span>${c.usos2fa}</span>
     <b>Nota</b><span style="white-space:pre-wrap">${esc(c.nota||"—")}</span></div>
+    <div class="acts" style="margin:6px 0 12px"><button class="btn s p" data-actividad="${esc(c.email)}">🕘 Ver toda su actividad (con horas)</button></div>
     <h2 style="font-size:16px">Cuentas de este cliente (${c.cuentas.length})</h2>
     ${c.cuentas.map(i=>{const st=state(i);return `<div class="mini"><b>${esc(i.producto)}</b> · ${esc(i.correo)} <span class="tag t-${st.k}">${st.t}</span><br>
       Código <span class="mono">${esc(i.codigo)}</span> · Activada ${fdate(i.inicio)} · Vence ${fdate(i.fin)} ${i.vencida?"":`(${i.restante} d)`}<br>
@@ -595,14 +598,38 @@ function copy(t){ copyText(t).then(()=>toast("Copiado ✔")); }
 
 /* ---------- Registro ---------- */
 let logData = [];
-async function loadLog(){
-  try{ logData = (await api("admin_log")).log; drawLog(); }
+let logCli = "", logReq = 0;
+async function loadLog(cli){
+  logCli = typeof cli==="string" ? cli : ""; const my = ++logReq; // si llegan dos respuestas, solo vale la última pedida
+  $("#lrows").innerHTML = '<tr><td colspan="4" class="empty">Cargando…</td></tr>'; $("#lsum").innerHTML = "";
+  try{ const r = (await api("admin_log", logCli?{cliente:logCli}:{})).log; if(my!==logReq) return; logData = r; drawLog(); }
   catch(ex){ $("#lrows").innerHTML = `<tr><td colspan="4" class="empty">${esc(/no válida/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script.":ex.message)}</td></tr>`; }
+}
+const fdtL = iso => { if(!iso) return "—"; const d=new Date(iso); return d.toLocaleDateString("es-CO",{timeZone:"America/Bogota",weekday:"short",day:"2-digit",month:"short"})+" · <b>"+d.toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true})+"</b>"; };
+function logSummary(list){
+  if(!logCli){ $("#lsum").innerHTML=""; return; }
+  if(!list.length){ $("#lsum").innerHTML='<div class="mini">Este cliente no tiene actividad registrada todavía.</div>'; return; }
+  const hrs = new Array(24).fill(0), devs = {}, evs = {};
+  list.forEach(l=>{ const h=+new Date(l.fecha).toLocaleString("en-US",{timeZone:"America/Bogota",hour:"numeric",hour12:false})%24; hrs[h]++;
+    const m=/· ((?:Android|iPhone|Windows|Mac|Linux|Otro) · [^·]+)$/.exec(l.detalle); if(m) devs[m[1].trim()]=(devs[m[1].trim()]||0)+1; evs[l.evento]=(evs[l.evento]||0)+1; });
+  const hh = h => (h%12||12)+(h<12?" a. m.":" p. m.");
+  const top = hrs.map((n,h)=>[n,h]).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>hh(x[1])+" ("+x[0]+")").join(", ");
+  const max = Math.max(...hrs);
+  const bars = hrs.map((n,h)=>`<div title="${hh(h)}: ${n} movimiento(s)" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px"><i style="display:block;width:100%;height:${max?Math.max(n?6:0,Math.round(n/max*54)):0}px;background:var(--red,#ef5350);border-radius:3px 3px 0 0;opacity:${n?1:0}"></i><small style="font-size:9px;color:var(--mut)">${h%3===0?h:""}</small></div>`).join("");
+  const sorted = list.map(l=>l.fecha).sort();
+  $("#lsum").innerHTML = `<div class="mini" style="margin:10px 0">
+    <b>${esc(logCli)}</b> · ${list.length} movimiento(s) · primero: ${fdtL(sorted[0])} · último: ${fdtL(sorted[sorted.length-1])}<br>
+    <b>Horas en que más se mueve:</b> ${esc(top)}<br>
+    <b>Dispositivos:</b> ${esc(Object.entries(devs).sort((a,b)=>b[1]-a[1]).map(x=>x[0]+" ("+x[1]+")").join(", ")||"—")}<br>
+    <b>Lo que más hace:</b> ${esc(Object.entries(evs).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0]+" ("+x[1]+")").join(", "))}
+    <div style="display:flex;gap:2px;height:72px;margin-top:10px;align-items:stretch" aria-label="Movimientos por hora del día">${bars}</div>
+    <small style="color:var(--mut)">Movimientos por hora del día (0 = medianoche, hora de Colombia)</small></div>`;
 }
 function drawLog(){
   const q = ($("#lq")?.value||"").toLowerCase();
   const list = logData.filter(l=>!q||[l.evento,l.detalle,l.quien].join(" ").toLowerCase().includes(q));
-  $("#lrows").innerHTML = list.length ? list.map(l=>`<tr><td data-l="Fecha">${fdt(l.fecha)}</td><td data-l="Evento"><b>${esc(l.evento)}</b></td><td data-l="Detalle" style="word-break:break-all">${esc(l.detalle)}</td><td data-l="Quién" style="word-break:break-all">${esc(l.quien)}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">Sin eventos.</td></tr>`;
+  logSummary(list);
+  $("#lrows").innerHTML = list.length ? list.map(l=>`<tr><td data-l="Fecha" style="white-space:nowrap">${fdtL(l.fecha)}</td><td data-l="Evento"><b>${esc(l.evento)}</b></td><td data-l="Detalle" style="word-break:break-all">${esc(l.detalle)}</td><td data-l="Quién" style="word-break:break-all">${esc(l.quien)}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">Sin eventos.</td></tr>`;
 }
 
 /* ---------- CSV ---------- */
@@ -967,4 +994,11 @@ document.addEventListener("click", async e=>{
   b.disabled = true;
   try{ const j = await api("admin_order_deliver",{ref:p.ref, forzar:p.estado==="RECHAZADO"}); toast(j.estado==="ENTREGADO"?"Cuenta entregada ✔":"Sin cupo: agrega una cuenta nueva y vuelve a intentar"); await loadPagos(); await refresh(); }
   catch(ex){ toast(ex.message); b.disabled = false; }
+});
+
+/* ---------- abrir la actividad de un cliente desde su detalle ---------- */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-actividad]"); if(!b) return;
+  const em = b.dataset.actividad; const d = b.closest("dialog"); if(d) d.close();
+  setTab("log"); const i = $("#lcli"); if(i) i.value = em; loadLog(em); window.scrollTo({top:0,behavior:"smooth"});
 });

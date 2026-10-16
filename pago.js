@@ -18,7 +18,8 @@
   function ensureCred(){
     const c = load("iap_cred"); if(c && c.exp > Date.now()+30000) return Promise.resolve(c);
     return new Promise(resolve => {
-      show("🔐", "Confirma tu cuenta", "Inicia sesión con el mismo Gmail con el que pagaste para ver tu pedido.", '<div id="gb" style="display:flex;justify-content:center"></div>');
+      show("🔐", "Confirma tu cuenta", "Inicia sesión con el mismo correo con el que pagaste para ver tu pedido.", '<div id="gb" style="display:flex;justify-content:center"></div><div id="ge"></div>');
+      if(window.iapEmailLogin) iapEmailLogin($("#ge"), (u, cr) => resolve(cr));
       const init = () => {
         if(!window.google || !google.accounts || !google.accounts.id) return setTimeout(init, 300);
         google.accounts.id.initialize({client_id:CLIENT_ID, callback:r => { const p=parseJwt(r.credential); const cr={token:r.credential,exp:p.exp*1000}; save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""}); resolve(cr); }});

@@ -1,6 +1,6 @@
 // Service worker de IA Plus: abre rápido y funciona sin conexión (solo la pantalla; las cuentas siempre se piden en línea).
-const VER = "iap-v18";
-const SHELL = ["./", "index.html", "cuenta.html", "styles.css", "app.js", "pwa.js", "net.js", "guard.js", "pago.js", "cuenta.js", "logo-main.webp", "favicon.png", "chatgpt.png", "capcut.png", "filmora.png", "icon-192.png", "manifest.webmanifest"];
+const VER = "iap-v20";
+const SHELL = ["./", "index.html", "cuenta.html", "styles.css", "app.js", "pwa.js", "net.js", "login-email.js", "guard.js", "pago.js", "cuenta.js", "logo-main.webp", "favicon.png", "chatgpt.png", "capcut.png", "filmora.png", "icon-192.png", "manifest.webmanifest"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VER).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VER).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {

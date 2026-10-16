@@ -19,8 +19,9 @@ function ensureCred(){
     let bar = document.getElementById("relogin");
     if(!bar){ bar = document.createElement("div"); bar.id="relogin";
       bar.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:460px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(20,40,90,.25);z-index:60;text-align:center";
-      bar.innerHTML='<div style="font-weight:800;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div>';
+      bar.innerHTML='<div style="font-weight:800;margin-bottom:8px">Confirma tu cuenta para continuar</div><div id="relBtn" style="display:flex;justify-content:center"></div><div id="relEmail"></div>';
       document.body.appendChild(bar); }
+    if(window.iapEmailLogin) iapEmailLogin(document.getElementById("relEmail"), (u, cr)=>{ bar.remove(); credP=null; resolve(cr); });
     const init = () => {
       if(!window.google?.accounts?.id){ return setTimeout(init,300); }
       google.accounts.id.initialize({client_id:CLIENT_ID, auto_select:true, callback:r=>{
@@ -266,6 +267,25 @@ document.addEventListener("click", e=>{
   if(!e.target.closest("#menu")) $("#menu").classList.remove("on");
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
+/* ---------- actividad: cada movimiento queda registrado con su hora (lo ve el administrador en el panel) ---------- */
+document.addEventListener("click", e=>{
+  if(!window.iapTrack) return;
+  const card = e.target.closest(".sub-card");
+  const det = card ? [card.querySelector(".pname h2")?.textContent, card.querySelector(".field code")?.textContent].filter(Boolean).join(" · ") : "";
+  const c = e.target.closest("[data-copy]");
+  if(c){ iapTrack(c.classList.contains("tcopy") ? "copio_2fa" : c.parentElement.querySelector(".pw") ? "copio_clave" : "copio_correo", det); return; }
+  const g = e.target.closest(".tog");
+  if(g){ const pw = g.parentElement.querySelector(".pw"); if(pw && pw.textContent.includes("•")) iapTrack("vio_clave", det); return; }
+  const ba = e.target.closest("[data-acc]");
+  if(ba){ const p = document.getElementById(ba.dataset.acc); if(p && !p.classList.contains("on")) iapTrack("ver_cuenta", det); return; }
+  if(e.target.closest("#logout")){ iapTrack("salir"); return; }
+  if(e.target.closest("[data-install]")){ iapTrack("instalar"); return; }
+  const a = e.target.closest("a[href]"); if(!a) return;
+  if(a.classList.contains("buyagain")) iapTrack("renovar", det);
+  else if(/wa.me/.test(a.href)) iapTrack("soporte", det);
+  else if(/#faq/.test(a.href)) iapTrack("ayuda", det);
+  else if(/#catalogo/.test(a.href)) iapTrack("comprar");
+}, true);
 $("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
 let timer=null;
 /* ---------- enlace de activación: cuenta.html?codigo=IAP-XXXX-XXXX ---------- */

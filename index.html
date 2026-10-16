@@ -68,7 +68,7 @@
     </nav>
     <div class="nav-right">
       <div id="authArea">
-        <button class="btn btn-google" id="loginBtn">Ingresar con Gmail</button>
+        <button class="btn btn-google" id="loginBtn">Ingresar</button>
       </div>
       <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">☰</button>
     </div>
@@ -84,7 +84,7 @@
       <p>ChatGPT, CapCut Pro, Filmora y más. Inicia sesión con tu Gmail, elige tu cuenta y recíbela en minutos por WhatsApp.</p>
       <div class="cta">
         <a href="#catalogo" class="btn btn-primary btn-lg">Ver catálogo <svg class="ic"><use href="#i-right"/></svg></a>
-        <button class="btn btn-ghost btn-lg" id="heroLogin">Ingresar con Gmail</button>
+        <button class="btn btn-ghost btn-lg" id="heroLogin">Ingresar</button>
       </div>
       <div class="hstats"><div><b data-count="auto">0</b><span>cuentas premium</span></div><div><b class="hero-from">—</b><span>desde, al mes</span></div><div><b data-count="30">0</b><span>días de acceso</span></div></div>
       <ul class="trust">
@@ -208,9 +208,10 @@
   <div class="modal-box">
     <button class="modal-x" id="closeLogin" aria-label="Cerrar">✕</button>
     <img src="logo-main.webp" alt="" class="modal-logo">
-    <h3 id="loginTitle">Ingresa con tu Gmail</h3>
-    <p>Usa tu cuenta de Google para comprar y ver tus pedidos.</p>
+    <h3 id="loginTitle">Ingresa a tu cuenta</h3>
+    <p>Con Google o con un código que te enviamos a tu correo.</p>
     <div id="gBtn" class="gbtn"></div>
+    <div id="emailModal"></div>
     <small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>.</small>
     <p class="note err" id="loginErr" hidden></p>
   </div>
@@ -232,6 +233,7 @@
   <button type="button" data-install id="bnApp"><i><svg class="ic"><use href="#i-phone"/></svg></i><span>Instalar</span></button>
 </nav>
 <script src="net.js"></script>
+<script src="login-email.js"></script>
 <script src="app.js"></script>
 <script src="pwa.js"></script>
 </body>

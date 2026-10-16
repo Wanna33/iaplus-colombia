@@ -20,12 +20,31 @@
   // Solo se reintentan las consultas que no cambian nada (repetir un canje o un pago podría duplicarlo).
   const SAFE = ["list", "pay_confirm", "admin_list", "admin_log", "admin_orders", "admin_pay_config"];
   const isSafe = b => b && (SAFE.indexOf(b.action || "list") >= 0 || (b.action === "totp" && !b.ask));
+  // Dispositivo (para el registro de actividad): sistema y navegador, sin datos personales.
+  function device(){
+    const u = navigator.userAgent || "";
+    const os = /iPhone|iPad|iPod/.test(u) ? "iPhone" : /Android/.test(u) ? "Android" : /Windows/.test(u) ? "Windows" : /Mac OS X/.test(u) ? "Mac" : /Linux/.test(u) ? "Linux" : "Otro";
+    const br = /SamsungBrowser/.test(u) ? "Samsung" : /Edg\//.test(u) ? "Edge" : /OPR\//.test(u) ? "Opera" : /Firefox\//.test(u) ? "Firefox" : /CriOS|Chrome\//.test(u) ? "Chrome" : /Safari\//.test(u) ? "Safari" : "Navegador";
+    const app = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone ? " (app)" : "";
+    return os + " · " + br + app;
+  }
+  window.IAP_API = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
   window.postJson = async function(url, body){
+    if(body && !body.dev) body = {...body, dev: device()};
     try{ return await once(url, body); }
     catch(e){
       if(!e.network || navigator.onLine === false || !isSafe(body)) throw e;
       await new Promise(r => setTimeout(r, 1200));
       return once(url, body);
     }
+  };
+  window.iapTrack = function(tipo, detalle){
+    try{
+      const c = JSON.parse(localStorage.getItem("iap_cred") || "null");
+      if(!c || !c.token || c.exp < Date.now()) return;
+      const body = JSON.stringify({action:"evento", tipo, detalle: String(detalle || "").slice(0, 80), idToken: c.token, dev: device()});
+      // sendBeacon llega aunque el cliente cambie de página o cierre la pestaña
+      if(!(navigator.sendBeacon && navigator.sendBeacon(window.IAP_API, new Blob([body], {type:"text/plain"})))) once(window.IAP_API, JSON.parse(body)).catch(()=>{});
+    }catch{}
   };
 })();
