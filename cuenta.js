@@ -101,7 +101,7 @@ const I = {
   ok:'<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>'
 };
 function message(title, text){
-  $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><a class="cta" href="index.html?tienda=1">Ir a la tienda</a></div>`;
+  $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><button class="cta" type="button" data-retry>🔄 Reintentar</button> <a class="ghostlink" href="index.html?tienda=1">Ir a la tienda</a></div>`;
 }
 function confetti(){
   const box=document.createElement("div"); box.className="confetti";
@@ -198,9 +198,20 @@ function bindAdd(){
     }catch(ex){ err.textContent=ex.message; err.hidden=false; btn.disabled=false; btn.textContent="Desbloquear"; }
   };
 }
+function warnHtml(){
+  const out=[];
+  ITEMS.forEach(it=>{
+    const app=appOf(it), name=app.n==="tu cuenta"?it.producto:app.n, end=it.fin?new Date(it.fin):null;
+    const link="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, quiero renovar mi "+it.producto+" ("+it.correo+")");
+    if(it.vencida) out.push(`<div class="warn bad"><span>⛔ Tu plan de <b>${esc(name)}</b> ya venció.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
+    else if(end){ const d=Math.ceil((end-Date.now())/DAY); if(d<=5) out.push(`<div class="warn"><span>⏰ Tu plan de <b>${esc(name)}</b> vence ${d<=0?"hoy":d===1?"mañana":"en "+d+" días"}.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`); }
+  });
+  return out.slice(0,3).join("");
+}
 function renderMain(){
   const act = ITEMS.filter(i=>!i.vencida).length;
   $("#app").innerHTML = `
+    ${warnHtml()}
     <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span></div>
     <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
@@ -240,6 +251,7 @@ function buildMenu(){
 document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
+  if(e.target.closest("[data-retry]")){ $("#app").innerHTML='<div class="skel"><i></i><i></i><i></i></div>'; loadAll(); return; }
   const more = e.target.closest("[data-more]");
   if(more){ openMore(); return; }
   const ask = e.target.closest("[data-ask]");
@@ -286,7 +298,7 @@ async function loadAll(){
     renderMain();
     if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
     if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
-  }catch(err){ message("No pudimos cargar tu cuenta", esc(err.message)); }
+  }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
 }
 loadAll();
 (function(){
@@ -298,3 +310,7 @@ loadAll();
 
 /* sombra del encabezado al desplazarse */
 (function(){const h=document.querySelector(".nav,.top");if(!h)return;const f=()=>h.classList.toggle("scrolled",window.scrollY>8);addEventListener("scroll",f,{passive:true});f();})();
+
+addEventListener("offline",()=>toastMsg("Sin internet. Revisa tu conexión."));
+addEventListener("online",()=>toastMsg("Conexión recuperada ✔"));
+function toastMsg(t){ const x=document.createElement("div"); x.className="toastc"; x.textContent=t; document.body.appendChild(x); setTimeout(()=>x.remove(),2600); }
