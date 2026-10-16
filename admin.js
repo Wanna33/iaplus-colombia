@@ -265,6 +265,7 @@ const IC = {
   res:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
   cli:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
   pay:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/>',
+  wa:'<path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-4.8A8.5 8.5 0 1 1 20.5 11.5z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5"/>',
   cod:'<path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M10 7v12" stroke-dasharray="2 2"/>',
   cta:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
   prod:'<path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
@@ -275,16 +276,19 @@ const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[
 const NAV = [
   {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
   {g:"Ventas", t:"cli", l:"Clientes", s:"Todos tus clientes, sus planes y vencimientos"},
+  {g:"Ventas", t:"wa", l:"WhatsApp", s:"Ventas del asistente de WhatsApp: confirma el pago y se envía el enlace"},
   {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pagos recibidos con Wompi"},
   {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
   {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
   {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
   {g:"Control", t:"log", l:"Actividad", s:"Cada movimiento de tus clientes con fecha y hora"}
 ];
+let WAV = []; // ventas del asistente de WhatsApp
 function navBadges(){
   const porVencer = clients().filter(c=>cState(c).k==="w").length;
   const libres = items.filter(i=>state(i).k==="av").length;
-  return {cli:porVencer?{n:porVencer,c:"w",t:"clientes por vencer"}:null, cod:{n:libres,c:"",t:"códigos disponibles"}};
+  const waP = WAV.filter(v=>v.estado==="POR CONFIRMAR"||v.estado==="NECESITA AYUDA").length;
+  return {cli:porVencer?{n:porVencer,c:"w",t:"clientes por vencer"}:null, cod:{n:libres,c:"",t:"códigos disponibles"}, wa:waP?{n:waP,c:"w",t:"ventas de WhatsApp por atender"}:null};
 }
 function drawNav(){
   const b = navBadges(); let g = "";
@@ -302,6 +306,7 @@ function setTab(t){
   openSide(false);
   if(t==="log") loadLog(logCli);
   if(t==="pay") loadPagos();
+  if(t==="wa") loadWa();
   if(t==="res") loadFeed();
 }
 function updateViews(){
@@ -342,6 +347,15 @@ function render(){
   <section id="tab-prod" class="hide">
     <div class="card"><h2>🛍️ Productos</h2><p class="hint" style="margin:0 0 12px">Ordenados por ingresos. «Clientes en sus cuentas» es cuántos clientes activos hay repartidos en las cuentas de cada producto (sin tope por cuenta).</p><div id="prodTable"></div></div>
     <div class="card"><h2>Resumen por producto</h2><div id="byProd" class="prodgrid"></div></div>
+  </section>
+
+  <section id="tab-wa" class="hide">
+    <div class="card"><h2>💬 Ventas por WhatsApp</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">El asistente con IA atiende a tus clientes. Cuando alguien dice que pagó, aparece aquí. Revisa el comprobante y toca <b>Confirmar</b>: se crea el código y al cliente le llega por WhatsApp su enlace de activación.</p>
+      <div class="tools"><select id="waSt"><option value="pend">Por atender</option><option value="">Todas</option></select><button class="btn s" id="waReload">↻ Recargar</button></div>
+      <div id="waRows" class="walist"><div class="empty">Cargando…</div></div>
+    </div>
+    <details class="card" id="waCfgBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">⚙️ Conexión del asistente</summary><div id="waCfg" style="margin-top:12px">Cargando…</div></details>
   </section>
 
   <section id="tab-pay" class="hide">
@@ -1091,6 +1105,71 @@ document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key.toL
 /* ---------- Pagos en línea (Wompi) ---------- */
 let PEDIDOS = [];
 const PAY_TAG = {ENTREGADO:["t-ok","Entregado"], PENDIENTE:["t-w","Pendiente"], APROBADO_SIN_STOCK:["t-b","Aprobado · sin cupo"], RECHAZADO:["t-g","Rechazado"]};
+/* ---------- Ventas del asistente de WhatsApp ---------- */
+let waTimer = null;
+const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pagó · por confirmar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
+async function loadWa(){
+  const el = $("#waRows"); if(!el) return;
+  try{ WAV = (await api("admin_wa_list")).ventas; drawWa(); }
+  catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar WhatsApp.":ex.message)+'</div>'; }
+  if($("#waCfgBox") && !$("#waCfgBox").dataset.ok) loadWaCfg();
+  clearInterval(waTimer); waTimer = setInterval(()=>{ if(curTab==="wa" && !document.querySelector("dialog[open]")) api("admin_wa_list").then(j=>{ WAV=j.ventas; drawWa(); }).catch(()=>{}); }, 45000);
+}
+function drawWa(){
+  const el = $("#waRows"); if(!el) return; const pend = $("#waSt").value==="pend";
+  const list = WAV.filter(v=>!pend || v.estado==="POR CONFIRMAR" || v.estado==="NECESITA AYUDA" || v.estado==="CONFIRMADO (enviar a mano)");
+  drawNav(); document.querySelectorAll(".nv[data-t]").forEach(x=>x.classList.toggle("on", x.dataset.t===curTab));
+  el.innerHTML = list.length ? list.map(v=>{ const [c,t] = WA_TAG[v.estado]||["t-g",v.estado];
+    return `<div class="wacard" data-wa="${esc(v.id)}"><div class="wah"><b>${esc(v.nombre||"Cliente")}</b> <a href="https://wa.me/${esc(v.telefono)}" target="_blank" rel="noopener" class="mono">+${esc(v.telefono)}</a> <span class="tag ${c}">${t}</span><small style="color:var(--mut);margin-left:auto">${fdt(v.fecha)}</small></div>
+      <div class="wab">${v.producto?`${EMO(v.producto)} <b>${esc(v.producto)}</b> · ${money(v.monto)}`:""}${v.gmail?` · Gmail: <span class="mono">${esc(v.gmail)}</span>`:""}${v.codigo?` · Código <span class="mono">${esc(v.codigo)}</span>`:""}${v.nota?`<div class="note">📝 ${esc(v.nota)}</div>`:""}</div>
+      <div class="acts">${v.comprobante?`<button class="btn s" data-wv="media">🧾 Ver comprobante</button>`:""}
+        ${v.estado==="POR CONFIRMAR"?`<button class="btn s p" data-wv="ok">✔ Confirmar y enviar enlace</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
+        ${v.estado==="NECESITA AYUDA"?`<button class="btn s p" data-wv="ok">✔ Confirmar una venta</button><button class="btn s" data-wv="done">Marcar atendido</button>`:""}
+        ${v.codigo?`<button class="btn s" data-wv="link">🔗 Copiar enlace</button>`:""}
+        <a class="btn s wa" target="_blank" rel="noopener" href="https://wa.me/${esc(v.telefono)}">💬 Abrir chat</a></div></div>`; }).join("")
+    : `<div class="empty">${pend?"No hay ventas por atender 🎉":"Todavía no hay ventas por WhatsApp."}</div>`;
+}
+async function waAction(v, a){
+  if(a==="link"){ copy(linkFor(v.codigo)); return; }
+  if(a==="media"){ toast("Trayendo comprobante…"); const j = await api("admin_wa_media",{id:v.id}); showInfo(`<h2>🧾 Comprobante de ${esc(v.nombre||"+"+v.telefono)}</h2><img src="data:${esc(j.mime)};base64,${j.b64}" alt="Comprobante" style="max-width:100%;border-radius:12px">`); return; }
+  if(a==="done"){ await api("admin_wa_done",{id:v.id}); toast("Marcado como atendido ✔"); return loadWa(); }
+  if(a==="no"){
+    const f = await askForm("Rechazar el pago de "+(v.nombre||"+"+v.telefono),[{id:"motivo",label:"Mensaje para el cliente (opcional)",area:true,value:"Hola, no encontramos tu pago. ¿Me envías de nuevo el comprobante, por favor?"},{id:"avisar",label:"Enviarle este mensaje por WhatsApp",type:"check",value:true}],"","Rechazar");
+    if(!f) return; const j = await api("admin_wa_reject",{id:v.id,motivo:f.motivo,avisar:!!f.avisar}); toast(j.enviado?"Rechazado y avisado ✔":"Rechazado ✔"); return loadWa();
+  }
+  if(a==="ok"){
+    const opts = Object.keys(PKEYS).map(n=>({v:PKEYS[n], l:n+" — "+money(priceOf(n))}));
+    const f = await askForm("Confirmar pago de "+(v.nombre||"+"+v.telefono),[{id:"producto",label:"Producto que compró",type:"select",opts,value:pkeyOf(v.producto)||"chatgpt"},{id:"monto",label:"Monto recibido (COP)",type:"number",value:v.monto||priceOf(v.producto)}],
+      "¿Ya te llegó el dinero? Al confirmar se crea un código y al cliente le llega su enlace de activación por WhatsApp.","Confirmar y enviar");
+    if(!f) return; const j = await api("admin_wa_confirm",{id:v.id,producto:f.producto,monto:f.monto});
+    if(j.enviado) toast("Pago confirmado ✔ El cliente ya recibió su enlace de activación");
+    else { copyText(j.texto); showInfo(`<h2>✔ Código creado</h2><p>No se pudo enviar por WhatsApp${j.error?": "+esc(j.error):""}. El mensaje con el enlace quedó <b>copiado</b>; pégalo en el chat.</p><div class="acts" style="margin-top:10px"><a class="btn p wa" target="_blank" rel="noopener" href="https://wa.me/${esc(j.telefono)}?text=${encodeURIComponent(j.texto)}">💬 Enviar por WhatsApp</a></div>`); }
+    await refresh(); return loadWa();
+  }
+}
+async function loadWaCfg(){
+  const box = $("#waCfg"); if(!box) return;
+  try{
+    const c = await api("admin_wa_config"); $("#waCfgBox").dataset.ok = "1";
+    const e = c.estado||{}; const ck = (ok,t)=>`<span class="tag ${ok?"t-ok":"t-b"}">${ok?"✔":"falta"} ${t}</span>`;
+    box.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0 0 10px">El asistente vive en tu cuenta de Cloudflare. Pega aquí su dirección (termina en <span class="mono">workers.dev</span>).</p>
+      <div class="form" style="grid-template-columns:1fr auto"><input id="waUrl" placeholder="https://iaplus-whatsapp.TU-USUARIO.workers.dev" value="${esc(c.workerUrl)}"><button class="btn p" id="waSave">Guardar</button></div>
+      <p style="margin:12px 0 6px"><b>Clave del asistente</b> <small style="color:var(--mut)">(va en Cloudflare como <span class="mono">BOT_SECRET</span>; no la compartas)</small></p>
+      <div class="codeline"><span class="mono" id="waSec">••••••••••••</span><button class="btn s" id="waShow">Mostrar</button><button class="btn s" id="waCp">Copiar</button></div>
+      ${c.workerUrl?`<div class="acts" style="margin-top:12px">${e.ok?ck(e.whatsapp,"WhatsApp conectado")+ck(e.ia,"Clave de IA")+ck(e.tienda,"Conexión con la tienda")+(e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa (los atiendes tú)</span>`:""):`<span class="tag t-b">No responde: ${esc(e.error||"revisa la dirección")}</span>`}</div>`:""}`;
+    $("#waSave").onclick = async()=>{ try{ await api("admin_wa_config",{workerUrl:$("#waUrl").value}); toast("Guardado ✔"); delete $("#waCfgBox").dataset.ok; loadWaCfg(); }catch(ex){ toast(ex.message); } };
+    $("#waShow").onclick = ()=>{ $("#waSec").textContent = c.secret; };
+    $("#waCp").onclick = ()=>copy(c.secret);
+  }catch(ex){ box.innerHTML = '<div class="capwarn">'+esc(ex.message)+'</div>'; }
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-wv]"); if(!b) return;
+  const v = WAV.find(x=>x.id===b.closest("[data-wa]").dataset.wa); if(!v) return;
+  b.disabled = true; waAction(v, b.dataset.wv).catch(ex=>toast(ex.message)).finally(()=>{ b.disabled = false; });
+});
+document.addEventListener("change", e=>{ if(e.target.id==="waSt") drawWa(); });
+document.addEventListener("click", e=>{ if(e.target.id==="waReload") loadWa(); });
+
 async function loadPagos(){
   const cfgBox = $("#payCfg"), rowsEl = $("#payRows"); if(!cfgBox) return;
   try{

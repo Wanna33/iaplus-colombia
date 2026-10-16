@@ -20,7 +20,7 @@
     }finally{ if(t) clearTimeout(t); }
   }
   // Solo se reintentan las consultas que no cambian nada (repetir un canje o un pago podría duplicarlo).
-  const SAFE = ["list", "pay_confirm", "admin_list", "admin_log", "admin_orders", "admin_pay_config"];
+  const SAFE = ["list", "pay_confirm", "admin_list", "admin_log", "admin_orders", "admin_pay_config", "admin_wa_list"];
   const isSafe = b => b && (SAFE.indexOf(b.action || "list") >= 0 || (b.action === "totp" && !b.ask));
   // Dispositivo (para el registro de actividad): sistema y navegador, sin datos personales.
   function device(){
