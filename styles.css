@@ -415,3 +415,87 @@ details p{color:var(--mut);padding:0 22px 20px;font-weight:500;font-size:15px}
   .reveal{opacity:1;translate:none}
   .mq-track{animation:none}
 }
+
+/* =====================================================================
+   TEMA DE AUTOR · "noche premium"
+   Portada oscura con aurora, encabezado de cristal, acentos coral→violeta
+   ===================================================================== */
+:root{
+  --night:#0a0e1a;--night2:#111729;--violet:#8b5cf6;--rose:#f43f5e;
+  --grad:linear-gradient(135deg,#f04c48 0%,#f43f5e 55%,#e0457b 100%);
+  --grad-ink:linear-gradient(90deg,#ef4b47,#f43f5e 45%,#8b5cf6);
+  --grad-ring:conic-gradient(from var(--ang,0deg),#ff6a5c,#f43f5e,#a78bfa,#ffb38a,#ff6a5c);
+}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+
+/* ---------- portada ---------- */
+.hero{background:var(--night);color:#e2e8f0;padding-bottom:128px;isolation:isolate}
+.hero::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-2px;height:90px;background:#fff;border-radius:50% 50% 0 0/100% 100% 0 0;z-index:1}
+.hero-in{z-index:2}
+.hero-bg::after{background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 0%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 30%,#000 0%,transparent 70%)}
+.hero-bg::before{content:"";position:absolute;inset:0;background:radial-gradient(520px circle at var(--sx,70%) var(--sy,30%),rgba(255,106,92,.16),transparent 60%);transition:background .2s;z-index:1}
+.glow{display:block;position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;will-change:transform;animation:aurora 18s ease-in-out infinite alternate}
+.g1{width:520px;height:520px;background:#f43f5e;top:-220px;left:-160px}
+.g2{width:480px;height:480px;background:#7c3aed;top:10%;right:-180px;opacity:.45;animation-duration:22s;animation-direction:alternate-reverse}
+.g3{width:420px;height:420px;background:#ff8a65;bottom:-200px;left:30%;opacity:.35;animation-duration:26s}
+@keyframes aurora{0%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,40px) scale(1.15)}100%{transform:translate(-40px,80px) scale(.95)}}
+.hero h1{color:#fff}
+.hero h1 .grad{background:linear-gradient(90deg,#ff7a6e,#fb7185 40%,#c4b5fd 80%,#ff7a6e);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+.hero p{color:#cbd5e1}
+.hero .login-card p{color:var(--mut)}
+.pill{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#e2e8f0;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:none}
+.pill .dot{background:#34d399}
+.hero .btn-ghost{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:#fff;box-shadow:none}
+.hero .btn-ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
+.hero .btn-primary{box-shadow:0 10px 30px rgba(244,63,94,.45)}
+.hero .btn-primary:hover{box-shadow:0 16px 40px rgba(244,63,94,.55)}
+.hstats b{color:#fff}
+.hstats span{color:#94a3b8}
+.hstats>div+div{border-left-color:rgba(255,255,255,.12)}
+.trust{color:#cbd5e1}
+.trust .ic{color:#fb7185}
+.orb{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.orb.dk{background:rgba(0,0,0,.55)}
+.login-card{box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08);border-color:transparent}
+.login-card::before{left:0;right:0;top:0;height:auto;bottom:0;border-radius:inherit;padding:1.5px;background:var(--grad-ring);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spinRing 6s linear infinite;opacity:.9}
+@keyframes spinRing{to{--ang:360deg}}
+
+/* ---------- encabezado: cristal oscuro sobre la portada ---------- */
+.nav.dark{background:rgba(10,14,26,.94);border-bottom-color:rgba(255,255,255,.08);box-shadow:none}
+.nav.dark .links a{color:#cbd5e1}
+.nav.dark .links a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav.dark .links a.on{color:#fff}
+.nav.dark .user .uname{color:#fff}.nav.dark .user .uname small{color:#cbd5e1}
+.nav.dark .user button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+.nav.dark .btn-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+.nav.dark .btn-google{border-color:transparent}
+.progress{background:linear-gradient(90deg,#ff6a5c,#f43f5e,#8b5cf6);height:3px}
+
+/* ---------- tarjetas: anillo de degradado que gira ---------- */
+.card::before{inset:0;height:auto;border-radius:inherit;padding:1.5px;background:var(--grad-ring);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;transform:none;opacity:0;transition:opacity .35s}
+.card:hover::before{opacity:1;animation:spinRing 3.5s linear infinite}
+.card:hover{border-color:transparent;box-shadow:0 2px 6px rgba(15,23,42,.05),0 24px 56px rgba(244,63,94,.16)}
+.card::after{background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(244,63,94,.08),transparent 45%)}
+.card .badge{background:linear-gradient(135deg,#fff7e8,#ffedd5)}
+
+/* ---------- acentos ---------- */
+.why-i:hover i{background:var(--grad-ink);color:#fff}
+.step b{background:var(--grad-ink)}
+.chip.on{background:var(--grad);box-shadow:0 8px 20px rgba(244,63,94,.3)}
+.eyebrow{background:linear-gradient(135deg,#fff3f2,#f5f3ff);border-color:#fbd5d5}
+.cta-band{background:radial-gradient(600px 300px at 85% 0%,rgba(244,63,94,.45),transparent 60%),radial-gradient(500px 300px at 0% 100%,rgba(124,58,237,.4),transparent 60%),var(--night)}
+.btn-primary{background:var(--grad);background-size:160% 100%}
+.btn-primary:hover{background-position:100% 0}
+.btn.magnet{translate:var(--tx,0) var(--ty2,0);transition:translate .25s var(--ease),transform .25s var(--ease),box-shadow .25s}
+.footer{background:var(--night)}
+
+@media(max-width:860px){
+  .hero{padding-bottom:96px}
+  .hero::after{height:56px}
+  .glow{filter:blur(60px)}
+  .g1{width:340px;height:340px}.g2{width:300px;height:300px}.g3{display:none}
+  .hero-bg::before{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .glow,.hero h1 .grad,.login-card::before,.card:hover::before{animation:none!important}
+}

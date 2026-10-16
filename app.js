@@ -369,3 +369,24 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-pay]
 
 /* sombra del encabezado al desplazarse */
 (function(){const h=document.querySelector(".nav,.top");if(!h)return;const f=()=>h.classList.toggle("scrolled",window.scrollY>8);addEventListener("scroll",f,{passive:true});f();})();
+
+/* ============ TEMA "NOCHE PREMIUM": encabezado sobre la portada, foco de luz y botón magnético ============ */
+(function(){
+  const nav = document.querySelector(".nav"), hero = document.getElementById("inicio"), meta = document.querySelector('meta[name="theme-color"]');
+  if(nav && hero){
+    let dark = null;
+    const f = () => { const d = window.scrollY < hero.offsetHeight - 90; if(d === dark) return; dark = d; nav.classList.toggle("dark", d); if(meta) meta.content = d ? "#0a0e1a" : "#ffffff"; };
+    addEventListener("scroll", f, {passive:true}); addEventListener("resize", f); f();
+  }
+  const fine = matchMedia("(hover:hover) and (pointer:fine)").matches && !matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if(!fine || !hero) return;
+  // foco de luz que sigue al mouse en la portada (un solo cuadro por movimiento)
+  const bg = hero.querySelector(".hero-bg"); let raf = 0, ev = null;
+  hero.addEventListener("pointermove", e => { ev = e; if(raf) return; raf = requestAnimationFrame(() => { raf = 0; const r = hero.getBoundingClientRect(); bg.style.setProperty("--sx", (ev.clientX - r.left) + "px"); bg.style.setProperty("--sy", (ev.clientY - r.top) + "px"); }); });
+  // botón principal magnético: se acerca un poco al cursor
+  hero.querySelectorAll(".cta .btn").forEach(b => {
+    b.classList.add("magnet");
+    b.addEventListener("pointermove", e => { const r = b.getBoundingClientRect(); b.style.setProperty("--tx", ((e.clientX - r.left - r.width/2) * .18).toFixed(1) + "px"); b.style.setProperty("--ty2", ((e.clientY - r.top - r.height/2) * .25).toFixed(1) + "px"); });
+    b.addEventListener("pointerleave", () => { b.style.setProperty("--tx", "0px"); b.style.setProperty("--ty2", "0px"); });
+  });
+})();
