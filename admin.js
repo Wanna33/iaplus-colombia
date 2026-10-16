@@ -1112,7 +1112,7 @@ let PEDIDOS = [];
 const PAY_TAG = {ENTREGADO:["t-ok","Entregado"], PENDIENTE:["t-w","Pendiente"], APROBADO_SIN_STOCK:["t-b","Aprobado · sin cupo"], RECHAZADO:["t-g","Rechazado"]};
 /* ---------- Ventas del asistente de WhatsApp ---------- */
 let waTimer = null;
-const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pagó · por confirmar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"RECLAMO":["t-b","⚠️ Reclamo (devolución u otro)"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"AUTO-CONFIRMADO":["t-ok","🤖 Venta automática · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
+const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pagó · por confirmar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"RECLAMO":["t-b","⚠️ Reclamo (devolución u otro)"],"NO VERIFICADO":["t-g","🤖 Comprobante no válido · lo maneja el asistente"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"AUTO-CONFIRMADO":["t-ok","🤖 Venta automática · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
 async function loadWa(){
   const el = $("#waRows"); if(!el) return;
   try{ WAV = (await api("admin_wa_list")).ventas; drawWa(); }
