@@ -29,7 +29,9 @@
 <link rel="preload" as="image" href="logo-main.webp" type="image/webp">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"IA Plus Colombia","url":"https://wanna33.github.io/iaplus-colombia/","image":"https://wanna33.github.io/iaplus-colombia/icon-512.png","areaServed":"CO","priceRange":"COP"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" data-async-css>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
 <noscript><style>.reveal{opacity:1!important;translate:none!important}</style></noscript>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -58,7 +60,7 @@
 
 <header class="nav">
   <div class="wrap nav-in">
-    <a href="#inicio" class="brand"><img src="logo-main.webp" alt="IA Plus Colombia" width="80" height="56"></a>
+    <a href="#inicio" class="brand"><img src="logo-main.webp" alt="IA Plus Colombia" width="80" height="56" fetchpriority="high"></a>
     <nav class="links" id="links">
       <a href="#catalogo" data-s="catalogo">Catálogo</a>
       <a href="#porque" data-s="porque">Beneficios</a>
@@ -96,7 +98,7 @@
     <div class="hero-side">
       <div class="orbit" id="orbit" aria-hidden="true"></div>
       <div class="login-card" id="heroCard">
-        <h3 id="heroCardTitle">Inicia sesión</h3>
+        <h2 id="heroCardTitle">Inicia sesión</h2>
         <p id="heroCardText">Entra con tu cuenta de Google para comprar y ver tus pedidos.</p>
         <div id="gBtnHero" class="gbtn"></div>
         <small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
@@ -187,15 +189,15 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <img src="logo-main.webp" alt="IA Plus Colombia" class="foot-logo" loading="lazy">
+        <img src="logo-main.webp" alt="IA Plus Colombia" class="foot-logo" loading="lazy" width="138" height="96">
         <p>Cuentas digitales premium al mejor precio en Colombia, con entrega rápida y garantía.</p>
       </div>
       <div>
-        <h4>Tienda</h4>
+        <h3>Tienda</h3>
         <nav class="foot-links"><a href="#catalogo">Catálogo</a><a href="#porque">Beneficios</a><a href="#como">Cómo funciona</a><a href="#faq">Preguntas</a></nav>
       </div>
       <div>
-        <h4>Contacto</h4>
+        <h3>Contacto</h3>
         <nav class="foot-links"><a id="waContact" target="_blank" rel="noopener">WhatsApp</a><a href="cuenta.html">Mi cuenta</a><a href="terminos.html">Términos</a><a href="privacidad.html">Privacidad</a></nav>
       </div>
     </div>
@@ -207,7 +209,7 @@
 <div class="modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
   <div class="modal-box">
     <button class="modal-x" id="closeLogin" aria-label="Cerrar">✕</button>
-    <img src="logo-main.webp" alt="" class="modal-logo">
+    <img src="logo-main.webp" alt="" class="modal-logo" width="138" height="96">
     <h3 id="loginTitle">Ingresa con tu Gmail</h3>
     <p>Usa tu cuenta de Google para comprar y ver tus pedidos.</p>
     <div id="gBtn" class="gbtn"></div>

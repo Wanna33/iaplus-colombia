@@ -111,19 +111,19 @@ function confetti(){
 }
 /* ---------- productos ---------- */
 const APPS=[
-  {k:"youtube",n:"YouTube Premium",img:"youtube.png",url:"https://www.youtube.com/",host:"youtube.com",dur:"3 meses"},
-  {k:"davinci",n:"DaVinci Resolve",img:"davinci.png",url:"https://www.blackmagicdesign.com/products/davinciresolve",host:"DaVinci Resolve en tu PC"},
-  {k:"photoshop",n:"Adobe Photoshop",img:"photoshop.png",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
-  {k:"premiere",n:"Adobe Premiere Pro",img:"premiere.png",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
-  {k:"xbox",n:"Xbox Game Pass Ultimate",img:"xbox.png",url:"https://www.xbox.com/es-CO/auth/msa?action=logIn",host:"xbox.com"},
-  {k:"canva",n:"Canva",img:"canva.png",url:"https://www.canva.com/login",host:"canva.com"},
-  {k:"duolingo",n:"Duolingo",img:"duolingo.png",url:"https://www.duolingo.com/log-in",host:"duolingo.com",dur:"12 meses"},
-  {k:"claude",n:"Claude Code",img:"claude.png",url:"https://claude.ai/login",host:"claude.ai",dev:1},
-  {k:"gemini",n:"Gemini Pro",img:"gemini.png",url:"https://gemini.google.com/",host:"gemini.google.com"},
-  {k:"flow",n:"Flow",img:"flow.png",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},
-  {k:"capcut",n:"CapCut Pro",img:"capcut.png",url:"https://www.capcut.com/login",host:"capcut.com"},
-  {k:"filmora",n:"Filmora",img:"filmora.png",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},
-  {k:"chatgpt",n:"ChatGPT",img:"chatgpt.png",dark:true,url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}
+  {k:"youtube",n:"YouTube Premium",img:"youtube.webp",url:"https://www.youtube.com/",host:"youtube.com",dur:"3 meses"},
+  {k:"davinci",n:"DaVinci Resolve",img:"davinci.webp",url:"https://www.blackmagicdesign.com/products/davinciresolve",host:"DaVinci Resolve en tu PC"},
+  {k:"photoshop",n:"Adobe Photoshop",img:"photoshop.webp",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
+  {k:"premiere",n:"Adobe Premiere Pro",img:"premiere.webp",url:"https://account.adobe.com/",host:"adobe.com (Creative Cloud en tu PC)"},
+  {k:"xbox",n:"Xbox Game Pass Ultimate",img:"xbox.webp",url:"https://www.xbox.com/es-CO/auth/msa?action=logIn",host:"xbox.com"},
+  {k:"canva",n:"Canva",img:"canva.webp",url:"https://www.canva.com/login",host:"canva.com"},
+  {k:"duolingo",n:"Duolingo",img:"duolingo.webp",url:"https://www.duolingo.com/log-in",host:"duolingo.com",dur:"12 meses"},
+  {k:"claude",n:"Claude Code",img:"claude.webp",url:"https://claude.ai/login",host:"claude.ai",dev:1},
+  {k:"gemini",n:"Gemini Pro",img:"gemini.webp",url:"https://gemini.google.com/",host:"gemini.google.com"},
+  {k:"flow",n:"Flow",img:"flow.webp",url:"https://labs.google/fx/tools/flow",host:"labs.google/fx/tools/flow"},
+  {k:"capcut",n:"CapCut Pro",img:"capcut.webp",url:"https://www.capcut.com/login",host:"capcut.com"},
+  {k:"filmora",n:"Filmora",img:"filmora.webp",url:"https://account.wondershare.com/",host:"Wondershare / Filmora"},
+  {k:"chatgpt",n:"ChatGPT",img:"chatgpt.webp",dark:true,url:"https://chatgpt.com/auth/login",host:"chatgpt.com"}
 ];
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 let ITEMS = [], tab = "sub", filterQ = "";

@@ -15,12 +15,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="IA Plus">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1e6bff">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#f6f8fc;--card:#fff;--line:#e6ebf4;--text:#101a33;--mut:#5f6f8c;--acc:#1e6bff;--acc2:#12a8ff;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#eef4ff}
+:root{--bg:#f8fafc;--card:#fff;--line:#e8edf3;--text:#0f172a;--mut:#64748b;--acc:#e0403d;--acc2:#ff6a5c;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#eef4ff}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text);line-height:1.5}
 a{color:inherit;text-decoration:none}
 .bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
 .bar-in{max-width:1300px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -44,7 +46,7 @@ main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .stat b{display:block;font-size:28px;line-height:1.1}
 .stat span{color:var(--mut);font-size:13px}
-.stat.big{grid-column:1/-1;background:linear-gradient(135deg,#12a8ff,#1e56ff);color:#fff;border:0;padding:20px 24px}
+.stat.big{grid-column:1/-1;background:linear-gradient(135deg,#f04c48,#ff6a5c 60%,#ff8a65);color:#fff;border:0;padding:20px 24px}
 .stat.big span{color:#dbe9ff;font-size:15px;font-weight:600}
 .stat.big b{font-size:clamp(46px,9vw,72px);margin:4px 0}
 .stat.big small{color:#dbe9ff;font-size:13px}
@@ -52,7 +54,7 @@ main{max-width:1300px;margin:0 auto;padding:22px 20px 70px}
 .accrow:last-child{border-bottom:0}
 .accname{font-weight:700;flex:1 1 240px;word-break:break-all}
 .stat.w b{color:var(--warn)}.stat.b b{color:var(--bad)}.stat.g b{color:var(--ok)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:0 8px 24px rgba(30,60,120,.05)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
 .card h2{font-size:18px;margin-bottom:12px}
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
 .form label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-bottom:4px}
@@ -98,14 +100,14 @@ dialog h2{font-size:19px;margin-bottom:12px}
 .mini{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px}
 .prodgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .pcard{border:1px solid var(--line);border-radius:16px;padding:16px;background:linear-gradient(180deg,#fff,var(--soft));transition:transform .25s,box-shadow .25s}
-.pcard:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(30,100,255,.15)}
+.pcard:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(239,83,80,.16)}
 .pcard .pe{font-size:28px}.pcard .pn{font-size:30px;font-weight:800;line-height:1.1;margin:6px 0}.pcard .pn small{font-size:13px;color:var(--mut);font-weight:600}.pcard .pm{font-size:13px;color:var(--mut)}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 section[id^=tab-]:not(.hide)>.card,section[id^=tab-]:not(.hide)>details{animation:up .5s cubic-bezier(.2,.7,.2,1) both}
 section[id^=tab-]:not(.hide)>.card:nth-child(2){animation-delay:.06s}
 section[id^=tab-]:not(.hide)>.card:nth-child(3){animation-delay:.12s}
 section[id^=tab-]:not(.hide)>.card:nth-child(4){animation-delay:.18s}
-.stat{transition:transform .25s,box-shadow .25s;animation:up .5s cubic-bezier(.2,.7,.2,1) both}.stat:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(30,100,255,.12)}
+.stat{transition:transform .25s,box-shadow .25s;animation:up .5s cubic-bezier(.2,.7,.2,1) both}.stat:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(239,83,80,.14)}
 .stat:nth-child(2){animation-delay:.05s}.stat:nth-child(3){animation-delay:.1s}.stat:nth-child(4){animation-delay:.15s}.stat:nth-child(5){animation-delay:.2s}
 .stat.big{background-size:200% 200%;animation:up .5s both,gradmove 10s ease infinite}
 @keyframes gradmove{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
@@ -158,7 +160,7 @@ dialog.gs input{font-size:17px;padding:14px}.gsr{display:grid;gap:6px;margin-top
 dialog.set{width:min(640px,94vw)}dialog.set h3{margin:18px 0 6px;font-size:15px}dialog.set label{display:block;font-size:13px;color:var(--mut);font-weight:600;margin:10px 0 4px}
 dialog.set textarea{font-size:13px}.sethelp{font-size:12px;color:var(--mut)}.sethelp code{background:var(--soft);padding:1px 6px;border-radius:6px;color:var(--acc)}
 /* ---- modo oscuro ---- */
-[data-theme=dark]{color-scheme:dark;--bg:#0e131d;--card:#171e2d;--line:#273149;--text:#e8edf8;--mut:#94a2bf;--soft:#1b2640;--okbg:#0f3a2b;--warnbg:#3b2e0b;--badbg:#3f1818;--acc:#4d8dff;--acc2:#2bb6ff}
+[data-theme=dark]{color-scheme:dark;--bg:#0e131d;--card:#171e2d;--line:#273149;--text:#e8edf8;--mut:#94a2bf;--soft:#1b2640;--okbg:#0f3a2b;--warnbg:#3b2e0b;--badbg:#3f1818;--acc:#ff6f6b;--acc2:#ff8a65}
 [data-theme=dark] .bar,[data-theme=dark] .tabs,[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea,[data-theme=dark] .btn,[data-theme=dark] dialog{background:var(--card);color:var(--text)}
 [data-theme=dark] .btn.p{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff}
 [data-theme=dark] .btn.s.p{color:#fff}
@@ -208,6 +210,30 @@ html{-webkit-text-size-adjust:100%}body{overflow-x:hidden}
   .brow{grid-template-columns:70px 1fr}.brow span:last-child{grid-column:1/-1}
   .kv{grid-template-columns:1fr}
 }
+
+/* ===== identidad IA Plus: acabado profesional ===== */
+.bar{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
+.bar h1{font-weight:800;letter-spacing:-.02em}
+.btn{transition:border-color .2s,color .2s,background .2s,transform .15s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn.p{box-shadow:0 6px 16px rgba(239,83,80,.28)}
+.btn.p:hover{box-shadow:0 10px 22px rgba(239,83,80,.36)}
+.tabs{box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.tabs button{transition:background .2s,color .2s}
+.tabs button:hover{color:var(--text);background:var(--soft)}
+.tabs button.on{box-shadow:0 6px 16px rgba(239,83,80,.28)}
+.card{border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.05)}
+.card h2{font-weight:800;letter-spacing:-.02em}
+.stat{border-radius:16px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.stat b{font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+th{font-weight:700}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--soft)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)!important;box-shadow:0 0 0 4px rgba(239,83,80,.12)}
+dialog{border-radius:20px}
+dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+:root:not([data-theme=dark]){--soft:#fff3f2}
+:focus-visible{outline:3px solid rgba(239,83,80,.5);outline-offset:2px}
 </style>
 </head>
 <body>

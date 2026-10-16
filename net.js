@@ -3,6 +3,8 @@
    - Un reintento automático si falla la conexión (no si el servidor respondió).
    - Si la respuesta no es JSON (página de error de Google), se devuelve un mensaje claro. */
 (function(){
+  // hojas de estilo diferidas (fuentes): se activan sin bloquear el primer dibujo de la página
+  document.querySelectorAll("link[data-async-css]").forEach(l => { l.media = "all"; });
   const TIMEOUT = 25000;
   async function once(url, body){
     const ctrl = "AbortController" in window ? new AbortController() : null;

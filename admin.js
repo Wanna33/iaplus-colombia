@@ -909,7 +909,7 @@ function backupJson(){
 }
 
 /* ---------- Tema oscuro ---------- */
-function applyTheme(){ const t = load("iap_theme") || ""; document.documentElement.dataset.theme = t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content = t==="dark" ? "#0f1420" : "#1e6bff"; }
+function applyTheme(){ const t = load("iap_theme") || ""; document.documentElement.dataset.theme = t; const m=document.querySelector('meta[name="theme-color"]'); if(m) m.content = t==="dark" ? "#0f1420" : "#ffffff"; }
 applyTheme();
 
 /* ---------- Ajustes ---------- */

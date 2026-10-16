@@ -13,19 +13,19 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.png", dark:true, price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.png", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.png", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.png", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"duolingo", name:"Duolingo", cat:"Educación", ico:"🦉", img:"duolingo.png", lt:true, price:30000, per:"/12 meses", days:365, feats:["Duolingo por 12 meses completos","Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía incluida"]},
-  {id:"canva", name:"Canva", cat:"Diseño", ico:"🎨", img:"canva.png", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"xbox", name:"Xbox Game Pass Ultimate", cat:"Juegos", ico:"🎮", img:"xbox.png", price:26000, per:"/mes", feats:["Game Pass Ultimate por 1 mes","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"premiere", name:"Adobe Premiere Pro", cat:"Edición de video", ico:"🎞️", img:"premiere.png", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de video profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.png", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.png", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"youtube", name:"YouTube Premium", cat:"Streaming", ico:"▶️", img:"youtube.png", lt:true, price:30000, per:"/3 meses", days:90, feats:["YouTube Premium por 3 meses","Sin anuncios y con reproducción en segundo plano","Entrega rápida por WhatsApp","Garantía incluida"]},
-  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.png", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.png", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.webp", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"duolingo", name:"Duolingo", cat:"Educación", ico:"🦉", img:"duolingo.webp", lt:true, price:30000, per:"/12 meses", days:365, feats:["Duolingo por 12 meses completos","Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía incluida"]},
+  {id:"canva", name:"Canva", cat:"Diseño", ico:"🎨", img:"canva.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"xbox", name:"Xbox Game Pass Ultimate", cat:"Juegos", ico:"🎮", img:"xbox.webp", price:26000, per:"/mes", feats:["Game Pass Ultimate por 1 mes","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"premiere", name:"Adobe Premiere Pro", cat:"Edición de video", ico:"🎞️", img:"premiere.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de video profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.webp", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"youtube", name:"YouTube Premium", cat:"Streaming", ico:"▶️", img:"youtube.webp", lt:true, price:30000, per:"/3 meses", days:90, feats:["YouTube Premium por 3 meses","Sin anuncios y con reproducción en segundo plano","Entrega rápida por WhatsApp","Garantía incluida"]},
+  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
 const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
 
@@ -169,13 +169,13 @@ async function redeemCode(code, err, btn, label){
 function renderHeroCard(){
   const c = $("#heroCard");
   if(user && hasAccount()){
-    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])}</h3><p>Tu cuenta ya está activa.</p></div>
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h2>Hola, ${esc(user.name.split(" ")[0])}</h2><p>Tu cuenta ya está activa.</p></div>
       <a href="cuenta.html" class="btn btn-primary full pulse-btn"><svg class="ic"><use href="#i-unlock"/></svg>Ver mi cuenta</a>
       <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">Comprar otra cuenta</a>
       <button class="linkbtn" id="heroLogout">Cerrar sesión</button>`;
     $("#heroLogout").onclick = logout;
   } else if(user){
-    c.innerHTML = `<div class="who">${avatarOf(72)}<h3>Hola, ${esc(user.name.split(" ")[0])}</h3><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
+    c.innerHTML = `<div class="who">${avatarOf(72)}<h2>Hola, ${esc(user.name.split(" ")[0])}</h2><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
       <form id="heroForm" class="redeem-form" style="flex-direction:column"><input id="heroCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar mi código</button></form>
       <p class="note err" id="heroErr" hidden></p>
       <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">¿Aún no tienes código? Ver catálogo</a>
@@ -183,7 +183,7 @@ function renderHeroCard(){
     $("#heroLogout").onclick = logout;
     $("#heroForm").onsubmit = e => { e.preventDefault(); redeemCode($("#heroCode").value, $("#heroErr"), e.target.querySelector("button"), "Activar mi código"); };
   } else {
-    c.innerHTML = `<h3>Entra a tu cuenta</h3><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
+    c.innerHTML = `<h2>Entra a tu cuenta</h2><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
       <div id="gBtnHero" class="gbtn"></div><small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
       <a href="#catalogo" class="linkbtn" style="display:block;margin-top:12px">¿Aún no tienes código? Ver catálogo ↓</a>`;
     initGoogle();

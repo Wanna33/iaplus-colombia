@@ -5,9 +5,9 @@
 :root{
   --red:#ef5350;--red-600:#e0403d;--red-700:#c9302d;--red-400:#ff6f6b;--red-100:#ffe1df;--red-50:#fff3f2;
   --peach:#ff8a65;--violet:#7c4dff;
-  --ink:#0f172a;--text:#1e293b;--mut:#64748b;--mut2:#94a3b8;
+  --ink:#0f172a;--text:#1e293b;--mut:#64748b;--mut2:#6b7280;
   --bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--line:#e8edf3;--line2:#dde4ed;
-  --ok:#0f9d62;--okbg:#e7f7ef;--warn:#b45309;--warnbg:#fff7e8;
+  --ok:#0b7a4b;--okbg:#e7f7ef;--warn:#b45309;--warnbg:#fff7e8;
   --grad:linear-gradient(135deg,#f04c48 0%,#ff6a5c 100%);
   --grad-ink:linear-gradient(90deg,#ef4b47,#ff7a59);
   --r-sm:10px;--r:14px;--r-lg:18px;--r-xl:24px;
@@ -20,7 +20,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 8px);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;animation:pageIn .6s var(--ease) both}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 input,button,select{font:inherit;font-size:16px;color:inherit}
@@ -54,7 +54,7 @@ button{cursor:pointer}
 .btn-primary:hover::before,.btn-wa:hover::before{left:130%;transition:left .75s var(--ease)}
 .ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);pointer-events:none;animation:ripple .6s var(--ease) forwards}
 .btn-primary .ripple,.btn-wa .ripple{background:#fff;opacity:.35}
-.linkbtn{display:block;margin:12px auto 0;background:none;border:0;color:var(--red);font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .2s}
+.linkbtn{display:block;margin:12px auto 0;background:none;border:0;color:var(--red-700);font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color .2s}
 .linkbtn:hover{color:var(--red-700)}
 .pulse-btn{}
 
@@ -97,7 +97,7 @@ button{cursor:pointer}
 .g1{width:440px;height:440px;background:#ff9a90;top:-160px;left:-140px}
 .g2{width:400px;height:400px;background:#ffc0a8;bottom:-180px;right:-100px;animation-duration:20s;animation-direction:alternate-reverse}
 .hero-in{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
-.hero-text>*{animation:rise .9s var(--ease) both}
+.hero-text>*{animation:slideUp .8s var(--ease) both}
 .hero-text>*:nth-child(2){animation-delay:.08s}.hero-text>*:nth-child(3){animation-delay:.16s}.hero-text>*:nth-child(4){animation-delay:.24s}.hero-text>*:nth-child(5){animation-delay:.32s}.hero-text>*:nth-child(6){animation-delay:.4s}
 .pill{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line2);color:var(--text);padding:6px 14px 6px 10px;border-radius:99px;font-size:13px;font-weight:500;margin-bottom:22px;box-shadow:var(--sh-1)}
 .pill .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(18,163,107,.5);animation:ping 2.4s ease-out infinite}
@@ -122,7 +122,7 @@ button{cursor:pointer}
 .orb.dk{background:#111}
 .login-card{position:relative;z-index:2;background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);padding:36px 32px 28px;text-align:center;box-shadow:var(--sh-3);max-width:410px;width:100%;margin:0 auto;animation:rise 1s .18s var(--ease) both}
 .login-card::before{content:"";position:absolute;left:32px;right:32px;top:-1px;height:2px;border-radius:2px;background:var(--grad)}
-.login-card h3{font-size:23px;color:var(--ink);margin-bottom:8px;font-weight:800;letter-spacing:-.02em}
+.login-card h2,.login-card h3{font-size:23px;color:var(--ink);margin-bottom:8px;font-weight:800;letter-spacing:-.02em}
 .login-card p{color:var(--mut);font-size:15px;margin:0 auto 22px;font-weight:500}
 .login-card .legal,.modal-box .legal{color:var(--mut2);font-size:12.5px;display:block;margin-top:14px;font-weight:500;line-height:1.5}
 .legal a{color:var(--mut);text-decoration:underline;text-underline-offset:2px}.legal a:hover{color:var(--red)}
@@ -143,7 +143,7 @@ button{cursor:pointer}
 .mq-i{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:7px 16px 7px 7px;white-space:nowrap;transition:transform .25s var(--ease),border-color .2s,box-shadow .25s}
 .mq-i:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:var(--sh-2)}
 .mq-i b{color:var(--ink);font-size:14px;font-weight:800}
-.mq-i small{color:var(--red);font-size:12.5px;font-weight:800}
+.mq-i small{color:var(--red-700);font-size:12.5px;font-weight:800}
 .mq-ic{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#fff;font-size:18px;overflow:hidden}
 .mq-ic img{width:28px;height:28px;object-fit:contain;border-radius:7px}
 .mq-ic.dk{background:#111}
@@ -174,7 +174,7 @@ button{cursor:pointer}
 .chip.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(239,83,80,.3)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:22px;transition:opacity .2s}
 .grid.swap{opacity:0}
-.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;overflow:hidden;box-shadow:var(--sh-1);transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .45s var(--ease),box-shadow .35s var(--ease),border-color .3s;will-change:transform}
+.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;overflow:hidden;box-shadow:var(--sh-1);transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .45s var(--ease),box-shadow .35s var(--ease),border-color .3s}
 .card::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
 .card::after{content:"";position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(239,83,80,.10),transparent 45%);opacity:0;transition:opacity .35s;pointer-events:none}
 .card:hover{--ty:-6px;border-color:#f6c3c1;box-shadow:var(--sh-3)}
@@ -264,7 +264,7 @@ details p{color:var(--mut);padding:0 22px 20px;font-weight:500;font-size:15px}
 .foot-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:36px;align-items:start}
 .foot-logo{height:96px;width:auto;margin-bottom:12px}
 .foot-grid p{color:#a3a3ae;font-size:14.5px;font-weight:500;max-width:320px}
-.foot-grid h4{color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;font-weight:800}
+.foot-grid h3{color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;font-weight:800}
 .foot-links{display:grid;gap:9px}
 .foot-links a{color:#b7b7c2;font-size:15px;font-weight:700;transition:color .2s,transform .2s;display:inline-block}
 .foot-links a:hover{color:#fff;transform:translateX(3px)}
@@ -394,6 +394,7 @@ details p{color:var(--mut);padding:0 22px 20px;font-weight:500;font-size:15px}
 /* ---------- keyframes ---------- */
 @keyframes pageIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(18px)}to{transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}}
 @keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
