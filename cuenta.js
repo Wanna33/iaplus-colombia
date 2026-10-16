@@ -290,12 +290,18 @@ async function openMore(){
   }catch(ex){ body.innerHTML="<p>"+esc(ex.message)+"</p>"; }
 }
 let timer=null;
+/* ---------- enlace de activación: cuenta.html?codigo=IAP-XXXX-XXXX ---------- */
+(function(){ try{ const p=new URLSearchParams(location.search); const k=(p.get("codigo")||p.get("code")||"").trim().toUpperCase(); if(/^[A-Z0-9-]{6,40}$/.test(k)){ save("iap_pending_code",k); history.replaceState(null,"",location.pathname); } }catch{} })();
+let FLASH=null;
+function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(!f.ok){ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 async function loadAll(){
+  const pc = load("iap_pending_code");
+  if(pc){ try{ const r=await callApi({action:"redeem",code:pc}); save("iap_pending_code",null); FLASH = r.ok ? {ok:true,t:"¡Tu cuenta quedó activada! 🎉"} : {ok:false,t:r.error||"No pudimos activar este enlace."}; if(r.ok){ try{ sessionStorage.removeItem("iap_conf"); }catch{} } }catch(e){ /* sin conexión: se vuelve a intentar al recargar */ } }
   try{
     const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
-    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); return; }
-    renderMain();
+    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); return; }
+    renderMain(); showFlash();
     if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
     if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
@@ -313,4 +319,4 @@ loadAll();
 
 addEventListener("offline",()=>toastMsg("Sin internet. Revisa tu conexión."));
 addEventListener("online",()=>toastMsg("Conexión recuperada ✔"));
-function toastMsg(t){ const x=document.createElement("div"); x.className="toastc"; x.textContent=t; document.body.appendChild(x); setTimeout(()=>x.remove(),2600); }
+function toastMsg(t,ms){ const x=document.createElement("div"); x.className="toastc"; x.textContent=t; document.body.appendChild(x); setTimeout(()=>x.remove(),ms||2600); }

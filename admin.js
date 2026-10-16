@@ -489,9 +489,10 @@ async function autoGen(e){
     const all = res.flatMap(r=>r.codes);
     const out = $("#autoOut"); out.classList.add("on");
     out.innerHTML = `${TTL?`<div class="capwarn" style="margin:0 0 10px">⏱ Si nadie los canjea, se borran solos en ${TTL>=60?(TTL/60)+" h":TTL+" min"}.</div>`:""}<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
-      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
+      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
       <div class="acts" style="margin-top:10px"><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
     out.querySelectorAll("[data-cp]").forEach(x=>x.onclick=()=>copy(x.dataset.cp));
+    out.querySelectorAll("[data-cl]").forEach(x=>x.onclick=()=>copy(linkFor(x.dataset.cl)));
     out.querySelectorAll("[data-cm]").forEach(x=>x.onclick=()=>copy(msgFor({producto:prod,codigo:x.dataset.cm,dias})));
     $("#cpAllAuto").onclick=()=>copy(all.join("\n"));
     copy(all.join("\n")); toast(all.length+" códigos creados ✔ (copiados)");
@@ -518,9 +519,10 @@ function showCodes(codes, it){
   const mb=$("#manualBox"); if(mb) mb.open=true;
   const n=$("#newcode"); n.classList.add("on");
   n.innerHTML = `<div style="color:var(--mut);font-size:13px">${codes.length>1?codes.length+" códigos nuevos":"Código nuevo"} (un solo uso) — ${esc(it.producto)}:</div>
-    ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
+    ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
     ${codes.length>1?`<div class="acts" style="margin-top:10px"><button class="btn s" id="cpAll">Copiar todos los códigos</button></div>`:""}`;
   n.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
+  n.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copy(linkFor(b.dataset.cl)));
   n.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({...it,codigo:b.dataset.cm})));
   const all=$("#cpAll"); if(all) all.onclick=()=>copy(codes.join("\n"));
 }
@@ -755,7 +757,7 @@ const sp = s => String(s).replace(/ {2,}/g," ").replace(/ ([.,!?])/g,"$1");
 const TPL_DEFAULT = {
   renovar: "Hola {nombre} 👋 Tu plan de {producto} {estado}. ¿Quieres renovarlo?",
   vencido: "Hola {nombre} 👋 Tu {producto} venció el {fin}. ¿Quieres reactivarlo? Escríbenos y lo dejamos listo.",
-  codigo: "Hola 👋 Este es tu código de activación de {producto}: {codigo}\n\n1) Entra a {sitio}\n2) Inicia sesión con tu Gmail\n3) Escribe el código en la tarjeta de {producto} y pulsa \"Desbloquear cuenta\".\n\nEl código solo funciona una vez y tu plan dura {dias} días desde que lo actives.",
+  codigo: "Hola 👋 Tu cuenta de {producto} está lista.\n\n👉 Actívala con un clic: {enlace}\n\nSolo inicia sesión con tu Gmail y se desbloquea sola. (Código: {codigo})\n\nEl enlace funciona una sola vez y tu plan dura {dias} días desde que lo actives.",
   clave: "Hola {nombre} 👋 Actualizamos la contraseña de tu cuenta de {producto}. Entra a {sitio}cuenta.html y verás los datos nuevos. Si tienes dudas, escríbenos."
 };
 const TPL = () => ({...TPL_DEFAULT, ...(load("iap_tpl")||{})});
@@ -764,7 +766,8 @@ function renewMsg(i){
   const base = {nombre:firstName(i), producto:i.producto, fin:fdate(i.fin), dias:i.dias, sitio:SITE, estado:i.vencida?"venció el "+fdate(i.fin):"vence el "+fdate(i.fin)};
   return sp(fillTpl(i.vencida?"vencido":"renovar", base));
 }
-function msgFor(i){ return fillTpl("codigo", {producto:i.producto, codigo:i.codigo, dias:i.dias, sitio:SITE, nombre:firstName(i)}); }
+const linkFor = c => SITE + "cuenta.html?codigo=" + encodeURIComponent(c);
+function msgFor(i){ let m = fillTpl("codigo", {producto:i.producto, codigo:i.codigo, dias:i.dias, sitio:SITE, nombre:firstName(i), enlace:linkFor(i.codigo)}); if(!m.includes("cuenta.html?codigo=")) m += "\n\n👉 Actívala con un clic: " + linkFor(i.codigo); return m; }
 
 /* ---------- Seguimiento de avisos (a quién ya le escribiste) ---------- */
 const avKey = i => String(i.cliente).toLowerCase()+"|"+i.producto+"|"+(i.fin||"");
@@ -888,7 +891,7 @@ function openSettings(){
   const t = TPL(), d = document.createElement("dialog"); d.className="set";
   d.innerHTML = `<form method="dialog"><h2>⚙️ Ajustes</h2>
     <h3>💬 Mensajes de WhatsApp</h3>
-    <p class="sethelp">Usa estas palabras entre llaves y se reemplazan solas: <code>{nombre}</code> <code>{producto}</code> <code>{fin}</code> <code>{estado}</code> <code>{codigo}</code> <code>{dias}</code> <code>{sitio}</code></p>
+    <p class="sethelp">Usa estas palabras entre llaves y se reemplazan solas: <code>{nombre}</code> <code>{producto}</code> <code>{fin}</code> <code>{estado}</code> <code>{codigo}</code> <code>{enlace}</code> <code>{dias}</code> <code>{sitio}</code></p>
     <label>Aviso de renovación (por vencer)</label><textarea name="renovar" rows="2">${esc(t.renovar)}</textarea>
     <label>Aviso a un cliente vencido</label><textarea name="vencido" rows="2">${esc(t.vencido)}</textarea>
     <label>Mensaje con el código de activación</label><textarea name="codigo" rows="6">${esc(t.codigo)}</textarea>
