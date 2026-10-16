@@ -498,7 +498,7 @@ function crows(){
       <td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Vence">${fdate(c.vence)}</td><td data-l="Desde">${fdate(c.primera)}</td>
       <td data-l="Pagado"><b>${money(c.gastado)}</b></td><td data-l="Nota"><div class="note">${esc(c.nota||"—")}</div></td>
-      <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button><button class="btn s p" data-ca="grant" title="Darle acceso a más cuentas de un producto">➕ Dar más cuentas</button>
+      <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button><button class="btn s p" data-ca="grant" title="Darle acceso a más cuentas de un producto">➕ Dar más cuentas</button><button class="btn s" data-ca="2fa" title="Darle más pedidos del código de verificación">🔢 Más códigos 2FA</button>
         ${c.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp, renewMsg({...c.cuentas[0],nombre:c.nombre}))}">💬 WhatsApp</a>`:""}</div></td></tr>`;
   }).join("") : `<tr><td colspan="9" class="empty">No hay clientes que coincidan.</td></tr>`;
 }
@@ -509,7 +509,7 @@ function clientDetail(c){
     <b>Cliente desde</b><span>${fdate(c.primera)}</span><b>Última activación</b><span>${fdate(c.ultima)}</span>
     <b>Total pagado</b><span><b style="color:var(--text)">${money(c.gastado)}</b></span><b>Códigos 2FA pedidos</b><span>${c.usos2fa}</span>
     <b>Nota</b><span style="white-space:pre-wrap">${esc(c.nota||"—")}</span></div>
-    <div class="acts" style="margin:6px 0 12px"><button class="btn s p" data-actividad="${esc(c.email)}">🕘 Ver toda su actividad (con horas)</button><button class="btn s p" data-grant="${esc(c.email)}">➕ Dar más cuentas</button></div>
+    <div class="acts" style="margin:6px 0 12px"><button class="btn s p" data-actividad="${esc(c.email)}">🕘 Ver toda su actividad (con horas)</button><button class="btn s p" data-grant="${esc(c.email)}">➕ Dar más cuentas</button><button class="btn s" data-dar2fa="${esc(c.email)}">🔢 Más códigos 2FA</button></div>
     <h2 style="font-size:16px">Cuentas de este cliente (${c.cuentas.length})</h2>
     ${c.cuentas.map(i=>{const st=state(i);return `<div class="mini"><b>${esc(i.producto)}</b> · ${esc(i.correo)} <span class="tag t-${st.k}">${st.t}</span><br>
       Código <span class="mono">${esc(i.codigo)}</span> · Activada ${fdate(i.inicio)} · Vence ${fdate(i.fin)} ${i.vencida?"":`(${i.restante} d)`}<br>
@@ -518,6 +518,19 @@ function clientDetail(c){
 // Dar acceso a más cuentas de un producto: el cliente las ve en «Mi suscripción» y vencen igual que su plan.
 const PKEYS = {"ChatGPT":"chatgpt","Claude Code":"claude","Gemini Pro":"gemini","Flow":"flow","Duolingo":"duolingo","Canva":"canva","Xbox Game Pass Ultimate":"xbox","Adobe Premiere Pro":"premiere","Adobe Photoshop":"photoshop","DaVinci Resolve":"davinci","YouTube Premium":"youtube","CapCut Pro":"capcut","Filmora":"filmora"};
 const pkeyOf = name => { const n=String(name||"").toLowerCase(); const hit=Object.keys(PKEYS).find(k=>n.includes(k.toLowerCase())||n.includes(PKEYS[k])); return hit?PKEYS[hit]:""; };
+// Más pedidos del código de verificación (2FA) para un cliente: solo por hoy, un límite fijo, o volver al normal
+async function dar2fa(email){
+  email = String(email||"").trim().toLowerCase(); if(!email) return;
+  const actual = Math.max(0, ...items.filter(i=>(i.cliente||"").toLowerCase()===email).map(i=>Number(i.max2fa)||0)) || 2;
+  const v = await askForm("Códigos de verificación de "+email,[
+    {id:"modo",label:"¿Qué quieres hacer?",type:"select",value:"hoy",opts:[{v:"hoy",l:"Darle códigos extra solo por hoy"},{v:"siempre",l:"Cambiar su límite diario (para siempre)"},{v:"normal",l:"Volver al normal (2 por día)"}]},
+    {id:"cantidad",label:"Cantidad (extra de hoy, o el nuevo límite diario)",type:"number",value:3}],
+    "Hoy puede pedir <b>"+actual+"</b> código(s) en total. Los pedidos se comparten entre todas sus cuentas.","Guardar");
+  if(!v) return;
+  const j = await api("admin_2fa_extra",{cliente:email, modo:v.modo, cantidad:v.cantidad});
+  toast("Listo ✔ Hoy puede pedir "+j.limite+" código(s) de verificación");
+  await refresh();
+}
 async function grantAccounts(email){
   email = String(email||"").trim().toLowerCase(); if(!email) return;
   const mine = new Set(items.filter(i=>(i.cliente||"").toLowerCase()===email && !i.vencida).map(i=>i.correo.toLowerCase()));
@@ -846,7 +859,7 @@ document.addEventListener("click", async e=>{
   const ca = e.target.closest("[data-ca]");
   if(ca){
     const c = clients().find(x=>x.email===ca.closest("tr").dataset.c); if(!c) return;
-    try{ if(ca.dataset.ca==="info") clientDetail(c); else if(ca.dataset.ca==="grant") await grantAccounts(c.email); else await editClient(c); }catch(ex){ toast(ex.message); }
+    try{ if(ca.dataset.ca==="info") clientDetail(c); else if(ca.dataset.ca==="grant") await grantAccounts(c.email); else if(ca.dataset.ca==="2fa") await dar2fa(c.email); else await editClient(c); }catch(ex){ toast(ex.message); }
     return;
   }
   const bt = e.target.closest("[data-a]"); if(!bt) return;
@@ -1227,6 +1240,8 @@ document.addEventListener("click", e=>{
   setTab("log"); const i = $("#lcli"); if(i) i.value = em; loadLog(em); window.scrollTo({top:0,behavior:"smooth"});
 });
 document.addEventListener("click", e=>{
+  const z = e.target.closest("[data-dar2fa]");
+  if(z){ const d = z.closest("dialog"); if(d) d.close(); dar2fa(z.dataset.dar2fa).catch(ex=>toast(ex.message)); return; }
   const b = e.target.closest("[data-grant]"); if(!b) return;
   const d = b.closest("dialog"); if(d) d.close();
   grantAccounts(b.dataset.grant).catch(ex=>toast(ex.message));
