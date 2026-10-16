@@ -294,7 +294,8 @@ let FLASH=null;
 function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(!f.ok){ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 async function loadAll(){
   const pc = load("iap_pending_code");
-  if(pc){ try{ const r=await callApi({action:"redeem",code:pc}); save("iap_pending_code",null); FLASH = r.ok ? {ok:true,t:"¡Tu cuenta quedó activada! 🎉"} : {ok:false,t:r.error||"No pudimos activar este enlace."}; if(r.ok){ try{ sessionStorage.removeItem("iap_conf"); }catch{} } }catch(e){ /* sin conexión: se vuelve a intentar al recargar */ } }
+  if(pc && load("iap_admin") && !confirm("Abriste un enlace de activación ("+pc+") con tu cuenta de administrador.\n\n¿Activarlo en TU cuenta? Pulsa Cancelar si es para un cliente y envíaselo a él.")) save("iap_pending_code",null);
+  else if(pc){ try{ const r=await callApi({action:"redeem",code:pc}); save("iap_pending_code",null); FLASH = r.ok ? {ok:true,t:"¡Tu cuenta quedó activada! 🎉"} : {ok:false,t:r.error||"No pudimos activar este enlace."}; if(r.ok){ try{ sessionStorage.removeItem("iap_conf"); }catch{} } }catch(e){ /* sin conexión: se vuelve a intentar al recargar */ } }
   try{
     const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();

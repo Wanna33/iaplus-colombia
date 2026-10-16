@@ -594,13 +594,14 @@ async function autoGen(e){
     const all = res.flatMap(r=>r.codes);
     const out = $("#autoOut"); out.classList.add("on");
     out.innerHTML = `${TTL?`<div class="capwarn" style="margin:0 0 10px">⏱ Si nadie los canjea, se borran solos en ${TTL>=60?(TTL/60)+" h":TTL+" min"}.</div>`:""}<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
-      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
-      <div class="acts" style="margin-top:10px"><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
+      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s p" data-cl="${esc(c)}">🔗 Copiar enlace de activación</button><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
+      <div class="acts" style="margin-top:10px"><button class="btn s p" id="clAllAuto">🔗 Copiar todos los enlaces</button><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
     out.querySelectorAll("[data-cp]").forEach(x=>x.onclick=()=>copy(x.dataset.cp));
     out.querySelectorAll("[data-cl]").forEach(x=>x.onclick=()=>copy(linkFor(x.dataset.cl)));
     out.querySelectorAll("[data-cm]").forEach(x=>x.onclick=()=>copy(msgFor({producto:prod,codigo:x.dataset.cm,dias})));
     $("#cpAllAuto").onclick=()=>copy(all.join("\n"));
-    copy(all.join("\n")); toast(all.length+" códigos creados ✔ (copiados)");
+    $("#clAllAuto").onclick=()=>copy(all.map(linkFor).join("\n"));
+    copyText(all.map(linkFor).join("\n")).then(()=>toast(all.length+(all.length===1?" código creado ✔ Enlace de activación copiado":" códigos creados ✔ Enlaces de activación copiados")));
   }
   b.disabled=false; b.textContent="🎲 Generar";
 }
@@ -624,12 +625,13 @@ function showCodes(codes, it){
   const mb=$("#manualBox"); if(mb) mb.open=true;
   const n=$("#newcode"); n.classList.add("on");
   n.innerHTML = `<div style="color:var(--mut);font-size:13px">${codes.length>1?codes.length+" códigos nuevos":"Código nuevo"} (un solo uso) — ${esc(it.producto)}:</div>
-    ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
-    ${codes.length>1?`<div class="acts" style="margin-top:10px"><button class="btn s" id="cpAll">Copiar todos los códigos</button></div>`:""}`;
+    ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s p" data-cl="${esc(c)}">🔗 Copiar enlace de activación</button><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
+    ${codes.length>1?`<div class="acts" style="margin-top:10px"><button class="btn s p" id="clAll">🔗 Copiar todos los enlaces</button><button class="btn s" id="cpAll">Copiar todos los códigos</button></div>`:""}`;
   n.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
   n.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copy(linkFor(b.dataset.cl)));
   n.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({...it,codigo:b.dataset.cm})));
   const all=$("#cpAll"); if(all) all.onclick=()=>copy(codes.join("\n"));
+  const allL=$("#clAll"); if(allL) allL.onclick=()=>copy(codes.map(linkFor).join("\n"));
 }
 async function genCode(e){
   e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
@@ -641,9 +643,9 @@ async function genCode(e){
     let codes;
     if(qty>1) codes = (await api("admin_bulk",{fila:a.fila,dias,precio,cantidad:qty})).codigos;
     else codes = [(await api("admin_clone",{fila:a.fila,dias,precio})).codigo];
-    copy(codes.length>1?codes.join("\n"):msgFor({producto:a.producto,codigo:codes[0],dias}));
+    await copyText(codes.length>1?codes.map(linkFor).join("\n"):msgFor({producto:a.producto,codigo:codes[0],dias}));
     await refresh(); showCodes(codes,{producto:a.producto,dias});
-    toast(codes.length>1?`${codes.length} códigos creados ✔ (copiados)`:"Código creado ✔ (mensaje copiado)");
+    toast(codes.length>1?`${codes.length} códigos creados ✔ (enlaces de activación copiados)`:"Código creado ✔ (mensaje con el enlace de activación copiado)");
   }catch(ex){ toast(ex.message); }
   b.disabled=false;
 }
