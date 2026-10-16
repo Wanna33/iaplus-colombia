@@ -479,7 +479,7 @@ function crows(){
       <td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Vence">${fdate(c.vence)}</td><td data-l="Desde">${fdate(c.primera)}</td>
       <td data-l="Pagado"><b>${money(c.gastado)}</b></td><td data-l="Nota"><div class="note">${esc(c.nota||"—")}</div></td>
-      <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button>
+      <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button><button class="btn s p" data-ca="grant" title="Darle acceso a más cuentas de un producto">➕ Dar más cuentas</button>
         ${c.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp, renewMsg({...c.cuentas[0],nombre:c.nombre}))}">💬 WhatsApp</a>`:""}</div></td></tr>`;
   }).join("") : `<tr><td colspan="9" class="empty">No hay clientes que coincidan.</td></tr>`;
 }
@@ -490,11 +490,29 @@ function clientDetail(c){
     <b>Cliente desde</b><span>${fdate(c.primera)}</span><b>Última activación</b><span>${fdate(c.ultima)}</span>
     <b>Total pagado</b><span><b style="color:var(--text)">${money(c.gastado)}</b></span><b>Códigos 2FA pedidos</b><span>${c.usos2fa}</span>
     <b>Nota</b><span style="white-space:pre-wrap">${esc(c.nota||"—")}</span></div>
-    <div class="acts" style="margin:6px 0 12px"><button class="btn s p" data-actividad="${esc(c.email)}">🕘 Ver toda su actividad (con horas)</button></div>
+    <div class="acts" style="margin:6px 0 12px"><button class="btn s p" data-actividad="${esc(c.email)}">🕘 Ver toda su actividad (con horas)</button><button class="btn s p" data-grant="${esc(c.email)}">➕ Dar más cuentas</button></div>
     <h2 style="font-size:16px">Cuentas de este cliente (${c.cuentas.length})</h2>
     ${c.cuentas.map(i=>{const st=state(i);return `<div class="mini"><b>${esc(i.producto)}</b> · ${esc(i.correo)} <span class="tag t-${st.k}">${st.t}</span><br>
       Código <span class="mono">${esc(i.codigo)}</span> · Activada ${fdate(i.inicio)} · Vence ${fdate(i.fin)} ${i.vencida?"":`(${i.restante} d)`}<br>
       2FA: ${i.tiene2fa?`${i.usos2fa}/${i.max2fa} usos${i.ultimo2fa?" · último "+fdt(i.ultimo2fa):""}`:"sin clave"} · Precio ${money(i.precio)}</div>`;}).join("")}`);
+}
+// Dar acceso a más cuentas de un producto: el cliente las ve en «Mi suscripción» y vencen igual que su plan.
+const PKEYS = {"ChatGPT":"chatgpt","Claude Code":"claude","Gemini Pro":"gemini","Flow":"flow","Duolingo":"duolingo","Canva":"canva","Xbox Game Pass Ultimate":"xbox","Adobe Premiere Pro":"premiere","Adobe Photoshop":"photoshop","DaVinci Resolve":"davinci","YouTube Premium":"youtube","CapCut Pro":"capcut","Filmora":"filmora"};
+const pkeyOf = name => { const n=String(name||"").toLowerCase(); const hit=Object.keys(PKEYS).find(k=>n.includes(k.toLowerCase())||n.includes(PKEYS[k])); return hit?PKEYS[hit]:""; };
+async function grantAccounts(email){
+  email = String(email||"").trim().toLowerCase(); if(!email) return;
+  const mine = new Set(items.filter(i=>(i.cliente||"").toLowerCase()===email && !i.vencida).map(i=>i.correo.toLowerCase()));
+  const libres = k => new Set(items.filter(i=>pkeyOf(i.producto)===k && i.estado!=="Con problemas" && !mine.has(i.correo.toLowerCase())).map(i=>i.correo.toLowerCase())).size;
+  const opts = Object.keys(PKEYS).map(n=>({v:PKEYS[n], l:n+" — "+libres(PKEYS[n])+" cuenta(s) que aún no tiene"})).filter(o=>libres(o.v)>0);
+  if(!opts.length) return toast("Este cliente ya tiene acceso a todas las cuentas.");
+  const v = await askForm("Dar más cuentas a "+email,[
+    {id:"producto",label:"Producto",type:"select",opts,value:opts.find(o=>o.v==="chatgpt")?.v||opts[0].v},
+    {id:"cantidad",label:"¿Cuántas cuentas más? (escribe «todas» para darle todas)",value:"todas",req:true}],
+    "Las cuentas nuevas le aparecen en «Mi suscripción» con correo, contraseña y 2FA, y vencen el mismo día que su plan actual. Si no tiene un plan activo, empiezan hoy.","Dar acceso");
+  if(!v) return;
+  const j = await api("admin_grant",{cliente:email, producto:v.producto, cantidad:String(v.cantidad).trim().toLowerCase()==="todas"?"todas":v.cantidad});
+  toast("Listo ✔ Se le dieron "+j.dadas+" cuenta"+(j.dadas===1?"":"s")+(j.quedan?" · quedan "+j.quedan+" que aún no tiene":""));
+  await refresh();
 }
 async function editClient(c){
   const v = await askForm("Datos de "+(c.nombre||c.email),[
@@ -809,7 +827,7 @@ document.addEventListener("click", async e=>{
   const ca = e.target.closest("[data-ca]");
   if(ca){
     const c = clients().find(x=>x.email===ca.closest("tr").dataset.c); if(!c) return;
-    try{ if(ca.dataset.ca==="info") clientDetail(c); else await editClient(c); }catch(ex){ toast(ex.message); }
+    try{ if(ca.dataset.ca==="info") clientDetail(c); else if(ca.dataset.ca==="grant") await grantAccounts(c.email); else await editClient(c); }catch(ex){ toast(ex.message); }
     return;
   }
   const bt = e.target.closest("[data-a]"); if(!bt) return;
@@ -1109,6 +1127,11 @@ document.addEventListener("click", e=>{
   const b = e.target.closest("[data-actividad]"); if(!b) return;
   const em = b.dataset.actividad; const d = b.closest("dialog"); if(d) d.close();
   setTab("log"); const i = $("#lcli"); if(i) i.value = em; loadLog(em); window.scrollTo({top:0,behavior:"smooth"});
+});
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-grant]"); if(!b) return;
+  const d = b.closest("dialog"); if(d) d.close();
+  grantAccounts(b.dataset.grant).catch(ex=>toast(ex.message));
 });
 
 /* ---------- menú lateral: clics, cajón en celular y atajos ---------- */
