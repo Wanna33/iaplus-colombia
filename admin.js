@@ -150,7 +150,7 @@ function statsHtml(){
     + k("👥","Clientes activos", `<span data-n="${activos}">0</span>`, nuevosHoy ? "+"+nuevosHoy+" nuevo"+(nuevosHoy===1?"":"s")+" hoy" : "Ningún cliente nuevo hoy", "", "cli")
     + k("⏳","Vencen en 7 días", `<span data-n="${v7}">0</span>`, v7 ? "Escríbeles para renovar" : "Nadie por vencer", v7?"w":"", "cli")
     + k("🎫","Códigos disponibles", `<span data-n="${libres}">0</span>`, "Listos para vender", libres?"":"w", "cod")
-    + k("🧩","Cupo libre", `<span data-n="${cupo}">0</span>`, ocup+"% de ocupación en "+cuentas.length+" cuenta"+(cuentas.length===1?"":"s"), ocup>=85?"w":"", "cta")
+    + (noCap() ? k("🧩","Cuentas en uso", `<span data-n="${cuentas.length}">0</span>`, cuentas.reduce((t,a)=>t+used(a),0)+" clientes activos repartidos · sin tope", "", "cta") : k("🧩","Cupo libre", `<span data-n="${cupo}">0</span>`, ocup+"% de ocupación en "+cuentas.length+" cuenta"+(cuentas.length===1?"":"s"), ocup>=85?"w":"", "cta"))
     + k("⚠️","Con problemas", `<span data-n="${prob}">0</span>`, prob ? "Revisa y reemplaza" : "Todo funcionando", prob?"b":"g", "cod");
 }
 function monthsHtml(){
@@ -211,10 +211,10 @@ function prodTableHtml(){
     else if(state(i).k==="av") a.libre++; m.set(k,a); });
   const list = [...m.values()].sort((a,b)=>b.ing-a.ing);
   if(!list.length) return '<div class="empty">Aún no hay productos.</div>';
-  return `<div class="wrapt"><table class="ptable"><thead><tr><th>Producto</th><th>Precio</th><th>Plan</th><th>Activos</th><th>Códigos libres</th><th>Vendidos</th><th>Ingresos del mes</th><th>Ingresos totales</th><th>Cupo de sus cuentas</th><th></th></tr></thead><tbody>${list.map(a=>{
+  return `<div class="wrapt"><table class="ptable"><thead><tr><th>Producto</th><th>Precio</th><th>Plan</th><th>Activos</th><th>Códigos libres</th><th>Vendidos</th><th>Ingresos del mes</th><th>Ingresos totales</th><th>Clientes en sus cuentas</th><th></th></tr></thead><tbody>${list.map(a=>{
     const accs=[...a.cuentas].map(c=>cm.get(c)).filter(x=>x&&!x.prob), usados=accs.reduce((t,x)=>t+Math.min(cap,used(x)),0), total=accs.length*cap, pct=total?Math.round(usados/total*100):0, cls=pct>=100?"full":pct>=80?"hi":"";
     return `<tr><td data-l="Producto"><b>${EMO(a.k)} ${esc(a.k)}</b></td><td data-l="Precio">${money(priceOf(a.k))}</td><td data-l="Plan">${daysOf(a.k)} días</td><td data-l="Activos"><b>${a.act}</b></td><td data-l="Códigos libres">${a.libre?`<span class="tag t-av">${a.libre}</span>`:'<span class="tag t-w">0</span>'}</td><td data-l="Vendidos">${a.tot}</td><td data-l="Ingresos del mes">${money(a.mes)}</td><td data-l="Ingresos totales"><b>${money(a.ing)}</b></td>
-      <td data-l="Cupo"><span class="capbar ${cls}" title="${usados} de ${total} lugares ocupados en ${accs.length} cuenta(s)"><i style="width:${Math.min(100,pct)}%"></i></span> <b class="capn ${cls}">${pct}%</b> <small style="color:var(--mut)">${accs.length} cta${accs.length===1?"":"s"}</small></td>
+      <td data-l="Clientes">${noCap()?`<b>${accs.reduce((t,x)=>t+used(x),0)}</b> <small style="color:var(--mut)">en ${accs.length} cta${accs.length===1?"":"s"}</small>`:`<span class="capbar ${cls}" title="${usados} de ${total} lugares ocupados en ${accs.length} cuenta(s)"><i style="width:${Math.min(100,pct)}%"></i></span> <b class="capn ${cls}">${pct}%</b> <small style="color:var(--mut)">${accs.length} cta${accs.length===1?"":"s"}</small>`}</td>
       <td class="acts-td"><button class="btn s p" data-genp="${esc(a.k)}">🎲 Generar códigos</button></td></tr>`; }).join("")}</tbody></table></div>`;
 }
 function byProductHtml(){
@@ -340,7 +340,7 @@ function render(){
   </section>
 
   <section id="tab-prod" class="hide">
-    <div class="card"><h2>🛍️ Productos</h2><p class="hint" style="margin:0 0 12px">Ordenados por ingresos. El cupo es cuántos lugares están ocupados en las cuentas de cada producto (tope de ${getCap()} clientes por cuenta).</p><div id="prodTable"></div></div>
+    <div class="card"><h2>🛍️ Productos</h2><p class="hint" style="margin:0 0 12px">Ordenados por ingresos. «Clientes en sus cuentas» es cuántos clientes activos hay repartidos en las cuentas de cada producto (sin tope por cuenta).</p><div id="prodTable"></div></div>
     <div class="card"><h2>Resumen por producto</h2><div id="byProd" class="prodgrid"></div></div>
   </section>
 
@@ -366,19 +366,17 @@ function render(){
 
   <section id="tab-cod" class="hide">
     <div class="card"><h2>🎲 Generar códigos automáticos</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos al azar</b> entre las cuentas que todavía tienen cupo y <b>nunca pasa del tope</b> por cuenta, para que no se saturen. El cupo se mide con los clientes que <b>ya canjearon</b> su código; los códigos sin canjear no ocupan lugar (puedes cambiarlo con la casilla de abajo).</p>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos</b> entre las cuentas de ese producto, empezando por las que tienen menos clientes. <b>No hay tope:</b> cada cuenta recibe los clientes que sean.</p>
       <form id="autoForm" class="form">
         <div><label>Producto</label><select id="aProd" required></select></div>
         <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" value="1" required></div>
         <div><label>Días del plan</label><input id="aDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="aPrice" type="number" min="0" step="500" value="10000"></div>
-        <div><label>Tope por cuenta</label><input id="aCap" type="number" min="1" value="25" required></div>
         <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
       </form>
       <div class="ttlbox"><span>🛡️ <b>Seguridad:</b> los códigos que nadie canjee se borran solos a los</span>
         <select id="aTtl"><option value="0">Nunca</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="120">2 horas</option><option value="360">6 horas</option><option value="1440">24 horas</option></select>
         <button class="btn s" type="button" id="aClean" title="Invalida ahora mismo los códigos que ya pasaron el tiempo">🧹 Limpiar ahora</button></div>
-      <label class="chk"><input type="checkbox" id="aNoCap"> <b>Sin tope por cuenta (ilimitado):</b> genera todos los que pidas y los reparte entre las cuentas menos ocupadas</label>
       <label class="chk"><input type="checkbox" id="aCount"> Contar también los códigos generados que todavía no se han canjeado</label>
       <div id="capInfo" class="capinfo"></div>
       <div class="newcode" id="autoOut"></div>
@@ -441,13 +439,9 @@ function render(){
   $("#genForm").onsubmit = genCode;
   $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
   $("#aCount").checked = countFree();
-  $("#aNoCap").checked = noCap();
-  $("#aNoCap").onchange = () => { try{ localStorage.setItem(NOCAP_KEY, JSON.stringify($("#aNoCap").checked)); }catch{} $("#aCap").disabled = $("#aNoCap").checked; $("#capInfo").innerHTML = capInfoHtml(); };
-  $("#aCap").disabled = noCap();
   $("#aTtl").onchange = async () => { try{ await api("admin_set_ttl",{minutos:$("#aTtl").value}); TTL = +$("#aTtl").value; toast(TTL? "Los códigos sin canjear se borrarán a los "+$("#aTtl").selectedOptions[0].textContent+" ✔" : "Los códigos ya no caducan"); rows(); }catch(ex){ $("#aTtl").value = String(TTL??60); toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar la caducidad":ex.message); } };
   $("#aClean").onclick = async () => { try{ const j = await api("admin_cleanup"); toast(j.borrados? j.borrados+" código(s) vencido(s) invalidados ✔" : "No había códigos vencidos"); await refresh(); }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs)":ex.message); } };
   $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
-  $("#aCap").oninput = () => { const v=+$("#aCap").value; if(v>0){ try{ localStorage.setItem(CAP_KEY, JSON.stringify(v)); }catch{} } $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
@@ -533,7 +527,7 @@ const COUNT_KEY = "iap_cap_free";
 const countFree = () => !!load(COUNT_KEY);   // por defecto NO: solo cuentan los clientes que ya canjearon
 const used = a => a.act + (countFree() ? a.libres : 0);
 const NOCAP_KEY = "iap_nocap";
-const noCap = () => load(NOCAP_KEY) !== false; // por defecto SIN tope: el administrador genera los que quiera
+const noCap = () => true; // sin tope de clientes por cuenta: cada cuenta recibe los clientes que sean
 function planAuto(prod, qty, cap){
   const base = [...capMap().values()].filter(a=>!a.prob && a.filas[prod]!==undefined);
   const pool = noCap() ? base.map(a=>({...a, room:Infinity, load:used(a)})) : base.map(a=>({...a, room:cap-used(a), load:used(a)})).filter(a=>a.room>0);
@@ -549,11 +543,12 @@ function planAuto(prod, qty, cap){
   return {plan, hechos:qty-left, faltan:left, cuentas:pool.length};
 }
 function capBar(a, cap){
+  if(noCap()){ const u = used(a); return `<b class="capn" title="${a.act} clientes activos · ${a.libres} códigos sin canjear">${u} cliente${u===1?"":"s"}</b>`; }
   const u = used(a), pct = Math.min(100, u/cap*100), cls = u>=cap ? "full" : (pct>=80 ? "hi" : "");
   return `<span class="capbar ${cls}" title="${a.act} clientes activos · ${a.libres} códigos sin canjear"><i style="width:${pct}%"></i></span><b class="capn ${cls}">${u}/${cap}</b>`;
 }
 function capInfoHtml(){
-  const prod = $("#aProd")?.value, cap = +$("#aCap")?.value || getCap(); if(!prod) return "";
+  const prod = $("#aProd")?.value, cap = getCap(); if(!prod) return "";
   const todas = [...capMap().values()].filter(a=>a.filas[prod]!==undefined);
   const abiertas = todas.filter(a=>!a.prob && (noCap() || used(a)<cap));
   const cupo = abiertas.reduce((s,a)=>s+cap-used(a),0);
@@ -568,7 +563,6 @@ function fillAuto(){
   const prev = sel.value, ps = [...new Set(items.map(i=>i.producto))];
   sel.innerHTML = ps.length ? ps.map(p=>`<option>${esc(p)}</option>`).join("") : "<option value=\"\">Primero agrega una cuenta</option>";
   if(ps.includes(prev)) sel.value = prev; else onAutoProd();
-  const capIn = $("#aCap"); if(capIn && document.activeElement!==capIn) capIn.value = getCap();
   $("#capInfo").innerHTML = capInfoHtml();
 }
 function onAutoProd(){ const p=$("#aProd").value; if(!p) return; $("#aDays").value = daysOf(p); $("#aPrice").value = priceOf(p); $("#capInfo").innerHTML = capInfoHtml(); }
@@ -585,9 +579,8 @@ async function makeCodes(fila, n, dias, precio){
 }
 async function autoGen(e){
   e.preventDefault();
-  const prod=$("#aProd").value, qty=Math.max(1,Math.floor(+$("#aQty").value||1)), cap=Math.max(1,+$("#aCap").value||25);
+  const prod=$("#aProd").value, qty=Math.max(1,Math.floor(+$("#aQty").value||1)), cap=getCap();
   const dias=$("#aDays").value, precio=$("#aPrice").value; if(!prod) return toast("Primero agrega una cuenta");
-  try{ localStorage.setItem(CAP_KEY, JSON.stringify(cap)); }catch{}
   const {plan, hechos, faltan} = planAuto(prod, qty, cap);
   if(!hechos){ $("#capInfo").innerHTML = capInfoHtml(); return toast("No hay cuentas con cupo para "+prod+". Agrega una cuenta nueva."); }
   const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" códigos ("+p.antes+" clientes canjeados → hasta "+(p.antes+p.n)+(noCap()?"":" de "+cap)+")").join("\n");
@@ -628,7 +621,7 @@ function fillProducts(){
 function fillAccounts(){
   fillProducts();
   const sel=$("#gAcc"); if(!sel) return; const prev=sel.value; const list=accounts();
-  sel.innerHTML = list.length ? list.map(a=>{ const c=capMap().get(a.correo.toLowerCase()); const u=c?used(c):0, cap=getCap(); return `<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)} (${u}/${cap}${u>=cap?" · LLENA":""})</option>`; }).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
+  sel.innerHTML = list.length ? list.map(a=>{ const c=capMap().get(a.correo.toLowerCase()); const u=c?used(c):0, cap=getCap(); return `<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)} (${noCap()?u+" cliente"+(u===1?"":"s"):u+"/"+cap+(u>=cap?" · LLENA":"")})</option>`; }).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
 }
 function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a){ $("#gDays").value=a.dias; $("#gPrice").value=priceOf(a.producto); } }
@@ -937,13 +930,13 @@ function attentionHtml(){
 /* ---------- Alertas inteligentes ---------- */
 function alertsHtml(){
   const cap = getCap(), out = [], cm = [...capMap().values()];
-  cm.filter(a=>!a.prob && used(a)>=cap).forEach(a=>out.push({t:"b",ic:"🚫",tx:`Cuenta llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. No le generes más códigos.`,go:"cta"}));
-  cm.filter(a=>!a.prob && used(a)<cap && used(a)>=Math.ceil(cap*.8)).forEach(a=>out.push({t:"w",ic:"📈",tx:`Casi llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. Conviene agregar una cuenta nueva.`,go:"cta"}));
+  if(!noCap()) cm.filter(a=>!a.prob && used(a)>=cap).forEach(a=>out.push({t:"b",ic:"🚫",tx:`Cuenta llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. No le generes más códigos.`,go:"cta"}));
+  if(!noCap()) cm.filter(a=>!a.prob && used(a)<cap && used(a)>=Math.ceil(cap*.8)).forEach(a=>out.push({t:"w",ic:"📈",tx:`Casi llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. Conviene agregar una cuenta nueva.`,go:"cta"}));
   cm.filter(a=>a.prob).forEach(a=>out.push({t:"b",ic:"⚠️",tx:`Cuenta marcada con problemas: <b>${esc(a.correo)}</b>.`,go:"cta"}));
   const sin2 = {}; items.forEach(i=>{ if(i.cliente && !i.vencida && !i.tiene2fa){ const k=i.correo.toLowerCase(); sin2[k]=(sin2[k]||0)+1; } });
   Object.entries(sin2).forEach(([k,n])=>out.push({t:"w",ic:"🔓",tx:`<b>${esc(k)}</b> tiene ${n} cliente${n===1?"":"s"} y no tiene clave 2FA guardada.`,go:"cta"}));
   const prods = new Set(items.map(i=>i.producto));
-  prods.forEach(p=>{ const abiertas = cm.filter(a=>!a.prob && a.filas[p]!==undefined && used(a)<cap); if(!abiertas.length && cm.some(a=>a.filas[p]!==undefined)) out.push({t:"b",ic:"🧯",tx:`Sin cupo para vender <b>${esc(p)}</b>: todas sus cuentas están llenas.`,go:"cod"}); });
+  prods.forEach(p=>{ const abiertas = cm.filter(a=>!a.prob && a.filas[p]!==undefined && (noCap() || used(a)<cap)); if(!abiertas.length && cm.some(a=>a.filas[p]!==undefined)) out.push({t:"b",ic:"🧯",tx:`Sin cupo para vender <b>${esc(p)}</b>: todas sus cuentas están llenas.`,go:"cod"}); });
   const venc7 = items.filter(i=>i.cliente && i.vencida && i.restante!==null && i.restante<=-1 && i.restante>=-7 && !AVS()[avKey(i)]);
   if(venc7.length) out.push({t:"w",ic:"💸",tx:`${venc7.length} cliente${venc7.length===1?"":"s"} venció${venc7.length===1?"":"ieron"} en la última semana y no los has avisado: es el mejor momento para recuperarlos.`,go:"res",el:"#attn"});
   if(TTL) items.filter(i=>!i.cliente && i.codigo && i.creado).forEach(i=>{ const left = Math.ceil((new Date(i.creado).getTime()+TTL*60000-Date.now())/60000); if(left>0 && left<=10) out.push({t:"w",ic:"⏱",tx:`El código <b>${esc(i.codigo)}</b> se borra en ${left} min si nadie lo canjea.`,go:"cod"}); });
@@ -1039,8 +1032,6 @@ function openSettings(){
     <label>Aviso a un cliente vencido</label><textarea name="vencido" rows="2">${esc(t.vencido)}</textarea>
     <label>Mensaje con el código de activación</label><textarea name="codigo" rows="6">${esc(t.codigo)}</textarea>
     <label>Aviso de cambio de contraseña</label><textarea name="clave" rows="3">${esc(t.clave)}</textarea>
-    <h3>🧩 Cuentas</h3>
-    <label>Tope de clientes por cuenta</label><input name="cap" type="number" min="1" max="500" value="${getCap()}">
     <h3>🎨 Apariencia</h3>
     <label class="chk" style="margin:4px 0"><input type="checkbox" name="dark" ${load("iap_theme")==="dark"?"checked":""}> Modo oscuro</label>
     <h3>💾 Respaldo</h3>
@@ -1054,7 +1045,7 @@ function openSettings(){
       const f = new FormData(d.querySelector("form")), nt = {};
       for(const k of Object.keys(TPL_DEFAULT)){ const v = String(f.get(k)||"").trim(); if(v && v!==TPL_DEFAULT[k]) nt[k]=v; }
       lsSet("iap_tpl", nt);
-      const cap = Math.max(1, Math.min(500, +f.get("cap")||25)); lsSet(CAP_KEY, cap);
+      if(f.get("cap")) lsSet(CAP_KEY, Math.max(1, +f.get("cap")||25));
       lsSet("iap_theme", f.get("dark") ? "dark" : ""); applyTheme();
       toast("Ajustes guardados ✔"); refresh();
     }
