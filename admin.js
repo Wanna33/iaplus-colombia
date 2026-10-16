@@ -355,6 +355,11 @@ function render(){
       <div class="tools"><select id="waSt"><option value="pend">Por atender</option><option value="">Todas</option></select><button class="btn s" id="waReload">↻ Recargar</button></div>
       <div id="waRows" class="walist"><div class="empty">Cargando…</div></div>
     </div>
+    <div class="card"><h2>🏷️ Clientes y etiquetas</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">El asistente marca a cada cliente según cómo va la conversación. Los <b>urgentes</b> también te llegan por correo.</p>
+      <div class="tools"><select id="waEt"><option value="">Todas las etiquetas</option><option value="urgente">🚨 Urgente</option><option value="queja">😠 Queja</option><option value="reembolso">💸 Reembolso</option><option value="pago">✅ Pagó</option><option value="interesado">🔥 Interesado</option><option value="no_interesado">🙅 No interesado</option></select><input id="waEtQ" placeholder="Buscar nombre o número…"></div>
+      <div id="waCli" class="walist"><div class="empty">Cargando…</div></div>
+    </div>
     <details class="card" id="waCfgBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">⚙️ Conexión del asistente</summary><div id="waCfg" style="margin-top:12px">Cargando…</div></details>
   </section>
 
@@ -1112,6 +1117,7 @@ async function loadWa(){
   const el = $("#waRows"); if(!el) return;
   try{ WAV = (await api("admin_wa_list")).ventas; drawWa(); }
   catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar WhatsApp.":ex.message)+'</div>'; }
+  api("admin_wa_clientes").then(j=>{ WACLI = j.clientes||[]; drawWaCli(); }).catch(()=>{ const c=$("#waCli"); if(c) c.innerHTML='<div class="empty">Aún no hay etiquetas.</div>'; });
   if($("#waCfgBox") && !$("#waCfgBox").dataset.ok) loadWaCfg();
   clearInterval(waTimer); waTimer = setInterval(()=>{ if(curTab==="wa" && !document.querySelector("dialog[open]")) api("admin_wa_list").then(j=>{ WAV=j.ventas; drawWa(); }).catch(()=>{}); }, 45000);
 }
@@ -1129,6 +1135,19 @@ function drawWa(){
         <a class="btn s wa" target="_blank" rel="noopener" href="https://wa.me/${esc(v.telefono)}">💬 Abrir chat</a></div></div>`; }).join("")
     : `<div class="empty">${pend?"No hay ventas por atender 🎉":"Todavía no hay ventas por WhatsApp."}</div>`;
 }
+let WACLI = [];
+const ET_TAG = {urgente:["t-b","🚨 Urgente"], queja:["t-w","😠 Queja"], reembolso:["t-b","💸 Reembolso"], pago:["t-ok","✅ Pagó"], interesado:["t-av","🔥 Interesado"], no_interesado:["t-g","🙅 No interesado"]};
+function drawWaCli(){
+  const el = $("#waCli"); if(!el) return;
+  const f = $("#waEt").value, q = ($("#waEtQ").value||"").trim().toLowerCase();
+  const orden = c => c.etiquetas.includes("urgente")?0:c.etiquetas.includes("queja")||c.etiquetas.includes("reembolso")?1:2;
+  const list = WACLI.filter(c=>(!f||c.etiquetas.includes(f)) && (!q||(c.nombre+" "+c.telefono).toLowerCase().includes(q))).sort((a,b)=>orden(a)-orden(b)).slice(0,200);
+  el.innerHTML = list.length ? list.map(c=>`<div class="wacard"><div class="wah"><b>${esc(c.nombre||"Cliente")}</b> <a class="mono" href="https://wa.me/${esc(c.telefono)}" target="_blank" rel="noopener">+${esc(c.telefono)}</a>
+      ${c.etiquetas.map(e=>{ const [k,t]=ET_TAG[e]||["t-g",e]; return `<span class="tag ${k}">${t}</span>`; }).join(" ")}<small style="color:var(--mut);margin-left:auto">${fdt(c.actualizado)}</small></div>
+      ${c.nota?`<div class="note">📝 ${esc(c.nota)}</div>`:""}</div>`).join("") : '<div class="empty">No hay clientes con esa etiqueta.</div>';
+}
+document.addEventListener("change", e=>{ if(e.target.id==="waEt") drawWaCli(); });
+document.addEventListener("input", e=>{ if(e.target.id==="waEtQ") drawWaCli(); });
 async function waAction(v, a){
   if(a==="link"){ copy(linkFor(v.codigo)); return; }
   if(a==="media"){ toast("Trayendo comprobante…"); const j = await api("admin_wa_media",{id:v.id}); showInfo(`<h2>🧾 Comprobante de ${esc(v.nombre||"+"+v.telefono)}</h2><img src="data:${esc(j.mime)};base64,${j.b64}" alt="Comprobante" style="max-width:100%;border-radius:12px">`); return; }
