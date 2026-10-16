@@ -295,3 +295,6 @@ loadAll();
   const add=$("#bnTop");
   if(add) add.addEventListener("click",e=>{ e.preventDefault(); const b=$("#addbox"); if(b){ b.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>{ const i=$("#addCode"); if(i) i.focus(); },500); } });
 })();
+
+/* sombra del encabezado al desplazarse */
+(function(){const h=document.querySelector(".nav,.top");if(!h)return;const f=()=>h.classList.toggle("scrolled",window.scrollY>8);addEventListener("scroll",f,{passive:true});f();})();
