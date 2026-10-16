@@ -124,7 +124,8 @@ button{cursor:pointer}
 .login-card::before{content:"";position:absolute;left:32px;right:32px;top:-1px;height:2px;border-radius:2px;background:var(--grad)}
 .login-card h3{font-size:23px;color:var(--ink);margin-bottom:8px;font-weight:800;letter-spacing:-.02em}
 .login-card p{color:var(--mut);font-size:15px;margin:0 auto 22px;font-weight:500}
-.login-card .legal{color:var(--mut2);font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-weight:500}
+.login-card .legal,.modal-box .legal{color:var(--mut2);font-size:12.5px;display:block;margin-top:14px;font-weight:500;line-height:1.5}
+.legal a{color:var(--mut);text-decoration:underline;text-underline-offset:2px}.legal a:hover{color:var(--red)}
 .login-card .gbtn{min-height:44px}
 .login-card .who{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px}
 .login-card .who img{width:76px;height:76px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px var(--red-100),var(--sh-2);object-fit:cover;animation:popIn .6s var(--spring) both}

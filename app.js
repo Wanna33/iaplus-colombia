@@ -183,7 +183,7 @@ function renderHeroCard(){
     $("#heroForm").onsubmit = e => { e.preventDefault(); redeemCode($("#heroCode").value, $("#heroErr"), e.target.querySelector("button"), "Activar mi código"); };
   } else {
     c.innerHTML = `<h3>Entra a tu cuenta</h3><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
-      <div id="gBtnHero" class="gbtn"></div><small class="legal">Usamos Google para identificarte. Nunca vemos tu contraseña.</small>
+      <div id="gBtnHero" class="gbtn"></div><small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
       <a href="#catalogo" class="linkbtn" style="display:block;margin-top:12px">¿Aún no tienes código? Ver catálogo ↓</a>`;
     initGoogle();
   }
@@ -325,6 +325,9 @@ document.addEventListener("pointerdown", e => {
     const ld=document.createElement("script"); ld.type="application/ld+json";
     ld.textContent=JSON.stringify({"@context":"https://schema.org","@type":"ItemList",itemListElement:PRODUCTS.map((p,i)=>({"@type":"ListItem",position:i+1,item:{"@type":"Product",name:p.name,image:location.origin+location.pathname.replace(/[^/]*$/,"")+p.img,description:p.feats.join(". "),offers:{"@type":"Offer",price:p.price,priceCurrency:"COP",availability:"https://schema.org/InStock"}}}))});
     document.head.appendChild(ld);
+    // preguntas frecuentes para buscadores (Google puede mostrarlas como resultado enriquecido)
+    const fq=[...document.querySelectorAll("#faq details")].map(d=>({"@type":"Question",name:d.querySelector("summary").textContent.trim(),acceptedAnswer:{"@type":"Answer",text:d.querySelector("p").textContent.trim()}}));
+    if(fq.length){ const s=document.createElement("script"); s.type="application/ld+json"; s.textContent=JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:fq}); document.head.appendChild(s); }
   }catch{}
   // barra de progreso y botón de subir
   const pr=$("#progress"), tt=$("#totop"), ring=$("#totopRing");
