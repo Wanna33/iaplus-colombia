@@ -46,8 +46,7 @@ function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"
 async function api(action, data={}){
   const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Inicia sesión otra vez.");
-  const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({action, idToken:cred.token, ...data})});
-  const j = await r.json(); if(!j.ok) throw new Error(j.error||"Error"); return j;
+  const j = await postJson(API_URL, {...data, action, idToken:cred.token}); if(!j.ok) throw new Error(j.error||"Error"); return j;
 }
 
 function showLogin(){

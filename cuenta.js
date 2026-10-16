@@ -37,8 +37,7 @@ function ensureCred(){
 }
 async function callApi(body){
   const cred = await ensureCred();
-  const r = await fetch(API_URL,{method:"POST",body:JSON.stringify({...body, idToken:cred.token})});
-  const j = await r.json();
+  const j = await postJson(API_URL, {...body, idToken:cred.token});
   if(!j.ok && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return callApi(body); }
   return j;
 }
@@ -252,8 +251,6 @@ document.addEventListener("click", e=>{
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
   if(e.target.closest("[data-retry]")){ $("#app").innerHTML='<div class="skel"><i></i><i></i><i></i></div>'; loadAll(); return; }
-  const more = e.target.closest("[data-more]");
-  if(more){ openMore(); return; }
   const ask = e.target.closest("[data-ask]");
   if(ask){ askTotp(ask.closest("[data-totp]")); return; }
   const g = e.target.closest(".tog");
@@ -270,25 +267,6 @@ document.addEventListener("click", e=>{
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
 $("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
-/* ---------- elegir otras cuentas (mismo producto, mismo vencimiento) ---------- */
-async function openMore(){
-  let m=document.getElementById("moreM"); if(m) m.remove();
-  m=document.createElement("div"); m.id="moreM"; m.className="moremodal";
-  m.innerHTML=`<div class="morecard"><button class="x" type="button" aria-label="Cerrar">×</button><h3>Más cuentas para ti</h3><div class="mbody">Buscando cuentas disponibles…</div></div>`;
-  document.body.appendChild(m);
-  const body=m.querySelector(".mbody"), close=()=>m.remove();
-  m.addEventListener("click",e=>{ if(e.target===m||e.target.closest(".x")) close(); });
-  try{
-    const j=await callApi({action:"acct_options"}); if(!j.ok) throw new Error(j.error||"Error");
-    if(j.tiene>=j.max){ body.innerHTML=`<p>Ya tienes el máximo de ${j.max} cuentas activas.</p>`; return; }
-        body.innerHTML=`<p>Por tener una cuenta activa puedes elegir otras sin costo. Vencen el mismo día que tu primera cuenta y comparten tus pedidos de código de cada día.</p>`+(j.grupos||[]).map(g=>`<h4 class="mgrp">${esc(g.producto)}</h4>`+(g.opciones.length?"":`<div class="mopt"><div><small>Sin cuentas libres por ahora</small></div><a class="cta" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero una cuenta de "+g.producto)}">Pedir</a></div>`)+g.opciones.map(o=>`<div class="mopt"><div><b>${esc(o.cuenta)}</b><small>${o.uso} de ${o.cupo} usuarios</small></div><button class="cta" type="button" data-pick="${o.fila}">Elegir</button></div>`).join("")).join("")+`<div class="adderr" id="moreErr" hidden></div>`;
-    body.onclick=async e=>{
-      const b=e.target.closest("[data-pick]"); if(!b) return; b.disabled=true; b.textContent="Agregando…";
-      try{ const r=await callApi({action:"acct_add",fila:+b.dataset.pick}); if(!r.ok) throw new Error(r.error||"Error"); close(); await loadAll(); }
-      catch(ex){ const er=body.querySelector("#moreErr"); er.textContent=ex.message; er.hidden=false; b.disabled=false; b.textContent="Elegir"; }
-    };
-  }catch(ex){ body.innerHTML="<p>"+esc(ex.message)+"</p>"; }
-}
 let timer=null;
 /* ---------- enlace de activación: cuenta.html?codigo=IAP-XXXX-XXXX ---------- */
 (function(){ try{ const p=new URLSearchParams(location.search); const k=(p.get("codigo")||p.get("code")||"").trim().toUpperCase(); if(/^[A-Z0-9-]{6,40}$/.test(k)){ save("iap_pending_code",k); history.replaceState(null,"",location.pathname); } }catch{} })();

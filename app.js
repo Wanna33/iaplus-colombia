@@ -195,8 +195,7 @@ async function callApi(action, code){
   const cred = load("iap_cred", null);
   if(!CONFIG.API_URL) throw new Error("El servicio de cuentas aún no está configurado.");
   if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Pulsa Salir y vuelve a entrar con Google.");
-  const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action, code, idToken:cred.token})});
-  const j = await r.json();
+  const j = await postJson(CONFIG.API_URL, {action, code, idToken:cred.token});
   if(!j.ok) throw new Error(j.error || "Error");
   if(j.admin !== undefined) save("iap_admin", !!j.admin); // lo decide el servidor, no el navegador
   return j.items;
@@ -342,8 +341,7 @@ document.addEventListener("pointerdown", e => {
 async function apiRaw(body){
   const cred = load("iap_cred", null);
   if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Pulsa Salir y vuelve a entrar con Google.");
-  const r = await fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({...body, idToken:cred.token})});
-  const j = await r.json(); if(!j.ok) throw new Error(j.error || "Error"); return j;
+  const j = await postJson(CONFIG.API_URL, {...body, idToken:cred.token}); if(!j.ok) throw new Error(j.error || "Error"); return j;
 }
 // Dirección del Web Checkout de Wompi (la firma y el precio ya vienen firmados desde el servidor)
 function wompiUrl(j){

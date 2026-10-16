@@ -29,8 +29,7 @@
   }
   async function call(body){
     const cred = await ensureCred();
-    const r = await fetch(API_URL, {method:"POST", body:JSON.stringify({...body, idToken:cred.token})});
-    const j = await r.json();
+    const j = await postJson(API_URL, {...body, idToken:cred.token});
     if(!j.ok && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return call(body); }
     return j;
   }
