@@ -283,7 +283,7 @@ const NAV = [
   {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
   {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
   {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
-  {g:"Control", t:"ag", l:"Agentes", s:"Tus agentes de IA trabajando 24/7: qué hace cada uno y cómo va"},
+  {g:"Control", t:"ag", l:"Mi empresa", s:"Tus empleados de IA trabajando 24/7: quién hace qué, su nivel y sus tareas"},
   {g:"Control", t:"rev", l:"Revendedores", s:"Personas que autorizas para vender, con permisos limitados"},
   {g:"Control", t:"log", l:"Actividad", s:"Cada movimiento de tus clientes con fecha y hora"}
 ];
@@ -453,7 +453,7 @@ function render(){
   </section>
 
   <section id="tab-ag" class="hide">
-    <div class="card"><h2>🤖 Tus agentes de IA</h2>
+    <div class="card"><h2>🏢 Tu empresa de IA</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada agente hace una parte del trabajo, día y noche, sin que tengas que intervenir. Si algo falla, el vigilante te escribe al correo.</p>
       <div id="agGrid" class="agrid"><div class="empty">Cargando…</div></div>
     </div>
@@ -1425,30 +1425,56 @@ async function loadAgentes(){
   try{ drawAgentes(await api("admin_wa_agentes")); }
   catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el asistente para ver los agentes.":ex.message)+'</div>'; }
 }
+// Organigrama de la empresa: cada empleado, su departamento, si usa IA o es gratis, su nivel y sus tareas.
+const nivelDe = n => Math.min(10, 1 + Math.floor(Math.log2(1 + (n||0) / 25)));
+const sigNivel = nv => 25 * (Math.pow(2, nv) - 1);
+const ROLES = [
+  {d:"👔 Dirección", k:"gerente", ic:"👔", n:"Gerente general (CEO)", ia:"IA precisa · 2 veces al día", p:"Estudia todo el negocio, decide qué mejorar y escribe las instrucciones que siguen todos los empleados."},
+  {d:"👔 Dirección", k:"secretaria", ic:"🗂️", n:"Secretaria", ia:"Gratis", p:"Te manda al correo el resumen del día: ventas, qué preguntan los clientes y qué mejorar."},
+  {d:"👔 Dirección", k:"contador", ic:"🧮", n:"Contador", ia:"Gratis", p:"Lleva la cuenta de lo que gasta la IA y te avisa antes de que se acabe el saldo.", siempre:true},
+  {d:"💼 Ventas", k:"despachador", ic:"🧭", n:"Despachador", ia:"Gratis", p:"Lee cada mensaje y decide qué empleado lo atiende, para que la IA solo se use cuando hace falta."},
+  {d:"💼 Ventas", k:"recepcionista", ic:"🛎️", n:"Recepcionista", ia:"Gratis", p:"Contesta los «gracias» y los emojis sin gastar IA."},
+  {d:"💼 Ventas", k:"vendedor", ic:"💬", n:"Vendedores (clones)", ia:"IA económica", p:"Atienden muchos chats a la vez, resuelven dudas y llevan al cliente a pagar. Cada vez que suben de nivel entran más vendedores.", clones:true},
+  {d:"💼 Ventas", k:"seguimiento", ic:"🔁", n:"Agente de seguimiento", ia:"IA económica", p:"Le vuelve a escribir a quien dejó de responder sin comprar (a las 3 horas y al día siguiente)."},
+  {d:"💰 Caja", k:"cajero", ic:"🧾", n:"Cajero", ia:"IA precisa · solo comprobantes", p:"Revisa la captura de Nequi: monto, destinatario, fecha y referencia. Una referencia nunca se acepta dos veces."},
+  {d:"💰 Caja", k:"entregas", ic:"🔗", n:"Entregas", ia:"Gratis", p:"Si el pago es válido, crea el código y le manda al cliente su enlace de activación al instante."},
+  {d:"🛠️ Atención al cliente", k:"soporte", ic:"🛠️", n:"Soporte técnico", ia:"IA económica", p:"Revisa planes, cambia cuentas que fallan, da códigos 2FA extra y registra reembolsos."},
+  {d:"📣 Marketing", k:"revisor_a", et:"etiquetador_a", ic:"🏷️", n:"Etiquetador A · chats recientes", ia:"Gratis", p:"Marca a los clientes que escribieron estos días como Pagó o Pendiente, aquí y en tu WhatsApp Business."},
+  {d:"📣 Marketing", k:"revisor_b", et:"etiquetador_b", ic:"🏷️", n:"Etiquetador B · viejos y archivados", ia:"Gratis", p:"Revisa los chats antiguos y archivados y los marca, para saber a quién recordarle."},
+  {d:"📣 Marketing", k:"recordador_a", ic:"🌙", n:"Recordador A · pendientes", ia:"Gratis", p:"A las 3:05 a. m. les recuerda a los pendientes recientes que pueden tener ChatGPT en tu página."},
+  {d:"📣 Marketing", k:"recordador_b", ic:"🌙", n:"Recordador B · clientes antiguos", ia:"Gratis", p:"Le escribe con cuidado a los clientes antiguos: máximo 25 por noche y uno cada 3 días por persona."},
+  {d:"🛡️ Seguridad", k:"seguridad", ic:"🛡️", n:"Seguridad", ia:"Gratis", p:"Nunca escribe a tus contactos, rechaza comprobantes falsos o repetidos y corta los bucles con otros bots.", siempre:true},
+  {d:"🛡️ Seguridad", k:"supervisor", ic:"👀", n:"Supervisor", ia:"Gratis", p:"Cada 10 minutos busca chats que se quedaron sin respuesta y hace que se respondan."},
+  {d:"🛡️ Seguridad", k:"vigilante", ic:"🚨", n:"Vigilante", ia:"Gratis", p:"Cada 30 minutos revisa que WhatsApp esté conectado y que haya saldo. Si algo falla, te escribe al correo.", siempre:true},
+  {d:"🎓 Capacitación", k:"capacitador", ic:"🎓", n:"Capacitador", ia:"(lo hace el CEO)", p:"Convierte las mejores conversaciones y tus respuestas en lecciones para todos los empleados."},
+];
 function drawAgentes(a){
   const el = $("#agGrid"); if(!el) return;
-  const c = a.chats, e = a.etiquetas, sal = a.saldo || {}, rec = a.recordatorio, ok = a.puente.conectado;
-  const ag = (ic, t, st, p, li) => `<div class="ag"><h3><span class="st ${st}"></span>${ic} ${t}</h3><p>${p}</p><ul>${li.map(x=>"<li>"+x+"</li>").join("")}</ul></div>`;
-  const salTxt = sal.fijado ? "US$ "+Math.max(0,sal.restante).toFixed(2)+(sal.diasRestantes!=null?" (~"+fmtDias(sal.diasRestantes)+")":"") : "sin configurar (toca la barra 🧠 de arriba)";
-  const stSal = !sal.fijado ? "w" : sal.restante < 1 ? "b" : sal.restante < 2.5 ? "w" : "";
-  el.innerHTML = [
-    ag("💬","Agente de ventas", ok?"":"b", "Atiende todos los chats a la vez, día y noche: responde dudas, explica que las cuentas son compartidas y lleva al cliente a pagar.",
-      ["Chats con movimiento hoy: <b>"+c.hoy+"</b>", "Chats en total: "+c.total, "Modelo: "+esc(a.modelos.chat)+" (el más económico)"]),
-    ag("🧾","Agente de pagos", ok?"":"b", "Lee la captura de Nequi y revisa monto, destinatario (Nelson Gomez / 310 203 5327), fecha y referencia. Una referencia nunca se acepta dos veces.",
-      ["Clientes que ya pagaron: <b>"+e.pago+"</b>", "Modelo: "+esc(a.modelos.preciso)+" (el más preciso, solo para comprobantes)"]),
-    ag("🔗","Agente de entregas", ok?"":"b", "Cuando el pago es válido, crea el código y le envía al cliente su enlace de activación al instante. Ese enlace le activa el plan en su cuenta.", ["Entregas automáticas: sí", "Pagos dudosos: el agente le pide al cliente un comprobante correcto"]),
-    ag("🛠️","Agente de soporte", e.urgente?"w":"", "Revisa los planes del cliente, le cambia la cuenta si le falla, le da códigos 2FA extra y registra reembolsos. Nunca dice que lo atenderá una persona.",
-      ["Quejas abiertas: <b>"+e.queja+"</b>", "Urgentes: <b>"+e.urgente+"</b> (te llegan al correo)", "Reembolsos: "+e.reembolso]),
-    ag("🔁","Agente de seguimiento", "", "Si un cliente deja de responder sin comprar, le escribe a las 3 horas y otra vez al día siguiente, retomando su duda.", ["Clientes pendientes de comprar: <b>"+e.pendiente+"</b>", "Interesados: "+e.interesado]),
-    ag("🌙","Agente de recordatorios", "", "Cada noche a las 3:05 a. m. le deja un recordatorio corto a quien no ha comprado, incluidos los chats viejos y archivados. Nunca a tus contactos. Máximo 1 cada 3 días por cliente.",
-      rec ? ["Última vez: <b>"+esc(rec.dia||"")+"</b>", "Enviados: <b>"+(rec.enviados||0)+"</b> · revisados: "+(rec.revisados||0), "Etiquetados: "+(rec.etiquetados||0)] : ["Aún no ha corrido"]),
-    ag("🏷️","Agente etiquetador", "", "Marca a cada cliente según cómo va su conversación, aquí y en tu WhatsApp Business.",
-      ["✅ Pagó: "+e.pago+" · ⏳ Pendiente: "+e.pendiente, "🔥 Interesado: "+e.interesado+" · 🙅 No: "+e.no_interesado, "😠 Queja: "+e.queja+" · 🚨 Urgente: "+e.urgente]),
-    ag("👀","Supervisor", c.sinResponder?"w":"", "Cada 10 minutos busca chats que se quedaron sin respuesta y hace que se respondan, aunque sean de hace días.",
-      ["Sin responder ahora: <b>"+c.sinResponder+"</b>", "Chats con el asistente en pausa: "+c.pausados]),
-    ag("🎓","Agente de aprendizaje", "", "Dos veces al día estudia las conversaciones, aprende de las ventas cerradas y de tus respuestas, y te manda un resumen al correo.",
-      ["Último estudio: <b>"+(a.estudio.ultimo?fdt(new Date(a.estudio.ultimo).toISOString()):"aún no")+"</b>", "Lecciones aprendidas: "+Math.round(a.estudio.lecciones/100)/10+" mil caracteres"]),
-    ag("🚨","Vigilante", ok?stSal:"b", "Revisa cada 30 minutos que WhatsApp esté conectado y que haya saldo de IA. Si algo falla, te escribe al correo.",
-      ["WhatsApp: <b>"+(ok?"conectado ✅":"desconectado ❌")+"</b>"+(a.puente.visto?" · último aviso "+hace(a.puente.visto):""), "Saldo de IA: <b>"+salTxt+"</b>"]),
-  ].join("");
+  const emp = a.empresa || {total:{}, dias:{}}, T = emp.total || {}, hoyK = Object.keys(emp.dias||{}).sort().pop(), H = (hoyK && emp.dias[hoyK]) || {};
+  const e = a.etiquetas, sal = a.saldo || {}, ok = a.puente.conectado;
+  const val = (o, r) => (o[r.k]||0) + (r.et ? (o[r.et]||0) : 0);
+  const tareasHoy = Object.values(H).reduce((x,y)=>x+y,0), conIA = ROLES.filter(r=>/IA/.test(r.ia)).length;
+  const salTxt = sal.fijado ? "US$ "+Math.max(0,sal.restante).toFixed(2)+(sal.porDia?" · gasta ~US$ "+sal.porDia.toFixed(2)+"/día":"") : "escribe tu saldo en la barra 🧠";
+  const extra = r => r.k==="vendedor" ? "<li>👥 Vendedores trabajando a la vez: <b>"+(a.clones||8)+"</b></li>"
+    : r.k==="contador" ? "<li>Saldo: <b>"+salTxt+"</b></li>"
+    : r.k==="vigilante" ? "<li>WhatsApp: <b>"+(ok?"conectado ✅":"desconectado ❌")+"</b></li>"
+    : r.k==="revisor_a"||r.k==="revisor_b" ? "<li>Marcados hoy: "+(H[r.et]||0)+" · total "+(T[r.et]||0)+"</li>" : "";
+  const card = r => { const n = val(T, r), nv = nivelDe(n), ini = sigNivel(nv-1), fin = sigNivel(nv), pct = nv>=10?100:Math.round((n-ini)/(fin-ini)*100);
+    const st = (r.k==="vigilante"||r.k==="vendedor"||r.k==="cajero") && !ok ? "b" : r.k==="contador" && sal.fijado && sal.restante<1 ? "b" : "";
+    return `<div class="ag"><h3><span class="st ${st}"></span>${r.ic} ${esc(r.n)}</h3>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="tag t-av" style="font-size:11px">Nivel ${nv}</span><span class="saldo" style="padding:0;border:0;background:none"><span class="bar" style="width:90px"><i style="width:${pct}%"></i></span></span><span style="font-size:11px;color:var(--mut)">${r.ia}</span></div>
+      <p>${r.p}</p><ul><li>Tareas hoy: <b>${val(H, r)}</b> · en total: ${n}${r.siempre?" (trabaja siempre)":""}</li>${extra(r)}</ul></div>`; };
+  const deps = [...new Set(ROLES.map(r=>r.d))];
+  el.outerHTML = `<div id="agGrid">
+    <div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+      <div class="ag"><b style="font-size:22px">${ROLES.length}</b><p style="margin:0">empleados</p></div>
+      <div class="ag"><b style="font-size:22px">${ROLES.length-conIA}</b><p style="margin:0">trabajan gratis (sin IA)</p></div>
+      <div class="ag"><b style="font-size:22px">${a.clones||8}</b><p style="margin:0">vendedores a la vez</p></div>
+      <div class="ag"><b style="font-size:22px">${tareasHoy}</b><p style="margin:0">tareas hoy</p></div>
+      <div class="ag"><b style="font-size:22px">${e.pago}</b><p style="margin:0">clientes que pagaron</p></div>
+      <div class="ag"><b style="font-size:22px">${e.pendiente}</b><p style="margin:0">pendientes por comprar</p></div>
+    </div>
+    <p style="color:var(--mut);font-size:13px;margin-bottom:14px">🧠 Todos comparten la misma memoria de cada cliente. El despachador decide quién trabaja en cada momento, así la IA solo se paga cuando hace falta. Con el trabajo suben de nivel; al subir el de ventas entran más vendedores a la vez. El CEO estudia los resultados dos veces al día y todos aprenden de eso.</p>
+    ${deps.map(d=>`<h3 style="margin:16px 0 8px;font-size:15px">${d}</h3><div class="agrid">${ROLES.filter(r=>r.d===d).map(card).join("")}</div>`).join("")}
+  </div>`;
 }
