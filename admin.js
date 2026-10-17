@@ -333,6 +333,7 @@ function render(){
         <button class="btn" data-qa="acc">➕ Agregar cuenta</button>
         <button class="btn" data-qa="pass">🔑 Cambiar contraseña</button>
         <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
+        <button class="btn" data-goto="rev">🤝 Revendedores</button>
       </div></div>
     <div class="kpis" id="stats"></div>
     <div class="dgrid">
