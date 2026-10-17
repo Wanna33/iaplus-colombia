@@ -13,7 +13,7 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación al instante por WhatsApp","Garantía durante el mes"]},
   {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.webp", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},

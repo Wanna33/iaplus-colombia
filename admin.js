@@ -369,7 +369,7 @@ function render(){
     </div>
     <div class="card"><h2>🏷️ Clientes y etiquetas</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">El asistente marca a cada cliente según cómo va la conversación. Los <b>urgentes</b> también te llegan por correo.</p>
-      <div class="tools"><select id="waEt"><option value="">Todas las etiquetas</option><option value="urgente">🚨 Urgente</option><option value="queja">😠 Queja</option><option value="reembolso">💸 Reembolso</option><option value="pago">✅ Pagó</option><option value="interesado">🔥 Interesado</option><option value="no_interesado">🙅 No interesado</option></select><input id="waEtQ" placeholder="Buscar nombre o número…"></div>
+      <div class="tools"><select id="waEt"><option value="">Todas las etiquetas</option><option value="pendiente">⏳ Pendiente</option><option value="urgente">🚨 Urgente</option><option value="queja">😠 Queja</option><option value="reembolso">💸 Reembolso</option><option value="pago">✅ Pagó</option><option value="interesado">🔥 Interesado</option><option value="no_interesado">🙅 No interesado</option></select><input id="waEtQ" placeholder="Buscar nombre o número…"></div>
       <div id="waCli" class="walist"><div class="empty">Cargando…</div></div>
     </div>
     <details class="card" id="waCfgBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">⚙️ Conexión del asistente</summary><div id="waCfg" style="margin-top:12px">Cargando…</div></details>
@@ -1390,6 +1390,24 @@ function drawInbox(){
     + (list.length>300?`<div class="empty">Mostrando 300 de ${list.length}. Usa el buscador.</div>`:"")
     : '<div class="empty">No hay chats con ese filtro.</div>';
 }
+const RAPIDAS = [
+  {l:"💳 Datos de pago", t:"Puedes pagar por *Nequi* al *310 203 5327* (a nombre de *Nelson Gomez*). Cuando pagues, envíame la captura del comprobante y tu correo de Gmail 🙌"},
+  {l:"💲 Precios", t:"*ChatGPT Plus* cuesta *$10.000* por 30 días (hasta 2 dispositivos). Mira todos los productos aquí: " + SITE},
+  {l:"🔑 Cómo entrar", t:"Entra a *Mi suscripción* con tu Gmail: " + SITE + "cuenta.html — ahí ves el correo, la contraseña y el código de verificación."},
+  {l:"🤝 Es compartida", t:"Te cuento que la cuenta es *compartida* con otros usuarios: por eso el precio es tan bajo. Por favor no cambies la contraseña ni los datos de la cuenta 🙏"},
+  {l:"🙏 Gracias", t:"¡Gracias por tu compra! 😊 Cualquier cosa me escribes por aquí."},
+];
+let CATB = null;
+async function enviarCodigo(c){
+  try{ if(!CATB) CATB = (await api("admin_rev_list")).catalogo; }catch(ex){ return toast(ex.message); }
+  const f = await askForm("Enviar código de activación", [
+    {id:"producto", label:"Producto", type:"select", value:"chatgpt", opts:CATB.map(p=>({v:p.k, l:p.name+" · "+money(priceOf(p.name))}))},
+    {id:"precio", label:"Precio cobrado (COP)", type:"number", value:priceOf("ChatGPT")},
+  ], "Se crea un código de un solo uso y le llega a <b>"+esc(c.nombre||("+"+c.tel))+"</b> por WhatsApp con su enlace de activación. Úsalo cuando el cliente ya te pagó.", "Crear y enviar");
+  if(!f) return;
+  try{ const j = await api("admin_wa_codigo", {tel:c.tel, producto:f.producto, precio:+f.precio||0, nombre:c.nombre||""}); toast("Código "+j.codigo+" enviado ✔"); openChat(c.tel, true); refresh(); }
+  catch(ex){ toast(ex.message); }
+}
 async function openChat(tel, silencioso){
   ibSel = tel; const box = $("#ibChat"); if(!box) return;
   document.querySelectorAll(".ib-it").forEach(b=>b.classList.toggle("on", b.dataset.ib===tel));
@@ -1399,9 +1417,10 @@ async function openChat(tel, silencioso){
     if(ibSel !== tel) return;
     const borrador = $("#ibTxt") && silencioso ? $("#ibTxt").value : "";
     box.innerHTML = `<div class="ib-top"><b>${esc(c.nombre||"Cliente")}</b> <a class="mono" href="https://wa.me/${esc(c.tel)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:13px">+${esc(c.tel)}</a> ${etHtml(c.etiquetas)}
-        <span style="margin-left:auto;display:flex;gap:6px"><button class="btn s" id="ibPausa">${c.pausa?"▶ Reactivar asistente":"⏸ Pausar asistente"}</button></span></div>
+        <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn s" id="ibCod" title="Crea el código de activación y se lo envía por WhatsApp">🎟️ Enviar código</button><button class="btn s" id="ibPausa">${c.pausa?"▶ Reactivar asistente":"⏸ Pausar asistente"}</button></span></div>
       <div class="ib-msgs" id="ibMsgs">${c.turnos.length?c.turnos.map(t=>`<div class="bub ${t.r==="u"?"u":t.d?"d":"a"}">${t.img?"📷 <i>Imagen</i>\n":""}${esc(t.t).replace(/\*([^*\n]+)\*/g,"<b>$1</b>")}<small>${t.r==="u"?"Cliente":t.d?"Tú":"Asistente"} · ${fdt(new Date(t.ts).toISOString())}</small></div>`).join(""):'<div class="empty">Sin mensajes guardados.</div>'}</div>
       ${c.pausa?'<div class="capwarn" style="margin:8px 10px 0">El asistente está en pausa en este chat: no le responde hasta que lo reactives.</div>':""}
+      <div class="ib-quick">${RAPIDAS.map((q,i)=>`<button type="button" class="chip" data-rq="${i}">${q.l}</button>`).join("")}</div>
       <form class="ib-send" id="ibForm"><textarea id="ibTxt" rows="1" placeholder="Escribe un mensaje para el cliente…"></textarea><button class="btn p" type="submit">Enviar</button></form>`;
     const m = $("#ibMsgs"); m.scrollTop = m.scrollHeight;
     $("#ibTxt").value = borrador;
@@ -1411,6 +1430,8 @@ async function openChat(tel, silencioso){
       try{ await api("admin_wa_send", {tel, texto:t}); $("#ibTxt").value = ""; toast("Enviado ✔ (sale de tu WhatsApp en segundos)"); await openChat(tel, true); }
       catch(ex){ toast(ex.message); } bt.disabled = false;
     };
+    document.querySelectorAll("[data-rq]").forEach(b=>b.onclick=()=>{ const t=$("#ibTxt"); t.value = (t.value?t.value+"\n":"")+RAPIDAS[+b.dataset.rq].t; t.focus(); });
+    $("#ibCod").onclick = ()=>enviarCodigo(c);
     $("#ibPausa").onclick = async ()=>{
       try{ await api("admin_wa_pausa", {tel, on:!c.pausa}); toast(c.pausa?"El asistente vuelve a atender este chat ✔":"Asistente en pausa en este chat ✔"); const x = IB.find(i=>i.tel===tel); if(x) x.pausa = !c.pausa; drawInbox(); openChat(tel, true); }
       catch(ex){ toast(ex.message); }
@@ -1441,8 +1462,8 @@ const ROLES = [
   {d:"🛠️ Atención al cliente", k:"soporte", ic:"🛠️", n:"Soporte técnico", ia:"IA económica", p:"Revisa planes, cambia cuentas que fallan, da códigos 2FA extra y registra reembolsos."},
   {d:"📣 Marketing", k:"revisor_a", et:"etiquetador_a", ic:"🏷️", n:"Etiquetador A · chats recientes", ia:"Gratis", p:"Marca a los clientes que escribieron estos días como Pagó o Pendiente, aquí y en tu WhatsApp Business."},
   {d:"📣 Marketing", k:"revisor_b", et:"etiquetador_b", ic:"🏷️", n:"Etiquetador B · viejos y archivados", ia:"Gratis", p:"Revisa los chats antiguos y archivados y los marca, para saber a quién recordarle."},
-  {d:"📣 Marketing", k:"recordador_a", ic:"🌙", n:"Recordador A · pendientes", ia:"Gratis", p:"A las 3:05 a. m. les recuerda a los pendientes recientes que pueden tener ChatGPT en tu página."},
-  {d:"📣 Marketing", k:"recordador_b", ic:"🌙", n:"Recordador B · clientes antiguos", ia:"Gratis", p:"Le escribe con cuidado a los clientes antiguos: máximo 25 por noche y uno cada 3 días por persona."},
+  {d:"📣 Marketing", k:"recordador_a", ic:"☀️", n:"Recordador A · pendientes", ia:"Gratis", p:"A las 7:00 a. m. les recuerda a los pendientes recientes que pueden tener ChatGPT en tu página."},
+  {d:"📣 Marketing", k:"recordador_b", ic:"☀️", n:"Recordador B · clientes antiguos", ia:"Gratis", p:"Le escribe con cuidado a los clientes antiguos: máximo 25 por noche y uno cada 3 días por persona."},
   {d:"🛡️ Seguridad", k:"seguridad", ic:"🛡️", n:"Seguridad", ia:"Gratis", p:"Nunca escribe a tus contactos, rechaza comprobantes falsos o repetidos y corta los bucles con otros bots.", siempre:true},
   {d:"🛡️ Seguridad", k:"supervisor", ic:"👀", n:"Supervisor", ia:"Gratis", p:"Cada 10 minutos busca chats que se quedaron sin respuesta y hace que se respondan."},
   {d:"🛡️ Seguridad", k:"vigilante", ic:"🚨", n:"Vigilante", ia:"Gratis", p:"Cada 30 minutos revisa que WhatsApp esté conectado y que haya saldo. Si algo falla, te escribe al correo.", siempre:true},
