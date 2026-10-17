@@ -77,7 +77,7 @@ function start(){
   const u = load("iap_user"); const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ showLogin(); return; }
   $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide"); $("#gSearch").classList.remove("hide"); $("#gSettings").classList.remove("hide");
-  refresh();
+  refresh(); loadSaldo(); clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden) loadSaldo(); }, 300000);
 }
 
 /* ---------- Utilidades de datos ---------- */
@@ -270,6 +270,7 @@ const IC = {
   cta:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
   prod:'<path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   log:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  ag:'<rect x="5" y="7" width="14" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6"/>',
   rev:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M19 8v6M16 11h6"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
@@ -282,6 +283,7 @@ const NAV = [
   {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
   {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
   {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
+  {g:"Control", t:"ag", l:"Agentes", s:"Tus agentes de IA trabajando 24/7: qué hace cada uno y cómo va"},
   {g:"Control", t:"rev", l:"Revendedores", s:"Personas que autorizas para vender, con permisos limitados"},
   {g:"Control", t:"log", l:"Actividad", s:"Cada movimiento de tus clientes con fecha y hora"}
 ];
@@ -310,6 +312,7 @@ function setTab(t){
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
   if(t==="rev") loadRev();
+  if(t==="ag") loadAgentes();
   if(t==="res") loadFeed();
 }
 function updateViews(){
@@ -354,6 +357,11 @@ function render(){
   </section>
 
   <section id="tab-wa" class="hide">
+    <div class="card"><h2>💬 Conversaciones</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Todos los chats de clientes que atiende el asistente. Puedes leerlos y, si quieres, escribirle tú a un cliente: el mensaje sale desde tu WhatsApp. El asistente sigue atendiendo; usa <b>Pausar asistente</b> solo si quieres llevar tú ese chat.</p>
+      <div class="tools"><input id="ibQ" placeholder="Buscar nombre, número o mensaje" style="min-width:200px"><select id="ibF"><option value="">Todos</option><option value="sin">Sin responder</option><option value="pendiente">⏳ Pendientes (no han comprado)</option><option value="pago">✅ Pagaron</option><option value="interesado">🔥 Interesados</option><option value="alerta">🚨 Urgentes y quejas</option><option value="pausa">⏸ Asistente en pausa</option></select><button class="btn s" id="ibReload">↻</button></div>
+      <div class="inbox"><div class="ib-list" id="ibList"><div class="empty">Cargando…</div></div><div class="ib-chat" id="ibChat"><div class="empty" style="margin:auto">Elige un chat para verlo.</div></div></div>
+    </div>
     <div class="card"><h2>💬 Ventas por WhatsApp</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">El asistente con IA atiende a tus clientes. Cuando alguien dice que pagó, aparece aquí. Revisa el comprobante y toca <b>Confirmar</b>: se crea el código y al cliente le llega por WhatsApp su enlace de activación.</p>
       <div class="tools"><select id="waSt"><option value="pend">Por atender</option><option value="">Todas</option></select><button class="btn s" id="waReload">↻ Recargar</button></div>
@@ -442,6 +450,13 @@ function render(){
       </form>
       <div class="saved" id="draftNote"></div>
     </details>
+  </section>
+
+  <section id="tab-ag" class="hide">
+    <div class="card"><h2>🤖 Tus agentes de IA</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada agente hace una parte del trabajo, día y noche, sin que tengas que intervenir. Si algo falla, el vigilante te escribe al correo.</p>
+      <div id="agGrid" class="agrid"><div class="empty">Cargando…</div></div>
+    </div>
   </section>
 
   <section id="tab-rev" class="hide">
@@ -1144,6 +1159,7 @@ async function loadWa(){
   catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar WhatsApp.":ex.message)+'</div>'; }
   api("admin_wa_clientes").then(j=>{ WACLI = j.clientes||[]; drawWaCli(); }).catch(()=>{ const c=$("#waCli"); if(c) c.innerHTML='<div class="empty">Aún no hay etiquetas.</div>'; });
   if($("#waCfgBox") && !$("#waCfgBox").dataset.ok) loadWaCfg();
+  loadInbox();
   clearInterval(waTimer); waTimer = setInterval(()=>{ if(curTab==="wa" && !document.querySelector("dialog[open]")) api("admin_wa_list").then(j=>{ WAV=j.ventas; drawWa(); }).catch(()=>{}); }, 45000);
 }
 function drawWa(){
@@ -1318,3 +1334,121 @@ document.addEventListener("click", async e=>{
     if(a==="del"){ if(!confirm("¿Quitar a "+(r.nombre||r.gmail)+"? Ya no podrá entrar. Sus ventas y clientes siguen igual.")) return; await api("admin_rev_del", {gmail:r.gmail}); toast("Revendedor quitado ✔"); loadRev(); }
   }catch(ex){ toast(ex.message); }
 });
+
+/* ---------- Saldo de IA (barra de arriba) ---------- */
+let SALDO = null;
+async function loadSaldo(){ try{ SALDO = await api("admin_wa_saldo"); drawSaldo(); }catch{ const b=$("#saldoIA"); if(b){ b.classList.remove("hide"); b.textContent="🧠 Saldo IA: —"; } } }
+function fmtDias(d){ return d==null ? "" : d < 1 ? Math.max(1, Math.round(d*24))+" h" : Math.round(d)+" días"; }
+function drawSaldo(){
+  const b = $("#saldoIA"); if(!b) return; b.classList.remove("hide","w","b"); b.onclick = editSaldo;
+  if(!SALDO || !SALDO.fijado){ b.innerHTML = "🧠 Saldo IA: <u>escríbelo</u>"; b.classList.add("w"); return; }
+  const r = Math.max(0, SALDO.restante), pct = SALDO.inicial > 0 ? Math.max(2, Math.min(100, r / SALDO.inicial * 100)) : 0, d = SALDO.diasRestantes;
+  if(r < 1) b.classList.add("b"); else if(r < 2.5 || (d != null && d < 2)) b.classList.add("w");
+  b.innerHTML = `🧠 IA <span class="bar"><i style="width:${pct}%"></i></span> US$ ${r.toFixed(2)}<span class="tx2">${d!=null?" · ~"+fmtDias(d):""}</span>`;
+  b.title = `Saldo estimado de Claude: US$ ${r.toFixed(2)} de ${SALDO.inicial.toFixed(2)} · gastado US$ ${SALDO.gastado.toFixed(3)} desde el ${fdt(new Date(SALDO.desde).toISOString())} · ~US$ ${(SALDO.porDia||0).toFixed(2)} por día. Toca para actualizarlo.`;
+}
+async function editSaldo(){
+  const f = await askForm("Saldo de IA (Claude)", [{id:"usd", label:"¿Cuánto saldo tienes ahora? (en dólares, ej: 4.75)", value:SALDO&&SALDO.fijado?Math.max(0,SALDO.restante).toFixed(2):"", req:true}],
+    'Míralo en <a href="https://platform.claude.com/settings/billing" target="_blank" rel="noopener" style="color:var(--acc)">platform.claude.com → Billing</a> y escríbelo aquí. Desde ese momento la barra descuenta sola lo que gastan tus agentes. Cuando recargues, vuelve a escribir el saldo nuevo.', "Guardar saldo");
+  if(!f) return;
+  const v = Number(String(f.usd).replace(",", ".").replace(/[^\d.]/g, ""));
+  if(!(v >= 0)) return toast("Escribe un número, por ejemplo 4.75");
+  try{ SALDO = await api("admin_wa_saldo", {fijar:v}); drawSaldo(); toast("Saldo guardado ✔"); }catch(ex){ toast(ex.message); }
+}
+
+/* ---------- Bandeja de WhatsApp: leer y responder chats ---------- */
+let IB = [], ibSel = "", ibTimer = null, IBC = null;
+const IBET = {pago:"✅ Pagó", pendiente:"⏳ Pendiente", interesado:"🔥 Interesado", queja:"😠 Queja", urgente:"🚨 Urgente", reembolso:"💸 Reembolso", no_interesado:"🙅 No interesado"};
+const IBETC = {pago:"t-ok", pendiente:"t-w", interesado:"t-av", queja:"t-b", urgente:"t-b", reembolso:"t-b", no_interesado:"t-g"};
+const etHtml = e => (e||[]).map(k=>`<span class="tag ${IBETC[k]||"t-g"}" style="font-size:11px;padding:1px 7px">${esc(IBET[k]||k)}</span>`).join(" ");
+const hace = ts => { if(!ts) return ""; const m = (Date.now()-ts)/60000; return m<1?"ahora":m<60?Math.round(m)+" min":m<1440?Math.round(m/60)+" h":Math.round(m/1440)+" d"; };
+async function loadInbox(){
+  const el = $("#ibList"); if(!el) return;
+  $("#ibQ").oninput = drawInbox; $("#ibF").onchange = drawInbox; $("#ibReload").onclick = loadInbox;
+  try{ IB = (await api("admin_wa_chats")).chats || []; drawInbox(); }
+  catch(ex){ el.innerHTML = '<div class="empty">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el asistente para ver los chats.":ex.message)+'</div>'; }
+  clearInterval(ibTimer); ibTimer = setInterval(()=>{
+    if(curTab!=="wa" || document.hidden || document.querySelector("dialog[open]")) return;
+    api("admin_wa_chats").then(j=>{ IB = j.chats||[]; drawInbox(); }).catch(()=>{});
+    if(ibSel && !($("#ibTxt") && $("#ibTxt").value)) openChat(ibSel, true);
+  }, 60000);
+}
+function drawInbox(){
+  const el = $("#ibList"); if(!el) return;
+  const q = ($("#ibQ").value||"").toLowerCase().trim(), f = $("#ibF").value;
+  const list = IB.filter(c=>{
+    if(f==="sin" && c.quien!=="u") return false;
+    if(f==="pausa" && !c.pausa) return false;
+    if(f==="alerta" && !c.etiquetas.some(e=>e==="urgente"||e==="queja")) return false;
+    if(f && !["sin","pausa","alerta"].includes(f) && !c.etiquetas.includes(f)) return false;
+    return !q || (c.nombre+" "+c.tel+" "+c.ultimo).toLowerCase().includes(q);
+  });
+  el.innerHTML = list.length ? list.slice(0,300).map(c=>`<button type="button" class="ib-it ${c.tel===ibSel?"on":""}" data-ib="${esc(c.tel)}">
+      <div class="ib-h"><b>${c.quien==="u"?'<span class="ib-dot" title="Último mensaje del cliente"></span> ':""}${esc(c.nombre||("+"+c.tel))}</b><time>${hace(c.ts)}</time></div>
+      <div class="ib-u">${c.quien==="a"?"🤖 ":c.quien==="d"?"👤 Tú: ":""}${esc(c.ultimo||(c.sinDatos?"(se actualiza con el próximo mensaje)":""))}</div>
+      <div>${c.pausa?'<span class="tag t-g" style="font-size:11px;padding:1px 7px">⏸ Pausa</span> ':""}${etHtml(c.etiquetas)}</div></button>`).join("")
+    + (list.length>300?`<div class="empty">Mostrando 300 de ${list.length}. Usa el buscador.</div>`:"")
+    : '<div class="empty">No hay chats con ese filtro.</div>';
+}
+async function openChat(tel, silencioso){
+  ibSel = tel; const box = $("#ibChat"); if(!box) return;
+  document.querySelectorAll(".ib-it").forEach(b=>b.classList.toggle("on", b.dataset.ib===tel));
+  if(!silencioso) box.innerHTML = '<div class="empty" style="margin:auto">Cargando…</div>';
+  try{
+    const c = IBC = await api("admin_wa_chat", {tel});
+    if(ibSel !== tel) return;
+    const borrador = $("#ibTxt") && silencioso ? $("#ibTxt").value : "";
+    box.innerHTML = `<div class="ib-top"><b>${esc(c.nombre||"Cliente")}</b> <a class="mono" href="https://wa.me/${esc(c.tel)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:13px">+${esc(c.tel)}</a> ${etHtml(c.etiquetas)}
+        <span style="margin-left:auto;display:flex;gap:6px"><button class="btn s" id="ibPausa">${c.pausa?"▶ Reactivar asistente":"⏸ Pausar asistente"}</button></span></div>
+      <div class="ib-msgs" id="ibMsgs">${c.turnos.length?c.turnos.map(t=>`<div class="bub ${t.r==="u"?"u":t.d?"d":"a"}">${t.img?"📷 <i>Imagen</i>\n":""}${esc(t.t).replace(/\*([^*\n]+)\*/g,"<b>$1</b>")}<small>${t.r==="u"?"Cliente":t.d?"Tú":"Asistente"} · ${fdt(new Date(t.ts).toISOString())}</small></div>`).join(""):'<div class="empty">Sin mensajes guardados.</div>'}</div>
+      ${c.pausa?'<div class="capwarn" style="margin:8px 10px 0">El asistente está en pausa en este chat: no le responde hasta que lo reactives.</div>':""}
+      <form class="ib-send" id="ibForm"><textarea id="ibTxt" rows="1" placeholder="Escribe un mensaje para el cliente…"></textarea><button class="btn p" type="submit">Enviar</button></form>`;
+    const m = $("#ibMsgs"); m.scrollTop = m.scrollHeight;
+    $("#ibTxt").value = borrador;
+    $("#ibTxt").onkeydown = e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("#ibForm").requestSubmit(); } };
+    $("#ibForm").onsubmit = async e=>{
+      e.preventDefault(); const t = $("#ibTxt").value.trim(); if(!t) return; const bt = e.target.querySelector("button"); bt.disabled = true;
+      try{ await api("admin_wa_send", {tel, texto:t}); $("#ibTxt").value = ""; toast("Enviado ✔ (sale de tu WhatsApp en segundos)"); await openChat(tel, true); }
+      catch(ex){ toast(ex.message); } bt.disabled = false;
+    };
+    $("#ibPausa").onclick = async ()=>{
+      try{ await api("admin_wa_pausa", {tel, on:!c.pausa}); toast(c.pausa?"El asistente vuelve a atender este chat ✔":"Asistente en pausa en este chat ✔"); const x = IB.find(i=>i.tel===tel); if(x) x.pausa = !c.pausa; drawInbox(); openChat(tel, true); }
+      catch(ex){ toast(ex.message); }
+    };
+  }catch(ex){ box.innerHTML = '<div class="empty" style="margin:auto">'+esc(ex.message)+'</div>'; }
+}
+document.addEventListener("click", e=>{ const b = e.target.closest("[data-ib]"); if(b) openChat(b.dataset.ib); });
+
+/* ---------- Tablero de agentes ---------- */
+async function loadAgentes(){
+  const el = $("#agGrid"); if(!el) return;
+  try{ drawAgentes(await api("admin_wa_agentes")); }
+  catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el asistente para ver los agentes.":ex.message)+'</div>'; }
+}
+function drawAgentes(a){
+  const el = $("#agGrid"); if(!el) return;
+  const c = a.chats, e = a.etiquetas, sal = a.saldo || {}, rec = a.recordatorio, ok = a.puente.conectado;
+  const ag = (ic, t, st, p, li) => `<div class="ag"><h3><span class="st ${st}"></span>${ic} ${t}</h3><p>${p}</p><ul>${li.map(x=>"<li>"+x+"</li>").join("")}</ul></div>`;
+  const salTxt = sal.fijado ? "US$ "+Math.max(0,sal.restante).toFixed(2)+(sal.diasRestantes!=null?" (~"+fmtDias(sal.diasRestantes)+")":"") : "sin configurar (toca la barra 🧠 de arriba)";
+  const stSal = !sal.fijado ? "w" : sal.restante < 1 ? "b" : sal.restante < 2.5 ? "w" : "";
+  el.innerHTML = [
+    ag("💬","Agente de ventas", ok?"":"b", "Atiende todos los chats a la vez, día y noche: responde dudas, explica que las cuentas son compartidas y lleva al cliente a pagar.",
+      ["Chats con movimiento hoy: <b>"+c.hoy+"</b>", "Chats en total: "+c.total, "Modelo: "+esc(a.modelos.chat)+" (el más económico)"]),
+    ag("🧾","Agente de pagos", ok?"":"b", "Lee la captura de Nequi y revisa monto, destinatario (Nelson Gomez / 310 203 5327), fecha y referencia. Una referencia nunca se acepta dos veces.",
+      ["Clientes que ya pagaron: <b>"+e.pago+"</b>", "Modelo: "+esc(a.modelos.preciso)+" (el más preciso, solo para comprobantes)"]),
+    ag("🔗","Agente de entregas", ok?"":"b", "Cuando el pago es válido, crea el código y le envía al cliente su enlace de activación al instante. Ese enlace le activa el plan en su cuenta.", ["Entregas automáticas: sí", "Pagos dudosos: el agente le pide al cliente un comprobante correcto"]),
+    ag("🛠️","Agente de soporte", e.urgente?"w":"", "Revisa los planes del cliente, le cambia la cuenta si le falla, le da códigos 2FA extra y registra reembolsos. Nunca dice que lo atenderá una persona.",
+      ["Quejas abiertas: <b>"+e.queja+"</b>", "Urgentes: <b>"+e.urgente+"</b> (te llegan al correo)", "Reembolsos: "+e.reembolso]),
+    ag("🔁","Agente de seguimiento", "", "Si un cliente deja de responder sin comprar, le escribe a las 3 horas y otra vez al día siguiente, retomando su duda.", ["Clientes pendientes de comprar: <b>"+e.pendiente+"</b>", "Interesados: "+e.interesado]),
+    ag("🌙","Agente de recordatorios", "", "Cada noche a las 3:05 a. m. le deja un recordatorio corto a quien no ha comprado, incluidos los chats viejos y archivados. Nunca a tus contactos. Máximo 1 cada 3 días por cliente.",
+      rec ? ["Última vez: <b>"+esc(rec.dia||"")+"</b>", "Enviados: <b>"+(rec.enviados||0)+"</b> · revisados: "+(rec.revisados||0), "Etiquetados: "+(rec.etiquetados||0)] : ["Aún no ha corrido"]),
+    ag("🏷️","Agente etiquetador", "", "Marca a cada cliente según cómo va su conversación, aquí y en tu WhatsApp Business.",
+      ["✅ Pagó: "+e.pago+" · ⏳ Pendiente: "+e.pendiente, "🔥 Interesado: "+e.interesado+" · 🙅 No: "+e.no_interesado, "😠 Queja: "+e.queja+" · 🚨 Urgente: "+e.urgente]),
+    ag("👀","Supervisor", c.sinResponder?"w":"", "Cada 10 minutos busca chats que se quedaron sin respuesta y hace que se respondan, aunque sean de hace días.",
+      ["Sin responder ahora: <b>"+c.sinResponder+"</b>", "Chats con el asistente en pausa: "+c.pausados]),
+    ag("🎓","Agente de aprendizaje", "", "Dos veces al día estudia las conversaciones, aprende de las ventas cerradas y de tus respuestas, y te manda un resumen al correo.",
+      ["Último estudio: <b>"+(a.estudio.ultimo?fdt(new Date(a.estudio.ultimo).toISOString()):"aún no")+"</b>", "Lecciones aprendidas: "+Math.round(a.estudio.lecciones/100)/10+" mil caracteres"]),
+    ag("🚨","Vigilante", ok?stSal:"b", "Revisa cada 30 minutos que WhatsApp esté conectado y que haya saldo de IA. Si algo falla, te escribe al correo.",
+      ["WhatsApp: <b>"+(ok?"conectado ✅":"desconectado ❌")+"</b>"+(a.puente.visto?" · último aviso "+hace(a.puente.visto):""), "Saldo de IA: <b>"+salTxt+"</b>"]),
+  ].join("");
+}

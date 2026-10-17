@@ -344,6 +344,33 @@ dialog{border-radius:20px}
 dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 :root:not([data-theme=dark]){--soft:#fff3f2}
 :focus-visible{outline:3px solid rgba(239,83,80,.5);outline-offset:2px}
+/* ---------- saldo de IA, bandeja de WhatsApp y agentes ---------- */
+.saldo{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.saldo .bar{width:70px;height:8px;border-radius:9px;background:var(--line);overflow:hidden;display:inline-block}
+.saldo .bar i{display:block;height:100%;background:var(--ok);border-radius:9px}
+.saldo.w .bar i{background:var(--warn)}.saldo.b .bar i{background:var(--bad)}.saldo.b{border-color:var(--bad);color:var(--bad)}
+.inbox{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:12px;min-height:520px}
+.ib-list{border:1px solid var(--line);border-radius:14px;overflow:auto;max-height:640px}
+.ib-it{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;padding:10px 12px;cursor:pointer}
+.ib-it:hover,.ib-it.on{background:var(--soft)}
+.ib-it b{font-size:14px}.ib-it .ib-u{font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib-it .ib-h{display:flex;gap:6px;align-items:center;justify-content:space-between}.ib-it time{font-size:11px;color:var(--mut);flex:none}
+.ib-dot{width:9px;height:9px;border-radius:50%;background:var(--acc);display:inline-block;flex:none}
+.ib-chat{border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;max-height:640px;min-height:520px}
+.ib-top{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ib-msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.bub{max-width:78%;padding:8px 11px;border-radius:14px;font-size:14px;white-space:pre-wrap;word-break:break-word;line-height:1.4}
+.bub small{display:block;font-size:10.5px;color:var(--mut);margin-top:3px}
+.bub.u{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.bub.a{align-self:flex-end;background:#dcf8c6;color:#0f172a}.bub.d{align-self:flex-end;background:#cfe3ff;color:#0f172a}
+.ib-send{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.ib-send textarea{flex:1;resize:none;min-height:44px;max-height:140px;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--text)}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ag{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--card)}
+.ag h3{font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ag p{font-size:13px;color:var(--mut);margin-bottom:8px}.ag ul{list-style:none;font-size:13px;display:grid;gap:3px}
+.ag .st{width:10px;height:10px;border-radius:50%;background:var(--ok);flex:none}.ag .st.w{background:var(--warn)}.ag .st.b{background:var(--bad)}
+@media(max-width:760px){.inbox{grid-template-columns:1fr}.ib-list{max-height:300px}.ib-chat{min-height:420px}.saldo .bar{width:44px}.saldo .tx2{display:none}}
 </style>
 </head>
 <body>
@@ -362,7 +389,7 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
   <button class="burger" id="sideBtn" type="button" aria-label="Abrir menú">☰</button>
   <a class="bar-logo" href="index.html"><img src="logo-main.webp" alt="IA Plus Colombia" width="58" height="40"></a>
   <div class="ttl"><h1 id="pageTitle">Panel de administrador</h1><p id="pageSub"></p></div>
-  <div class="sp"><button class="search-btn hide" id="gSearch" type="button" title="Buscar (Ctrl+K)"><span>🔎 Buscar cliente, código, cuenta…</span><kbd>Ctrl K</kbd></button><button class="btn s hide" id="gSettings" title="Ajustes" aria-label="Ajustes">⚙️</button><button class="btn s hide" id="reload">↻ Actualizar</button></div>
+  <div class="sp"><button class="saldo hide" id="saldoIA" type="button" title="Saldo de IA (Claude) · toca para actualizarlo"></button><button class="search-btn hide" id="gSearch" type="button" title="Buscar (Ctrl+K)"><span>🔎 Buscar cliente, código, cuenta…</span><kbd>Ctrl K</kbd></button><button class="btn s hide" id="gSettings" title="Ajustes" aria-label="Ajustes">⚙️</button><button class="btn s hide" id="reload">↻ Actualizar</button></div>
 </div></header>
 <main id="app"><div class="skel"></div><div class="skel"></div><div class="skel"></div></main>
 </div>
