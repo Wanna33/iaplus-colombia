@@ -14,6 +14,8 @@ const CONFIG = {
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
   {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación al instante por WhatsApp","Garantía durante el mes"]},
+  {id:"chatgpt3", name:"ChatGPT 3 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:20000, per:"/3 meses", days:90, badge:"Mejor precio", feats:["ChatGPT Plus por 3 meses","Sale a menos de $7.000 el mes","Cuenta compartida · hasta 2 dispositivos","Activación al instante por WhatsApp"]},
+  {id:"chatgpt6", name:"ChatGPT 6 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:50000, per:"/6 meses", days:180, badge:"Medio año", feats:["ChatGPT Plus por 6 meses","Te olvidas de renovar por medio año","Cuenta compartida · hasta 2 dispositivos","Activación al instante por WhatsApp"]},
   {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.webp", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
@@ -75,7 +77,7 @@ function renderGrid(){
   const first = gridFirst; gridFirst = false;
   $("#grid").innerHTML = list.map((p,n)=>`
     <article class="card ${first?"reveal":"anim"}" style="--d:${Math.min(n,8)*(first?80:55)}ms">
-      ${p.hot?'<span class="badge">Más vendido</span>':''}
+      ${p.hot||p.badge?'<span class="badge">'+(p.badge||'Más vendido')+'</span>':''}
       <div class="ico ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
