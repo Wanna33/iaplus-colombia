@@ -270,6 +270,7 @@ const IC = {
   cta:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/>',
   prod:'<path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   log:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  rev:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M19 8v6M16 11h6"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
 const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[k]||""}</svg>`;
@@ -281,6 +282,7 @@ const NAV = [
   {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
   {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
   {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
+  {g:"Control", t:"rev", l:"Revendedores", s:"Personas que autorizas para vender, con permisos limitados"},
   {g:"Control", t:"log", l:"Actividad", s:"Cada movimiento de tus clientes con fecha y hora"}
 ];
 let WAV = []; // ventas del asistente de WhatsApp
@@ -307,6 +309,7 @@ function setTab(t){
   if(t==="log") loadLog(logCli);
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
+  if(t==="rev") loadRev();
   if(t==="res") loadFeed();
 }
 function updateViews(){
@@ -438,6 +441,14 @@ function render(){
       </form>
       <div class="saved" id="draftNote"></div>
     </details>
+  </section>
+
+  <section id="tab-rev" class="hide">
+    <div class="card"><h2>🤝 Revendedores</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Autoriza a una persona con su Gmail. Ella entra a <b>revendedor.html</b> y <b>solo</b> puede: generar códigos de los productos que le permitas (con un tope al día), ver <b>sus</b> ventas, anular <b>sus</b> códigos sin usar y, si quieres, dar códigos 2FA extra a <b>sus</b> clientes. Nunca ve correos ni contraseñas de las cuentas, ni a tus otros clientes, ni este panel. Todo lo que hace queda en <b>Actividad</b>.</p>
+      <div class="tools"><button class="btn s p" id="revAdd">➕ Autorizar revendedor</button><button class="btn s" id="revLink">🔗 Copiar enlace de su página</button><button class="btn s" id="revReload">↻ Recargar</button></div>
+      <div id="revRows" class="walist"><div class="empty">Cargando…</div></div>
+    </div>
   </section>
 
   <section id="tab-log" class="hide">
@@ -1261,4 +1272,48 @@ document.addEventListener("keydown", e=>{
   if(e.key==="Escape") openSide(false);
   const k = e.target.closest && e.target.closest(".kpi[data-goto]"); if(k && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); k.click(); }
   if(e.altKey && /^[1-7]$/.test(e.key) && $("#sideNav")?.children.length){ e.preventDefault(); setTab(NAV[+e.key-1].t); }
+});
+
+/* ---------- Revendedores (solo el dueño los autoriza y controla) ---------- */
+let REVS = [], REVCAT = [];
+async function loadRev(){
+  const el = $("#revRows"); if(!el) return;
+  $("#revAdd").onclick = ()=>editRev(null); $("#revReload").onclick = loadRev;
+  $("#revLink").onclick = ()=>copyText(SITE+"revendedor.html").then(()=>toast("Enlace copiado ✔"));
+  try{ const j = await api("admin_rev_list"); REVS = j.revendedores; REVCAT = j.catalogo; drawRev(); }
+  catch(ex){ el.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) para usar revendedores.":ex.message)+'</div>'; }
+}
+function drawRev(){
+  const el = $("#revRows"); if(!el) return;
+  const nm = k => (REVCAT.find(c=>c.k===k)||{name:k}).name;
+  el.innerHTML = REVS.length ? REVS.map(r=>{ const s = r.stats||{};
+    return `<div class="wacard"><div class="wah"><b>${esc(r.nombre||r.gmail)}</b> <span class="mono">${esc(r.gmail)}</span> <span class="tag ${r.activo?"t-ok":"t-g"}">${r.activo?"Activo":"Pausado"}</span></div>
+      <div class="wab">Productos: ${(r.productos||[]).length?r.productos.map(k=>esc(nm(k))).join(", "):"ninguno"} · Tope: <b>${r.tope}</b>/día${r.d2fa?" · puede dar 2FA extra":""}</div>
+      <div class="wab">Hoy: <b>${s.hoy||0}</b> códigos · Total: ${s.total||0} · Activados: <b>${s.activados||0}</b> · Sin usar: ${s.disponibles||0} · Clientes activos: ${s.activos||0} · Valor vendido: <b>${money(s.valor)}</b>${s.ultimo?" · último: "+esc(s.ultimo):""}</div>
+      <div class="acts"><button class="btn s" data-rv="edit" data-g="${esc(r.gmail)}">✏️ Permisos</button><button class="btn s" data-rv="pausa" data-g="${esc(r.gmail)}">${r.activo?"⏸ Pausar":"▶ Activar"}</button><button class="btn s" data-rv="act" data-g="${esc(r.gmail)}">🕘 Su actividad</button><button class="btn s d" data-rv="del" data-g="${esc(r.gmail)}">🗑 Quitar</button></div></div>`; }).join("")
+    : '<div class="empty">Aún no tienes revendedores. Toca «Autorizar revendedor».</div>';
+}
+async function guardarRev(r){ await api("admin_rev_set", r); toast("Revendedor guardado ✔"); loadRev(); }
+async function editRev(r){
+  const f = await askForm(r?"Permisos de "+(r.nombre||r.gmail):"Autorizar revendedor", [
+    ...(r?[]:[{id:"gmail", label:"Gmail del revendedor", type:"email", req:true, ph:"persona@gmail.com"}]),
+    {id:"nombre", label:"Nombre", value:r?r.nombre:"", ph:"Ej: Pedro"},
+    {id:"tope", label:"Máximo de códigos al día", type:"number", value:r?r.tope:5, req:true},
+    {id:"d2fa", type:"check", label:"Puede dar códigos 2FA extra a sus clientes", value:r?r.d2fa:false},
+    ...REVCAT.map(c=>({id:"p_"+c.k, type:"check", label:"Puede vender "+c.name, value:r?(r.productos||[]).includes(c.k):c.k==="chatgpt"}))
+  ], "Elige qué puede vender. Siempre puedes cambiarlo, pausarlo o quitarlo.");
+  if(!f) return;
+  try{ await guardarRev({gmail:r?r.gmail:f.gmail, nombre:f.nombre, tope:+f.tope||0, d2fa:!!f.d2fa, activo:r?r.activo:true, productos:REVCAT.filter(c=>f["p_"+c.k]).map(c=>c.k)}); }
+  catch(ex){ toast(ex.message); }
+}
+document.addEventListener("click", async e=>{
+  const b = e.target.closest("[data-rv]"); if(!b) return;
+  const r = REVS.find(x=>x.gmail===b.dataset.g); if(!r) return;
+  const a = b.dataset.rv;
+  if(a==="edit") return editRev(r);
+  if(a==="act"){ logCli = r.gmail; setTab("log"); return; }
+  try{
+    if(a==="pausa") await guardarRev({...r, activo:!r.activo});
+    if(a==="del"){ if(!confirm("¿Quitar a "+(r.nombre||r.gmail)+"? Ya no podrá entrar. Sus ventas y clientes siguen igual.")) return; await api("admin_rev_del", {gmail:r.gmail}); toast("Revendedor quitado ✔"); loadRev(); }
+  }catch(ex){ toast(ex.message); }
 });

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'none'; form-action 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<script src="guard.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel de revendedor | IA Plus Colombia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.png" type="image/png">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--line:#e8edf3;--text:#0f172a;--mut:#64748b;--acc:#e0403d;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#f1f5f9}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text);line-height:1.5}
+a{color:inherit;text-decoration:none}
+.bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar-in{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.bar img{height:40px;width:auto}
+.bar h1{font-size:17px;line-height:1.2}.bar p{font-size:13px;color:var(--mut)}
+.sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:18px;box-shadow:0 1px 3px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.05)}
+.card h2{font-size:17px;font-weight:800;margin-bottom:10px}
+.mut{color:var(--mut);font-size:14px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer;color:var(--text);min-height:40px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.s{padding:6px 11px;font-size:13px;min-height:34px}
+.btn.wa{background:#25d366;border-color:#25d366;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.st{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.st b{display:block;font-size:24px;font-weight:800}.st span{font-size:13px;color:var(--mut)}
+.form{display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:10px;align-items:end}
+label{font-size:13px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px}
+select,input{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text)}
+.codes{display:grid;gap:10px;margin-top:14px}
+.code{border:1px dashed var(--acc);border-radius:14px;padding:12px;background:#fff8f7}
+.mono{font-family:ui-monospace,Consolas,monospace;font-weight:700}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}
+.list{display:grid;gap:8px}
+.it{border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+.it .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{flex:1;min-width:180px}
+.tools select{width:auto}
+.msg{text-align:center;padding:60px 16px}.msg h2{margin-bottom:8px}.msg p{color:var(--mut);margin-bottom:18px}
+.empty{text-align:center;color:var(--mut);padding:24px}
+.note{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mut);margin-top:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:#0f172a;color:#fff;padding:11px 18px;border-radius:12px;font-weight:700;transition:.3s;z-index:50;max-width:calc(100% - 32px)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.skel{height:90px;border-radius:18px;background:linear-gradient(90deg,#eef2f6,#f8fafc,#eef2f6);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:14px}
+@keyframes sk{to{background-position:-200% 0}}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr}.bar p{display:none}}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a href="index.html"><img src="logo-main.webp" alt="IA Plus Colombia" width="58" height="40"></a>
+  <div><h1>Panel de revendedor</h1><p id="who"></p></div>
+  <div class="sp"><button class="btn s" id="reload" type="button" title="Actualizar" hidden>↻</button><button class="btn s" id="salir" type="button" hidden>Salir</button></div>
+</div></header>
+<main id="app"><div class="skel"></div><div class="skel"></div></main>
+<div class="toast" id="toast"></div>
+<script src="net.js"></script>
+<script src="revendedor.js"></script>
+</body>
+</html>
