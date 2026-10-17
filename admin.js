@@ -1492,6 +1492,8 @@ const ROLES = [
   {d:"👔 Dirección", k:"secretaria", ic:"🗂️", n:"Secretaria", ia:"Gratis", p:"Te manda al correo el resumen del día: ventas, qué preguntan los clientes y qué mejorar."},
   {d:"👔 Dirección", k:"contador", ic:"🧮", n:"Contador", ia:"Gratis", p:"Lleva la cuenta de lo que gasta la IA y te avisa antes de que se acabe el saldo.", siempre:true},
   {d:"💼 Ventas", k:"despachador", ic:"🧭", n:"Despachador", ia:"Gratis", p:"Lee cada mensaje y decide qué empleado lo atiende, para que la IA solo se use cuando hace falta."},
+  {d:"💼 Ventas", k:"saludador", ic:"👋", n:"Saludador", ia:"Gratis", p:"Le da la bienvenida con los planes de ChatGPT Plus a quien escribe «hola» por primera vez, sin gastar IA."},
+  {d:"💼 Ventas", k:"respuestas_auto", ic:"⚡", n:"Respuestas automáticas", ia:"Gratis", p:"Contesta al instante precios, cómo pagar, «ya pagué», dispositivos y si la cuenta es compartida. Tú editas las respuestas en Modo Dios."},
   {d:"💼 Ventas", k:"recepcionista", ic:"🛎️", n:"Recepcionista", ia:"Gratis", p:"Contesta los «gracias» y los emojis sin gastar IA."},
   {d:"💼 Ventas", k:"vendedor", ic:"💬", n:"Vendedores (clones)", ia:"IA económica", p:"Atienden muchos chats a la vez, resuelven dudas y llevan al cliente a pagar. Cada vez que suben de nivel entran más vendedores.", clones:true},
   {d:"💼 Ventas", k:"seguimiento", ic:"🔁", n:"Agente de seguimiento", ia:"IA económica", p:"Le vuelve a escribir a quien dejó de responder sin comprar (a las 3 horas y al día siguiente)."},
