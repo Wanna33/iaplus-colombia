@@ -77,7 +77,7 @@ function start(){
   const u = load("iap_user"); const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ showLogin(); return; }
   $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide"); $("#gSearch").classList.remove("hide"); $("#gSettings").classList.remove("hide");
-  refresh(); loadSaldo(); clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden) loadSaldo(); }, 300000);
+  refresh(); loadSaldo(); setTimeout(()=>api("admin_catalogo").then(j=>{ GPRODS = j.productos; syncPrecios(); }).catch(()=>{}), 0); clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden) loadSaldo(); }, 300000);
 }
 
 /* ---------- Utilidades de datos ---------- */
@@ -262,6 +262,7 @@ function countUp(){
 }
 /* ---------- Navegación: menú lateral (computador) y barra inferior (celular) ---------- */
 const IC = {
+  dios:'<path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 20 12 16.6 6.5 20 8 13.4 3 9l6.4-.7z"/>',
   res:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
   cli:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
   pay:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/>',
@@ -277,6 +278,7 @@ const IC = {
 const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[k]||""}</svg>`;
 const NAV = [
   {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
+  {g:"General", t:"dios", l:"Modo Dios", s:"Controla todo: precios, asistente, respuestas automáticas y recordatorios"},
   {g:"Ventas", t:"cli", l:"Clientes", s:"Todos tus clientes, sus planes y vencimientos"},
   {g:"Ventas", t:"wa", l:"WhatsApp", s:"Ventas del asistente de WhatsApp: confirma el pago y se envía el enlace"},
   {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pagos recibidos con Wompi"},
@@ -313,6 +315,7 @@ function setTab(t){
   if(t==="wa") loadWa();
   if(t==="rev") loadRev();
   if(t==="ag") loadAgentes();
+  if(t==="dios") loadDios();
   if(t==="res") loadFeed();
 }
 function updateViews(){
@@ -336,6 +339,7 @@ function render(){
         <button class="btn" data-qa="acc">➕ Agregar cuenta</button>
         <button class="btn" data-qa="pass">🔑 Cambiar contraseña</button>
         <button class="btn" data-qa="avisar">💬 Avisar vencimientos</button>
+        <button class="btn" data-goto="dios">⚡ Modo Dios</button>
         <button class="btn" data-goto="rev">🤝 Revendedores</button>
       </div></div>
     <div class="kpis" id="stats"></div>
@@ -450,6 +454,40 @@ function render(){
       </form>
       <div class="saved" id="draftNote"></div>
     </details>
+  </section>
+
+  <section id="tab-dios" class="hide">
+    <div class="god-hero"><div><h2>⚡ Modo Dios</h2><p>Aquí decides todo. Cada cambio se aplica al instante en la tienda, en el asistente de WhatsApp y en tus agentes. Sin tocar código.</p></div><div class="god-badges" id="godBadges"></div></div>
+    <div class="god-grid">
+      <div class="card"><h2>🧠 Asistente de WhatsApp</h2>
+        <label class="sw"><input type="checkbox" id="gAsis"><span></span><b>Asistente encendido</b><small>Si lo apagas, nadie responde por WhatsApp hasta que lo vuelvas a encender.</small></label>
+        <label class="sw"><input type="checkbox" id="gSal"><span></span><b>Saludo automático gratis</b><small>A quien escribe "hola" por primera vez le llega la bienvenida con los planes, sin gastar IA.</small></label>
+        <div class="acts" style="margin-top:10px"><button class="btn s" id="gReanudar">▶ Reactivar el asistente en todos los chats pausados</button></div>
+      </div>
+      <div class="card"><h2>☀️ Recordatorios automáticos</h2>
+        <label class="sw"><input type="checkbox" id="gRec"><span></span><b>Enviar recordatorios</b><small>A clientes que no han comprado (nunca a tus contactos), máximo 1 cada 3 días por persona.</small></label>
+        <div class="god-row"><label>Hora<select id="gRecH"><option value="5">5:00 a. m.</option><option value="6">6:00 a. m.</option><option value="7">7:00 a. m.</option><option value="8">8:00 a. m.</option><option value="9">9:00 a. m.</option><option value="10">10:00 a. m.</option><option value="11">11:00 a. m.</option><option value="12">12:00 m.</option><option value="13">1:00 p. m.</option><option value="14">2:00 p. m.</option><option value="15">3:00 p. m.</option><option value="16">4:00 p. m.</option><option value="17">5:00 p. m.</option><option value="18">6:00 p. m.</option><option value="19">7:00 p. m.</option><option value="20">8:00 p. m.</option><option value="21">9:00 p. m.</option></select></label>
+          <label>Máximo por día<input id="gRecMax" type="number" min="0" max="150"></label><label>De esos, clientes antiguos<input id="gRecV" type="number" min="0" max="60"></label></div>
+        <p class="god-hint">⚠️ Más mensajes = más ventas, pero también más riesgo de que WhatsApp bloquee el número. Recomendado: 60 por día y 25 antiguos.</p>
+      </div>
+    </div>
+    <div class="card"><h2>📜 Órdenes para la IA</h2>
+      <p class="god-hint">Escribe instrucciones en tus palabras y el asistente las seguirá siempre. Ejemplos: "Si preguntan por Netflix, di que llega la otra semana", "Los domingos ofrece el plan de 3 meses primero", "No vendas Canva por ahora".</p>
+      <textarea id="gReglas" rows="5" maxlength="3000" class="god-ta" placeholder="Tus órdenes para el asistente…"></textarea>
+      <div class="acts" style="justify-content:flex-end;margin-top:8px"><span class="god-hint" id="gReglasN"></span><button class="btn p" id="gReglasOk">Guardar órdenes</button></div>
+    </div>
+    <div class="card"><h2>⚡ Respuestas automáticas <span class="tag t-ok" style="font-size:11px">gratis · sin IA</span></h2>
+      <p class="god-hint">Si el cliente escribe una de estas palabras, se le responde al instante con tu texto, sin gastar saldo de IA. Si pregunta por otro producto o algo más complejo, responde la IA. Los precios de ChatGPT ($10.000 / $20.000 / $50.000) se actualizan solos con los de abajo.</p>
+      <div id="gFaq" class="faq-list"></div>
+      <div class="acts" style="margin-top:10px"><button class="btn s" id="gFaqAdd">➕ Agregar respuesta</button><button class="btn s" id="gFaqReset">↺ Volver a las de fábrica</button><span style="flex:1"></span><button class="btn p" id="gFaqOk">Guardar respuestas</button></div>
+    </div>
+    <div class="card"><h2>🛒 Productos, planes y precios</h2>
+      <p class="god-hint">Cambia el precio o los días y toca Guardar: se actualiza en la tienda, en el asistente, en los revendedores y en los códigos nuevos. "Visible" apagado lo esconde de la tienda y el asistente deja de ofrecerlo.</p>
+      <div class="wrapt"><table class="god-tab"><thead><tr><th>Producto</th><th>Precio (COP)</th><th>Días</th><th>Visible</th><th>Cuentas con cupo</th><th></th></tr></thead><tbody id="gProds"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody></table></div>
+      <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">➕ Agregar un producto nuevo</summary>
+        <div class="god-row" style="margin-top:10px"><label>Nombre<input id="nNom" placeholder="Ej: Netflix"></label><label>Precio<input id="nPre" type="number" placeholder="15000"></label><label>Días<input id="nDia" type="number" value="30"></label><button class="btn p" id="nOk" style="align-self:end">Crear</button></div>
+        <p class="god-hint">Luego agrega sus cuentas en la pestaña Cuentas con un nombre que contenga la misma palabra (por ejemplo "Netflix"). En la tienda aparece en la lista del asistente; para mostrarlo con foto en la página, pídemelo.</p></details>
+    </div>
   </section>
 
   <section id="tab-ag" class="hide">
@@ -1499,3 +1537,67 @@ function drawAgentes(a){
     ${deps.map(d=>`<h3 style="margin:16px 0 8px;font-size:15px">${d}</h3><div class="agrid">${ROLES.filter(r=>r.d===d).map(card).join("")}</div>`).join("")}
   </div>`;
 }
+
+/* ---------- Modo Dios ---------- */
+let GCFG = null, GPRODS = [];
+async function loadDios(){
+  const [c, p] = await Promise.allSettled([api("admin_wa_ajustes"), api("admin_catalogo")]);
+  if(c.status==="fulfilled"){ GCFG = c.value.config; drawDiosCfg(); } else toast("Asistente: "+c.reason.message);
+  if(p.status==="fulfilled"){ GPRODS = p.value.productos; syncPrecios(); drawProds(); } else $("#gProds").innerHTML = '<tr><td colspan="6" class="empty">'+esc(p.reason.message)+'</td></tr>';
+}
+function syncPrecios(){ GPRODS.forEach(x=>{ PRICES[x.name] = x.price; DAYS[x.name] = x.dias; }); }
+function drawDiosCfg(){
+  const c = GCFG; if(!c) return;
+  $("#gAsis").checked = c.asistente; $("#gSal").checked = c.saludo; $("#gRec").checked = c.rec.activo;
+  $("#gRecH").value = c.rec.hora; $("#gRecMax").value = c.rec.max; $("#gRecV").value = c.rec.viejos;
+  $("#gReglas").value = c.reglas || ""; $("#gReglasN").textContent = (c.reglas||"").length+"/3000";
+  $("#godBadges").innerHTML = `<span class="tag ${c.asistente?"t-ok":"t-b"}">${c.asistente?"🟢 Asistente encendido":"🔴 Asistente apagado"}</span><span class="tag t-av">⚡ ${c.faq.filter(f=>f.activa).length} respuestas gratis</span><span class="tag ${c.rec.activo?"t-ok":"t-g"}">☀️ Recordatorios ${c.rec.activo?"a las "+c.rec.hora+":00":"apagados"}</span>`;
+  drawFaq();
+}
+function drawFaq(){
+  $("#gFaq").innerHTML = GCFG.faq.map((f,i)=>`<div class="faq-it" data-fi="${i}">
+    <label class="sw sm"><input type="checkbox" data-fa ${f.activa?"checked":""}><span></span></label>
+    <div class="faq-b"><input data-fk value="${esc(f.claves.join(", "))}" placeholder="Palabras clave separadas por coma (ej: precio, cuanto vale)">
+      <textarea data-fr rows="2" placeholder="Respuesta que se envía">${esc(f.resp)}</textarea></div>
+    <button class="btn s d" data-fdel title="Quitar">🗑</button></div>`).join("") || '<div class="empty">No hay respuestas automáticas.</div>';
+}
+function leerFaq(){ return [...document.querySelectorAll(".faq-it")].map(el=>({id:GCFG.faq[+el.dataset.fi]?.id||("r"+Date.now()+el.dataset.fi), activa:el.querySelector("[data-fa]").checked,
+  claves:el.querySelector("[data-fk]").value.split(",").map(x=>x.trim()).filter(Boolean), resp:el.querySelector("[data-fr]").value.trim()})); }
+async function guardarCfg(parcial, msg){
+  try{ const j = await api("admin_wa_ajustes", {config:parcial}); GCFG = j.config; drawDiosCfg(); toast(msg||"Guardado ✔"); }
+  catch(ex){ toast(ex.message); drawDiosCfg(); }
+}
+function drawProds(){
+  $("#gProds").innerHTML = GPRODS.map(p=>`<tr data-pk="${esc(p.k)}"><td><b>${EMO(p.name)} ${esc(p.name)}</b>${p.plan?' <span class="tag t-av" style="font-size:10px">plan</span>':""}${p.cambiado?' <span class="tag t-w" style="font-size:10px">editado</span>':""}</td>
+    <td><input data-pp type="number" min="1000" step="1000" value="${p.price}" style="width:110px"></td>
+    <td><input data-pd type="number" min="1" max="730" value="${p.dias}" style="width:80px"></td>
+    <td><label class="sw sm"><input type="checkbox" data-pv ${p.oculto?"":"checked"}><span></span></label></td>
+    <td>${p.cuentas?'<span class="tag t-ok">'+p.cuentas+'</span>':'<span class="tag t-b">agotado</span>'}</td>
+    <td class="acts"><button class="btn s p" data-psave>Guardar</button>${p.cambiado?'<button class="btn s" data-preset title="Volver al precio de fábrica">↺</button>':""}</td></tr>`).join("");
+}
+document.addEventListener("change", e=>{
+  if(!GCFG) return;
+  if(e.target.id==="gAsis"){ if(!e.target.checked && !confirm("¿Apagar el asistente? Nadie recibirá respuesta por WhatsApp hasta que lo enciendas.")){ e.target.checked = true; return; } guardarCfg({asistente:e.target.checked}, e.target.checked?"Asistente encendido ✔":"Asistente apagado"); }
+  if(e.target.id==="gSal") guardarCfg({saludo:e.target.checked});
+  if(["gRec","gRecH","gRecMax","gRecV"].includes(e.target.id)) guardarCfg({rec:{activo:$("#gRec").checked, hora:+$("#gRecH").value, max:+$("#gRecMax").value, viejos:+$("#gRecV").value}}, "Recordatorios guardados ✔");
+});
+document.addEventListener("input", e=>{ if(e.target.id==="gReglas") $("#gReglasN").textContent = e.target.value.length+"/3000"; });
+document.addEventListener("click", async e=>{
+  const t = e.target;
+  if(t.id==="gReglasOk") return guardarCfg({reglas:$("#gReglas").value}, "Órdenes guardadas: el asistente ya las sigue ✔");
+  if(t.id==="gFaqAdd"){ GCFG.faq = leerFaq(); GCFG.faq.push({id:"r"+Date.now(), activa:true, claves:[], resp:""}); drawFaq(); const l=[...document.querySelectorAll("[data-fk]")].pop(); if(l) l.focus(); return; }
+  if(t.closest("[data-fdel]")){ GCFG.faq = leerFaq(); GCFG.faq.splice(+t.closest(".faq-it").dataset.fi, 1); drawFaq(); return; }
+  if(t.id==="gFaqOk"){ const f = leerFaq().filter(x=>x.claves.length && x.resp); return guardarCfg({faq:f}, "Respuestas automáticas guardadas ✔"); }
+  if(t.id==="gFaqReset"){ if(!confirm("¿Volver a las respuestas automáticas de fábrica?")) return; try{ const j = await api("admin_wa_ajustes", {reiniciarFaq:true}); GCFG = j.config; drawDiosCfg(); toast("Listo ✔"); }catch(ex){ toast(ex.message); } return; }
+  if(t.id==="gReanudar"){ try{ const j = await api("admin_wa_reanudar"); toast("Reactivado en "+(j.reanudados||0)+" chats ✔"); }catch(ex){ toast(ex.message); } return; }
+  const row = t.closest("[data-pk]");
+  if(row && t.closest("[data-psave]")){
+    const set = {k:row.dataset.pk, price:+row.querySelector("[data-pp]").value, dias:+row.querySelector("[data-pd]").value, oculto:!row.querySelector("[data-pv]").checked};
+    try{ GPRODS = (await api("admin_catalogo", {set})).productos; syncPrecios(); drawProds(); toast("Producto guardado: ya se ve así en la tienda ✔"); }catch(ex){ toast(ex.message); } return;
+  }
+  if(row && t.closest("[data-preset]")){ try{ GPRODS = (await api("admin_catalogo", {reset:row.dataset.pk})).productos; syncPrecios(); drawProds(); toast("Volvió al precio de fábrica ✔"); }catch(ex){ toast(ex.message); } return; }
+  if(t.id==="nOk"){
+    const name = $("#nNom").value.trim(), k = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20);
+    try{ GPRODS = (await api("admin_catalogo", {set:{k, name, price:+$("#nPre").value, dias:+$("#nDia").value, match:name}})).productos; syncPrecios(); drawProds(); toast("Producto creado ✔"); $("#nNom").value=""; $("#nPre").value=""; }catch(ex){ toast(ex.message); }
+  }
+});

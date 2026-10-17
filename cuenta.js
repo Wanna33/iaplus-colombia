@@ -226,11 +226,46 @@ function renderMain(){
   const act = ITEMS.filter(i=>!i.vencida).length;
   $("#app").innerHTML = `
     ${warnHtml()}
-    <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span></div>
+    <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span>${act?'<button class="guiabtn" id="guiaBtn" type="button">❓ Guía paso a paso</button>':""}</div>
     <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
     ${addBox(false)}`;
   bindAdd(); applyFilter(); tick(); refreshTotp();
+  const gb = $("#guiaBtn"); if(gb) gb.onclick = ()=>guia();
+  let vista = false; try{ vista = !!localStorage.getItem("iap_guia_v1"); }catch{}
+  if(act && !vista && tab==="sub") setTimeout(()=>guia(), 700);
+}
+/* ---------- Guía paso a paso ---------- */
+function guia(){
+  const card = [...document.querySelectorAll(".sub-card:not(.expired)")][0]; if(!card) return;
+  const fields = card.querySelectorAll(".access .field"), ask = card.querySelector("[data-ask]"), how = card.querySelector(".how");
+  const pasos = [
+    {el:card, t:"¡Tu plan está activo! 🎉", d:"Te muestro en 4 pasos cómo entrar a tu cuenta. Tarda menos de un minuto."},
+    {el:fields[0], t:"1️⃣ Copia el correo", d:"Toca el botón de copiar al lado del correo. Ese es el usuario para iniciar sesión."},
+    {el:fields[1], t:"2️⃣ Copia la contraseña", d:"Toca copiar al lado de la contraseña. No la cambies: la cuenta es compartida."},
+    ask ? {el:ask.closest("[data-totp]")||ask, t:"3️⃣ Código de verificación", d:"Si al entrar te pide un código de 6 dígitos, toca aquí y cópialo rápido: cambia cada 30 segundos."} : null,
+    {el:how, t:ask?"4️⃣ Entra y pega los datos":"3️⃣ Entra y pega los datos", d:"Abre la página de tu herramienta desde este enlace, pega el correo y la contraseña, ¡y listo! 🚀"},
+  ].filter(p=>p && p.el);
+  let i = 0;
+  const capa = document.createElement("div"); capa.className = "guia-capa"; document.body.appendChild(capa);
+  const caja = document.createElement("div"); caja.className = "guia-caja"; caja.setAttribute("role","dialog"); caja.setAttribute("aria-live","polite"); document.body.appendChild(caja);
+  const limpiar = ()=>document.querySelectorAll(".guia-hl").forEach(x=>x.classList.remove("guia-hl"));
+  const fin = ()=>{ limpiar(); capa.remove(); caja.remove(); try{ localStorage.setItem("iap_guia_v1","1"); }catch{} document.removeEventListener("keydown", tecla); };
+  const ver = ()=>{
+    limpiar(); const p = pasos[i]; p.el.classList.add("guia-hl");
+    p.el.scrollIntoView({behavior:"smooth", block:"center"});
+    caja.innerHTML = `<div class="guia-dots">${pasos.map((_,k)=>`<i class="${k===i?"on":k<i?"ya":""}"></i>`).join("")}</div>
+      <h3>${p.t}</h3><p>${p.d}</p>
+      <div class="guia-acts"><button type="button" class="guia-skip">Saltar</button><span></span>${i?'<button type="button" class="guia-back">Atrás</button>':""}<button type="button" class="cta guia-next">${i===pasos.length-1?"¡Entendido!":"Siguiente"}</button></div>`;
+    caja.classList.remove("in"); void caja.offsetWidth; caja.classList.add("in");
+    caja.querySelector(".guia-skip").onclick = fin;
+    caja.querySelector(".guia-next").onclick = ()=>{ if(i===pasos.length-1) fin(); else { i++; ver(); } };
+    const b = caja.querySelector(".guia-back"); if(b) b.onclick = ()=>{ i--; ver(); };
+    caja.querySelector(".guia-next").focus();
+  };
+  const tecla = e=>{ if(e.key==="Escape") fin(); };
+  document.addEventListener("keydown", tecla); capa.onclick = fin;
+  ver();
 }
 function applyFilter(){
   const g=$("#grid"); if(!g) return; let n=0;

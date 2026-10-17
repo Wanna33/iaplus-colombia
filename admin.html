@@ -344,6 +344,34 @@ dialog{border-radius:20px}
 dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 :root:not([data-theme=dark]){--soft:#fff3f2}
 :focus-visible{outline:3px solid rgba(239,83,80,.5);outline-offset:2px}
+/* ---------- transiciones suaves ---------- */
+[id^=tab-]:not(.hide){animation:godIn .35s ease}
+.card{transition:box-shadow .25s,transform .25s}.card:hover{box-shadow:0 2px 6px rgba(15,23,42,.06),0 14px 34px rgba(15,23,42,.08)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---------- Modo Dios ---------- */
+.god-hero{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:22px 24px;margin-bottom:20px;border-radius:20px;color:#fff;
+  background:radial-gradient(120% 140% at 0% 0%,#ff6a5c 0%,#e0403d 40%,#5b2a86 100%);box-shadow:0 14px 40px rgba(224,64,61,.28);animation:godIn .5s ease}
+.god-hero h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}.god-hero p{opacity:.92;max-width:640px;font-size:14px}
+.god-badges{display:flex;gap:6px;flex-wrap:wrap}.god-badges .tag{background:rgba(255,255,255,.18);color:#fff;font-size:12px}
+@keyframes godIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.god-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.god-hint{font-size:13px;color:var(--mut);margin:6px 0 10px}
+.god-row{display:flex;gap:10px;flex-wrap:wrap}.god-row label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--mut);flex:1 1 140px}
+.god-row input,.god-row select{font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--text)}
+.god-ta{width:100%;font:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);resize:vertical}
+.god-tab input{font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text)}
+.sw{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;padding:10px 0;cursor:pointer}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw span{grid-row:span 2;width:46px;height:26px;border-radius:99px;background:var(--line);position:relative;transition:.25s}
+.sw span::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.25s}
+.sw input:checked+span{background:var(--ok)}.sw input:checked+span::after{transform:translateX(20px)}
+.sw input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+.sw b{font-size:14px}.sw small{font-size:12.5px;color:var(--mut)}
+.sw.sm{display:inline-grid;padding:0}.sw.sm span{width:40px;height:22px}.sw.sm span::after{width:16px;height:16px}.sw.sm input:checked+span::after{transform:translateX(18px)}
+.faq-list{display:grid;gap:10px}
+.faq-it{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:10px;animation:godIn .3s ease}
+.faq-b{display:grid;gap:6px}.faq-b input,.faq-b textarea{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);width:100%}
+.faq-b textarea{resize:vertical}
 /* ---------- saldo de IA, bandeja de WhatsApp y agentes ---------- */
 .saldo{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
 .saldo .bar{width:70px;height:8px;border-radius:9px;background:var(--line);overflow:hidden;display:inline-block}

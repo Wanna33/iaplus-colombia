@@ -29,6 +29,30 @@ const PRODUCTS = [
   {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
   {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
 ];
+
+/* ============ PRECIOS EN VIVO: los que el dueño tiene en el panel (Modo Dios) ============ */
+const perDe = d => d===30?"/mes":d===90?"/3 meses":d===180?"/6 meses":d===365?"/12 meses":d%30===0?`/${d/30} meses`:`/${d} días`;
+function aplicarPrecios(lista){
+  if(!Array.isArray(lista)) return false; let cambio = false;
+  for(const s of lista){
+    const i = PRODUCTS.findIndex(p=>p.id===s.k); if(i<0) continue;
+    if(s.oculto){ PRODUCTS.splice(i,1); cambio = true; continue; }
+    const p = PRODUCTS[i];
+    if(s.price>0 && s.price!==p.price){ p.price = s.price; cambio = true; }
+    if(s.dias>0 && s.dias!==(p.days||30)){ p.days = s.dias; p.per = perDe(s.dias); cambio = true; }
+  }
+  return cambio;
+}
+try{ aplicarPrecios(JSON.parse(localStorage.getItem("iap_precios")||"null")); }catch{}
+fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action:"precios"}), credentials:"omit"}).then(r=>r.json()).then(j=>{
+  if(!j || !j.ok) return;
+  try{ localStorage.setItem("iap_precios", JSON.stringify(j.productos)); }catch{}
+  if(aplicarPrecios(j.productos)){
+    try{ renderFilters(); renderGrid(); }catch{}
+    const hs=document.querySelector(".hero-from"); if(hs) hs.textContent=cop(Math.min(...PRODUCTS.map(p=>p.price)));
+  }
+}).catch(()=>{});
+
 const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
 
 /* ============ UTILIDADES ============ */
