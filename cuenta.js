@@ -61,6 +61,18 @@ async function fetchTotp(box, ask){
   st.busy=false; renderTotp();
 }
 function askTotp(box){ return fetchTotp(box,true); }
+// "Pedir 2 códigos más": se dan al instante desde la sesión del cliente (los pedidos se comparten entre todas sus cuentas)
+let masBusy = false;
+async function masCodigos(){
+  if(masBusy) return; masBusy = true; renderTotp();
+  try{
+    const j = await callApi({action:"totp_mas"}); if(!j.ok) throw new Error(j.error||"Error");
+    for(const b of document.querySelectorAll("[data-totp]")){ b.dataset.max = j.limite; b.dataset.rest = j.restantes; const st = totpState[b.dataset.totp] = totpState[b.dataset.totp] || {}; st.rest = j.restantes; st.err = ""; }
+    toastMsg("Listo ✔ Ya tienes "+j.restantes+" código(s) más para hoy");
+  }catch(err){ for(const b of document.querySelectorAll("[data-totp]")){ const st = totpState[b.dataset.totp] = totpState[b.dataset.totp] || {}; st.err = err.message; } }
+  masBusy = false; renderTotp();
+}
+document.addEventListener("click", e=>{ if(e.target.closest("[data-mas]")) masCodigos(); });
 function renderTotp(){
   const now=Date.now();
   for(const box of document.querySelectorAll("[data-totp]")){
@@ -84,8 +96,8 @@ function renderTotp(){
       btn.textContent=none?"Sin códigos disponibles":"Pedir código de autenticación";
       box.querySelector(".trest").textContent = rest===null ? "" : (none ? "Ya usaste tus "+(box.dataset.max||5)+" pedidos de hoy. Mañana se renuevan." : "Te quedan "+rest+" de "+(box.dataset.max||5)+" pedidos de hoy.");
       const agotado = none || /Ya usaste/.test(st.err||""), mas = box.querySelector(".tmore");
-      if(mas){ mas.style.display = agotado ? "inline-block" : "none"; if(agotado){ const u = load("iap_user")||{}; mas.href = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, necesito más códigos de verificación para mi cuenta. Mi Gmail es "+(u.email||"")); } }
-      box.querySelector(".tnote").textContent = st.err ? st.err : (none ? "Si necesitas más códigos hoy, pídelos por WhatsApp y te los damos al instante." : "Al pedirlo se descuenta 1 de tus "+(box.dataset.max||5)+" pedidos de hoy (se renuevan cada día). Luego el código se renueva solo durante 10 minutos.");
+      if(mas){ mas.style.display = agotado ? "inline-block" : "none"; mas.disabled = !!masBusy; mas.textContent = masBusy ? "Pidiendo…" : "➕ Pedir 2 códigos más"; }
+      box.querySelector(".tnote").textContent = st.err ? st.err : (none ? "¿Necesitas más hoy? Pide 2 códigos más aquí abajo (hasta 3 veces al día)." : "Al pedirlo se descuenta 1 de tus "+(box.dataset.max||5)+" pedidos de hoy (se renuevan cada día). Luego el código se renueva solo durante 10 minutos.");
     }
   }
 }
@@ -149,7 +161,7 @@ function card(it, idx){
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||2}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>🔐 Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
-        <p class="tnote"></p><a class="cta tmore" target="_blank" rel="noopener" style="display:none;margin-top:6px;background:#25d366">💬 Pedir más códigos por WhatsApp</a></div>`:""}
+        <p class="tnote"></p><button class="cta tmore" type="button" data-mas style="display:none;margin-top:6px">➕ Pedir 2 códigos más</button></div>`:""}
       <div class="how"><h3>Cómo iniciar sesión</h3>
         <ol><li>Abre ${esc(app.n)}${app.url?` → <a class="l" href="${app.url}" target="_blank" rel="noopener">${esc(app.host||"ir al sitio")}</a>`:""}.</li>
         <li>Copia la <b>cuenta de acceso</b>, pégala y pulsa "Continuar".</li>
