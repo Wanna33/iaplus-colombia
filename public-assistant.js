@@ -6,7 +6,8 @@
   function answer(question, catalog = [], context = {}) {
     const q=normalize(question);
     const C=typeof IAPCatalog==='undefined'?require('./catalog-utils.js'):IAPCatalog;
-    if(/problema|falla|garantia|reembolso|no funciona/.test(q)) return {text:'Si tu cuenta presenta una falla, abre «Mi cuenta» y solicita ayuda por WhatsApp. El equipo revisará el caso según las condiciones de garantía. No escribas contraseñas ni códigos en este chat.',account:true,contact:true};
+    if(/devol|devuelv|reembols|cambiar de opinion|me arrepent/.test(q)) return {text:'Una vez pagado y entregado el acceso no hay devolución de dinero por cambio de opinión o por no usar el servicio. Si la cuenta no corresponde a lo ofrecido o no funciona y no logramos reemplazarla, tienes derecho a la garantía que indica la ley. Revisa los términos y condiciones o escríbenos por WhatsApp.',terms:true,contact:true};
+    if(/problema|falla|garantia|no funciona/.test(q)) return {text:'Si tu cuenta presenta una falla, abre «Mi cuenta» y solicita ayuda por WhatsApp. El equipo revisará el caso según las condiciones de garantía. No escribas contraseñas ni códigos en este chat.',account:true,contact:true};
     const explicitFamily=Object.keys(families).find(key=>families[key].test(q));
     const family=explicitFamily||(/mes|ano|anual|privad|compart|disposit|cuesta|precio/.test(q)?context.family:null);
     const budgetMatch=q.match(/(?:hasta|presupuesto(?: de)?|menos de)\s*\$?\s*(\d[\d.,]*)\s*(mil)?/);
@@ -16,6 +17,7 @@
       return {text:relevant.length?relevant.map(p=>`${p.name}: ${C.mode(p)}. ${C.devices(p)}.`).join(' '):'Cada cuenta puede tener condiciones distintas. Revisa la modalidad y los dispositivos en la ficha del plan antes de pagar.',products:relevant,family,catalog:!relevant.length};
     }
     if(/activ|codigo|enlace/.test(q)) return {text:'Cuando recibas tu código, entra con Google y escríbelo en «¿Ya pagaste?». Si ya lo activaste, abre «Mi cuenta» con el mismo correo. Este chat no activa códigos ni valida pagos.',activate:true,account:true};
+    if(/paypal|tarjeta|credito|debito/.test(q)) return {text:'Si el botón «PayPal» aparece en la ficha de la cuenta, puedes pagar con PayPal y la activación llega después de confirmar el pago. Si no lo ves, paga por Nequi: confirma por WhatsApp el precio y te indicamos los datos de pago.',catalog:true,contact:true};
     if(/pago|pagar|nequi|banco|transfer|comprobante|como comprar|como compro/.test(q)) return {text:'Elige tu cuenta y confirma por WhatsApp el precio, duración, modalidad y disponibilidad antes de pagar. Allí te indican los datos de pago y revisan tu comprobante. Después recibes las instrucciones de activación.',contact:true,catalog:true};
     if(/contrasena|gmail|google|correo/.test(q)) return {text:'Usa el botón oficial de Google de la página para iniciar sesión. No necesitas compartir tu contraseña personal por chat. Usa el mismo correo con el que realizaste la compra.',account:true};
     if(/renov|venc/.test(q)) return {text:'Consulta la duración y el vencimiento de tu plan en «Mi cuenta». Para renovar, confirma precio y disponibilidad por WhatsApp.',account:true,contact:true};
@@ -54,6 +56,7 @@
     if(result.catalog)addLink(box,'Ver catálogo de cuentas ↗','#catalogo');
     if(result.advisor)addLink(box,'Ayúdame a elegir ↗','#asistentes');
     if(result.account)addLink(box,'Abrir Mi cuenta ↗','cuenta.html');
+    if(result.terms)addLink(box,'Ver términos y condiciones ↗','terminos.html');
     if(result.activate)addLink(box,'Ir a activar mi código ↗','#unlock');
     if(result.contact)addLink(box,'Hablar con una persona por WhatsApp ↗',`https://wa.me/${phone}?text=${encodeURIComponent('Hola, necesito ayuda con las cuentas de IA Plus.')}`);
     log.append(box);while(log.children.length>16)log.firstElementChild.remove();log.scrollTop=log.scrollHeight;
