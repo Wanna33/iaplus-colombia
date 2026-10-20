@@ -1,5 +1,7 @@
 # PayPal para IA Plus Colombia
 
+Estado verificado el 20 de octubre de 2026: servidor de Apps Script actualizado a la versión 44; endpoint de webhook publicado y con respuesta de salud HTTP 200; interfaz publicada en GitHub Pages (versión `2026.10.20-paypal-1`). PayPal permanece deshabilitado: falta guardar la llave privada y registrar el webhook, pendientes de la confirmación específica del propietario. No se realizaron cobros reales.
+
 Precios autorizados por el propietario:
 
 | Clave | Plan | Precio PayPal |

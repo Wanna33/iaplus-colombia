@@ -6,6 +6,7 @@ llave-servidor.txt
 payments/.dev.vars
 payments/.env*
 payments/.wrangler/
+.wrangler/
 .clasp.json
 .clasprc.json
 outputs/

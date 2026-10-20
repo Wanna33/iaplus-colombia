@@ -165,4 +165,5 @@ function ppAdminSet_(b){
   return {ok:true,paypal:ppStatus_()};
 }
 function paypalEstado(){Logger.log(JSON.stringify(ppStatus_()));}
+function paypalVerificarConexion(){ppToken_(ppConfig_());Logger.log('PayPal: autenticación correcta. No se crearon pedidos ni se capturaron pagos.');}
 function ppSummaries_(){const result={};ppSheet_().getDataRange().getValues().slice(1).forEach(r=>{try{const q=JSON.parse(String(r[3]));result[String(r[0])]={total:ppAmount_(q.cents),env:q.env};}catch(e){}});return result;}
