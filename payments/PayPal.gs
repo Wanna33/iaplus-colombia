@@ -1,6 +1,6 @@
 // Add this file to the SAME Apps Script project as backend/Code.gs.
 // Client ID is public. NEVER put PAYPAL_CLIENT_SECRET in this file or the website.
-const PP_CLIENT_DEFAULT = 'BAA9yjbj7se43Z4YQ4vzRw4WetDH5_rns_feCJMc-kVIGaNEnFpCdl1CwT5Bxe4Xq6gN4jBsz8W0XAbTDE';
+const PP_CLIENT_DEFAULT = 'BAABfRwhgdDqJkgoQAK7BAb7TstoJyR6QJUc7z4xq1sP2bX__MPedKq79R0WR4fouBnSfkkSx5H1b0gs04';
 const PP_USD_DEFAULT = {chatgpt:'3.17',chatgpt3:'6.34',chatgpt6:'15.85'};
 const PP_HEADERS = ['Referencia','Pedido PayPal','Cotizacion','Datos del pedido','Estado','Captura PayPal','Creado'];
 function ppConfig_(){
