@@ -7,7 +7,7 @@
   const tray=document.createElement('aside');tray.className='compare-tray';tray.hidden=true;tray.setAttribute('aria-label','Planes seleccionados para comparar');document.body.append(tray);
   const find=id=>PRODUCTS.find(p=>p.id===id);
   const wa=p=>`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero confirmar disponibilidad, modalidad y condiciones de '+p.name+' ('+C.money(p.price)+' COP '+p.per+').')}`;
-  const link=p=>`<a class="btn btn-primary" href="${wa(p)}" target="_blank" rel="noopener">Consultar por WhatsApp ↗</a>${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button" data-paypal="${p.id}">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:""}`;
+  const link=p=>window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button" data-paypal="${p.id}">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:`<a class="btn btn-primary" href="${wa(p)}" target="_blank" rel="noopener">Consultar por WhatsApp ↗</a>`;
   function open(html,source){
     returnFocus=source;dialog.innerHTML=`<header class="store-dialog-head"><span class="eyebrow">ELIGE CON CLARIDAD</span><button type="button" data-store-close aria-label="Cerrar ventana">✕</button></header>${html}`;
     dialog.querySelector('[data-store-close]').onclick=()=>dialog.close();

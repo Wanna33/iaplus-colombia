@@ -148,7 +148,7 @@ function card(it, idx){
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const pct = start && end ? Math.min(100, Math.max(0,(Date.now()-start)/(end-start)*100)) : 0;
-  const renew = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, quiero renovar mi "+it.producto+" ("+it.correo+")");
+  const renew = "index.html#catalogo";
   const prob = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, tengo un problema con mi cuenta "+it.producto+" ("+it.correo+"). ¿Me ayudan o me dan otra cuenta?");
   const icon = app.img ? `<img src="${app.img}" alt="" style="${app.dark?"background:#000;padding:8px":""}">` : "📦";
   const access = ex ? "" : `
@@ -200,7 +200,7 @@ function addBox(first){
     <p>${first?"Escribe el código que te enviamos por WhatsApp.":"¿Compraste otra cuenta? Escribe aquí su código de activación."}</p>
     <form class="addrow" id="addForm"><input id="addCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="cta" type="submit">Desbloquear</button></form>
     <div class="adderr" id="addErr" hidden></div>
-    <p style="margin:14px 0 0"><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero comprar otra cuenta")}" target="_blank" rel="noopener" style="color:var(--red);font-weight:800">¿No tienes código? Cómpralo por WhatsApp →</a></p></div>`;
+    <p style="margin:14px 0 0"><a href="index.html#catalogo" style="color:var(--red);font-weight:800">¿No tienes código? Elige tu plan y paga con PayPal →</a></p></div>`;
 }
 function bindAdd(){
   const f=$("#addForm"); if(!f) return;
@@ -216,7 +216,7 @@ function warnHtml(){
   const out=[];
   ITEMS.forEach(it=>{
     const app=appOf(it), name=app.n==="tu cuenta"?it.producto:app.n, end=it.fin?new Date(it.fin):null;
-    const link="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, quiero renovar mi "+it.producto+" ("+it.correo+")");
+    const link="index.html#catalogo";
     if(it.vencida) out.push(`<div class="warn bad"><span>⛔ Tu plan de <b>${esc(name)}</b> ya venció.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
     else if(end){ const d=Math.ceil((end-Date.now())/DAY); if(d<=5) out.push(`<div class="warn"><span>⏰ Tu plan de <b>${esc(name)}</b> vence ${d<=0?"hoy":d===1?"mañana":"en "+d+" días"}.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`); }
   });

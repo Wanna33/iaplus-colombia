@@ -17,11 +17,11 @@
       return {text:relevant.length?relevant.map(p=>`${p.name}: ${C.mode(p)}. ${C.devices(p)}.`).join(' '):'Cada cuenta puede tener condiciones distintas. Revisa la modalidad y los dispositivos en la ficha del plan antes de pagar.',products:relevant,family,catalog:!relevant.length};
     }
     if(/activ|codigo|enlace/.test(q)) return {text:'Cuando recibas tu código, entra con Google y escríbelo en «¿Ya pagaste?». Si ya lo activaste, abre «Mi cuenta» con el mismo correo. Este chat no activa códigos ni valida pagos.',activate:true,account:true};
-    if(/paypal|tarjeta|credito|debito/.test(q)) return {text:'Si el botón «PayPal» aparece en la ficha de la cuenta, puedes pagar con PayPal y la activación llega después de confirmar el pago. Si no lo ves, paga por Nequi: confirma por WhatsApp el precio y te indicamos los datos de pago.',catalog:true,contact:true};
-    if(/pago|pagar|nequi|banco|transfer|comprobante|como comprar|como compro/.test(q)) return {text:'Elige tu cuenta y confirma por WhatsApp el precio, duración, modalidad y disponibilidad antes de pagar. Allí te indican los datos de pago y revisan tu comprobante. Después recibes las instrucciones de activación.',contact:true,catalog:true};
+    if(/paypal|tarjeta|credito|debito/.test(q)) return {text:'Pagas con PayPal dentro de la tienda: elige tu plan y pulsa el botón «PayPal» de su tarjeta. La activación llega después de confirmar el pago. Si un producto no muestra PayPal, escríbenos por WhatsApp.',catalog:true,contact:true};
+    if(/pago|pagar|nequi|banco|transfer|comprobante|como comprar|como compro/.test(q)) return {text:'Elige tu plan y pulsa el botón «PayPal» de su tarjeta. Revisas el importe total en PayPal antes de aprobar. Después recibes las instrucciones de activación.',catalog:true};
     if(/contrasena|gmail|google|correo/.test(q)) return {text:'Usa el botón oficial de Google de la página para iniciar sesión. No necesitas compartir tu contraseña personal por chat. Usa el mismo correo con el que realizaste la compra.',account:true};
-    if(/renov|venc/.test(q)) return {text:'Consulta la duración y el vencimiento de tu plan en «Mi cuenta». Para renovar, confirma precio y disponibilidad por WhatsApp.',account:true,contact:true};
-    if(/entrega|tarda|tiempo/.test(q)) return {text:'La activación se gestiona después de revisar tu pago. Confirma el tiempo estimado de entrega por WhatsApp antes de comprar.',contact:true};
+    if(/renov|venc/.test(q)) return {text:'Consulta la duración y el vencimiento de tu plan en «Mi cuenta». Para renovar, elige el plan en el catálogo y paga con PayPal.',account:true,catalog:true};
+    if(/entrega|tarda|tiempo/.test(q)) return {text:'La activación se gestiona después de confirmar tu pago en PayPal. Si tienes dudas sobre el tiempo, escribe por WhatsApp.',contact:true};
     let matches=family?catalog.filter(p=>families[family].test(normalize(p.name))):[];
     const months=q.match(/\b(1|3|6|12)\s*(?:mes|meses)/);
     const requestedDays=months?(Number(months[1])===12?365:Number(months[1])*30):/anual|un ano/.test(q)?365:null;
@@ -52,7 +52,7 @@
     const box=document.createElement('div');box.className='ph-answer';
     const copy=document.createElement('p');copy.textContent=result.text;box.append(copy);
     const phone=typeof CONFIG==='undefined'?'573102035327':CONFIG.WHATSAPP;
-    (result.products||[]).forEach(p=>addLink(box,`${p.name} · ${money(p.price)} COP ${p.per}`,`https://wa.me/${phone}?text=${encodeURIComponent('Hola, quiero confirmar disponibilidad y condiciones de '+p.name+' ('+money(p.price)+' COP '+p.per+').')}`));
+    (result.products||[]).forEach(p=>addLink(box,`${p.name} · ${money(p.price)} COP ${p.per}`,'#catalogo'));
     if(result.catalog)addLink(box,'Ver catálogo de cuentas ↗','#catalogo');
     if(result.advisor)addLink(box,'Ayúdame a elegir ↗','#asistentes');
     if(result.account)addLink(box,'Abrir Mi cuenta ↗','cuenta.html');

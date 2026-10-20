@@ -110,10 +110,7 @@ function renderGrid(){
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
       <div class="card-tools"><button type="button" data-details="${p.id}" aria-label="Ver detalles de ${esc(p.name)}">Ver detalles ↗</button><button type="button" data-compare="${p.id}" aria-pressed="false" aria-label="Comparar ${esc(p.name)}">＋ Comparar</button></div>
-      ${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full" data-paypal="${p.id}" aria-label="Pagar ${esc(p.name)} con PayPal">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:''}
-      ${(CONFIG.PAGOS||/[?&]pagos=1/.test(location.search))?`<button class="btn btn-primary full buy-btn pay-btn" type="button" data-pay="${p.id}"><svg class="ic"><use href="#i-card"/></svg>Pagar ahora</button>
-      <a class="buy-alt" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">o compra por WhatsApp</a>`
-      :`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
+      ${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full buy-btn" data-paypal="${p.id}" aria-label="Pagar ${esc(p.name)} con PayPal">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
     </article>`).join("") || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); swapGrid(); };
   observeReveal();
@@ -314,7 +311,6 @@ document.addEventListener("pointerdown", e => {
   const se=$("#search"), so=$("#sort");
   let qt; if(se) se.addEventListener("input", ()=>{ clearTimeout(qt); qt=setTimeout(swapGrid,140); });
   if(so) so.addEventListener("change", swapGrid);
-  const wb=$("#waBand"); if(wb) wb.href=`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent("Hola, quiero comprar una cuenta premium")}`;
   // íconos flotando alrededor de la tarjeta de ingreso
   const ob=$("#orbit");
   if(ob){
