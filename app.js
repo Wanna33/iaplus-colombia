@@ -13,21 +13,21 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación al instante por WhatsApp","Garantía durante el mes"]},
-  {id:"chatgpt3", name:"ChatGPT 3 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:20000, per:"/3 meses", days:90, badge:"Mejor precio", feats:["ChatGPT Plus por 3 meses","Sale a menos de $7.000 el mes","Cuenta compartida · hasta 2 dispositivos","Activación al instante por WhatsApp"]},
-  {id:"chatgpt6", name:"ChatGPT 6 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:50000, per:"/6 meses", days:180, badge:"Medio año", feats:["ChatGPT Plus por 6 meses","Te olvidas de renovar por medio año","Cuenta compartida · hasta 2 dispositivos","Activación al instante por WhatsApp"]},
-  {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.webp", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación guiada por WhatsApp","Garantía durante el plan"]},
+  {id:"chatgpt3", name:"ChatGPT 3 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:20000, per:"/3 meses", days:90, badge:"Plan trimestral", feats:["ChatGPT Plus por 3 meses","Pago único por la duración indicada","Cuenta compartida · hasta 2 dispositivos","Activación guiada por WhatsApp"]},
+  {id:"chatgpt6", name:"ChatGPT 6 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:50000, per:"/6 meses", days:180, badge:"Medio año", feats:["ChatGPT Plus por 6 meses","Te olvidas de renovar por medio año","Cuenta compartida · hasta 2 dispositivos","Activación guiada por WhatsApp"]},
+  {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"flow", name:"Flow", cat:"IA", ico:"🎥", img:"flow.webp", lt:true, price:20000, per:"/mes", feats:["Generador de video con IA profesional","1.000 créditos incluidos","Entrega rápida por WhatsApp","Garantía durante el plan"]},
   {id:"duolingo", name:"Duolingo", cat:"Educación", ico:"🦉", img:"duolingo.webp", lt:true, price:30000, per:"/12 meses", days:365, feats:["Duolingo por 12 meses completos","Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía incluida"]},
-  {id:"canva", name:"Canva", cat:"Diseño", ico:"🎨", img:"canva.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"xbox", name:"Xbox Game Pass Ultimate", cat:"Juegos", ico:"🎮", img:"xbox.webp", price:26000, per:"/mes", feats:["Game Pass Ultimate por 1 mes","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"premiere", name:"Adobe Premiere Pro", cat:"Edición de video", ico:"🎞️", img:"premiere.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de video profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.webp", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"canva", name:"Canva", cat:"Diseño", ico:"🎨", img:"canva.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"xbox", name:"Xbox Game Pass Ultimate", cat:"Juegos", ico:"🎮", img:"xbox.webp", price:26000, per:"/mes", feats:["Game Pass Ultimate por 1 mes","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"premiere", name:"Adobe Premiere Pro", cat:"Edición de video", ico:"🎞️", img:"premiere.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de video profesional","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.webp", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el plan"]},
   {id:"youtube", name:"YouTube Premium", cat:"Streaming", ico:"▶️", img:"youtube.webp", lt:true, price:30000, per:"/3 meses", days:90, feats:["YouTube Premium por 3 meses","Sin anuncios y con reproducción en segundo plano","Entrega rápida por WhatsApp","Garantía incluida"]},
-  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el mes"]},
-  {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el mes"]},
+  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["Cuenta privada solo para ti","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
 ];
 
 /* ============ PRECIOS EN VIVO: los que el dueño tiene en el panel (Modo Dios) ============ */
@@ -84,7 +84,7 @@ function toast(msg){ const t=$("#toast"); clearTimeout(toastT); t.classList.remo
 function renderFilters(){
   if(new Set(PRODUCTS.map(p=>p.cat)).size<2){ $("#filters").innerHTML=""; return; }
   const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
-  $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}">${c}</button>`).join("");
+  $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}" aria-pressed="${c===filter}">${c}</button>`).join("");
   $("#filters").onclick = e => { const b=e.target.closest(".chip"), c=b&&b.dataset.c; if(c && c!==filter){ filter=c; renderFilters(); swapGrid(); $("#filters .chip.on")?.scrollIntoView?.({inline:"center",block:"nearest",behavior:"smooth"}); } };
 }
 // cambio suave del catálogo: se desvanece, se redibuja y las tarjetas entran escalonadas
@@ -94,26 +94,30 @@ function swapGrid(){
   swapT=setTimeout(()=>{ renderGrid(); g.classList.remove("swap"); }, 180);
 }
 function renderGrid(){
-  const q = (($("#search")||{}).value||"").trim().toLowerCase(), so = ($("#sort")||{}).value||"";
-  let list = PRODUCTS.filter(p => (filter==="Todos" || p.cat===filter) && (!q || (p.name+" "+p.cat+" "+p.feats.join(" ")).toLowerCase().includes(q)));
+  const q = (($("#search")||{}).value||"").trim(), so = ($("#sort")||{}).value||"";
+  let list = PRODUCTS.filter(p => (filter==="Todos" || p.cat===filter) && IAPCatalog.matches(p,q));
   if(so) list = [...list].sort((a,b)=> so==="asc" ? a.price-b.price : b.price-a.price);
-  const cnt=$("#count"); if(cnt) cnt.textContent = list.length ? (list.length===PRODUCTS.length ? `${list.length} cuentas disponibles` : `${list.length} de ${PRODUCTS.length} cuentas`) : "";
+  const cnt=$("#count"); if(cnt) cnt.textContent = `${list.length} ${list.length===1?'plan':'planes'}${list.length===PRODUCTS.length?' en el catálogo':' de '+PRODUCTS.length}${filter==='Todos'?'':' · '+filter}`;
   const first = gridFirst; gridFirst = false;
   $("#grid").innerHTML = list.map((p,n)=>`
-    <article class="card ${first?"reveal":"anim"}" style="--d:${Math.min(n,8)*(first?80:55)}ms">
-      ${p.hot||p.badge?'<span class="badge">'+(p.badge||'Más vendido')+'</span>':''}
+    <article class="card ${first?"reveal":"anim"}" data-product="${p.id}" style="--d:${Math.min(n,8)*(first?80:55)}ms">
+      ${p.hot||p.badge?'<span class="badge">'+(p.badge||'Destacado')+'</span>':''}
       <div class="ico ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="cat">${esc(p.cat)}</div>
+      <div class="plan-facts"><span>${esc(IAPCatalog.mode(p))}</span><span>${IAPCatalog.duration(p)}</span></div>
       <ul>${p.feats.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
+      <div class="card-tools"><button type="button" data-details="${p.id}" aria-label="Ver detalles de ${esc(p.name)}">Ver detalles ↗</button><button type="button" data-compare="${p.id}" aria-pressed="false" aria-label="Comparar ${esc(p.name)}">＋ Comparar</button></div>
       ${(CONFIG.PAGOS||/[?&]pagos=1/.test(location.search))?`<button class="btn btn-primary full buy-btn pay-btn" type="button" data-pay="${p.id}"><svg class="ic"><use href="#i-card"/></svg>Pagar ahora</button>
       <a class="buy-alt" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}">o compra por WhatsApp</a>`
       :`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
+      ${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full" data-paypal="${p.id}" aria-label="Pagar ${esc(p.name)} con PayPal">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:''}
     </article>`).join("") || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); swapGrid(); };
   observeReveal();
+  window.dispatchEvent(new CustomEvent('iap:catalog-updated'));
 }
 function observeReveal(){
   const els = document.querySelectorAll(".reveal:not(.in)");
@@ -262,7 +266,7 @@ async function loadMine(){
 }
 
 /* ============ INIT ============ */
-$("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
+if($("#heroLogin")) $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
 $("#burger").onclick = () => { const on = $("#links").classList.toggle("on"); $("#burger").setAttribute("aria-expanded", on); };
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
@@ -401,7 +405,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-pay]
   const nav = document.querySelector(".nav"), hero = document.getElementById("inicio"), meta = document.querySelector('meta[name="theme-color"]');
   if(nav && hero){
     let dark = null;
-    const f = () => { const d = window.scrollY < hero.offsetHeight - 90; if(d === dark) return; dark = d; nav.classList.toggle("dark", d); if(meta) meta.content = d ? "#0a0e1a" : "#ffffff"; };
+    const f = () => { const d = window.scrollY < hero.offsetHeight - 90; if(d === dark) return; dark = d; nav.classList.toggle("dark", d); if(meta) meta.content = d ? "#174e3c" : "#faf9f5"; };
     addEventListener("scroll", f, {passive:true}); addEventListener("resize", f); f();
   }
   const fine = matchMedia("(hover:hover) and (pointer:fine)").matches && !matchMedia("(prefers-reduced-motion:reduce)").matches;

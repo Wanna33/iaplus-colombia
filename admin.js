@@ -277,11 +277,12 @@ const IC = {
 };
 const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[k]||""}</svg>`;
 const NAV = [
+  {g:"General", t:"local", l:"Bots sin API", s:"Automatizaciones locales · sin consumo de IA · mientras el panel está abierto"},
   {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
   {g:"General", t:"dios", l:"Modo Dios", s:"Controla todo: precios, asistente, respuestas automáticas y recordatorios"},
   {g:"Ventas", t:"cli", l:"Clientes", s:"Todos tus clientes, sus planes y vencimientos"},
   {g:"Ventas", t:"wa", l:"WhatsApp", s:"Ventas del asistente de WhatsApp: confirma el pago y se envía el enlace"},
-  {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pagos recibidos con Wompi"},
+  {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pedidos de Wompi y PayPal"},
   {g:"Inventario", t:"cod", l:"Códigos", s:"Genera y administra los códigos de activación"},
   {g:"Inventario", t:"cta", l:"Cuentas", s:"Correos, contraseñas y cupo de cada cuenta"},
   {g:"Inventario", t:"prod", l:"Productos", s:"Ventas, ingresos y cupo libre por producto"},
@@ -317,6 +318,7 @@ function setTab(t){
   if(t==="ag") loadAgentes();
   if(t==="dios") loadDios();
   if(t==="res") loadFeed();
+  if(t==="local") window.IAPLocalBots?.mount(document.getElementById("localBots"), items);
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
@@ -332,6 +334,7 @@ function render(){
     <button data-t="res">${svgI("res")}<span>Tablero</span></button><button data-t="cli">${svgI("cli")}<span>Clientes</span></button><button data-t="cod">${svgI("cod")}<span>Códigos</span></button><button data-t="cta">${svgI("cta")}<span>Cuentas</span></button><button data-t="more" id="moreBtn">${svgI("more")}<span>Más</span></button>
   </div>
 
+  <section id="tab-local" class="hide"><div id="localBots"></div></section>
   <section id="tab-res">
     <div class="dash-top"><h2 class="hello" id="hello"></h2>
       <div class="qa">
@@ -1275,6 +1278,7 @@ async function loadPagos(){
     const ck = (ok, t, opt) => `<span class="tag ${ok?"t-ok":(opt?"t-g":"t-b")}">${ok?"✔":(opt?"opcional":"falta")} ${t}</span>`;
     cfgBox.innerHTML = `<p style="color:var(--mut);font-size:14px;margin-bottom:8px">Ambiente: <b>${c.env==="production"?"PRODUCCIÓN (dinero real)":"PRUEBAS (sandbox, sin dinero real)"}</b> · ${c.productos} productos en el servidor</p>
       <div class="acts" style="margin-bottom:12px">${ck(c.publica,"Llave pública")}${ck(c.privada,"Llave privada")}${ck(c.integridad,"Secreto de integridad")}${ck(c.eventos,"Secreto de eventos",true)}</div>${(c.publica&&c.privada&&c.integridad)?"":'<div class="capwarn">Faltan llaves: agrégalas en Apps Script → Configuración del proyecto → Propiedades del script (WOMPI_PUBLIC, WOMPI_PRIVATE, WOMPI_INTEGRITY). Hasta entonces el botón «Pagar ahora» avisa que no está disponible.</div>'}`;
+    window.IAPAdminPayPal?.mount(cfgBox,c.paypal);
   }catch(ex){
     cfgBox.innerHTML = '<div class="capwarn">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para activar los pagos en línea.":ex.message)+"</div>";
     rowsEl.innerHTML = '<tr><td colspan="7" class="empty">—</td></tr>'; return;
@@ -1285,15 +1289,15 @@ function drawPagos(){
   const el = $("#payRows"); if(!el) return;
   el.innerHTML = PEDIDOS.length ? PEDIDOS.map(p=>{
     const [cls, txt] = PAY_TAG[p.estado] || ["t-g", p.estado];
-    return `<tr><td data-l="Fecha">${fdt(p.creado)}</td><td data-l="Cliente" style="word-break:break-all">${esc(p.cliente)}</td><td data-l="Producto">${EMO(p.nombre)} ${esc(p.nombre)}</td><td data-l="Monto"><b>${money(p.monto)}</b></td>
-      <td data-l="Estado"><span class="tag ${cls}">${txt}</span>${p.nota?`<div class="note">${esc(p.nota)}</div>`:""}</td><td data-l="Referencia" class="mono" style="font-size:12px;word-break:break-all">${esc(p.ref)}${p.tx?`<div class="exp">tx ${esc(p.tx)}</div>`:""}</td>
+    return `<tr><td data-l="Fecha">${fdt(p.creado)}</td><td data-l="Cliente" style="word-break:break-all">${esc(p.cliente)}</td><td data-l="Producto">${EMO(p.nombre)} ${esc(p.nombre)}</td><td data-l="Monto">${p.proveedor==="paypal"?`<b>US${esc(p.montoUSD||"—")}</b><small class="exp">Catálogo: ${money(p.monto)} COP</small>`:`<b>${money(p.monto)}</b>`}</td>
+      <td data-l="Estado"><span class="tag ${cls}">${txt}</span>${p.nota?`<div class="note">${esc(p.nota)}</div>`:""}</td><td data-l="Referencia" class="mono" style="font-size:12px;word-break:break-all">${esc(p.ref)}${p.tx?`<div class="exp">${p.proveedor==="paypal"?"PayPal":"Wompi"} · ${esc(p.tx)}</div>`:""}</td>
       <td class="acts-td">${p.estado==="ENTREGADO"?`<small style="color:var(--mut)">${esc(p.cuenta)}</small>`:`<button class="btn s p" data-deliver="${esc(p.ref)}">Entregar</button>`}</td></tr>`; }).join("")
     : '<tr><td colspan="7" class="empty">Todavía no hay pedidos.</td></tr>';
 }
 document.addEventListener("click", async e=>{
   const b = e.target.closest("[data-deliver]"); if(!b) return;
   const p = PEDIDOS.find(x=>x.ref===b.dataset.deliver); if(!p) return;
-  if(!confirm("¿Entregar «"+p.nombre+"» a "+p.cliente+"?\n\nHazlo solo si ya verificaste en tu panel de Wompi que el pago "+p.ref+" fue APROBADO.")) return;
+  if(!confirm("¿Entregar «"+p.nombre+"» a "+p.cliente+"?\n\nHazlo solo si ya verificaste en el proveedor de pago que el pedido "+p.ref+" fue APROBADO.")) return;
   b.disabled = true;
   try{ const j = await api("admin_order_deliver",{ref:p.ref, forzar:p.estado==="RECHAZADO"}); toast(j.estado==="ENTREGADO"?"Cuenta entregada ✔":"Sin cupo: agrega una cuenta nueva y vuelve a intentar"); await loadPagos(); await refresh(); }
   catch(ex){ toast(ex.message); b.disabled = false; }

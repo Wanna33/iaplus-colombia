@@ -1,0 +1,6 @@
+name = "iaplus-paypal-webhook"
+main = "webhook-worker.mjs"
+compatibility_date = "2026-10-20"
+
+[vars]
+TIENDA_API = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec"

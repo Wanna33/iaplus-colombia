@@ -2,3 +2,10 @@
 node_modules/
 backend/
 whatsapp-bot/
+llave-servidor.txt
+payments/.dev.vars
+payments/.env*
+payments/.wrangler/
+.clasp.json
+.clasprc.json
+outputs/

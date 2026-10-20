@@ -1,4 +1,4 @@
-/* Resultado del pago: Wompi devuelve al cliente aquí (?id=...). El servidor confirma el pago directo con Wompi y entrega la cuenta. */
+/* Payment returns: the server verifies the selected provider and owns fulfillment. */
 (function(){
   const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
   const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
@@ -8,9 +8,11 @@
   const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
   const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const params = new URLSearchParams(location.search);
-  const txId = params.get("id") || "";
   const pend = load("iap_pay");
-  const ref = pend && pend.ref;
+  const provider = params.get('provider')==='paypal'?'paypal':(params.get('id')?'wompi':pend?.provider==='paypal'?'paypal':'wompi');
+  const txId = provider==='paypal'?(params.get('token')||pend?.id||''):(params.get('id')||'');
+  const ref = provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref);
+  const canceled = provider==='paypal'&&params.get('cancel')==='1';
   const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
   const logo = '<img class="lg" src="logo-main.webp" alt="IA Plus Colombia">';
   const show = (ic, title, text, extra) => { $("#box").innerHTML = logo + '<div class="ic">' + ic + '</div><h1>' + title + '</h1><p>' + text + '</p>' + (ref ? '<div class="ref">Referencia: ' + esc(ref) + '</div>' : '') + (extra || ""); };
@@ -38,13 +40,15 @@
     if(!ref){ show("🤔", "No encontramos un pago en curso", "Si ya pagaste, escríbenos y lo revisamos de inmediato.", '<a class="btn w" href="'+wa("Hola, pagué en la tienda pero no veo mi cuenta.")+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a><a class="btn g" href="cuenta.html">Ir a Mi cuenta</a>'); return; }
     for(let i=0; i<45; i++){
       let j;
-      try{ j = await call({action:"pay_confirm", ref, id:txId}); }
+      try{ j = await call({action:provider==='paypal'?(canceled?'paypal_status':'paypal_confirm'):'pay_confirm', ref, id:txId}); }
       catch(e){ show("⚠️", "No pudimos confirmar el pago", esc(e.message), '<a class="btn w" href="'+wa("Hola, tuve un problema con mi pago. Referencia "+ref)+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>'); return; }
       if(!j.ok){ show("⚠️", "No pudimos confirmar el pago", esc(j.error||"Intenta de nuevo."), '<a class="btn w" href="'+wa("Hola, tuve un problema con mi pago. Referencia "+ref)+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>'); return; }
       if(j.estado === "ENTREGADO"){ done(); show("🎉", "¡Pago aprobado!", "Tu cuenta ya está lista. Entra a <b>Mi cuenta</b> para ver el correo, la contraseña y tu plan.", '<a class="btn p" href="cuenta.html">🔓 Ver mi cuenta</a>'); return; }
+      if(j.estado === 'SIMULACION'){show('🧪','Prueba de PayPal completada','Este pedido pertenece al entorno de pruebas. No se entrega ninguna cuenta real.','<a class="btn g" href="index.html?tienda=1#catalogo">Volver a la tienda</a>');return;}
       if(j.estado === "APROBADO_SIN_STOCK"){ show("✅", "Pago aprobado", "Recibimos tu pago. Estamos preparando tu cuenta y te la entregamos en breve. Si quieres, avísanos con tu referencia.", '<a class="btn w" href="'+wa("Hola, mi pago fue aprobado y espero mi cuenta. Referencia "+ref)+'" target="_blank" rel="noopener">💬 Avisar por WhatsApp</a><a class="btn g" href="cuenta.html">Ir a Mi cuenta</a>'); return; }
       if(j.estado === "RECHAZADO"){ show("❌", "Pago no aprobado", "Tu banco o Wompi no aprobó el pago. Si ves algún cobro, tu banco lo revierte solo. Puedes intentarlo de nuevo con otro medio de pago.", '<a class="btn p" href="index.html?tienda=1#catalogo">Volver a la tienda</a>'); return; }
-      if(!txId){ show("🧾", "Pedido registrado", "Todavía no vemos un pago asociado. Si ya pagaste, espera unos segundos o escríbenos.", '<a class="btn g" href="index.html?tienda=1#catalogo">Volver a la tienda</a>'); return; }
+      if(canceled){show('↩️','No se completó el regreso desde PayPal','Todavía no hay una captura completada para este pedido. Si aprobaste un pago, no pagues otra vez: revisa el pedido o consulta con la tienda.','<a class="btn p" href="pago.html?provider=paypal&ref='+encodeURIComponent(ref)+'">Revisar mi pedido</a><a class="btn g" href="index.html?tienda=1#catalogo">Volver a la tienda</a>');return;}
+      if(!txId&&provider!=='paypal'){ show("🧾", "Pedido registrado", "Todavía no vemos un pago asociado. Si ya pagaste, espera unos segundos o escríbenos.", '<a class="btn g" href="index.html?tienda=1#catalogo">Volver a la tienda</a>'); return; }
       $("#box").querySelector("h1") && ($("#box").querySelector("h1").textContent = "Esperando la confirmación…");
       await new Promise(r => setTimeout(r, 4000));
     }
