@@ -37,5 +37,11 @@
     if(!j?.ok||!j.ready||j.env!=='live')return;
     state.ready=true;state.env=j.env;state.prices=j.prices||{};
     renderGrid();
+    const grid=document.getElementById('grid');
+    if(grid&&!document.getElementById('ppPromo')){
+      const promo=document.createElement('div');promo.id='ppPromo';promo.className='pp-promo';
+      promo.innerHTML='<b>Paga con PayPal</b> y tu cuenta llega sola después del pago. Elige tu plan y pulsa el botón PayPal de la tarjeta.';
+      grid.parentNode.insertBefore(promo,grid);
+    }
   }).catch(()=>{});
 })();
