@@ -1509,6 +1509,7 @@ const ROLES = [
   {d:"💼 Ventas", k:"respuestas_auto", ic:"⚡", n:"Respuestas automáticas", ia:"Gratis", p:"Contesta al instante precios, cómo pagar, «ya pagué», dispositivos y si la cuenta es compartida. Tú editas las respuestas en Modo Dios."},
   {d:"💼 Ventas", k:"recepcionista", ic:"🛎️", n:"Recepcionista", ia:"Gratis", p:"Contesta los «gracias» y los emojis sin gastar IA."},
   {d:"💼 Ventas", k:"vendedor", ic:"💬", n:"Vendedores (clones)", ia:"IA económica", p:"Atienden muchos chats a la vez, resuelven dudas y llevan al cliente a pagar. Cada vez que suben de nivel entran más vendedores.", clones:true},
+  {d:"💼 Ventas", k:"control_calidad", ic:"✅", n:"Control de calidad", ia:"Gratis", p:"Revisa cada respuesta antes de enviarla: evita promesas de atención humana, filtra el plan de 1 mes si no lo preguntaron y mantiene respuestas breves y coherentes."},
   {d:"💼 Ventas", k:"seguimiento", ic:"🔁", n:"Agente de seguimiento", ia:"IA económica", p:"Le vuelve a escribir a quien dejó de responder sin comprar (a las 3 horas y al día siguiente)."},
   {d:"💰 Caja", k:"cajero", ic:"🧾", n:"Cajero", ia:"IA precisa · solo comprobantes", p:"Revisa la captura de Nequi: monto, destinatario, fecha y referencia. Una referencia nunca se acepta dos veces."},
   {d:"💰 Caja", k:"entregas", ic:"🔗", n:"Entregas", ia:"Gratis", p:"Si el pago es válido, crea el código y le manda al cliente su enlace de activación al instante."},
