@@ -11,3 +11,7 @@ payments/.wrangler/
 .clasprc.json
 outputs/
 bot-local/
+
+clientes-principal.csv
+clientes-no-guardados.csv
+publicidad-no-guardados.csv
