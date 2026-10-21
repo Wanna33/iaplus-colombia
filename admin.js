@@ -1262,11 +1262,11 @@ async function loadWaCfg(){
   try{
     const c = await api("admin_wa_config"); $("#waCfgBox").dataset.ok = "1";
     const e = c.estado||{}; const ck = (ok,t)=>`<span class="tag ${ok?"t-ok":"t-b"}">${ok?"✔":"falta"} ${t}</span>`;
-    box.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0 0 10px">El asistente vive en tu cuenta de Cloudflare. Pega aquí su dirección (termina en <span class="mono">workers.dev</span>).</p>
+    box.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0 0 10px">El asistente usa el puente de WhatsApp vinculado por QR. Mantén encendido el PC y deja abierta la ventana del puente para atender mensajes.</p>
       <div class="form" style="grid-template-columns:1fr auto"><input id="waUrl" placeholder="https://iaplus-whatsapp.TU-USUARIO.workers.dev" value="${esc(c.workerUrl)}"><button class="btn p" id="waSave">Guardar</button></div>
       <p style="margin:12px 0 6px"><b>Clave del asistente</b> <small style="color:var(--mut)">(va en Cloudflare como <span class="mono">BOT_SECRET</span>; no la compartas)</small></p>
       <div class="codeline"><span class="mono" id="waSec">••••••••••••</span><button class="btn s" id="waShow">Mostrar</button><button class="btn s" id="waCp">Copiar</button></div>
-      ${c.workerUrl?`<div class="acts" style="margin-top:12px">${e.ok?`${e.modo==="meta"?'<span class="tag t-ok">☁️ Nube activa · PC apagado</span>':'<span class="tag t-w">💻 Modo puente · PC necesario</span>'}${ck(e.whatsapp,"WhatsApp")}${ck(e.ia,"Clave de IA")}${ck(e.tienda,"Conexión con la tienda")}${e.meta?ck(e.meta.webhook,"Webhook Meta"):""}${e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa (los atiendes tú)</span>`:""}`:`<span class="tag t-b">No responde: ${esc(e.error||"revisa la dirección")}</span>`}</div>`:""}`;
+      ${c.workerUrl?`<div class="acts" style="margin-top:12px">${e.ok?`${e.modo==="meta"?'<span class="tag t-ok">☁️ Nube activa · PC apagado</span>':'<span class="tag t-w">📱 QR activo · PC encendido</span>'}${ck(e.whatsapp,"WhatsApp")}${ck(e.ia,"Clave de IA")}${ck(e.tienda,"Conexión con la tienda")}${e.meta?ck(e.meta.webhook,"Webhook Meta"):""}${e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa (los atiendes tú)</span>`:""}`:`<span class="tag t-b">No responde: ${esc(e.error||"revisa la dirección")}</span>`}</div>`:""}`;
     $("#waSave").onclick = async()=>{ try{ await api("admin_wa_config",{workerUrl:$("#waUrl").value}); toast("Guardado ✔"); delete $("#waCfgBox").dataset.ok; loadWaCfg(); }catch(ex){ toast(ex.message); } };
     $("#waShow").onclick = ()=>{ $("#waSec").textContent = c.secret; };
     $("#waCp").onclick = ()=>copy(c.secret);
@@ -1616,3 +1616,4 @@ document.addEventListener("click", async e=>{
     try{ GPRODS = (await api("admin_catalogo", {set:{k, name, price:+$("#nPre").value, dias:+$("#nDia").value, match:name}})).productos; syncPrecios(); drawProds(); toast("Producto creado ✔"); $("#nNom").value=""; $("#nPre").value=""; }catch(ex){ toast(ex.message); }
   }
 });
+

@@ -13,15 +13,15 @@ Ejecuta `node tools/check-readiness.cjs` antes de anunciar que la tienda está l
 
 PayPal solo se anuncia cuando Apps Script devuelve `ready: true`. La llave privada, el identificador del webhook y el ambiente viven en las propiedades privadas de Apps Script; nunca deben entrar en el repositorio ni en el navegador. Antes de activar producción, prueba en sandbox una compra completa, una confirmación repetida y un pedido sin cupo.
 
-## WhatsApp
+## WhatsApp por QR
 
-El Worker de Meta recibe conversaciones públicas y el puente local atiende el número vinculado. Son dos conexiones distintas: el Worker necesita sus secretos de Cloudflare y el puente necesita su sesión QR. Verifica una conversación real de prueba y confirma que el pedido aparece en el panel antes de enviar cualquier enlace.
+El modo operativo de IA Plus es el puente local con una sesión QR de WhatsApp. Verifica una conversación real de prueba y confirma que el pedido aparece en el panel antes de enviar cualquier enlace.
 
 Para iniciar el puente en Windows usa `INICIAR-PUENTE.bat`. A los pocos segundos abrirá la página QR. Escanéala desde WhatsApp → Dispositivos vinculados y deja la ventana abierta mientras atiende clientes.
 
-Para trabajar con el PC apagado configura el número en Meta Cloud API y guarda en Cloudflare `WA_TOKEN`, `WA_PHONE_ID`, `APP_SECRET` y `VERIFY_TOKEN`. Después registra `https://iaplus-whatsapp.versajoel1525.workers.dev/webhook` en Meta y comprueba que el panel indique `modo: meta`. En ese estado el Worker de Cloudflare envía y recibe directamente por Meta; no uses el QR ni el puente local.
+El modo QR necesita el computador encendido, con internet y con `INICIAR-PUENTE.bat` abierto. Si el vínculo se pierde, vuelve a escanear el QR desde `whatsapp-bot/puente/qr.html`. El modo nube de Meta queda como alternativa futura y no es necesario para esta operación.
 
-La guía detallada está en [CONFIGURAR-NUBE.md](CONFIGURAR-NUBE.md).
+
 
 ## Rutina diaria
 
@@ -30,3 +30,4 @@ La guía detallada está en [CONFIGURAR-NUBE.md](CONFIGURAR-NUBE.md).
 3. Revisar en el panel los pedidos pendientes, comprobantes y alertas.
 4. Hacer una copia de la hoja de datos antes de cambios de inventario.
 5. Revisar `npx wrangler tail` cuando se pruebe el Worker de WhatsApp.
+
