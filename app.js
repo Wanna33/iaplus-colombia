@@ -13,8 +13,8 @@ const CONFIG = {
 
 /* ============ PRODUCTOS (edita nombres, precios y detalles) ============ */
 const PRODUCTS = [
-  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", hot:true, feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación guiada por WhatsApp","Garantía durante el plan"]},
-  {id:"chatgpt3", name:"ChatGPT 3 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:20000, per:"/3 meses", days:90, badge:"Plan trimestral", feats:["ChatGPT Plus por 3 meses","Pago único por la duración indicada","Cuenta compartida · hasta 2 dispositivos","Activación guiada por WhatsApp"]},
+  {id:"chatgpt", name:"ChatGPT", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:10000, per:"/mes", feats:["ChatGPT Plus en cuenta compartida","Úsalo en hasta 2 dispositivos","Activación guiada por WhatsApp","Garantía durante el plan"]},
+  {id:"chatgpt3", name:"ChatGPT 3 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:20000, per:"/3 meses", days:90, badge:"Plan recomendado" , hot:true, feats:["ChatGPT Plus por 3 meses","Pago único por la duración indicada","Cuenta compartida · hasta 2 dispositivos","Activación guiada por WhatsApp"]},
   {id:"chatgpt6", name:"ChatGPT 6 meses", cat:"IA", ico:"🤖", img:"chatgpt.webp", dark:true, price:50000, per:"/6 meses", days:180, badge:"Medio año", feats:["ChatGPT Plus por 6 meses","Te olvidas de renovar por medio año","Cuenta compartida · hasta 2 dispositivos","Activación guiada por WhatsApp"]},
   {id:"claude", name:"Claude Code", cat:"IA", ico:"🧠", img:"claude.webp", lt:true, price:30000, per:"/mes", feats:["Acceso a Claude Code","Para 1 solo dispositivo","Entrega rápida por WhatsApp","Garantía durante el plan"]},
   {id:"gemini", name:"Gemini Pro", cat:"IA", ico:"✨", img:"gemini.webp", lt:true, price:10000, per:"/mes", feats:["Acceso a cuenta privada","Gemini Pro listo para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
@@ -54,7 +54,7 @@ runWhenIdle(() => fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({act
   try{ localStorage.setItem("iap_precios", JSON.stringify(j.productos)); }catch{}
   if(aplicarPrecios(j.productos)){
     try{ renderFilters(); renderGrid(); }catch{}
-    const hs=document.querySelector(".hero-from"); if(hs) hs.textContent=cop(Math.min(...PRODUCTS.map(p=>p.price)));
+    const hs=document.querySelector(".hero-from"); if(hs) hs.textContent=cop((PRODUCTS.find(p=>p.id==="chatgpt3")||{}).price || Math.min(...PRODUCTS.map(p=>p.price)));
   }
 }).catch(()=>{});
 
@@ -351,7 +351,7 @@ document.addEventListener("pointerdown", e => {
   if(mq){ const one=PRODUCTS.map(p=>`<a class="mq-i" href="#catalogo"><span class="mq-ic ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</span><b>${esc(p.name)}</b><small>${cop(p.price)}</small></a>`).join(""); mq.innerHTML=one+one; }
   // "desde $X" en la portada
   const from=Math.min(...PRODUCTS.map(p=>p.price)), hs=document.querySelector(".hero-from");
-  if(hs) hs.textContent=cop(from);
+  if(hs) hs.textContent=cop((PRODUCTS.find(p=>p.id==="chatgpt3")||{}).price || from);
   // datos estructurados para buscadores
   try{
     const ld=document.createElement("script"); ld.type="application/ld+json";
@@ -421,3 +421,4 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-pay]
     b.addEventListener("pointerleave", () => { b.style.setProperty("--tx", "0px"); b.style.setProperty("--ty2", "0px"); });
   });
 })();
+
