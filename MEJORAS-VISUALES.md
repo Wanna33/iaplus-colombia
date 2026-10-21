@@ -18,7 +18,7 @@ El centro presenta salud real del servidor local, disponibilidad del modelo conf
 
 El puente actualizado escribe una señal local sin información personal cada 15 segundos. Si no hay señal reciente, el centro lo indica sin asumir que está conectado. El proceso del puente necesita cargar el archivo actualizado para emitir esta señal; no se ha reiniciado ni se han enviado mensajes durante la verificación.
 
-La detección de Ollama verifica el modelo exacto. Si no está disponible, el bot conserva la búsqueda. Se añadieron comprobaciones de origen, Host y tipo de contenido a las solicitudes locales; la recarga de conocimiento se limita al computador. Los accesos de túnel siguen requiriendo su clave.
+La detección de Ollama verifica el modelo exacto. Si no está disponible, el bot conserva la búsqueda. Se añadieron comprobaciones de origen, Host y tipo de contenido a las solicitudes locales; la recarga de conocimiento se limita al computador. Los accesos de túnel siguen requiriendo su clave. La redacción con Ollama tiene un límite de 20 segundos y vuelve automáticamente a la búsqueda si el modelo tarda o falla.
 
 Los cambios de `bot-local/` y `whatsapp-bot/` son locales: esas carpetas ya estaban excluidas de Git. No se publican sesiones, conocimiento privado ni archivos de configuración. El centro no conecta automáticamente a los visitantes de la tienda con este computador.
 
@@ -29,7 +29,7 @@ Los cambios de `bot-local/` y `whatsapp-bot/` son locales: esas carpetas ya esta
 - `node bot-local/scripts/probar.mjs`: motor de conocimiento y respuestas locales.
 - Rutas HTTP locales: salud, respuesta con PayPal, recarga, rechazo de origen ajeno, recarga remota bloqueada y autenticación del túnel.
 - Vista administrativa de demostración: `node tools/preview.cjs`, después `/__qa/admin.html`. Datos ficticios sin acceso a servidores ni sesiones reales.
-- Modelo: Ollama instalado, servicio apagado al comprobar. Su inicio fue rechazado por la revisión automática de permisos. La redacción mediante modelo queda sin verificar.
+- Modelo: Ollama y `qwen2.5:7b` disponibles en la comprobación actual. Si una redacción tarda más de 20 segundos, el bot vuelve a la búsqueda local.
 - No se verificaron acceso administrativo autenticado, conversaciones reales ni cobros reales.
 
 ## Imagen
