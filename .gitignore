@@ -10,3 +10,4 @@ payments/.wrangler/
 .clasp.json
 .clasprc.json
 outputs/
+bot-local/
