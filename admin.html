@@ -378,6 +378,8 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 .saldo .bar{width:70px;height:8px;border-radius:9px;background:var(--line);overflow:hidden;display:inline-block}
 .saldo .bar i{display:block;height:100%;background:var(--ok);border-radius:9px}
 .saldo.w .bar i{background:var(--warn)}.saldo.b .bar i{background:var(--bad)}.saldo.b{border-color:var(--bad);color:var(--bad)}
+.terminal-panel{display:grid;gap:10px;border:1px solid var(--line);border-radius:14px;padding:13px;margin:0 0 14px;background:linear-gradient(135deg,var(--soft),var(--card))}
+.terminal-panel>div:first-child{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}.terminal-panel small{display:block;color:var(--mut);font-size:12px;margin-top:3px}.terminal-panel p{margin:0;color:var(--mut);font-size:13px;line-height:1.45}.terminal-panel .acts{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 .inbox{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:12px;min-height:520px}
 .ib-list{border:1px solid var(--line);border-radius:14px;overflow:auto;max-height:640px}
 .ib-it{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;padding:10px 12px;cursor:pointer}

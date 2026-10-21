@@ -376,7 +376,7 @@ function render(){
       <div class="inbox"><div class="ib-list" id="ibList"><div class="empty">Cargando…</div></div><div class="ib-chat" id="ibChat"><div class="empty" style="margin:auto">Elige un chat para verlo.</div></div></div>
     </div>
     <div class="card"><h2>💬 Ventas por WhatsApp</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">El asistente con IA atiende a tus clientes. Cuando alguien dice que pagó, aparece aquí. Revisa el comprobante y toca <b>Confirmar</b>: se crea el código y al cliente le llega por WhatsApp su enlace de activación.</p>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Claude analiza los comprobantes y activa automáticamente los pagos válidos. Esta lista muestra el resultado y solo deja una acción manual para excepciones que no se pueden validar solas.</p>
       <div class="tools"><select id="waSt"><option value="pend">Por atender</option><option value="">Todas</option></select><button class="btn s" id="waReload">↻ Recargar</button></div>
       <div id="waRows" class="walist"><div class="empty">Cargando…</div></div>
     </div>
@@ -1201,7 +1201,7 @@ document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key.toL
 let PEDIDOS = [];
 const PAY_TAG = {ENTREGADO:["t-ok","Entregado"], PENDIENTE:["t-w","Pendiente"], APROBADO_SIN_STOCK:["t-b","Aprobado · sin cupo"], RECHAZADO:["t-g","Rechazado"]};
 /* ---------- Ventas del asistente de WhatsApp ---------- */
-let waTimer = null;
+let waTimer = null, waCfgTimer = null;
 const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pagó · por confirmar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"RECLAMO":["t-b","⚠️ Reclamo (devolución u otro)"],"NO VERIFICADO":["t-g","🤖 Comprobante no válido · lo maneja el asistente"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"AUTO-CONFIRMADO":["t-ok","🤖 Venta automática · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
 async function loadWa(){
   const el = $("#waRows"); if(!el) return;
@@ -1220,7 +1220,7 @@ function drawWa(){
     return `<div class="wacard" data-wa="${esc(v.id)}"><div class="wah"><b>${esc(v.nombre||"Cliente")}</b> <a href="https://wa.me/${esc(v.telefono)}" target="_blank" rel="noopener" class="mono">+${esc(v.telefono)}</a> <span class="tag ${c}">${t}</span><small style="color:var(--mut);margin-left:auto">${fdt(v.fecha)}</small></div>
       <div class="wab">${v.producto?`${EMO(v.producto)} <b>${esc(v.producto)}</b> · ${money(v.monto)}`:""}${v.gmail?` · Gmail: <span class="mono">${esc(v.gmail)}</span>`:""}${v.codigo?` · Código <span class="mono">${esc(v.codigo)}</span>`:""}${v.nota?`<div class="note">📝 ${esc(v.nota)}</div>`:""}</div>
       <div class="acts">${v.comprobante?`<button class="btn s" data-wv="media">🧾 Ver comprobante</button>`:""}
-        ${v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"?`<button class="btn s p" data-wv="ok">✔ Confirmar y enviar enlace</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
+        ${v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"?`<button class="btn s p" data-wv="ok">🛠 Resolver excepción</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
         ${v.estado==="NECESITA AYUDA"?`<button class="btn s p" data-wv="ok">✔ Confirmar una venta</button><button class="btn s" data-wv="done">Marcar atendido</button>`:""}${v.estado==="RECLAMO"?`<button class="btn s" data-wv="done">Marcar resuelto</button>`:""}
         ${v.codigo?`<button class="btn s" data-wv="link">🔗 Copiar enlace</button>`:""}
         <a class="btn s wa" target="_blank" rel="noopener" href="https://wa.me/${esc(v.telefono)}">💬 Abrir chat</a></div></div>`; }).join("")
@@ -1257,12 +1257,24 @@ async function waAction(v, a){
     await refresh(); return loadWa();
   }
 }
+function terminalPanel(e){
+  e = e || {}; const t = e.terminal || {}, live = e.ok && e.whatsapp && t.conectada !== false;
+  const ago = Number(t.hace_segundos), cuando = Number.isFinite(ago) ? (ago < 60 ? `hace ${ago}s` : `hace ${Math.round(ago/60)} min`) : "sin latido";
+  const estado = live ? '<span class="tag t-ok">● Terminal conectada</span>' : '<span class="tag t-b">● Terminal sin conexión</span>';
+  return `<div class="terminal-panel" aria-live="polite"><div><b>🖥️ Terminal del asistente</b><small>Monitoreo integrado en este panel · ${esc(cuando)}</small></div><div class="acts">${estado}<span class="tag ${e.ia?"t-ok":"t-b"}">${e.ia?"✔ Claude listo":"✖ Falta Claude"}</span><span class="tag ${e.tienda?"t-ok":"t-b"}">${e.tienda?"✔ Tienda conectada":"✖ Tienda sin respuesta"}</span></div><p>${live?"El puente QR está atendiendo mensajes y la IA procesa los comprobantes válidos automáticamente.":"La terminal no está reportando señal. Abre el puente QR y conserva el PC conectado a internet."}</p><div class="acts"><a class="btn s" href="http://127.0.0.1:3111/centro" target="_blank" rel="noopener">Abrir centro local</a><button class="btn s" id="waTermReload" type="button">↻ Actualizar estado</button></div></div>`;
+}
+async function refrescarTerminal(){
+  const target = $("#waTerminal"); if(!target) return;
+  try { const c = await api("admin_wa_config"); target.innerHTML = terminalPanel(c.estado); }
+  catch { target.innerHTML = terminalPanel({ok:false,terminal:{conectada:false}}); }
+}
 async function loadWaCfg(){
   const box = $("#waCfg"); if(!box) return;
   try{
     const c = await api("admin_wa_config"); $("#waCfgBox").dataset.ok = "1";
     const e = c.estado||{}; const ck = (ok,t)=>`<span class="tag ${ok?"t-ok":"t-b"}">${ok?"✔":"falta"} ${t}</span>`;
-    box.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0 0 10px">El asistente usa el puente de WhatsApp vinculado por QR. Mantén encendido el PC y deja abierta la ventana del puente para atender mensajes.</p>
+    box.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0 0 10px">La terminal del puente QR ahora se controla desde aquí. El panel muestra su conexión y la salud de Claude; no abras una segunda terminal.</p>
+      <div id="waTerminal">${terminalPanel(e)}</div>
       <div class="form" style="grid-template-columns:1fr auto"><input id="waUrl" placeholder="https://iaplus-whatsapp.TU-USUARIO.workers.dev" value="${esc(c.workerUrl)}"><button class="btn p" id="waSave">Guardar</button></div>
       <p style="margin:12px 0 6px"><b>Clave del asistente</b> <small style="color:var(--mut)">(va en Cloudflare como <span class="mono">BOT_SECRET</span>; no la compartas)</small></p>
       <div class="codeline"><span class="mono" id="waSec">••••••••••••</span><button class="btn s" id="waShow">Mostrar</button><button class="btn s" id="waCp">Copiar</button></div>
@@ -1270,6 +1282,8 @@ async function loadWaCfg(){
     $("#waSave").onclick = async()=>{ try{ await api("admin_wa_config",{workerUrl:$("#waUrl").value}); toast("Guardado ✔"); delete $("#waCfgBox").dataset.ok; loadWaCfg(); }catch(ex){ toast(ex.message); } };
     $("#waShow").onclick = ()=>{ $("#waSec").textContent = c.secret; };
     $("#waCp").onclick = ()=>copy(c.secret);
+    $("#waTermReload").onclick = refrescarTerminal;
+    clearInterval(waCfgTimer); waCfgTimer = setInterval(()=>{ if(curTab==="wa" && !document.hidden) refrescarTerminal(); }, 30000);
   }catch(ex){ box.innerHTML = '<div class="capwarn">'+esc(ex.message)+'</div>'; }
 }
 document.addEventListener("click", e=>{
