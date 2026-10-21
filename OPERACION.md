@@ -19,6 +19,10 @@ El Worker de Meta recibe conversaciones públicas y el puente local atiende el n
 
 Para iniciar el puente en Windows usa `INICIAR-PUENTE.bat`. A los pocos segundos abrirá la página QR. Escanéala desde WhatsApp → Dispositivos vinculados y deja la ventana abierta mientras atiende clientes.
 
+Para trabajar con el PC apagado configura el número en Meta Cloud API y guarda en Cloudflare `WA_TOKEN`, `WA_PHONE_ID`, `APP_SECRET` y `VERIFY_TOKEN`. Después registra `https://iaplus-whatsapp.versajoel1525.workers.dev/webhook` en Meta y comprueba que el panel indique `modo: meta`. En ese estado el Worker de Cloudflare envía y recibe directamente por Meta; no uses el QR ni el puente local.
+
+La guía detallada está en [CONFIGURAR-NUBE.md](CONFIGURAR-NUBE.md).
+
 ## Rutina diaria
 
 1. Ejecutar `node tools/check-readiness.cjs`.
