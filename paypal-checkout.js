@@ -33,7 +33,7 @@
     };
   }
   document.addEventListener('click',e=>{const b=e.target.closest('[data-paypal]');if(b)start(b.dataset.paypal,b);});
-  postJson(CONFIG.API_URL,{action:'paypal_config'}).then(j=>{
+  const loadPayPalState=()=>postJson(CONFIG.API_URL,{action:'paypal_config'}).then(j=>{
     if(!j?.ok||!j.ready||j.env!=='live')return;
     state.ready=true;state.env=j.env;state.prices=j.prices||{};
     renderGrid();
@@ -44,4 +44,5 @@
       grid.parentNode.insertBefore(promo,grid);
     }
   }).catch(()=>{});
+  (window.requestIdleCallback ? requestIdleCallback(loadPayPalState,{timeout:1800}) : setTimeout(loadPayPalState,500));
 })();

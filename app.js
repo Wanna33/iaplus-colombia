@@ -44,7 +44,12 @@ function aplicarPrecios(lista){
   return cambio;
 }
 try{ aplicarPrecios(JSON.parse(localStorage.getItem("iap_precios")||"null")); }catch{}
-fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action:"precios"}), credentials:"omit"}).then(r=>r.json()).then(j=>{
+const runWhenIdle = fn => new Promise(resolve => {
+  const run = () => resolve(fn());
+  if(window.requestIdleCallback) requestIdleCallback(run, {timeout:1500});
+  else setTimeout(run, 350);
+});
+runWhenIdle(() => fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action:"precios"}), credentials:"omit"})).then(r=>r.json()).then(j=>{
   if(!j || !j.ok) return;
   try{ localStorage.setItem("iap_precios", JSON.stringify(j.productos)); }catch{}
   if(aplicarPrecios(j.productos)){
@@ -53,7 +58,7 @@ fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action:"precios"}), c
   }
 }).catch(()=>{});
 
-const iconOf = p => p.img ? `<img src="${p.img}" alt="">` : p.ico;
+const iconOf = p => p.img ? `<img src="${p.img}" alt="" loading="lazy" decoding="async" fetchpriority="low">` : p.ico;
 
 /* ============ UTILIDADES ============ */
 const $ = s => document.querySelector(s);
