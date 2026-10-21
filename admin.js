@@ -294,7 +294,7 @@ let WAV = []; // ventas del asistente de WhatsApp
 function navBadges(){
   const porVencer = clients().filter(c=>cState(c).k==="w").length;
   const libres = items.filter(i=>state(i).k==="av").length;
-  const waP = WAV.filter(v=>v.estado==="POR CONFIRMAR"||v.estado==="NECESITA AYUDA"||v.estado==="RECLAMO").length;
+  const waP = WAV.filter(v=>v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"||v.estado==="NECESITA AYUDA"||v.estado==="RECLAMO").length;
   return {cli:porVencer?{n:porVencer,c:"w",t:"clientes por vencer"}:null, cod:{n:libres,c:"",t:"códigos disponibles"}, wa:waP?{n:waP,c:"w",t:"ventas de WhatsApp por atender"}:null};
 }
 function drawNav(){
@@ -1205,13 +1205,13 @@ async function loadWa(){
 }
 function drawWa(){
   const el = $("#waRows"); if(!el) return; const pend = $("#waSt").value==="pend";
-  const list = WAV.filter(v=>!pend || v.estado==="POR CONFIRMAR" || v.estado==="NECESITA AYUDA" || v.estado==="RECLAMO" || v.estado==="CONFIRMADO (enviar a mano)");
+  const list = WAV.filter(v=>!pend || v.estado==="POR CONFIRMAR" || v.estado==="NO VERIFICADO" || v.estado==="NECESITA AYUDA" || v.estado==="RECLAMO" || v.estado==="CONFIRMADO (enviar a mano)");
   drawNav(); document.querySelectorAll(".nv[data-t]").forEach(x=>x.classList.toggle("on", x.dataset.t===curTab));
   el.innerHTML = list.length ? list.map(v=>{ const [c,t] = WA_TAG[v.estado]||["t-g",v.estado];
     return `<div class="wacard" data-wa="${esc(v.id)}"><div class="wah"><b>${esc(v.nombre||"Cliente")}</b> <a href="https://wa.me/${esc(v.telefono)}" target="_blank" rel="noopener" class="mono">+${esc(v.telefono)}</a> <span class="tag ${c}">${t}</span><small style="color:var(--mut);margin-left:auto">${fdt(v.fecha)}</small></div>
       <div class="wab">${v.producto?`${EMO(v.producto)} <b>${esc(v.producto)}</b> · ${money(v.monto)}`:""}${v.gmail?` · Gmail: <span class="mono">${esc(v.gmail)}</span>`:""}${v.codigo?` · Código <span class="mono">${esc(v.codigo)}</span>`:""}${v.nota?`<div class="note">📝 ${esc(v.nota)}</div>`:""}</div>
       <div class="acts">${v.comprobante?`<button class="btn s" data-wv="media">🧾 Ver comprobante</button>`:""}
-        ${v.estado==="POR CONFIRMAR"?`<button class="btn s p" data-wv="ok">✔ Confirmar y enviar enlace</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
+        ${v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"?`<button class="btn s p" data-wv="ok">✔ Confirmar y enviar enlace</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
         ${v.estado==="NECESITA AYUDA"?`<button class="btn s p" data-wv="ok">✔ Confirmar una venta</button><button class="btn s" data-wv="done">Marcar atendido</button>`:""}${v.estado==="RECLAMO"?`<button class="btn s" data-wv="done">Marcar resuelto</button>`:""}
         ${v.codigo?`<button class="btn s" data-wv="link">🔗 Copiar enlace</button>`:""}
         <a class="btn s wa" target="_blank" rel="noopener" href="https://wa.me/${esc(v.telefono)}">💬 Abrir chat</a></div></div>`; }).join("")
