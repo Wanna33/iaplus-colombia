@@ -35,3 +35,7 @@ Los cambios de `bot-local/` y `whatsapp-bot/` son locales: esas carpetas ya esta
 ## Imagen
 
 Herramienta: Imagegen integrado. Prompt: ilustración editorial 3D premium para IA Plus Colombia, símbolo más de cristal verde esmeralda sobre pedestal marfil, portátil plateado y teléfono con tarjetas abstractas de herramientas creativas, estudio con luz suave, composición central adaptable a móvil, sin personas, texto, marcas ni filigranas. Recurso final: `assets/digital-studio-v2.webp`. Original conservado en la carpeta de imágenes generadas de Codex.
+
+## Ajuste solicitado: persona y celular
+
+La portada usa ahora la presentadora existente `assets/presentadora-cuentas.webp`. El texto se sitúa debajo de la fotografía para conservar visible el rostro. Se ajustaron botones, orden de lectura, tipografía y tamaños pequeños. Verificado en navegador a 320, 390, 768 y 1280 px, sin imágenes rotas ni desbordamiento horizontal.

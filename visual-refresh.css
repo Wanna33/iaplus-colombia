@@ -19,3 +19,37 @@
 @media(max-width:540px){.hero-side .workspace-photo figcaption{padding:12px 14px;bottom:14px}.hero-side .workspace-photo figcaption>span{font-size:7px;letter-spacing:.1em;margin-bottom:5px}.hero-side .workspace-photo figcaption strong{font-size:18px;line-height:1.2}.hero-side .workspace-photo figcaption>small{font-size:7px;margin-top:5px}}
 
 .digital-photo figcaption{right:auto;max-width:80%}.digital-photo figcaption strong{font-size:22px}.digital-photo figcaption>span{font-size:8px;margin-bottom:6px}.digital-photo figcaption>small{font-size:8px;margin-top:6px}
+
+/* Portada humana: el texto tiene su propio espacio y no cubre a la persona. */
+.hero-side .person-photo{height:auto;display:flex;flex-direction:column;border-radius:26px 65px 26px 26px;background:#174e3c}
+.hero-side .person-photo:after{display:none}
+.hero-side .person-photo>img{display:block;width:100%;height:365px;object-fit:cover;object-position:50% 30%}
+.hero-side .person-photo figcaption{position:static;padding:18px 24px;border:0;border-radius:0;background:#174e3c;backdrop-filter:none}
+.hero-side .person-photo figcaption>span{font-size:9px;margin-bottom:7px;letter-spacing:.12em}
+.hero-side .person-photo figcaption strong{font-size:23px;line-height:1.25}
+.hero-side .person-photo figcaption strong br{display:none}
+.hero-side .person-photo figcaption strong br:after{content:' '}
+.hero-side .person-photo figcaption>small{font-size:10px;margin-top:8px;color:#d1e1d3}
+.hero-side:has(.person-photo){padding-bottom:0}
+.hero-side:has(.person-photo) .photo-note{position:static;margin:12px 0 0;max-width:100%;width:100%}
+@media(max-width:860px){.hero-side .person-photo>img{height:350px;object-position:50% 24%}.hero-side .person-photo figcaption strong{font-size:23px}}
+@media(max-width:540px){
+  .hero{padding:24px 0 32px}.hero-in{gap:16px}
+  .hero .pill{font-size:9px;letter-spacing:.02em;max-width:100%;white-space:normal}
+  .hero h1{font-size:clamp(31px,9.3vw,43px);letter-spacing:-.045em;overflow-wrap:normal}
+  .hero-side .person-photo{border-radius:20px 48px 20px 20px}
+  .hero-side .person-photo>img{height:clamp(240px,70vw,310px);object-position:50% 23%}
+  .hero-side .person-photo figcaption{padding:14px 17px}
+  .hero-side .person-photo figcaption strong{font-size:20px;line-height:1.3}
+  .hero-side .person-photo figcaption>span{font-size:8px;margin-bottom:5px}
+  .hero-side .person-photo figcaption>small{font-size:10px;margin-top:6px}
+  .hero-side:has(.person-photo) .photo-note{padding:12px;margin-top:10px}
+  .hero-side:has(.person-photo) .photo-note b{font-size:10px}
+  .hero .cta{display:grid;grid-template-columns:1fr;gap:10px}
+  .hero-text>.cta{grid-row:4}.hero-text>p{grid-row:5}
+  .hero .cta .btn{width:100%;min-height:48px;font-size:14px;justify-content:center}
+  .hero .trust{font-size:10px;gap:10px;flex-wrap:wrap}
+  .hero .trust li{white-space:normal}
+  .toolbar{gap:10px}.toolbar input{font-size:16px}
+}
+@media(max-width:360px){.nav .btn-google{font-size:10px;padding:9px}.brand img{width:106px!important}.goal-shortcuts{grid-template-columns:1fr}.hero .pill{font-size:8px}}
