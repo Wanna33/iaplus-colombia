@@ -15,8 +15,8 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"}) : "—";
-const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
+const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",year:"numeric"}) : "—";
+const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
 const money = n => "$"+Math.round(Number(n)||0).toLocaleString("es-CO");
 let items = [], busy = false, hlCode = "", curTab = "res", TTL = null; // TTL: minutos que dura un código sin canjear (0 = nunca)
 try{ curTab = sessionStorage.getItem("iap_tab") || "res"; }catch{}
@@ -65,13 +65,17 @@ function showLogin(){
 
 async function refresh(){
   if(busy) return; busy = true;
-  try{ const j = await api("admin_list"); items = j.items; if(j.ttl!==undefined) TTL = j.ttl; render(); }
+  const reload = $("#reload"); if(reload){reload.disabled=true;reload.textContent="Actualizando…";}
+  try{ const j = await api("admin_list"); if(!Array.isArray(j.items)) throw new Error("El servidor no devolvió una lista válida. Intenta actualizar otra vez."); items = j.items; if(j.ttl!==undefined) TTL = j.ttl; render();
+    const sync=$("#syncState");if(sync){sync.textContent="Actualizado "+new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"});sync.dataset.state="ok";}
+  }
   catch(e){
     if(/administrador/i.test(e.message)) message("Acceso denegado","Esta cuenta no es administradora.",'<a class="btn" href="index.html">Volver a la tienda</a>');
     else if(/sesión|venció|Inicia/i.test(e.message)) showLogin();
+    else if($("#addForm")){ toast("No se pudo actualizar: "+e.message); const sync=$("#syncState");if(sync){sync.textContent="Datos pendientes de actualizar";sync.dataset.state="error";} }
     else message("No se pudo cargar", esc(e.message), '<button class="btn p" id="retry">Reintentar</button>'); { const r=document.getElementById("retry"); if(r) r.onclick=start; }
   }
-  busy = false;
+  finally { busy = false; if(reload){reload.disabled=false;reload.textContent="↻ Actualizar";} }
 }
 function start(){
   const u = load("iap_user"); const cred = load("iap_cred");

@@ -1,0 +1,21 @@
+/* IA Plus: identidad compartida, conserva estructura e interacciones existentes. */
+:root{--red:#185442;--red2:#28735a;--acc:#185442;--acc2:#28735a}
+.brand{display:flex;align-items:center;gap:10px}.brand img{width:148px!important;height:48px!important;object-fit:contain}
+.hero{background:radial-gradient(ellipse at 80% 18%,#dce9de 0,transparent 55%),#f8f8f2;overflow:hidden}
+.hero h1{letter-spacing:-.065em;line-height:1.08}.hero .pill{background:#e5eddf;border:1px solid #ccd9c5;color:#315342;letter-spacing:.08em}
+.hero p{max-width:530px}.hero-side .workspace-photo{border-radius:28px 90px 28px 28px;border:1px solid #d7e2d5;box-shadow:0 24px 65px #153d2612}
+.hero-side .workspace-photo>img{object-fit:cover;object-position:center}.workspace-photo figcaption{padding:15px 19px;background:#143a30d9;border:1px solid #ffffff25;border-radius:15px;backdrop-filter:blur(12px);right:24px}
+.digital-photo:after{display:none}
+.workspace-photo figcaption>small{color:#d4e5da}.photo-note{border-radius:16px!important;box-shadow:0 12px 35px #163c2520!important}
+.btn-primary{background:#185442!important;box-shadow:0 7px 16px #18544218!important}.btn-primary:hover{background:#103e30!important}
+.grid{gap:20px}.grid .card{border:1px solid #dde4d8;box-shadow:0 4px 14px #1d3a2205;transition:box-shadow .2s,border-color .2s}
+.grid .card:hover{border-color:#9bb5a0;box-shadow:0 14px 30px #254b2910}.grid .card .ico{background:#f1f5ee;border:1px solid #e2e8dd;border-radius:18px;padding:10px;width:70px;height:70px}
+.featured-plan{box-shadow:0 8px 28px #234b2510}.goal-shortcuts button{border-radius:16px}.section-heading .title{letter-spacing:-.05em}
+.nav{background:#fafbf6f5!important;backdrop-filter:blur(18px)}.confidence-strip{border-radius:14px;background:#eef3e8}
+:focus-visible{outline:3px solid #76a284!important;outline-offset:4px}
+@media(max-width:540px){.brand img{width:122px!important;height:42px!important}.hero-side .workspace-photo{border-radius:20px 56px 20px 20px;height:285px}.hero-side .workspace-photo figcaption{left:14px;right:14px;bottom:14px;padding:11px 15px}.hero-side .workspace-photo strong{font-size:19px}.grid{gap:14px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+@media(max-width:540px){.hero-side .workspace-photo figcaption{padding:12px 14px;bottom:14px}.hero-side .workspace-photo figcaption>span{font-size:7px;letter-spacing:.1em;margin-bottom:5px}.hero-side .workspace-photo figcaption strong{font-size:18px;line-height:1.2}.hero-side .workspace-photo figcaption>small{font-size:7px;margin-top:5px}}
+
+.digital-photo figcaption{right:auto;max-width:80%}.digital-photo figcaption strong{font-size:22px}.digital-photo figcaption>span{font-size:8px;margin-bottom:6px}.digital-photo figcaption>small{font-size:8px;margin-top:6px}
