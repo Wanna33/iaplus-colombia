@@ -16,13 +16,13 @@ Campaña de **Mensajes** con destino a WhatsApp. El objetivo es recibir consulta
 
 **Texto principal**
 
-¿Buscas herramientas para estudiar, crear o editar? En IA Plus Colombia encuentras cuentas digitales premium desde **$10.000 COP al mes**, con opciones como ChatGPT, Canva, CapCut y más.
+¿Buscas herramientas para estudiar, crear o editar? En IA Plus Colombia encuentras cuentas digitales premium con el plan recomendado de **3 meses por $20.000 COP**, con opciones como ChatGPT, Canva, CapCut y más.
 
 Consulta disponibilidad, duración, modalidad y condiciones antes de comprar. Escríbenos por WhatsApp y te ayudamos a elegir el plan adecuado.
 
 **Título**
 
-Cuentas premium desde $10.000 COP
+ChatGPT Plus · 3 meses por $20.000 COP
 
 **Descripción**
 
@@ -45,3 +45,4 @@ Consulta disponibilidad por WhatsApp
 6. Comenzar con un presupuesto pequeño de prueba y revisar conversaciones, costo por conversación y ventas confirmadas.
 
 El precio es un punto de partida del catálogo; Meta debe mostrar el anuncio solo mientras ese precio y la disponibilidad sean correctos. Mantén visibles las condiciones y la modalidad del plan en la conversación antes de cobrar.
+
