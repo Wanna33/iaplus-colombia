@@ -17,6 +17,8 @@ PayPal solo se anuncia cuando Apps Script devuelve `ready: true`. La llave priva
 
 El Worker de Meta recibe conversaciones públicas y el puente local atiende el número vinculado. Son dos conexiones distintas: el Worker necesita sus secretos de Cloudflare y el puente necesita su sesión QR. Verifica una conversación real de prueba y confirma que el pedido aparece en el panel antes de enviar cualquier enlace.
 
+Para iniciar el puente en Windows usa `INICIAR-PUENTE.bat`. A los pocos segundos abrirá la página QR. Escanéala desde WhatsApp → Dispositivos vinculados y deja la ventana abierta mientras atiende clientes.
+
 ## Rutina diaria
 
 1. Ejecutar `node tools/check-readiness.cjs`.
