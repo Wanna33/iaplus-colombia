@@ -1,5 +1,5 @@
 // Service worker de IA Plus: abre rápido y funciona sin conexión (solo la pantalla; las cuentas siempre se piden en línea).
-const VER = "iap-v47-paypal-only";
+const VER = "iap-v48-asistente-inteligente";
 const SHELL = ["./", "index.html", "cuenta.html", "styles.css", "studio.css", "shop-experience.css", "customer-theme.css", "public-assistant.css", "paypal-checkout.css", "paypal-checkout.js", "catalog-utils.js", "store-tools.js", "assistants.js", "public-assistant.js", "assets/presentadora-cuentas.webp", "app.js", "pwa.js", "net.js", "guard.js", "pago.js", "cuenta.js", "logo-main.webp", "favicon.png", "chatgpt.webp", "capcut.webp", "filmora.webp", "canva.webp", "gemini.webp", "claude.webp", "davinci.webp", "duolingo.webp", "flow.webp", "photoshop.webp", "premiere.webp", "xbox.webp", "youtube.webp", "icon-192.png", "manifest.webmanifest"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VER).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VER).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
