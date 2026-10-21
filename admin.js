@@ -18,6 +18,7 @@ const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 const fdate = iso => iso ? new Date(iso).toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",year:"numeric"}) : "—";
 const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
 const money = n => "$"+Math.round(Number(n)||0).toLocaleString("es-CO");
+const norm = s => String(s??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 let items = [], busy = false, hlCode = "", curTab = "res", TTL = null; // TTL: minutos que dura un código sin canjear (0 = nunca)
 try{ curTab = sessionStorage.getItem("iap_tab") || "res"; }catch{}
 const DRAFT = "iap_admin_draft";
@@ -66,6 +67,7 @@ function showLogin(){
 async function refresh(){
   if(busy) return; busy = true;
   const reload = $("#reload"); if(reload){reload.disabled=true;reload.textContent="Actualizando…";}
+  const syncStart=$("#syncState"); if(syncStart){syncStart.textContent="Actualizando datos…";syncStart.dataset.state="busy";}
   try{ const j = await api("admin_list"); if(!Array.isArray(j.items)) throw new Error("El servidor no devolvió una lista válida. Intenta actualizar otra vez."); items = j.items; if(j.ttl!==undefined) TTL = j.ttl; render();
     const sync=$("#syncState");if(sync){sync.textContent="Actualizado "+new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"});sync.dataset.state="ok";}
   }
@@ -304,13 +306,13 @@ function navBadges(){
 function drawNav(){
   const b = navBadges(); let g = "";
   $("#sideNav").innerHTML = NAV.map(n=>{ const h = n.g!==g ? `<div class="nvg">${n.g}</div>` : ""; g = n.g; const bd = b[n.t];
-    return h+`<button type="button" class="nv" data-t="${n.t}">${svgI(n.t)}<span>${n.l}</span>${bd?`<em class="nvb ${bd.c}" title="${bd.n} ${bd.t}">${bd.n}</em>`:""}</button>`; }).join("");
+    return h+`<button type="button" class="nv" data-t="${n.t}" title="${esc(n.s)}" aria-label="${esc(n.l)}: ${esc(n.s)}">${svgI(n.t)}<span>${n.l}</span>${bd?`<em class="nvb ${bd.c}" title="${bd.n} ${bd.t}">${bd.n}</em>`:""}</button>`; }).join("");
 }
 function openSide(on){ document.body.classList.toggle("side-open", !!on); }
 function setTab(t){
   if(!NAV.some(n=>n.t===t)) t = "res";
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
-  document.querySelectorAll(".nv[data-t],.tabs button[data-t]").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  document.querySelectorAll(".nv[data-t],.tabs button[data-t]").forEach(b=>{ const on=b.dataset.t===t; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   const more = document.querySelector('.tabs button[data-t="more"]'); if(more) more.classList.toggle("on", !["res","cli","cod","cta"].includes(t));
   document.querySelectorAll("[id^=tab-]").forEach(s=>s.classList.toggle("hide", s.id!=="tab-"+t));
   const n = NAV.find(x=>x.t===t); $("#pageTitle").textContent = n.l; $("#pageSub").textContent = n.s; document.title = n.l + " · Panel IA Plus";
@@ -534,8 +536,10 @@ function render(){
   $("#aClean").onclick = async () => { try{ const j = await api("admin_cleanup"); toast(j.borrados? j.borrados+" código(s) vencido(s) invalidados ✔" : "No había códigos vencidos"); await refresh(); }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs)":ex.message); } };
   $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
-  $("#q").oninput = $("#st").onchange = $("#pf").onchange = rows;
-  $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = crows;
+  let filterTimer;
+  const redrawFilters = () => { clearTimeout(filterTimer); filterTimer = setTimeout(()=>{ rows(); crows(); }, 90); };
+  $("#q").oninput = $("#st").onchange = $("#pf").onchange = redrawFilters;
+  $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = redrawFilters;
   $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
   $("#payReload").onclick = loadPagos; $("#logReload").onclick = ()=>{ $("#lcli").value=""; loadLog(); }; $("#lq").oninput = drawLog;
   $("#lcliGo").onclick = ()=>loadLog($("#lcli").value.trim().toLowerCase()); $("#lcli").onkeydown = e=>{ if(e.key==="Enter") $("#lcliGo").click(); };
@@ -553,8 +557,8 @@ function quick(a){
 
 /* ---------- Clientes ---------- */
 function cFiltered(){
-  const q = ($("#cq")?.value||"").toLowerCase(), st = $("#cst")?.value||"", so = $("#cso")?.value||"rest";
-  const list = clients().filter(c=>(!st||cState(c).k===st) && (!q || [c.nombre,c.email,c.whatsapp,c.nota].join(" ").toLowerCase().includes(q)));
+  const q = norm($("#cq")?.value||""), st = $("#cst")?.value||"", so = $("#cso")?.value||"rest";
+  const list = clients().filter(c=>(!st||cState(c).k===st) && (!q || norm([c.nombre,c.email,c.whatsapp,c.nota].join(" ")).includes(q)));
   const rest = c => Math.min(...c.cuentas.filter(i=>!i.vencida).map(i=>i.restante??9999), 99999);
   const sorters = {rest:(a,b)=>rest(a)-rest(b), gasto:(a,b)=>b.gastado-a.gastado, nuevo:(a,b)=>String(b.ultima||"").localeCompare(String(a.ultima||"")), nombre:(a,b)=>(a.nombre||a.email).localeCompare(b.nombre||b.email)};
   return list.sort(sorters[so]);
@@ -776,9 +780,9 @@ async function genCode(e){
   b.disabled=false;
 }
 function filtered(){
-  const q = ($("#q")?.value||"").toLowerCase(), st = $("#st")?.value||"";
+  const q = norm($("#q")?.value||""), st = $("#st")?.value||"";
   const pf = $("#pf")?.value||"";
-  return items.filter(i => (!st || state(i).k===st) && (!pf || i.producto===pf) && (!q || [i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ").toLowerCase().includes(q)))
+  return items.filter(i => (!st || state(i).k===st) && (!pf || i.producto===pf) && (!q || norm([i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ")).includes(q)))
     .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
 // Cuenta regresiva de un código sin canjear (se borra solo a los TTL minutos)
@@ -999,7 +1003,8 @@ document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
   if(e.key!=="/" || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || !$("#q")) return;
   e.preventDefault(); if(curTab!=="cli"&&curTab!=="cod") setTab("cod"); (curTab==="cli"?$("#cq"):$("#q")).focus();
 });
-start(); setInterval(()=>{ if(!document.hidden && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
+const isEditing = () => { const a=document.activeElement; return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); };
+start(); setInterval(()=>{ if(!document.hidden && !isEditing() && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 
 
 /* =====================================================================
