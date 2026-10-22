@@ -310,6 +310,7 @@ function drawNav(){
 }
 function openSide(on){ document.body.classList.toggle("side-open", !!on); }
 function setTab(t){
+  const previousTab=curTab;
   if(!NAV.some(n=>n.t===t)) t = "res";
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
   document.querySelectorAll(".nv[data-t],.tabs button[data-t]").forEach(b=>{ const on=b.dataset.t===t; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -317,6 +318,7 @@ function setTab(t){
   document.querySelectorAll("[id^=tab-]").forEach(s=>s.classList.toggle("hide", s.id!=="tab-"+t));
   const n = NAV.find(x=>x.t===t); $("#pageTitle").textContent = n.l; $("#pageSub").textContent = n.s; document.title = n.l + " · Panel IA Plus";
   openSide(false);
+  if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
   if(t==="log") loadLog(logCli);
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
@@ -522,7 +524,7 @@ function render(){
       <div class="wrapt"><table style="min-width:640px"><thead><tr><th>Fecha</th><th>Evento</th><th>Detalle</th><th>Quién</th></tr></thead><tbody id="lrows"><tr><td colspan="4" class="empty">Abre esta pestaña para cargar.</td></tr></tbody></table></div>
     </div>
   </section>`;
-  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="more"){ openSide(true); return; } setTab(b.dataset.t); window.scrollTo({top:0,behavior:"smooth"}); });
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="more"){ openSide(true); return; } setTab(b.dataset.t); });
   $("#side").classList.remove("hide"); document.body.classList.add("has-side"); drawNav();
   if(!$("#fab")){ const f=document.createElement("button"); f.className="fab"; f.id="fab"; f.title="Nueva cuenta o código"; f.textContent="＋"; f.onclick=()=>{ setTab("cta"); const bx=$("#addBox"); bx.open=true; bx.scrollIntoView({behavior:"smooth",block:"start"}); setTimeout(()=>$("#fMail").focus(),400); }; document.body.appendChild(f); }
   $("#addForm").onsubmit = addAccount;
@@ -792,9 +794,19 @@ function expiraHtml(i){
   if(left<=0) return `<div class="exp over">⏱ vencido · se borra solo</div>`;
   return `<div class="exp ${left<=10?"low":""}">⏱ vence en ${left>=60?Math.floor(left/60)+" h "+(left%60)+" min":left+" min"}</div>`;
 }
+let codePage = 0, codeFilterKey = "";
+const CODE_PAGE_SIZE = 20;
 function rows(){
   const el = $("#rows"); if(!el) return;
-  const list = filtered();
+  const all = filtered();
+  const filterKey = JSON.stringify([$("#q")?.value||"",$("#st")?.value||"",$("#pf")?.value||"",hlCode]);
+  if(filterKey!==codeFilterKey){codePage=0;codeFilterKey=filterKey;}
+  codePage=Math.max(0,Math.min(codePage,Math.ceil(all.length/CODE_PAGE_SIZE)-1));
+  const start=codePage*CODE_PAGE_SIZE, list=all.slice(start,start+CODE_PAGE_SIZE);
+  let pager=$("#codePager");
+  if(!pager){pager=document.createElement("nav");pager.id="codePager";pager.className="code-pager";pager.setAttribute("aria-label","Páginas de códigos");el.closest(".wrapt").after(pager);}
+  pager.innerHTML=`<span role="status">${all.length?start+1:0}–${Math.min(start+CODE_PAGE_SIZE,all.length)} de ${all.length} registros</span><div><button class="btn s" type="button" data-code-step="-1" ${codePage===0?"disabled":""}>← Anterior</button><button class="btn s" type="button" data-code-step="1" ${start+CODE_PAGE_SIZE>=all.length?"disabled":""}>Siguiente →</button></div>`;
+  pager.querySelectorAll("[data-code-step]").forEach(button=>button.onclick=()=>{codePage+=Number(button.dataset.codeStep);rows();el.closest(".wrapt").scrollIntoView({block:"start",behavior:"instant"});});
   el.innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
@@ -1342,7 +1354,7 @@ document.addEventListener("click", e=>{
 
 /* ---------- menú lateral: clics, cajón en celular y atajos ---------- */
 document.addEventListener("click", e=>{
-  const n = e.target.closest(".nv[data-t]"); if(n){ setTab(n.dataset.t); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  const n = e.target.closest(".nv[data-t]"); if(n){ setTab(n.dataset.t); return; }
   if(e.target.closest("#sideBtn")){ openSide(!document.body.classList.contains("side-open")); return; }
   if(e.target.closest("#sideShade")){ openSide(false); return; }
   if(e.target.closest("#gTheme")){ lsSet("iap_theme", load("iap_theme")==="dark" ? "" : "dark"); applyTheme(); return; }

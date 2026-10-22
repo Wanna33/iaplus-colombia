@@ -409,6 +409,12 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 @media(max-width:760px){.inbox{grid-template-columns:minmax(0,1fr)}.ib-list{max-height:300px}.ib-chat{min-height:420px}.saldo .bar{width:44px}.saldo .tx2{display:none}}
 </style>
 <link rel="stylesheet" href="admin-refresh.css">
+<style>
+/* Mobile code-list stability */
+.code-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:13px;color:var(--mut)}
+.code-pager>div{display:flex;gap:8px}.code-pager button:disabled{opacity:.45;cursor:default}
+@media(max-width:760px){#tab-cod,#tab-cod>.card,#tab-cod>details{animation:none!important}.code-pager{padding-bottom:16px}}
+</style>
 </head>
 <body>
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
@@ -437,6 +443,6 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 <link rel="stylesheet" href="local-bots.css">
 <script src="local-bots.js"></script>
 <script src="admin-paypal.js"></script>
-<script src="admin.js"></script>
+<script src="admin.js?v=20261022-mobile-codes"></script>
 </body>
 </html>
