@@ -406,7 +406,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-pay]
   const nav = document.querySelector(".nav"), hero = document.getElementById("inicio"), meta = document.querySelector('meta[name="theme-color"]');
   if(nav && hero){
     let dark = null;
-    const f = () => { const d = window.scrollY < hero.offsetHeight - 90; if(d === dark) return; dark = d; nav.classList.toggle("dark", d); if(meta) meta.content = d ? "#174e3c" : "#faf9f5"; };
+    const f = () => { const d = window.scrollY < hero.offsetHeight - 90; if(d === dark) return; dark = d; nav.classList.toggle("dark", d); if(meta) meta.content = "#f2f6fc"; };
     addEventListener("scroll", f, {passive:true}); addEventListener("resize", f); f();
   }
   const fine = matchMedia("(hover:hover) and (pointer:fine)").matches && !matchMedia("(prefers-reduced-motion:reduce)").matches;
