@@ -49,7 +49,7 @@
 <link rel="stylesheet" href="seasonal.css?v=20261022">
 <link rel="stylesheet" href="halloween-fx.css?v=20261022">
 <link rel="stylesheet" href="video-guide.css?v=20261022">
-<link rel="stylesheet" href="storefront-polish.css?v=20261023-5">
+<link rel="stylesheet" href="storefront-polish.css?v=20261023-6">
 
 </head>
 <body class="storefront">
@@ -114,7 +114,10 @@
     </div>
     <div class="hero-side">
       <div class="hero-collage" aria-label="Cuentas digitales para Colombia">
-        <img class="hero-colombia-art" src="assets/hero-colombia-creadora.webp?v=20261023" alt="Creadora colombiana sonriente con una escena cafetera y tarjetas de historias" width="1120" height="747" fetchpriority="high" decoding="async">
+        <picture class="hero-art-picture">
+          <source media="(max-width: 600px)" srcset="assets/hero-colombia-creadora-mobile.webp?v=20261023" width="780" height="975">
+          <img class="hero-colombia-art" src="assets/hero-colombia-creadora.webp?v=20261023" alt="Creadora colombiana sonriente con una escena cafetera y tarjetas de historias" width="1120" height="747" fetchpriority="high" decoding="async">
+        </picture>
         <span class="collage-country"><span aria-hidden="true">🇨🇴</span> Hecho para Colombia</span>
         <a class="collage-plan" href="#planes-chatgpt"><img src="chatgpt.webp" alt="" width="38" height="38"><span><b>ChatGPT Plus</b><small>Conoce los planes</small></span><span aria-hidden="true">↗</span></a>
         <div class="collage-tools" role="group" aria-label="Explora otras cuentas digitales">
