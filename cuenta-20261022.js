@@ -237,7 +237,7 @@ function bindAdd(){
       if(!await confirmActivation(p.code))return;
       btn.textContent="Activando tu acceso…";
       const j=await callApi({action:"redeem",code:p.code});if(!j.ok)throw new Error(j.error||"No se pudo activar el código.");
-      save("iap_pending_code",null);activationDraft="";sessionStorage.removeItem("iap_conf");FLASH={ok:true,t:"Acceso activado. Ya puedes ver tus datos y entrar a tu cuenta."};await loadAll();
+      save("iap_pending_code",null);activationDraft="";sessionStorage.removeItem("iap_conf");FLASH={ok:true,t:"Acceso activado. Ya puedes ver tus datos y entrar a tu cuenta."};WELCOME_CODE=p.code;await loadAll();
     }catch(ex){err.textContent=ex.message;err.hidden=false;input.focus();}
     finally{activationBusy=false;btn.disabled=false;btn.textContent="Revisar código →";}
   };
@@ -371,6 +371,7 @@ let timer=null;
 /* ---------- enlace de activación: cuenta.html?codigo=IAP-XXXX-XXXX ---------- */
 (function(){ try{ const p=new URLSearchParams(location.search); const k=IAPActivation.parse(p.get("codigo")||p.get("code")||""); if(k.code){ save("iap_pending_code",k.code); history.replaceState(null,"",location.pathname); } }catch{} })();
 let FLASH=null;
+let WELCOME_CODE=null; // código recién activado: al cargar la cuenta se muestra la bienvenida una vez
 function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(!f.ok){ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 async function loadAll(){
   const pc = load("iap_pending_code");
@@ -379,7 +380,7 @@ async function loadAll(){
     try{
       if(await confirmActivation(pc)){
         const r=await callApi({action:"redeem",code:pc});
-        if(r.ok){save("iap_pending_code",null);FLASH={ok:true,t:"Acceso activado. Tus datos están listos en Mi cuenta."};sessionStorage.removeItem("iap_conf");}
+        if(r.ok){save("iap_pending_code",null);FLASH={ok:true,t:"Acceso activado. Tus datos están listos en Mi cuenta."};sessionStorage.removeItem("iap_conf");WELCOME_CODE=pc;}
         else{activationDraft=pc;save("iap_pending_code",null);FLASH={ok:false,t:r.error||"No pudimos activar el código. Revísalo o pide ayuda."};}
       }else{activationDraft=pc;save("iap_pending_code",null);}
     }catch(e){FLASH={ok:false,t:e.message||"La conexión se interrumpió. Consulta tus accesos antes de volver a intentarlo."};}
@@ -390,6 +391,7 @@ async function loadAll(){
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
     if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); return; }
     renderMain(); showFlash();
+    if(WELCOME_CODE){ const c=WELCOME_CODE; WELCOME_CODE=null; window.IAPCelebrate?.show(ITEMS.find(i=>i.codigo===c)||ITEMS.find(i=>!i.vencida)||null); }
     if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
     if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }

@@ -1,0 +1,33 @@
+/* Ventana de bienvenida tras activar un código o un enlace (ver activation-celebrate.js). */
+.celebrate{position:fixed;inset:0;margin:auto;width:min(460px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;border:0;border-radius:28px;padding:0;background:#fff;color:#1d1d22;box-shadow:0 28px 80px rgba(29,29,34,.28)}
+.celebrate::backdrop{background:rgba(29,29,34,.5);backdrop-filter:blur(6px)}
+.celebrate[open]{animation:celIn .45s cubic-bezier(.2,.8,.2,1) both}
+.cel-box{position:relative;z-index:1;padding:30px 24px 24px;text-align:center}
+.cel-icon{font-size:56px;line-height:1;animation:celPop .7s cubic-bezier(.2,.9,.3,1.4) .15s both}
+.celebrate h2{font-size:26px;letter-spacing:-.02em;margin:10px 0 6px}
+.celebrate .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:#7651a4}
+.celebrate p{font-size:15px;line-height:1.6;color:#4b4b56;margin:0 0 16px}
+.cel-steps{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:10px;text-align:left}
+.cel-steps li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:#f5f5f8}
+.cel-steps b{display:block;font-size:14.5px}
+.cel-steps small{display:block;margin-top:2px;font-size:13px;color:#6b6b76;line-height:1.5}
+.cel-n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ef5350)}
+.cel-actions{display:grid;gap:10px}
+.cel-go{width:100%;min-height:50px;font-size:16px}
+.cel-help{font-size:13.5px;font-weight:700;color:#12814a;text-decoration:none;padding:8px}
+.cel-burst{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.cel-burst span{position:absolute;top:-40px;animation:celFall 3.6s ease-in forwards}
+
+/* Versión de Halloween: se activa solo con html.halloween-theme */
+.celebrate.spooky{background:linear-gradient(180deg,#241d3b,#2f2350 60%,#3a2a44);color:#f5eafc;box-shadow:0 28px 80px rgba(240,162,71,.25)}
+.celebrate.spooky h2{color:#ffd98c}
+.celebrate.spooky .eyebrow{color:#f0a247}
+.celebrate.spooky p{color:#e9dcf7}
+.celebrate.spooky .cel-steps li{background:rgba(255,255,255,.07)}
+.celebrate.spooky .cel-steps small{color:#cbbbe0}
+.celebrate.spooky .cel-help{color:#ffd98c}
+
+@keyframes celIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes celPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes celFall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--sway,0),520px,0) rotate(300deg);opacity:0}}
+@media (max-width:480px){.cel-box{padding:24px 18px 20px}.celebrate h2{font-size:23px}}
