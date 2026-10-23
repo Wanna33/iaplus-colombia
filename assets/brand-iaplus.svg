@@ -1,26 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="76" viewBox="0 0 320 76" role="img" aria-labelledby="title desc">
   <title id="title">iapluscolombia</title>
-  <desc id="desc">Logo de IA Plus Colombia con un distintivo azul y un acento tricolor colombiano.</desc>
-  <defs>
-    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#3588F5"/>
-      <stop offset=".58" stop-color="#365DE0"/>
-      <stop offset="1" stop-color="#5749C9"/>
-    </linearGradient>
-  </defs>
-  <g transform="translate(2 6)">
-    <rect width="64" height="64" rx="20" fill="url(#brand)"/>
-    <rect x=".5" y=".5" width="63" height="63" rx="19.5" fill="none" stroke="#fff" stroke-opacity=".32"/>
-    <path d="M14 45 27 19a5 5 0 0 1 9 0l13 26" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M21 36h21" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-    <path d="M49 15v11m-5.5-5.5h11" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+  <desc id="desc">Logotipo tipográfico premium de iapluscolombia, en azul profundo con un acento dorado.</desc>
+  <g font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="-1.25">
+    <text x="8" y="44" fill="#142E43">ia<tspan fill="#B78B42">plus</tspan><tspan fill="#142E43">colombia</tspan></text>
   </g>
-  <g font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="750" letter-spacing="-1.35">
-    <text x="79" y="43" fill="#18304B">ia<tspan fill="#3769DF">plus</tspan><tspan fill="#18304B">colombia</tspan></text>
-  </g>
-  <g transform="translate(81 55)" aria-hidden="true">
-    <rect width="35" height="3" rx="1.5" fill="#F5C542"/>
-    <path d="M0 1.5h35v3a1.5 1.5 0 0 1-1.5 1.5h-32A1.5 1.5 0 0 1 0 4.5Z" fill="#2867C7"/>
-    <path d="M0 4.5h35V6a1.5 1.5 0 0 1-1.5 1.5h-32A1.5 1.5 0 0 1 0 6Z" fill="#D84648"/>
-  </g>
+  <path d="M9 56h46" stroke="#B78B42" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="60" cy="56" r="1.3" fill="#B78B42"/>
 </svg>

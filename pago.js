@@ -17,7 +17,7 @@
   const ref = cleanId(provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref));
   const canceled = provider==='paypal'&&params.get('cancel')==='1';
   const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
-  const logo = '<img class="lg" src="assets/brand-iaplus.svg?v=pro3" alt="iapluscolombia">';
+  const logo = '<img class="lg" src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia">';
   const show = (ic, title, text, extra) => { $("#box").innerHTML = logo + '<div class="ic">' + ic + '</div><h1>' + title + '</h1><p>' + text + '</p>' + (ref ? '<div class="ref">Referencia: ' + esc(ref) + '</div>' : '') + (extra || ""); };
   function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
   // Revisa que el token sea de esta tienda y no esté vencido antes de guardarlo (el servidor lo vuelve a verificar).

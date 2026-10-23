@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" role="img" aria-label="IA Plus"><defs><linearGradient id="iap" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#378cff"/><stop offset=".55" stop-color="#315ee9"/><stop offset="1" stop-color="#6c58d8"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="19" fill="url(#iap)"/><rect x="2.5" y="2.5" width="59" height="59" rx="18.5" fill="none" stroke="#fff" stroke-opacity=".4"/><path d="M16 43 28 19a4 4 0 0 1 7 0l12 24" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 36h17" stroke="white" stroke-width="5" stroke-linecap="round"/><path d="M47 16v10m-5-5h10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">iapluscolombia</title>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="#142E43"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="17.5" fill="none" stroke="#D1AE70" stroke-opacity=".7"/>
+  <text x="7" y="43" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="-2" fill="#F8F6F0">IA</text>
+  <path d="M45 15v12m-6-6h12" stroke="#D1AE70" stroke-width="3" stroke-linecap="round"/>
+</svg>
