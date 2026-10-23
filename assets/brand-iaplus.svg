@@ -1,1 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="232" height="76" viewBox="0 0 232 76" role="img" aria-label="IA Plus Colombia"><title>IA Plus Colombia</title><g transform="translate(3 6)"><defs><linearGradient id="iap" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#378cff"/><stop offset=".55" stop-color="#315ee9"/><stop offset="1" stop-color="#6c58d8"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="19" fill="url(#iap)"/><rect x="2.5" y="2.5" width="59" height="59" rx="18.5" fill="none" stroke="#fff" stroke-opacity=".4"/><path d="M16 43 28 19a4 4 0 0 1 7 0l12 24" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 36h17" stroke="white" stroke-width="5" stroke-linecap="round"/><path d="M47 16v10m-5-5h10" stroke="white" stroke-width="3" stroke-linecap="round"/></g><text x="81" y="41" font-family="Segoe UI,Arial,sans-serif" font-size="35" font-weight="700" letter-spacing="-1.6" fill="#1b2b48">IA Plus<tspan fill="#386ce5" font-size="18" baseline-shift="super">+</tspan></text><text x="83" y="59" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="600" letter-spacing="4.5" fill="#607596">COLOMBIA</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="76" viewBox="0 0 320 76" role="img" aria-labelledby="title desc">
+  <title id="title">iapluscolombia</title>
+  <desc id="desc">Logo de IA Plus Colombia con un distintivo azul y un acento tricolor colombiano.</desc>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#3588F5"/>
+      <stop offset=".58" stop-color="#365DE0"/>
+      <stop offset="1" stop-color="#5749C9"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(2 6)">
+    <rect width="64" height="64" rx="20" fill="url(#brand)"/>
+    <rect x=".5" y=".5" width="63" height="63" rx="19.5" fill="none" stroke="#fff" stroke-opacity=".32"/>
+    <path d="M14 45 27 19a5 5 0 0 1 9 0l13 26" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M21 36h21" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <path d="M49 15v11m-5.5-5.5h11" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+  </g>
+  <g font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="750" letter-spacing="-1.35">
+    <text x="79" y="43" fill="#18304B">ia<tspan fill="#3769DF">plus</tspan><tspan fill="#18304B">colombia</tspan></text>
+  </g>
+  <g transform="translate(81 55)" aria-hidden="true">
+    <rect width="35" height="3" rx="1.5" fill="#F5C542"/>
+    <path d="M0 1.5h35v3a1.5 1.5 0 0 1-1.5 1.5h-32A1.5 1.5 0 0 1 0 4.5Z" fill="#2867C7"/>
+    <path d="M0 4.5h35V6a1.5 1.5 0 0 1-1.5 1.5h-32A1.5 1.5 0 0 1 0 6Z" fill="#D84648"/>
+  </g>
+</svg>
