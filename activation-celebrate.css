@@ -37,12 +37,29 @@
 .guide-video-btn:hover{background:#efe8ff;transform:translateY(-1px)}
 .cel-video{width:100%}
 .celebrate.spooky .guide-video-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#ffd98c}
-.guide-video{position:fixed;inset:0;margin:auto;width:min(860px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:0;border-radius:26px;padding:0;background:linear-gradient(160deg,#17122e,#2a1f4d 62%,#1c1537);color:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5)}
+.guide-video{position:fixed;inset:0;margin:auto;width:min(860px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:0;border-radius:26px;padding:0;background:linear-gradient(160deg,#17122e,#2a1f4d 62%,#1c1537);color:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5);z-index:2147483000}
 .guide-video::backdrop{background:rgba(12,10,24,.72);backdrop-filter:blur(6px)}
-.guide-video form{position:absolute;right:12px;top:12px;z-index:2}
-.gv-close{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:800;cursor:pointer}
-.gv-body{padding:26px 22px 22px;text-align:center}
+.gv-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 0 20px}
+.gv-title{font-size:13px;font-weight:800;letter-spacing:.06em;color:#ffd98c;text-transform:uppercase}
+.gv-btns{display:flex;gap:6px}
+.gv-btn{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:800;cursor:pointer;line-height:1}
+.gv-btn:hover{background:rgba(255,255,255,.28)}.gv-btn[hidden]{display:none}
+.gv-body{padding:6px 22px 22px;text-align:center}
 .gv-body .eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;color:#ffb066}
-.gv-body h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.03em;margin:6px 44px 14px;color:#fff}
+.gv-body h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.03em;margin:6px 0 14px;color:#fff}
 .gv-body video{display:block;width:100%;aspect-ratio:16/9;border-radius:16px;background:#0c0a18}
 .gv-body p{margin:14px 0 0;font-size:14.5px;color:#d9d1f0;font-weight:600}
+/* Minimizado: flota en una esquina, se arrastra por la barra y no bloquea la página */
+.guide-video.gv-mini{inset:auto 16px 16px auto;margin:0;width:min(340px,64vw);max-height:none;overflow:hidden;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.14)}
+.guide-video.gv-mini .gv-bar{padding:4px 6px 4px 12px;cursor:grab;touch-action:none;user-select:none}
+.guide-video.gv-mini .gv-bar:active{cursor:grabbing}
+.guide-video.gv-mini .gv-title{font-size:11px}
+.guide-video.gv-mini .gv-btn{width:34px;height:34px;font-size:15px}
+.guide-video.gv-mini .gv-body{padding:0 6px 6px}
+.guide-video.gv-mini .gv-body .eyebrow,.guide-video.gv-mini .gv-body h2,.guide-video.gv-mini .gv-body p{display:none}
+.guide-video.gv-mini .gv-body video{border-radius:12px}
+@media(max-width:900px){.guide-video.gv-mini{inset:auto 10px calc(88px + env(safe-area-inset-bottom)) auto}}
+
+/* Cabecera de Mi cuenta en celular: el buscador no puede ser más ancho que la pantalla (empujaba el avatar y la barra inferior fuera de vista) */
+.top-in .search{min-width:0}
+.top-in .search input{min-width:0;width:100%}

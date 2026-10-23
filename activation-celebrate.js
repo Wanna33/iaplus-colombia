@@ -66,18 +66,85 @@
     burst(dlg, spooky);
   }
 
-  // Video guía: ventana aparte que se abre desde cualquier botón con data-guide-video.
+  // Video guía: se abre grande y se puede minimizar a un reproductor flotante (como YouTube) sin cortar el video.
+  // Es siempre el mismo <dialog>: modal cuando está grande, no modal (clic en la página) cuando está minimizado.
+  const PIP_OK = !!(document.pictureInPictureEnabled && HTMLVideoElement.prototype.requestPictureInPicture);
+
+  function minimizeVideo(d){
+    if (d.classList.contains("gv-mini")) return;
+    d._switching = true; d.classList.add("gv-mini");
+    d.style.left = d.style.top = d.style.right = d.style.bottom = "";
+    if (d.open) d.close();
+    d.show();
+    syncBtns(d);
+  }
+  function expandVideo(d){
+    d._switching = true; d.classList.remove("gv-mini");
+    d.style.left = d.style.top = d.style.right = d.style.bottom = "";
+    if (d.open) d.close();
+    d.showModal();
+    syncBtns(d);
+    d.querySelector("video")?.focus?.();
+  }
+  function closeVideo(d){
+    d._switching = false;
+    try { d.querySelector("video")?.pause(); } catch {}
+    if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {});
+    if (d.open) d.close();
+    d.remove();
+  }
+  function syncBtns(d){
+    const mini = d.classList.contains("gv-mini");
+    d.querySelector('[data-gv="min"]').hidden = mini;
+    d.querySelector('[data-gv="max"]').hidden = !mini;
+  }
+  // Arrastrar el reproductor minimizado por su barra superior.
+  function enableDrag(d){
+    const bar = d.querySelector(".gv-bar"); let drag = null;
+    bar.addEventListener("pointerdown", e => {
+      if (!d.classList.contains("gv-mini") || e.target.closest("button")) return;
+      const r = d.getBoundingClientRect();
+      drag = {dx: e.clientX - r.left, dy: e.clientY - r.top, w: r.width, h: r.height};
+      d.style.right = d.style.bottom = "auto"; d.style.left = r.left + "px"; d.style.top = r.top + "px";
+      bar.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    bar.addEventListener("pointermove", e => {
+      if (!drag) return;
+      const x = Math.min(Math.max(0, e.clientX - drag.dx), innerWidth - drag.w), y = Math.min(Math.max(0, e.clientY - drag.dy), innerHeight - drag.h);
+      d.style.left = x + "px"; d.style.top = y + "px";
+    });
+    const end = () => { drag = null; };
+    bar.addEventListener("pointerup", end); bar.addEventListener("pointercancel", end);
+  }
+
   function openVideo(){
-    if (document.querySelector("dialog.guide-video")) return;
+    const old = document.querySelector("dialog.guide-video");
+    if (old) { if (old.classList.contains("gv-mini")) expandVideo(old); return; }
     const d = document.createElement("dialog");
     d.className = "guide-video";
     d.setAttribute("aria-label", "Video guía de activación");
-    d.innerHTML = `<form method="dialog"><button class="gv-close" value="x" aria-label="Cerrar el video">✕</button></form>
+    d.innerHTML = `<div class="gv-bar"><span class="gv-title">▶ Video guía</span><div class="gv-btns">
+        ${PIP_OK ? '<button type="button" class="gv-btn" data-gv="pip" title="Ventana flotante fuera de la página" aria-label="Abrir en ventana flotante">⧉</button>' : ""}
+        <button type="button" class="gv-btn" data-gv="min" title="Minimizar y seguir los pasos" aria-label="Minimizar el video">⌄</button>
+        <button type="button" class="gv-btn" data-gv="max" title="Ampliar" aria-label="Ampliar el video" hidden>⤢</button>
+        <button type="button" class="gv-btn" data-gv="close" title="Cerrar" aria-label="Cerrar el video">✕</button></div></div>
       <div class="gv-body"><span class="eyebrow">VIDEO GUÍA</span><h2>Activa y entra a tu cuenta</h2>
       <video controls playsinline autoplay poster="assets/video/como-activar-poster.jpg"><source src="assets/video/como-activar-chatgpt-plus.mp4" type="video/mp4"></video>
-      <p>En 3 minutos: activar con enlace o código y entrar a tu ChatGPT Plus.</p></div>`;
+      <p>En 3 minutos: activar con enlace o código y entrar a tu ChatGPT Plus. <b>Toca ⌄ para minimizarlo</b> y seguir los pasos mientras lo ves.</p></div>`;
     document.body.appendChild(d);
-    d.addEventListener("close", () => { d.querySelector("video")?.pause(); d.remove(); }, {once: true});
+    d.addEventListener("click", e => {
+      const b = e.target.closest("[data-gv]"); if (!b) return;
+      const k = b.dataset.gv;
+      if (k === "min") minimizeVideo(d);
+      else if (k === "max") expandVideo(d);
+      else if (k === "close") closeVideo(d);
+      else if (k === "pip") { const v = d.querySelector("video"); v.requestPictureInPicture().then(() => minimizeVideo(d)).catch(() => {}); }
+    });
+    // Esc o tocar fuera minimiza en vez de cerrar.
+    d.addEventListener("cancel", e => { e.preventDefault(); minimizeVideo(d); });
+    d.addEventListener("click", e => { if (e.target === d && !d.classList.contains("gv-mini")) minimizeVideo(d); });
+    d.addEventListener("close", () => { if (d._switching) { d._switching = false; return; } try { d.querySelector("video")?.pause(); } catch {} d.remove(); });
+    enableDrag(d);
     d.showModal();
     try { window.iapTrack && window.iapTrack("video_guia", location.pathname.split("/").pop()); } catch {}
   }
