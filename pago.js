@@ -10,29 +10,45 @@
   const params = new URLSearchParams(location.search);
   const pend = load("iap_pay");
   const provider = params.get('provider')==='paypal'?'paypal':(params.get('id')?'wompi':pend?.provider==='paypal'?'paypal':'wompi');
-  const txId = provider==='paypal'?(params.get('token')||pend?.id||''):(params.get('id')||'');
-  const ref = provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref);
+  // Solo se aceptan identificadores con letras, números, guion o guion bajo: lo que llegue por la URL no se envía tal cual al servidor.
+  const SAFE_ID = /^[A-Za-z0-9_-]{4,80}$/;
+  const cleanId = v => (typeof v === 'string' && SAFE_ID.test(v)) ? v : '';
+  const txId = cleanId(provider==='paypal'?(params.get('token')||pend?.id||''):(params.get('id')||''));
+  const ref = cleanId(provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref));
   const canceled = provider==='paypal'&&params.get('cancel')==='1';
   const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
   const logo = '<img class="lg" src="assets/brand-iaplus.svg?v=pro2" alt="IA Plus Colombia">';
   const show = (ic, title, text, extra) => { $("#box").innerHTML = logo + '<div class="ic">' + ic + '</div><h1>' + title + '</h1><p>' + text + '</p>' + (ref ? '<div class="ref">Referencia: ' + esc(ref) + '</div>' : '') + (extra || ""); };
   function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
+  // Revisa que el token sea de esta tienda y no esté vencido antes de guardarlo (el servidor lo vuelve a verificar).
+  function readCred(r){
+    const p = parseJwt(r.credential);
+    if(p.aud !== CLIENT_ID || !p.email || !(p.exp*1000 > Date.now())) throw new Error("No pudimos validar tu cuenta de Google. Intenta de nuevo.");
+    return {p, cr:{token:r.credential, exp:p.exp*1000}};
+  }
   function ensureCred(){
     const c = load("iap_cred"); if(c && c.exp > Date.now()+30000) return Promise.resolve(c);
     return new Promise(resolve => {
       show("🔐", "Confirma tu cuenta", "Inicia sesión con el mismo Gmail con el que pagaste para ver tu pedido.", '<div id="gb" style="display:flex;justify-content:center"></div>');
       const init = () => {
         if(!window.google || !google.accounts || !google.accounts.id) return setTimeout(init, 300);
-        google.accounts.id.initialize({client_id:CLIENT_ID, callback:r => { const p=parseJwt(r.credential); const cr={token:r.credential,exp:p.exp*1000}; save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""}); resolve(cr); }});
+        google.accounts.id.initialize({client_id:CLIENT_ID, callback:r => {
+          let res;
+          try{ res = readCred(r); }
+          catch(e){ show("⚠️", "No pudimos validar tu cuenta", esc(e.message), ""); return; }
+          const {p, cr} = res;
+          save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""}); resolve(cr);
+        }});
         google.accounts.id.renderButton($("#gb"), {theme:"outline", size:"large", shape:"pill", locale:"es"});
       };
       init();
     });
   }
-  async function call(body){
+  // Si la sesión venció se pide Google otra vez, pero solo un reintento: así no se queda en bucle.
+  async function call(body, retry = true){
     const cred = await ensureCred();
     const j = await postJson(API_URL, {...body, idToken:cred.token});
-    if(!j.ok && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return call(body); }
+    if(!j.ok && retry && /sesión venció|Inicia sesión/i.test(j.error||"")){ try{ localStorage.removeItem("iap_cred"); }catch{} return call(body, false); }
     return j;
   }
   const done = () => { try{ localStorage.removeItem("iap_pay"); localStorage.setItem("iap_has","true"); }catch{} };
