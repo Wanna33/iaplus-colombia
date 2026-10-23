@@ -50,6 +50,7 @@
       </ol>
       <div class="cel-actions">
         <button class="cta cel-go" value="go" type="submit">Ver mis datos de acceso →</button>
+        <button class="guide-video-btn cel-video" type="button" data-guide-video>▶ Ver el video guía · 3 min</button>
         <a class="cel-help" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, acabo de activar mi cuenta y tengo una duda")}" target="_blank" rel="noopener">¿Necesitas ayuda? Escríbenos por WhatsApp</a>
       </div>
     </form>`;
@@ -65,5 +66,22 @@
     burst(dlg, spooky);
   }
 
-  window.IAPCelebrate = {show};
+  // Video guía: ventana aparte que se abre desde cualquier botón con data-guide-video.
+  function openVideo(){
+    if (document.querySelector("dialog.guide-video")) return;
+    const d = document.createElement("dialog");
+    d.className = "guide-video";
+    d.setAttribute("aria-label", "Video guía de activación");
+    d.innerHTML = `<form method="dialog"><button class="gv-close" value="x" aria-label="Cerrar el video">✕</button></form>
+      <div class="gv-body"><span class="eyebrow">VIDEO GUÍA</span><h2>Activa y entra a tu cuenta</h2>
+      <video controls playsinline autoplay poster="assets/video/como-activar-poster.jpg"><source src="assets/video/como-activar-chatgpt-plus.mp4" type="video/mp4"></video>
+      <p>En 3 minutos: activar con enlace o código y entrar a tu ChatGPT Plus.</p></div>`;
+    document.body.appendChild(d);
+    d.addEventListener("close", () => { d.querySelector("video")?.pause(); d.remove(); }, {once: true});
+    d.showModal();
+    try { window.iapTrack && window.iapTrack("video_guia", location.pathname.split("/").pop()); } catch {}
+  }
+  document.addEventListener("click", e => { if (e.target.closest("[data-guide-video]")) { e.preventDefault(); openVideo(); } });
+
+  window.IAPCelebrate = {show, openVideo};
 })();

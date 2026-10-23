@@ -31,3 +31,18 @@
 @keyframes celPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes celFall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--sway,0),520px,0) rotate(300deg);opacity:0}}
 @media (max-width:480px){.cel-box{padding:24px 18px 20px}.celebrate h2{font-size:23px}}
+
+/* Botón y ventana del video guía */
+.guide-video-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;margin:14px auto 4px;padding:12px 20px;border-radius:999px;border:1.5px solid #d9d4ee;background:#f6f2ff;color:#4c2f9c;font:inherit;font-weight:800;font-size:14.5px;cursor:pointer;min-height:44px;transition:transform .2s,background .2s}
+.guide-video-btn:hover{background:#efe8ff;transform:translateY(-1px)}
+.cel-video{width:100%}
+.celebrate.spooky .guide-video-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#ffd98c}
+.guide-video{position:fixed;inset:0;margin:auto;width:min(860px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:0;border-radius:26px;padding:0;background:linear-gradient(160deg,#17122e,#2a1f4d 62%,#1c1537);color:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5)}
+.guide-video::backdrop{background:rgba(12,10,24,.72);backdrop-filter:blur(6px)}
+.guide-video form{position:absolute;right:12px;top:12px;z-index:2}
+.gv-close{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:800;cursor:pointer}
+.gv-body{padding:26px 22px 22px;text-align:center}
+.gv-body .eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;color:#ffb066}
+.gv-body h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.03em;margin:6px 44px 14px;color:#fff}
+.gv-body video{display:block;width:100%;aspect-ratio:16/9;border-radius:16px;background:#0c0a18}
+.gv-body p{margin:14px 0 0;font-size:14.5px;color:#d9d1f0;font-weight:600}
