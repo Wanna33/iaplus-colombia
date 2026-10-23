@@ -6,3 +6,11 @@ body{background:radial-gradient(ellipse at 4% 8%,#d6eaff,transparent 46%),radial
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 :focus-visible{outline:3px solid #578de1!important;outline-offset:3px}
 body>.box{background:linear-gradient(145deg,#ffffffd9,#ffffff8c);border:1px solid #fff;border-radius:28px;box-shadow:0 18px 60px #4b6b9e15}
+.account-signin{background:linear-gradient(145deg,#fff 0%,#fff 73%,#f5f7ef 100%);border-color:#d5ddd4;box-shadow:0 20px 55px rgba(35,61,45,.12)}
+.signin-welcome-head{display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;margin:0 auto 20px}
+.account-signin .signin-brand{display:block;flex:0 1 200px;width:200px;min-width:0;margin:0}
+.account-signin .signin-brand img{display:block;width:100%;height:auto;object-fit:contain}
+.signin-welcome-visual{display:grid;justify-items:center;align-content:center;flex:0 1 126px;width:126px;min-width:0;padding:4px;border:1px solid #d9dfd3;border-radius:20px;background:linear-gradient(145deg,#fffdf6,#edf4eb);box-shadow:0 10px 25px rgba(32,72,47,.12)}
+.signin-welcome-visual img{display:block;width:100%;height:auto;max-height:156px;object-fit:contain;object-position:center bottom}
+.signin-welcome-visual span{display:block;color:#176443;font-size:8px;font-weight:800;line-height:1.3;text-align:center}
+@media(max-width:390px){.signin-welcome-head{gap:7px}.account-signin .signin-brand{flex-basis:160px}.signin-welcome-visual{flex-basis:106px;width:106px;border-radius:16px}.signin-welcome-visual img{max-height:132px}.signin-welcome-visual span{font-size:7px}}
