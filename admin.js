@@ -335,7 +335,7 @@ function setTab(t){
   openSide(false);
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
 
-  if(t==="log") loadLog(logCli);
+  if(t==="log"){ loadLog(logCli); loadSeg(); }
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
   if(t==="rev") loadRev();
@@ -549,6 +549,12 @@ function render(){
   </section>
 
   <section id="tab-log" class="hide">
+    <div class="card" id="segCard"><h2>🛡️ Seguridad</h2>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Bloquea a un cliente que abuse de la tienda (reventa, fraude, uso indebido) y cierra todas las sesiones si crees que alguien entró sin permiso. Los cambios aplican al instante; tú nunca quedas bloqueado.</p>
+      <div class="tools"><input id="segMail" type="email" placeholder="Gmail del cliente a bloquear" style="min-width:240px" autocomplete="off"><input id="segWhy" placeholder="Motivo (opcional)" maxlength="120"><button class="btn s d" id="segBlock" type="button">Bloquear</button></div>
+      <div id="segList" style="margin:10px 0"></div>
+      <div class="tools"><button class="btn s d" id="segLogout" type="button">Cerrar todas las sesiones</button><span id="segInfo" style="color:var(--mut);font-size:13px"></span></div>
+    </div>
     <div class="card"><h2>🕘 Actividad de clientes y registro</h2>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada movimiento con su fecha y hora de Colombia: cuándo entran, activan códigos, piden el autenticador, copian o ven la contraseña, piden ayuda, renuevan o cierran sesión, y desde qué dispositivo. Sin cliente: los últimos 500 eventos.</p>
       <div class="tools"><input id="lcli" type="email" placeholder="Correo del cliente (ver toda su actividad)" style="min-width:240px"><button class="btn s p" id="lcliGo">Ver actividad</button><button class="btn s" id="logReload">↻ Todo el registro</button><input id="lq" placeholder="Filtrar lo que se muestra…"></div>
@@ -902,6 +908,26 @@ function copy(t){ copyText(t).then(()=>toast("Copiado ✔")); }
 /* ---------- Registro ---------- */
 let logData = [];
 let logCli = "", logReq = 0;
+/* ---------- Seguridad: bloqueos y cierre de sesiones ---------- */
+function drawSeg(r){
+  const ids = Object.keys(r.bloqueados||{}), el = $("#segList"); if(!el) return;
+  el.innerHTML = ids.length ? ids.map(m=>{ const b=r.bloqueados[m]||{}; return `<div class="mini" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px"><div style="min-width:0;word-break:break-word"><b>${esc(m)}</b><br><small style="color:var(--mut)">${esc(b.motivo||"Sin motivo")}${b.fecha?" · desde "+esc(fdate(new Date(b.fecha).toISOString())):""}</small></div><button class="btn s" type="button" data-seg-un="${esc(m)}">Desbloquear</button></div>`; }).join("") : '<p style="color:var(--mut);font-size:14px;margin:0">Nadie está bloqueado.</p>';
+  const info = $("#segInfo"); if(info) info.textContent = r.sesionDesde ? "Última vez que se cerraron las sesiones: "+new Date(r.sesionDesde).toLocaleString("es-CO",{timeZone:"America/Bogota"}) : "";
+}
+async function loadSeg(){
+  try{ drawSeg(await api("admin_seg_info")); }
+  catch(ex){ const el=$("#segList"); if(el) el.innerHTML = `<p style="color:var(--mut);font-size:14px;margin:0">${esc(/no válida/i.test(ex.message)?"Falta actualizar el backend (Code.gs) en Apps Script para usar la seguridad.":ex.message)}</p>`; }
+}
+async function segCall(action, data, okMsg){
+  try{ const r = await api(action, data); toast(okMsg); if(r.bloqueados) drawSeg({bloqueados:r.bloqueados, sesionDesde:0}); await loadSeg(); }
+  catch(ex){ toast(ex.message); }
+}
+document.addEventListener("click", e=>{
+  const t = e.target;
+  if(t.id==="segBlock"){ const m=$("#segMail").value.trim().toLowerCase(); if(!m) return toast("Escribe el Gmail del cliente"); if(!confirm("¿Bloquear a "+m+"? No podrá usar la tienda hasta que lo desbloquees.")) return; segCall("admin_seg_bloquear",{cliente:m,motivo:$("#segWhy").value.trim()},"Cliente bloqueado ✔").then(()=>{ $("#segMail").value=""; $("#segWhy").value=""; }); }
+  else if(t.dataset && t.dataset.segUn){ segCall("admin_seg_desbloquear",{cliente:t.dataset.segUn},"Cliente desbloqueado ✔"); }
+  else if(t.id==="segLogout"){ if(!confirm("Se cerrará la sesión de TODOS (también la tuya) y cada persona deberá volver a entrar con Google. ¿Continuar?")) return; api("admin_seg_cerrar_sesiones").then(()=>{ toast("Sesiones cerradas. Entra de nuevo."); try{ localStorage.removeItem("iap_cred"); }catch{} setTimeout(()=>location.reload(),900); }).catch(ex=>toast(ex.message)); }
+});
 async function loadLog(cli){
   logCli = typeof cli==="string" ? cli : ""; const my = ++logReq; // si llegan dos respuestas, solo vale la última pedida
   $("#lrows").innerHTML = '<tr><td colspan="4" class="empty">Cargando…</td></tr>'; $("#lsum").innerHTML = "";
