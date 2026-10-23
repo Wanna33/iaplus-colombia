@@ -9,7 +9,7 @@
       welcome.hidden = false;
       if (videoGuide) videoGuide.hidden = false;
     };
-    if (params.get("codigo") || params.get("code")) show();
+    if (params.get("codigo") || params.get("code") || params.get("tutorial") === "1") show();
     window.IAPActivationWelcome = {
       hideForSuccess() { welcome.hidden = true; },
       showSuccess() {
