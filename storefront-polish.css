@@ -47,9 +47,7 @@
 .storefront .activation-card{background:rgba(255,255,255,.92);border-radius:22px}
 .storefront .activation-steps li>b{background:#e1f1df;color:#146c4a}
 .storefront .trust-story-visual{border-color:rgba(39,91,58,.14);box-shadow:var(--shadow-soft)}
-.storefront .trust-photo-note{border-color:#dce8d9}
-.storefront .trust-photo-note>img{background:radial-gradient(circle,#dcebdc 0,#f6f8f0 72%,transparent 73%)}
-.storefront .trust-photo-check{background:#eaf6ee;color:#08794f;border-color:#c8e4d1}
+.storefront .trust-image-cta>span{background:#ffe08a;color:#183d2c}
 .storefront .assistant-tabs button{border-color:rgba(39,91,58,.12);border-radius:15px}
 .storefront .assistant-tabs button.on,.storefront .assistant-tabs button:hover{border-color:#a8ccb0;background:#edf6e8;color:#176b4c}
 .storefront .why-i,.storefront .step{border-radius:19px;background:rgba(255,255,255,.86)}
