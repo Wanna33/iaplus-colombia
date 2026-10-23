@@ -16,10 +16,6 @@
 <meta name="apple-mobile-web-app-title" content="IA Plus">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#ffffff">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://accounts.google.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{--bg:#f8fafc;--card:#fff;--line:#e8edf3;--text:#0f172a;--mut:#64748b;--acc:#e0403d;--acc2:#ff6a5c;--ok:#12a36b;--okbg:#e3f7ee;--warn:#c27a00;--warnbg:#fff4dc;--bad:#d33;--badbg:#fde8e8;--soft:#eef4ff}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -408,7 +404,6 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 .ib-list,.ib-chat{min-width:0}.ib-top b{max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:760px){.inbox{grid-template-columns:minmax(0,1fr)}.ib-list{max-height:300px}.ib-chat{min-height:420px}.saldo .bar{width:44px}.saldo .tx2{display:none}}
 </style>
-<link rel="stylesheet" href="admin-refresh.css">
 <link rel="stylesheet" href="admin-glass.css?v=20261022">
 <style>
 /* Mobile code-list stability */
@@ -424,7 +419,7 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 @media(max-width:560px){.bulk-bar .btn{flex:1 1 auto;min-height:44px}.sel-td{width:40px}}
 @media(max-width:560px){.batch-result-actions{display:grid;grid-template-columns:1fr}.batch-result-actions .btn{min-height:46px}.batch-welcome{align-items:flex-start}.batch-welcome img{width:96px}.codeline{align-items:stretch}.codeline .mono{flex-basis:100%;font-size:18px;overflow-wrap:anywhere}.codeline>div{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:7px}.codeline>div .btn{min-height:44px}.codeline>a{width:100%;justify-content:center;min-height:44px}}
 </style>
-<link rel="stylesheet" href="premium-2026.css?v=20261022-1">
+<link rel="stylesheet" href="admin-pro.css?v=20261022-3">
 </head>
 <body class="admin-app">
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
@@ -449,12 +444,9 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="net.js"></script>
-<link rel="stylesheet" href="local-bots.css">
-<script src="local-bots.js"></script>
-<script src="admin-paypal.js"></script>
-<script src="admin-workflow.js"></script>
-<script src="admin-insights.js"></script>
-<script src="admin.js?v=20261022-seleccion-seguridad"></script>
+<script defer src="net.js"></script>
+<script defer src="admin-workflow.js"></script>
+<script defer src="admin-insights.js"></script>
+<script defer src="admin.js?v=admin-pro-20261022-3"></script>
 </body>
 </html>

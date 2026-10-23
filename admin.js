@@ -44,6 +44,21 @@ function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); 
 function message(title, text, extra=""){ $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p>${extra}</div>`; }
 function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
 
+function loadAdminScript(src){
+  return new Promise((resolve,reject)=>{
+    const existing=document.querySelector(`script[data-admin-module="${src}"]`);
+    if(existing){if(existing.dataset.ready==="true")resolve();else{existing.addEventListener("load",resolve,{once:true});existing.addEventListener("error",reject,{once:true});}return;}
+    const script=document.createElement("script");script.src=src;script.dataset.adminModule=src;script.onload=()=>{script.dataset.ready="true";resolve();};script.onerror=()=>{script.remove();reject(new Error("No se pudo cargar este módulo."));};document.body.append(script);
+  });
+}
+function loadAdminStyle(href){
+  return new Promise((resolve,reject)=>{
+    const existing=document.querySelector(`link[data-admin-style="${href}"]`);
+    if(existing){if(existing.dataset.ready==="true")resolve();else{existing.addEventListener("load",resolve,{once:true});existing.addEventListener("error",reject,{once:true});}return;}
+    const link=document.createElement("link");link.rel="stylesheet";link.href=href;link.dataset.adminStyle=href;link.onload=()=>{link.dataset.ready="true";resolve();};link.onerror=()=>{link.remove();reject(new Error("No se pudo cargar el estilo de esta sección."));};document.head.append(link);
+  });
+}
+
 async function api(action, data={}){
   const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Inicia sesión otra vez.");
@@ -52,8 +67,13 @@ async function api(action, data={}){
 
 function showLogin(){
   message("Acceso del administrador","Inicia sesión con la cuenta de Google autorizada.",'<div id="g" style="display:inline-block"></div>');
+  if(!window.google?.accounts?.id&&!document.querySelector('script[data-google-identity]')){
+    const script=document.createElement("script");script.src="https://accounts.google.com/gsi/client";script.async=true;script.dataset.googleIdentity="true";
+    script.onerror=()=>{const mount=$("#g");if(mount)mount.innerHTML='<p class="login-load-error" role="status">No se pudo cargar el acceso de Google. Revisa tu conexión e intenta de nuevo.</p>';};document.head.append(script);
+  }
+  let attempts=0;
   const go = () => {
-    if(!window.google?.accounts?.id){ return setTimeout(go,300); }
+    if(!window.google?.accounts?.id){if(++attempts<40)return setTimeout(go,250);const mount=$("#g");if(mount)mount.innerHTML='<p class="login-load-error" role="status">Google está tardando en responder. Revisa tu conexión e intenta de nuevo.</p>';return;}
     google.accounts.id.initialize({client_id:CLIENT_ID, callback:r=>{
       const p=parseJwt(r.credential);
       save("iap_cred",{token:r.credential,exp:p.exp*1000}); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""});
@@ -83,7 +103,8 @@ function start(){
   const u = load("iap_user"); const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ showLogin(); return; }
   $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide"); $("#gSearch").classList.remove("hide"); $("#gSettings").classList.remove("hide");
-  refresh(); loadSaldo(); setTimeout(()=>api("admin_catalogo").then(j=>{ GPRODS = j.productos; syncPrecios(); }).catch(()=>{}), 0); clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden) loadSaldo(); }, 300000);
+  refresh().then(()=>{setTimeout(()=>{if(!document.hidden&&window.matchMedia("(min-width: 761px)").matches&&!$("#gSettings")?.classList.contains("hide"))loadSaldo();},2500);});
+  clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden&&window.matchMedia("(min-width: 761px)").matches) loadSaldo(); }, 300000);
 }
 
 /* ---------- Utilidades de datos ---------- */
@@ -177,7 +198,7 @@ function mixHtml(){
     <ul class="legend">${top.map((a,i)=>`<li><i style="background:${COL[i%COL.length]}"></i><span>${esc(a[0])}</span><b>${a[1]}</b><small>${Math.round(a[1]/tot*100)}%</small></li>`).join("")}</ul></div>`;
 }
 /* actividad reciente de clientes en el tablero */
-let FEED = {t:0, list:[]};
+let FEED = {t:0, list:[]}, feedTimer=0, feedLoading=false;
 const ago = iso => { const s=(Date.now()-new Date(iso))/1000; if(s<60) return "hace un momento"; if(s<3600) return "hace "+Math.floor(s/60)+" min"; if(s<86400) return "hace "+Math.floor(s/3600)+" h"; return new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short"}); };
 function drawFeed(){
   const el = $("#feed"); if(!el) return;
@@ -185,10 +206,17 @@ function drawFeed(){
 }
 async function loadFeed(force){
   if(!$("#feed")) return;
+  if(force&&feedTimer){clearTimeout(feedTimer);feedTimer=0;}
+  if(!force&&!FEED.t){
+    if(!feedTimer)feedTimer=setTimeout(()=>{feedTimer=null;if(!document.hidden&&curTab==="res")loadFeed(true);},1500);
+    return;
+  }
   if(!force && Date.now()-FEED.t < 60000){ drawFeed(); return; }
+  if(feedLoading)return;feedLoading=true;
   try{ const r = (await api("admin_log")).log; const adm = (load("iap_user")||{}).email;
     FEED = {t:Date.now(), list:r.slice(0,12)}; drawFeed(); if($("#feedStatus")) $("#feedStatus").textContent="Últimos "+FEED.list.length+" eventos registrados · actualizado "+new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"}); }
   catch{ $("#feed").innerHTML = '<li class="empty">No se pudo cargar la actividad.</li>'; }
+  finally{feedLoading=false;}
 }
 /* tabla de productos: ventas, ingresos y cupo */
 function prodTableHtml(){
@@ -290,6 +318,12 @@ function drawNav(){
     return h+`<button type="button" class="nv" data-t="${n.t}" title="${esc(n.s)}" aria-label="${esc(n.l)}: ${esc(n.s)}">${svgI(n.t)}<span>${n.l}</span>${bd?`<em class="nvb ${bd.c}" title="${bd.n} ${bd.t}">${bd.n}</em>`:""}</button>`; }).join("");
 }
 function openSide(on){ document.body.classList.toggle("side-open", !!on); $("#sideBtn")?.setAttribute("aria-expanded",String(!!on)); }
+let catalogReady=false,catalogPromise=null;
+function ensureCatalog(){
+  if(catalogReady)return Promise.resolve();
+  if(!catalogPromise)catalogPromise=api("admin_catalogo").then(j=>{GPRODS=j.productos||[];catalogReady=true;syncPrecios();if(curTab==="cod")fillAuto();if(curTab==="prod")drawProds();}).catch(()=>{}).finally(()=>{catalogPromise=null;});
+  return catalogPromise;
+}
 function setTab(t){
   const previousTab=curTab;
   if(!NAV.some(n=>n.t===t)) t = "res";
@@ -308,14 +342,16 @@ function setTab(t){
   if(t==="ag") loadAgentes();
   if(t==="dios" && !godDirty && !godSaving) loadDios();
   if(t==="res") loadFeed();
-  if(t==="cod") updateGeneratorPreview();
-  if(t==="local") window.IAPLocalBots?.mount(document.getElementById("localBots"), items);
+  if(t==="prod"){ $("#byProd").innerHTML=byProductHtml();$("#prodTable").innerHTML=prodTableHtml(); }
+  if(t==="cli") crows();
+  if(t==="cod"){fillAccounts();fillAuto();rows();updateGeneratorPreview();ensureCatalog();}
+  if(t==="cta"){if(!$("#passList").contains(document.activeElement))$("#passList").innerHTML=passListHtml();fillAccounts();}
+  if(t==="local")Promise.all([loadAdminStyle("local-bots.css"),loadAdminScript("local-bots.js")]).then(()=>window.IAPLocalBots?.mount(document.getElementById("localBots"),items)).catch(()=>{const el=$("#localBots");if(el)el.innerHTML='<div class="empty">No se pudo cargar esta sección. Comprueba la conexión e inténtalo de nuevo.</div>';});
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
   if(!$("#profit").contains(document.activeElement)) $("#profit").innerHTML = profitHtml();
-  if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
-  $("#byProd").innerHTML = byProductHtml(); $("#prodTable").innerHTML = prodTableHtml(); $("#daily").innerHTML = dailyHtml(); $("#mix").innerHTML = mixHtml(); drawBusinessInsights(); drawNav(); setTab(curTab); countUp(); fillAccounts(); fillAuto(); crows(); rows();
+  $("#daily").innerHTML = dailyHtml(); $("#mix").innerHTML = mixHtml(); drawBusinessInsights(); drawNav(); setTab(curTab); countUp();
   const u = load("iap_user")||{}; const h = new Date().getHours(); $("#hello").innerHTML = `${h<12?"Buenos días":h<19?"Buenas tardes":"Buenas noches"}${u.name?", "+esc(String(u.name).split(" ")[0]):""} 👋<small>${new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})}</small>`;
 }
 function render(){
@@ -546,7 +582,7 @@ function render(){
   $("#payReload").onclick = loadPagos; $("#logReload").onclick = ()=>{ $("#lcli").value=""; loadLog(); }; $("#lq").oninput = drawLog;
   $("#lcliGo").onclick = ()=>loadLog($("#lcli").value.trim().toLowerCase()); $("#lcli").onkeydown = e=>{ if(e.key==="Enter") $("#lcliGo").click(); };
   document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>quick(b.dataset.qa));
-  updateViews(); setTab(curTab);
+  updateViews();
 }
 // Acciones rápidas del Resumen
 function quick(a){
@@ -565,9 +601,19 @@ function cFiltered(){
   const sorters = {rest:(a,b)=>rest(a)-rest(b), gasto:(a,b)=>b.gastado-a.gastado, nuevo:(a,b)=>String(b.ultima||"").localeCompare(String(a.ultima||"")), nombre:(a,b)=>(a.nombre||a.email).localeCompare(b.nombre||b.email)};
   return list.sort(sorters[so]);
 }
+let clientPage=0,clientFilterKey="";
+const CLIENT_PAGE_SIZE=25;
 function crows(){
+  if(curTab!=="cli")return;
   const el = $("#crows"); if(!el) return;
-  const list = cFiltered();
+  const all=cFiltered(),key=JSON.stringify([$("#cq")?.value||"",$("#cst")?.value||"",$("#cso")?.value||""]);
+  if(key!==clientFilterKey){clientPage=0;clientFilterKey=key;}
+  clientPage=Math.max(0,Math.min(clientPage,Math.ceil(all.length/CLIENT_PAGE_SIZE)-1));
+  const start=clientPage*CLIENT_PAGE_SIZE,list=all.slice(start,start+CLIENT_PAGE_SIZE);
+  let pager=$("#clientPager");
+  if(!pager){pager=document.createElement("nav");pager.id="clientPager";pager.className="code-pager";pager.setAttribute("aria-label","Páginas de clientes");el.closest(".wrapt").after(pager);}
+  pager.innerHTML=`<span role="status">${all.length?start+1:0}–${Math.min(start+CLIENT_PAGE_SIZE,all.length)} de ${all.length} clientes</span><div><button class="btn s" type="button" data-client-step="-1" ${clientPage===0?"disabled":""}>← Anterior</button><button class="btn s" type="button" data-client-step="1" ${start+CLIENT_PAGE_SIZE>=all.length?"disabled":""}>Siguiente →</button></div>`;
+  pager.querySelectorAll("[data-client-step]").forEach(button=>button.onclick=()=>{clientPage+=Number(button.dataset.clientStep);crows();el.closest(".wrapt").scrollIntoView({block:"start",behavior:"instant"});});
   el.innerHTML = list.length ? list.map(c=>{
     const s = cState(c);
     return `<tr data-c="${esc(c.email)}"><td class="sel-td" data-l="Seleccionar"><input type="checkbox" class="csel" data-sel="${esc(c.email)}" ${cSel.has(c.email)?"checked":""} aria-label="Seleccionar a ${esc(c.nombre||c.email)}"></td><td data-l="Cliente"><div><b>${esc(c.nombre||"(sin nombre)")}</b><br><small style="color:var(--mut)">${esc(c.email)}</small></div></td>
@@ -806,6 +852,7 @@ function expiraHtml(i){
 let codePage = 0, codeFilterKey = "";
 const CODE_PAGE_SIZE = 20;
 function rows(){
+  if(curTab!=="cod")return;
   const el = $("#rows"); if(!el) return;
   const all = filtered();
   const filterKey = JSON.stringify([$("#q")?.value||"",$("#st")?.value||"",$("#pf")?.value||"",hlCode]);
@@ -908,7 +955,7 @@ function cSelUpdate(){
   const bar = $("#cBulk"); if(!bar) return;
   const n = cSel.size;
   bar.classList.toggle("hide", n===0); $("#cBulkN").textContent = n+(n===1?" seleccionado":" seleccionados");
-  const all = $("#cselAll"), vis = cFiltered().map(c=>c.email);
+  const all = $("#cselAll"), vis = cFiltered().slice(clientPage*CLIENT_PAGE_SIZE,(clientPage+1)*CLIENT_PAGE_SIZE).map(c=>c.email);
   if(all){ all.checked = vis.length>0 && vis.every(e=>cSel.has(e)); all.indeterminate = !all.checked && vis.some(e=>cSel.has(e)); }
 }
 function cSelected(){ const byMail = new Map(clients().map(c=>[c.email,c])); return [...cSel].map(e=>byMail.get(e)).filter(Boolean); }
@@ -923,7 +970,7 @@ function wireClientSelection(){
   $("#cBulkCsv").onclick = exportSelectedCsv;
   $("#cBulkTel").onclick = copySelectedPhones;
   $("#cBulkClr").onclick = ()=>{ cSel.clear(); crows(); };
-  $("#cselAll").onchange = e=>{ cFiltered().forEach(c=>e.target.checked ? cSel.add(c.email) : cSel.delete(c.email)); crows(); };
+  $("#cselAll").onchange = e=>{ cFiltered().slice(clientPage*CLIENT_PAGE_SIZE,(clientPage+1)*CLIENT_PAGE_SIZE).forEach(c=>e.target.checked ? cSel.add(c.email) : cSel.delete(c.email)); crows(); };
   $("#crows").onchange = e=>{ const b = e.target.closest(".csel"); if(!b) return; b.checked ? cSel.add(b.dataset.sel) : cSel.delete(b.dataset.sel); cSelUpdate(); };
 }
 
@@ -1350,7 +1397,7 @@ document.addEventListener("click", e=>{ if(e.target.id==="waReload") loadWa(); }
 async function loadPagos(){
   const cfgBox = $("#payCfg"), rowsEl = $("#payRows"); if(!cfgBox) return;
   try{
-    const c = await api("admin_pay_config");
+    const [c]=await Promise.all([api("admin_pay_config"),loadAdminScript("admin-paypal.js")]);
     const ck = (ok, t, opt) => `<span class="tag ${ok?"t-ok":(opt?"t-g":"t-b")}">${ok?"✔":(opt?"opcional":"falta")} ${t}</span>`;
     cfgBox.innerHTML = `<p style="color:var(--mut);font-size:14px;margin-bottom:8px">Ambiente: <b>${c.env==="production"?"PRODUCCIÓN (dinero real)":"PRUEBAS (sandbox, sin dinero real)"}</b> · ${c.productos} productos en el servidor</p>
       <div class="acts" style="margin-bottom:12px">${ck(c.publica,"Llave pública")}${ck(c.privada,"Llave privada")}${ck(c.integridad,"Secreto de integridad")}${ck(c.eventos,"Secreto de eventos",true)}</div>${(c.publica&&c.privada&&c.integridad)?"":'<div class="capwarn">Faltan llaves: agrégalas en Apps Script → Configuración del proyecto → Propiedades del script (WOMPI_PUBLIC, WOMPI_PRIVATE, WOMPI_INTEGRITY). Hasta entonces el botón «Pagar ahora» avisa que no está disponible.</div>'}`;
@@ -1637,7 +1684,7 @@ async function loadDios(){
     const [c,p]=await Promise.allSettled([api('admin_wa_ajustes'),api('admin_catalogo')]);
     if(c.status==='fulfilled'){GCFG=configShape(c.value.config);savedGodConfig=JSON.parse(JSON.stringify(GCFG));drawDiosCfg();godStatus('Todo guardado · los cambios se revisan antes de aplicar','saved');}
     else godStatus('No se pudo cargar la configuración. Vuelve a abrir Modo Dios.','error');
-    if(p.status==='fulfilled'){GPRODS=p.value.productos||[];syncPrecios();drawProds();}
+    if(p.status==='fulfilled'){GPRODS=p.value.productos||[];catalogReady=true;syncPrecios();drawProds();}
     else $('#gProds').innerHTML='<tr><td colspan="6" class="empty">'+esc(p.reason.message)+'</td></tr>';
   }finally{godLoading=false;godControlsDisabled(!GCFG);}
 }
