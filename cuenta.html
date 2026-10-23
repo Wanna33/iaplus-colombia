@@ -13,15 +13,15 @@
 <meta property="og:locale" content="es_CO">
 <meta property="og:site_name" content="IA Plus Colombia">
 <meta property="og:title" content="¡Gracias por confiar en IA Plus Colombia!">
-<meta property="og:description" content="Abre tu enlace, entra con Gmail y activa tu acceso paso a paso.">
-<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg">
+<meta property="og:description" content="Abre tu enlace, entra con Gmail, revisa y confirma tu plan. Después consulta tus accesos e instrucciones en Mi cuenta.">
+<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg?v=20261022-colombia-real">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Gracias por confiar en IA Plus Colombia. Tu acceso está a un paso.">
+<meta property="og:image:alt" content="Una emprendedora en una finca cafetera colombiana da la bienvenida y explica cómo activar tu acceso de IA Plus Colombia.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="¡Gracias por confiar en IA Plus Colombia!">
-<meta name="twitter:description" content="Abre tu enlace, entra con Gmail y activa tu acceso paso a paso.">
-<meta name="twitter:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg">
+<meta name="twitter:description" content="Abre tu enlace, entra con Gmail, revisa y confirma tu plan. Después consulta tus accesos e instrucciones en Mi cuenta.">
+<meta name="twitter:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg?v=20261022-colombia-real">
 <link rel="icon" href="assets/brand-mark.svg?v=4" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/brand-mark-192.png?v=3">
@@ -361,15 +361,31 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <link rel="stylesheet" href="customer-theme.css">
 <link rel="stylesheet" href="customer-glass.css?v=20261022">
 <link rel="stylesheet" href="premium-2026.css?v=20261022-1">
-<link rel="stylesheet" href="activation-welcome.css?v=20261022">
+<link rel="stylesheet" href="activation-welcome.css?v=20261022-colombia-real-1">
 <link rel="stylesheet" href="activation-celebrate.css?v=20261022">
 <link rel="stylesheet" href="halloween-fx.css?v=20261022">
 </head>
 <body class="account-app">
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
-<section class="activation-welcome" id="activationWelcome" hidden aria-label="Bienvenida de IA Plus Colombia">
-  <img src="assets/gracias-ia-plus-colombia.jpg" width="1200" height="630" alt="¡Gracias por confiar en IA Plus Colombia! Abre este enlace, elige tu Gmail y sigue las instrucciones para activar tu código." fetchpriority="high">
-  <p>Tu código ya está listo para revisar. Entra con tu Gmail y confirma la activación cuando veas tu plan.</p>
+<section class="activation-welcome" id="activationWelcome" hidden aria-label="Bienvenida de IA Plus Colombia" aria-live="polite" aria-atomic="true">
+  <div class="activation-welcome-art">
+    <img src="assets/gracias-ia-plus-colombia.jpg?v=20261022-colombia-real" width="1200" height="630" alt="Emprendedora colombiana en una finca cafetera. Gracias por confiar en IA Plus Colombia; abre el enlace, entra con Gmail y activa tu código." fetchpriority="high" decoding="async">
+  </div>
+  <div class="activation-welcome-copy">
+    <span class="activation-welcome-kicker" id="activationWelcomeKicker">BIENVENIDA · EDICIÓN DE HALLOWEEN</span>
+    <h2 id="activationWelcomeTitle">¡Bienvenido a IA Plus Colombia!</h2>
+    <p id="activationWelcomeText">Tu acceso está a un paso. Sigue estos pasos para activarlo con tranquilidad:</p>
+    <ol class="activation-welcome-steps" id="activationWelcomeSteps">
+      <li><span>1</span><div><b>Entra con tu Gmail</b><small>Usa la cuenta con la que quieres asociar este acceso.</small></div></li>
+      <li><span>2</span><div><b>Revisa y confirma</b><small>Comprueba tu plan y toca «Activar mi acceso».</small></div></li>
+      <li><span>3</span><div><b>Encuentra tus accesos</b><small>Al terminar, aparecerán en «Mi cuenta» con instrucciones.</small></div></li>
+    </ol>
+    <div class="activation-welcome-actions">
+      <a class="activation-welcome-primary" id="activationWelcomePrimary" href="#app">Continuar con mi Gmail <span aria-hidden="true">→</span></a>
+      <a class="activation-welcome-help" id="activationWelcomeHelp" href="https://wa.me/573102035327?text=Hola%2C%20necesito%20ayuda%20para%20activar%20mi%20acceso" target="_blank" rel="noopener">Necesito ayuda por WhatsApp</a>
+    </div>
+    <small class="activation-welcome-note" id="activationWelcomeNote">Por tu seguridad, nunca compartas tu contraseña ni códigos de verificación.</small>
+  </div>
 </section>
 <header class="top"><div class="top-in">
   <a class="logo" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia"></a>
@@ -392,11 +408,11 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <script src="net.js"></script>
 <script src="catalog-utils.js"></script>
 <script src="activation-utils.js"></script>
-<script src="activation-welcome.js?v=20261022"></script>
+<script src="activation-welcome.js?v=20261022-colombia-real-1"></script>
 <script src="seasonal.js?v=20261022"></script>
 <script src="halloween-fx.js?v=20261022"></script>
 <script src="activation-celebrate.js?v=20261022"></script>
-<script src="cuenta-20261022.js"></script>
+<script src="cuenta-20261022.js?v=20261022-colombia-real-1"></script>
 <script src="pwa.js"></script>
 </body>
 </html>

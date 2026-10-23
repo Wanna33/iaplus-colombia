@@ -372,7 +372,7 @@ let timer=null;
 (function(){ try{ const p=new URLSearchParams(location.search); const k=IAPActivation.parse(p.get("codigo")||p.get("code")||""); if(k.code){ save("iap_pending_code",k.code); history.replaceState(null,"",location.pathname); } }catch{} })();
 let FLASH=null;
 let WELCOME_CODE=null; // código recién activado: al cargar la cuenta se muestra la bienvenida una vez
-function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(!f.ok){ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
+function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(f.ok){ if(window.IAPCelebrate){ window.IAPActivationWelcome?.hideForSuccess(); }else{ window.IAPActivationWelcome?.showSuccess(); } }else{ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 async function loadAll(){
   const pc = load("iap_pending_code");
   if(pc && !activationBusy){
@@ -389,7 +389,7 @@ async function loadAll(){
   try{
     const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
-    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); return; }
+    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); if(WELCOME_CODE){ WELCOME_CODE=null; window.IAPCelebrate?.show(null); } return; }
     renderMain(); showFlash();
     if(WELCOME_CODE){ const c=WELCOME_CODE; WELCOME_CODE=null; window.IAPCelebrate?.show(ITEMS.find(i=>i.codigo===c)||ITEMS.find(i=>!i.vencida)||null); }
     if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);

@@ -1130,7 +1130,7 @@ function renewMsg(i){
   return sp(fillTpl(i.vencida?"vencido":"renovar", base));
 }
 const linkFor = c => SITE + "cuenta.html?codigo=" + encodeURIComponent(c);
-function msgFor(i){ let m = fillTpl("codigo", {producto:i.producto, codigo:i.codigo, dias:i.dias, sitio:SITE, nombre:firstName(i), enlace:linkFor(i.codigo)}); if(!m.includes("cuenta.html?codigo=")) m += "\n\n👉 Actívala con un clic: " + linkFor(i.codigo); return m; }
+function msgFor(i){ let m = fillTpl("codigo", {producto:i.producto, codigo:i.codigo, dias:i.dias, sitio:SITE, nombre:firstName(i), enlace:linkFor(i.codigo)}); if(!m.includes("cuenta.html?codigo=")) m += "\n\n🔗 Abre tu enlace personal de activación: " + linkFor(i.codigo); return m + "\n\n🧭 Para activar tu acceso:\n1. Abre el enlace y entra con tu Gmail.\n2. Revisa tu plan y pulsa «Activar mi acceso».\n3. Al confirmarse, entra a «Mi cuenta» y sigue los pasos para iniciar sesión.\n\n🔒 No compartas tu contraseña ni códigos de verificación. Si necesitas ayuda, responde a este mensaje."; }
 
 /* ---------- Seguimiento de avisos (a quién ya le escribiste) ---------- */
 const avKey = i => String(i.cliente).toLowerCase()+"|"+i.producto+"|"+(i.fin||"");
