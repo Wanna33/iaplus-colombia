@@ -14,7 +14,7 @@
   const ref = provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref);
   const canceled = provider==='paypal'&&params.get('cancel')==='1';
   const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
-  const logo = '<img class="lg" src="logo-main.webp" alt="IA Plus Colombia">';
+  const logo = '<img class="lg" src="assets/brand-iaplus.svg?v=pro2" alt="IA Plus Colombia">';
   const show = (ic, title, text, extra) => { $("#box").innerHTML = logo + '<div class="ic">' + ic + '</div><h1>' + title + '</h1><p>' + text + '</p>' + (ref ? '<div class="ref">Referencia: ' + esc(ref) + '</div>' : '') + (extra || ""); };
   function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
   function ensureCred(){

@@ -194,7 +194,7 @@ function renderAuth(){
 }
 function hasAccount(){ return !!(user && (load("iap_has", false) || (myItems&&myItems.length))); }
 async function redeemCode(code, err, btn, label){
-  err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
+  const parsed=IAPActivation.parse(code);err.hidden=true;if(parsed.error){err.textContent=parsed.error;err.hidden=false;return;}code=parsed.code;btn.disabled=true;btn.textContent="Verificando…";
   try{ myItems = await callApi("redeem", code); toast("Cuenta desbloqueada"); location.href = "cuenta.html"; }
   catch(ex){ err.textContent = ex.message; err.hidden=false; btn.disabled=false; btn.textContent=label; }
 }
@@ -208,12 +208,12 @@ function renderHeroCard(){
     $("#heroLogout").onclick = logout;
   } else if(user){
     c.innerHTML = `<div class="who">${avatarOf(72)}<h2>Hola, ${esc(user.name.split(" ")[0])}</h2><p>Escribe el código que te enviamos para activar tu cuenta.</p></div>
-      <form id="heroForm" class="redeem-form" style="flex-direction:column"><input id="heroCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Activar mi código</button></form>
+      <form id="heroForm" class="redeem-form" style="flex-direction:column"><input id="heroCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código de activación" maxlength="200"><button class="btn btn-primary" type="submit">Activar mi código</button></form>
       <p class="note err" id="heroErr" hidden></p>
       <a href="#catalogo" class="btn btn-ghost full" style="margin-top:10px">¿Aún no tienes código? Ver catálogo</a>
       <button class="linkbtn" id="heroLogout">Cerrar sesión</button>`;
     $("#heroLogout").onclick = logout;
-    $("#heroForm").onsubmit = e => { e.preventDefault(); redeemCode($("#heroCode").value, $("#heroErr"), e.target.querySelector("button"), "Activar mi código"); };
+    $("#heroForm").onsubmit = e => { e.preventDefault(); const p=IAPActivation.parse($("#heroCode").value); if(p.error){$("#heroErr").hidden=false;$("#heroErr").textContent=p.error;return;} location.href="cuenta.html?codigo="+encodeURIComponent(p.code); };
   } else {
     c.innerHTML = `<h2>Entra a tu cuenta</h2><p>¿Ya activaste tu código? Inicia sesión con tu Gmail y te llevamos directo a tu cuenta. Si es tu primera vez, aquí mismo activas tu código.</p>
       <div id="gBtnHero" class="gbtn"></div><small class="legal">Al ingresar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. Nunca vemos tu contraseña.</small>
@@ -242,15 +242,13 @@ function renderRedeem(){
   }
   if(!user){ box.innerHTML = '<button class="btn btn-google full" id="redeemLogin">Ingresar con Gmail para desbloquear</button>'; $("#redeemLogin").onclick = openLogin; return; }
   const list = (myItems&&myItems.length) ? '<a class="btn btn-primary full" style="margin-top:14px" href="cuenta.html"><svg class="ic"><use href="#i-unlock"/></svg>Abrir mi cuenta</a>' : '';
-  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
+  box.innerHTML = `<form id="redeemForm" class="redeem-form"><input id="codeInput" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código de activación" maxlength="200"><button class="btn btn-primary" type="submit">Desbloquear cuenta</button></form>
     <p class="note err" id="redeemErr" hidden></p>
     <div id="acctList">${myItems===null?'':(list||'')}</div>`;
-  $("#redeemForm").onsubmit = async e => {
-    e.preventDefault(); const err=$("#redeemErr"); err.hidden=true;
-    const btn=e.target.querySelector("button"); btn.disabled=true; btn.textContent="Verificando…";
-    try{ myItems = await callApi("redeem", $("#codeInput").value); toast("Cuenta desbloqueada"); location.href = "cuenta.html"; return; }
-    catch(ex){ err.textContent = ex.message; err.hidden=false; }
-    renderRedeem_keep(err.textContent, !err.hidden);
+  $("#redeemForm").onsubmit = e => {
+    e.preventDefault();const p=IAPActivation.parse($("#codeInput").value),err=$("#redeemErr");
+    err.hidden=!p.error;if(p.error){err.textContent=p.error;return;}
+    location.href="cuenta.html?codigo="+encodeURIComponent(p.code);
   };
 }
 function renderRedeem_keep(msg, show){ renderRedeem(); if(show){ const e=$("#redeemErr"); e.textContent=msg; e.hidden=false; } }

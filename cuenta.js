@@ -5,10 +5,10 @@ const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleuser
 let IS_ADMIN = false; // lo informa el servidor
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
-const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-const fmt = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"});
-const fmtT = d => d.toLocaleDateString("es-CO",{day:"2-digit",month:"2-digit",year:"numeric"})+", "+d.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit",hour12:false});
+const load = k => { try { return JSON.parse((k==="iap_pending_code"?sessionStorage:localStorage).getItem(k)); } catch { return null; } };
+const save = (k,v) => { try { (k==="iap_pending_code"?sessionStorage:localStorage).setItem(k, JSON.stringify(v)); } catch {} };
+const fmt = d => d.toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",year:"numeric"});
+const fmtT = d => d.toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"2-digit",year:"numeric"})+", "+d.toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit",hour12:false});
 function parseJwt(t){ const b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(decodeURIComponent(atob(b).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join(""))); }
 let credP = null;
 function ensureCred(){
@@ -18,19 +18,24 @@ function ensureCred(){
   credP = new Promise(resolve=>{
     let bar = document.getElementById("relogin");
     if(!bar){ bar = document.createElement("div"); bar.id="relogin";
-      bar.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:460px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(20,40,90,.25);z-index:60;text-align:center";
-      const act = !!load("iap_pending_code");
-      bar.innerHTML='<div style="font-weight:800;margin-bottom:'+(act?4:8)+'px">'+(act?'🎁 Activa tu plan con un clic':'Confirma tu cuenta para continuar')+'</div>'+(act?'<div style="color:var(--mut);font-size:14px;margin-bottom:10px">Entra con tu cuenta de Google y tu plan queda activado al instante.</div>':'')+'<div id="relBtn" style="display:flex;justify-content:center"></div>';
-      document.body.appendChild(bar); }
+      bar.className="account-signin";
+      const act=!!load("iap_pending_code");
+      bar.innerHTML=`<a class="signin-brand" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro2" alt="IA Plus Colombia" width="200" height="58"></a><span class="eyebrow">${act?"PASO 2 DE 3 · CONFIRMA TU IDENTIDAD":"TU ESPACIO PERSONAL"}</span><h1>${act?"Tu código ya está aquí.":"Todo tu acceso, en un lugar."}</h1><p>${act?"Entra con tu cuenta de Google. Después revisarás y confirmarás la activación.":"Entra con el mismo Gmail que usaste para activar tu plan. Aquí encontrarás tus accesos y tus pedidos."}</p>${act?'<div class="pending-code">Código recibido <span>✓ Listo para revisar</span></div>':""}<div id="relBtn" class="signin-google"></div><p id="loginWait" class="signin-wait" role="status">Preparando el acceso con Google…</p><small>Al continuar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. No pedimos tu contraseña de Google.</small><a class="signin-back" href="index.html?tienda=1#activar">← Volver a la tienda</a>`;
+      $("#app").replaceChildren(bar); }
+    let loginTries=0;
+
     const init = () => {
-      if(!window.google?.accounts?.id){ return setTimeout(init,300); }
+      if(!window.google?.accounts?.id){
+        if(++loginTries>35){const w=$("#loginWait");if(w)w.innerHTML='Google no pudo cargar. Revisa tu conexión o bloqueadores y <a href="cuenta.html">vuelve a intentarlo</a>.';return;}
+        return setTimeout(init,300);
+      }
       google.accounts.id.initialize({client_id:CLIENT_ID, auto_select:true, callback:r=>{
         const p=parseJwt(r.credential); const cr={token:r.credential,exp:p.exp*1000};
         save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""});
         bar.remove(); credP=null; resolve(cr);
       }});
       google.accounts.id.renderButton(document.getElementById("relBtn"),{theme:"outline",size:"large",shape:"pill",locale:"es"});
-      try{ google.accounts.id.prompt(); }catch{}
+      if($("#loginWait")) $("#loginWait").textContent="Elige tu Gmail para continuar.";
     };
     init();
   });
@@ -118,6 +123,7 @@ function message(title, text){
   $("#app").innerHTML = `<div class="msg"><h2>${title}</h2><p>${text}</p><button class="cta" type="button" data-retry>🔄 Reintentar</button> <a class="ghostlink" href="index.html?tienda=1">Ir a la tienda</a></div>`;
 }
 function confetti(){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
   const box=document.createElement("div"); box.className="confetti";
   const cols=["#ef5350","#ff8a80","#12a36b","#fbbf24","#7c4dff"];
   for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=Math.random()*100+"%";p.style.background=cols[i%5];
@@ -143,7 +149,7 @@ const APPS=[
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 let ITEMS = [], tab = "sub", filterQ = "";
 function card(it, idx){
-  const app=appOf(it), ex=it.vencida;
+  const app=appOf(it), ex=it.vencida, duration=IAPCatalog.duration({days:Number(it.dias)||30});
   const start = it.inicio ? new Date(it.inicio) : null;
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
@@ -154,9 +160,9 @@ function card(it, idx){
   const access = ex ? "" : `
     <div class="access on" id="acc${idx}">
       <div class="lbl">${I.mail} Cuenta de acceso</div>
-      <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar">${I.copy}</button></div>
+      <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar correo" aria-label="Copiar correo de acceso">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
-      <div class="field"><code class="pw" data-pw="${esc(it.clave)}">${esc(it.clave)}</code><button class="ib tog" title="Mostrar u ocultar">${I.eyeoff}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar">${I.copy}</button></div>
+      <div class="field"><code class="pw" data-pw="${esc(it.clave)}">••••••••••</code><button class="ib tog" title="Mostrar u ocultar contraseña" aria-label="Mostrar u ocultar contraseña">${I.eye}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar contraseña" aria-label="Copiar contraseña de acceso">${I.copy}</button></div>
       ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||2}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
@@ -166,7 +172,7 @@ function card(it, idx){
         <ol><li>Abre ${esc(app.n)}${app.url?` → <a class="l" href="${app.url}" target="_blank" rel="noopener">${esc(app.host||"ir al sitio")}</a>`:""}.</li>
         <li>Copia la <b>cuenta de acceso</b>, pégala y pulsa "Continuar".</li>
         <li>Copia la <b>contraseña</b>, pégala y entra. Si te pide verificación, usa el código de dos pasos o escríbenos.</li></ol></div>
-      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña. ${app.dev===1?"Úsala en 1 solo dispositivo":"Puedes usarla en hasta 2 dispositivos"} y tiene acceso por ${app.dur||"1 mes"}.</div>
+      <div class="note"><b>Importante:</b> no cambies el correo ni la contraseña. ${app.k==="chatgpt"?"Puedes usarla en hasta 2 dispositivos.":app.dev===1?"Úsala en 1 solo dispositivo.":"Consulta los dispositivos permitidos en las condiciones del producto."} Tu plan tiene una duración de <b>${esc(duration)}</b>.</div>
       ${app.k==="chatgpt"?`<details class="note"><summary>¿Te sale el error "model not found" u otro error en ChatGPT?</summary>
         <ol><li>Abre una <b>ventana de incógnito</b> (Ctrl+Shift+N) e inicia sesión en chatgpt.com. Si ahí funciona, el problema es la memoria de tu navegador.</li>
           <li>En tu navegador normal borra las <b>cookies y la caché</b> de chatgpt.com y vuelve a entrar.</li>
@@ -176,7 +182,7 @@ function card(it, idx){
     </div>`;
   return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${idx*80}ms" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
     <div class="sub-head"><div class="picon">${icon}</div>
-      <div class="pname"><h2>${esc(app.n==="tu cuenta"?it.producto:app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
+      <div class="pname"><h2>${esc(it.producto||app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
     </div>
     <div class="sub-body">
       ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-expanded="true"><span>🔑 Mis datos de acceso · <b data-end="${it.fin||""}">--</b></span><span class="chev">⌃</span></button>`}
@@ -196,22 +202,47 @@ function histHtml(){
     ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${it.vencida?"e":"a"}">${it.vencida?"Expirado":"Activo"}</span></td></tr>`).join("")}</tbody></table></div>`;
 }
 function addBox(first){
-  return `<div class="addbox" id="addbox"><h3>➕ ${first?"Desbloquea tu primera suscripción":"Agregar otra suscripción"}</h3>
-    <p>${first?"Escribe el código que te enviamos por WhatsApp.":"¿Compraste otra cuenta? Escribe aquí su código de activación."}</p>
-    <form class="addrow" id="addForm"><input id="addCode" placeholder="Ej: IAP-AB12-CD34" autocomplete="off" maxlength="40"><button class="cta" type="submit">Desbloquear</button></form>
-    <div class="adderr" id="addErr" hidden></div>
-    <p style="margin:14px 0 0"><a href="index.html#catalogo" style="color:var(--red);font-weight:800">¿No tienes código? Elige tu plan y paga con PayPal →</a></p></div>`;
+  return `<div class="addbox" id="addbox"><span class="eyebrow">ACTIVACIÓN DE ACCESO</span><h3>${first?"Tu primer acceso empieza aquí":"¿Tienes otro código?"}</h3>
+    <p>Pega tu código o el enlace que recibiste. Quedará asociado a tu Gmail actual.</p>
+    <form class="addrow" id="addForm" novalidate><label class="sr-only" for="addCode">Código de activación</label><input id="addCode" placeholder="IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="200" aria-describedby="addErr" required><button class="cta" type="submit">Revisar código →</button></form>
+    <div class="adderr" id="addErr" role="alert" hidden></div>
+    <a class="activation-shop" href="index.html?tienda=1#planes-chatgpt">¿Aún no tienes uno? Elige tu plan de ChatGPT →</a></div>`;
+}
+let activationBusy=false,activationDraft="";
+async function confirmActivation(code){
+  await ensureCred();
+  return new Promise(resolve=>{
+    const d=document.createElement("dialog"),u=load("iap_user")||{};
+    d.className="activation-review";
+    d.setAttribute("aria-labelledby","activateReviewTitle");
+    d.innerHTML=`<form method="dialog"><span class="eyebrow">PASO 3 DE 3 · REVISA TU ACTIVACIÓN</span><h2 id="activateReviewTitle">Tu acceso, en tu cuenta.</h2><p>Este código es de un solo uso. Confirma que estás usando el Gmail del cliente que lo va a activar.</p><dl><div><dt>Código de activación</dt><dd>${esc(code)}</dd></div><div><dt>Cuenta de Google</dt><dd>${esc(u.email||"Tu cuenta de Google actual")}</dd></div></dl><small>Al activarlo, encontrarás los datos de acceso y las instrucciones en Mi cuenta.</small><div class="review-actions"><button class="btn-review secondary" value="cancel">Volver</button><button class="btn-review" value="activate">Activar mi acceso</button></div><a class="switch-google" href="#" id="switchActivationUser">Usar otro Gmail</a></form>`;
+    d.addEventListener("close",()=>{const ok=d.returnValue==="activate";d.remove();resolve(ok);},{once:true});
+    d.addEventListener("cancel",e=>{e.preventDefault();d.close("cancel");});
+    document.body.appendChild(d);
+    d.querySelector("#switchActivationUser").onclick=e=>{e.preventDefault();save("iap_cred",null);save("iap_user",null);d.close("cancel");location.href="cuenta.html?codigo="+encodeURIComponent(code);};
+    d.showModal();d.querySelector('[value="activate"]').focus();
+  });
 }
 function bindAdd(){
-  const f=$("#addForm"); if(!f) return;
+  const f=$("#addForm");if(!f)return;
+  const input=$("#addCode"),err=$("#addErr");
+  const pending=load("iap_pending_code");if(pending||activationDraft)input.value=pending||activationDraft;
+  input.oninput=()=>{err.hidden=true;input.removeAttribute("aria-invalid");};
   f.onsubmit=async e=>{
-    e.preventDefault(); const btn=f.querySelector("button"), err=$("#addErr"); err.hidden=true; btn.disabled=true; btn.textContent="Verificando…";
+    e.preventDefault();if(activationBusy)return;
+    const p=IAPActivation.parse(input.value);err.hidden=true;
+    if(p.error){err.textContent=p.error;err.hidden=false;input.setAttribute("aria-invalid","true");input.focus();return;}
+    input.value=p.code;const btn=f.querySelector("button");activationBusy=true;btn.disabled=true;
     try{
-      const j=await callApi({action:"redeem",code:$("#addCode").value}); if(!j.ok) throw new Error(j.error||"Error");
-      sessionStorage.removeItem("iap_conf"); await loadAll();
-    }catch(ex){ err.textContent=ex.message; err.hidden=false; btn.disabled=false; btn.textContent="Desbloquear"; }
+      if(!await confirmActivation(p.code))return;
+      btn.textContent="Activando tu acceso…";
+      const j=await callApi({action:"redeem",code:p.code});if(!j.ok)throw new Error(j.error||"No se pudo activar el código.");
+      save("iap_pending_code",null);activationDraft="";sessionStorage.removeItem("iap_conf");FLASH={ok:true,t:"Acceso activado. Ya puedes ver tus datos y entrar a tu cuenta."};await loadAll();
+    }catch(ex){err.textContent=ex.message;err.hidden=false;input.focus();}
+    finally{activationBusy=false;btn.disabled=false;btn.textContent="Revisar código →";}
   };
 }
+
 function warnHtml(){
   const out=[];
   ITEMS.forEach(it=>{
@@ -227,7 +258,7 @@ function renderMain(){
   $("#app").innerHTML = `
     ${warnHtml()}
     <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span>${act?'<button class="guiabtn" id="guiaBtn" type="button">❓ Guía paso a paso</button>':""}</div>
-    <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab">Historial de pedidos</button></div>
+    <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab" aria-selected="${tab==="sub"}">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab" aria-selected="${tab==="hist"}">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
     ${addBox(false)}`;
   bindAdd(); applyFilter(); tick(); refreshTotp();
@@ -242,7 +273,7 @@ function guia(){
   const pasos = [
     {el:card, t:"¡Tu plan está activo! 🎉", d:"Te muestro en 4 pasos cómo entrar a tu cuenta. Tarda menos de un minuto."},
     {el:fields[0], t:"1️⃣ Copia el correo", d:"Toca el botón de copiar al lado del correo. Ese es el usuario para iniciar sesión."},
-    {el:fields[1], t:"2️⃣ Copia la contraseña", d:"Toca copiar al lado de la contraseña. No la cambies: la cuenta es compartida."},
+    {el:fields[1], t:"2️⃣ Copia la contraseña", d:"Toca copiar al lado de la contraseña. No cambies los datos de acceso entregados por la tienda."},
     ask ? {el:ask.closest("[data-totp]")||ask, t:"3️⃣ Código de verificación", d:"Si al entrar te pide un código de 6 dígitos, toca aquí y cópialo rápido: cambia cada 30 segundos."} : null,
     {el:how, t:ask?"4️⃣ Entra y pega los datos":"3️⃣ Entra y pega los datos", d:"Abre la página de tu herramienta desde este enlace, pega el correo y la contraseña, ¡y listo! 🚀"},
   ].filter(p=>p && p.el);
@@ -338,19 +369,28 @@ document.addEventListener("click", e=>{
 $("#q").addEventListener("input", e=>{ filterQ=e.target.value.trim().toLowerCase(); if(tab!=="sub"){ tab="sub"; renderMain(); } applyFilter(); });
 let timer=null;
 /* ---------- enlace de activación: cuenta.html?codigo=IAP-XXXX-XXXX ---------- */
-(function(){ try{ const p=new URLSearchParams(location.search); const k=(p.get("codigo")||p.get("code")||"").trim().toUpperCase(); if(/^[A-Z0-9-]{6,40}$/.test(k)){ save("iap_pending_code",k); history.replaceState(null,"",location.pathname); } }catch{} })();
+(function(){ try{ const p=new URLSearchParams(location.search); const k=IAPActivation.parse(p.get("codigo")||p.get("code")||""); if(k.code){ save("iap_pending_code",k.code); history.replaceState(null,"",location.pathname); } }catch{} })();
 let FLASH=null;
 function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(!f.ok){ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 async function loadAll(){
   const pc = load("iap_pending_code");
-  if(pc && load("iap_admin") && !confirm("Abriste un enlace de activación ("+pc+") con tu cuenta de administrador.\n\n¿Activarlo en TU cuenta? Pulsa Cancelar si es para un cliente y envíaselo a él.")) save("iap_pending_code",null);
-  else if(pc){ try{ const r=await callApi({action:"redeem",code:pc}); save("iap_pending_code",null); FLASH = r.ok ? {ok:true,t:"¡Tu cuenta quedó activada! 🎉"} : {ok:false,t:r.error||"No pudimos activar este enlace."}; if(r.ok){ try{ sessionStorage.removeItem("iap_conf"); }catch{} } }catch(e){ /* sin conexión: se vuelve a intentar al recargar */ } }
+  if(pc && !activationBusy){
+    activationBusy=true;
+    try{
+      if(await confirmActivation(pc)){
+        const r=await callApi({action:"redeem",code:pc});
+        if(r.ok){save("iap_pending_code",null);FLASH={ok:true,t:"Acceso activado. Tus datos están listos en Mi cuenta."};sessionStorage.removeItem("iap_conf");}
+        else{activationDraft=pc;save("iap_pending_code",null);FLASH={ok:false,t:r.error||"No pudimos activar el código. Revísalo o pide ayuda."};}
+      }else{activationDraft=pc;save("iap_pending_code",null);}
+    }catch(e){FLASH={ok:false,t:e.message||"La conexión se interrumpió. Consulta tus accesos antes de volver a intentarlo."};}
+    finally{activationBusy=false;}
+  }
   try{
     const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
     if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); return; }
     renderMain(); showFlash();
-    if(!timer) timer=setInterval(()=>{tick();refreshTotp();},1000);
+    if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
     if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
 }

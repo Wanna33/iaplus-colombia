@@ -34,7 +34,7 @@
     set("iap_pwa_seen","1");
     css();
     const b = document.createElement("div"); b.className = "pwa-b"; b.id = "pwaBanner";
-    b.innerHTML = `<img src="icon-192.png" alt=""><div><b>Instala la app de IA Plus</b>Entra a tu cuenta con un toque desde tu pantalla de inicio.</div><button class="go">Instalar</button><button class="x" aria-label="Cerrar">✕</button>`;
+    b.innerHTML = `<img src="assets/brand-mark-192.png?v=pro2" alt=""><div><b>Instala la app de IA Plus</b>Entra a tu cuenta con un toque desde tu pantalla de inicio.</div><button class="go">Instalar</button><button class="x" aria-label="Cerrar">✕</button>`;
     document.body.appendChild(b);
     b.querySelector(".go").onclick = install;
     b.querySelector(".x").onclick = hideBanner;

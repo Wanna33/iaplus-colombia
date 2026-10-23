@@ -31,12 +31,12 @@
     document.querySelectorAll('[data-category]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.category===filter)));
   }
   function featured(){
-    const plans=['chatgpt','capcut','canva'].map(find).filter(Boolean);
-    const words={chatgpt:['Ideas que avanzan','Para escribir, estudiar y organizar tus ideas.'],capcut:['Videos con tu estilo','Encuentra tu plan para editar contenido.'],canva:['Diseña tu próxima idea','Una cuenta para tus proyectos de diseño.']};
+    const plans=['chatgpt','chatgpt3','chatgpt6'].map(find).filter(Boolean);
+    const words={chatgpt:['Empieza a tu ritmo','Un mes para empezar con ChatGPT Plus.'],chatgpt3:['Más tiempo para tus ideas','Tres meses para estudiar, trabajar y crear.'],chatgpt6:['Hazlo parte de tu día','Seis meses para tus proyectos a largo plazo.']};
     const el=document.getElementById('featuredPlans');
-    if(el)el.innerHTML=plans.map(p=>`<article class="featured-plan feature-${p.id}"><div class="feature-top"><img src="${esc(p.img)}" alt="" width="48" height="48"><span>${esc(p.name)}</span><span class="feature-arrow" aria-hidden="true">↗</span></div><h3>${words[p.id][0]}</h3><p>${words[p.id][1]}</p><div class="feature-price"><b>${C.money(p.price)}</b><span>COP · ${C.duration(p)}</span></div><button type="button" data-details="${p.id}" aria-label="Ver plan de ${esc(p.name)}">Ver plan y condiciones <span aria-hidden="true">↗</span></button></article>`).join('');
-    const hero=document.getElementById('heroProductPeek');const p=find('chatgpt');
-    if(hero)hero.innerHTML=p?`<a href="#catalogo" data-jump-product="chatgpt"><img src="${esc(p.img)}" width="28" height="28" alt=""><span>ChatGPT · ${C.money(p.price)} COP / ${C.duration(p)}<small>${C.mode(p)} · ver condiciones ↗</small></span></a>`:'';
+    if(el)el.innerHTML=plans.map(p=>`<article class="featured-plan feature-${p.id}"><div class="feature-top"><img src="${esc(p.img)}" alt="" width="48" height="48"><span>${esc(p.name)}</span><span class="feature-arrow" aria-hidden="true">↗</span></div><h3>${words[p.id][0]}</h3><p>${words[p.id][1]}</p><div class="feature-mode">${esc(C.mode(p))} · ${esc(C.devices(p))}</div><div class="feature-price"><b>${C.money(p.price)}</b><span>COP · ${C.duration(p)}</span></div><button type="button" data-details="${p.id}" aria-label="Ver plan de ${esc(p.name)}">Ver plan y condiciones <span aria-hidden="true">↗</span></button></article>`).join('');
+    const hero=document.getElementById('heroProductPeek');const p=find('chatgpt3');
+    if(hero)hero.innerHTML=p?`<a href="#catalogo" data-details="chatgpt3"><img src="${esc(p.img)}" width="28" height="28" alt=""><span>ChatGPT · ${C.money(p.price)} COP / ${C.duration(p)}<small>${C.mode(p)} · ver condiciones ↗</small></span></a>`:'';
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-details]');if(d){const p=find(d.dataset.details);if(p)details(p,d);return;}

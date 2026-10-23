@@ -91,7 +91,7 @@ function state(it){
   if(it.estado==="Con problemas" && !it.cliente) return {k:"pr", t:"Con problemas"};
   if(!it.cliente && (it.estado==="Sin código" || !it.codigo)) return {k:"nc", t:"Sin código"};
   if(!it.cliente) return {k:"av", t:"Disponible"};
-  if(it.vencida) return {k:"b", t:"Vencida"};
+  if(!IAPInsights.isActive(it,Date.now())) return {k:"b", t:"Vencida"};
   if(it.restante!==null && it.restante<=5) return {k:"w", t:"Por vencer"};
   return {k:"ok", t:"Activa"};
 }
@@ -106,14 +106,14 @@ function clients(){
     c.nombre = c.nombre || i.nombre; c.whatsapp = c.whatsapp || i.whatsapp; c.nota = c.nota || i.nota;
     c.gastado += Number(i.precio)||0; c.usos2fa += i.usos2fa||0;
     if(i.inicio){ if(!c.primera || i.inicio<c.primera) c.primera=i.inicio; if(!c.ultima || i.inicio>c.ultima) c.ultima=i.inicio; }
-    if(i.vencida) c.vencidos++; else { c.activos++; if(i.fin && (!c.vence || i.fin>c.vence)) c.vence=i.fin; }
+    if(!IAPInsights.isActive(i,Date.now())) c.vencidos++; else { c.activos++; if(i.fin && (!c.vence || i.fin>c.vence)) c.vence=i.fin; }
     m.set(k,c);
   });
   return [...m.values()];
 }
 function cState(c){
   if(!c.activos) return {k:"b", t:"Vencido"};
-  const r = Math.min(...c.cuentas.filter(i=>!i.vencida).map(i=>i.restante??9999));
+  const r = Math.min(...c.cuentas.filter(i=>IAPInsights.isActive(i,Date.now())).map(i=>i.restante??9999));
   return r<=5 ? {k:"w", t:"Por vencer"} : {k:"ok", t:"Activo"};
 }
 
@@ -138,27 +138,8 @@ function showInfo(html){
 }
 
 /* ---------- Vistas ---------- */
-function statsHtml(){
-  const withClient = items.filter(i=>i.cliente), uniq = arr => new Set(arr.map(i=>i.cliente.toLowerCase())).size;
-  const nd = new Date(), now = Date.now(), D = 86400000, dia = nd.getDate();
-  const inM = (i,off,hasta) => { if(!i.inicio) return false; const d = new Date(i.inicio), m = new Date(nd.getFullYear(), nd.getMonth()-off, 1); return d.getMonth()===m.getMonth() && d.getFullYear()===m.getFullYear() && (!hasta || d.getDate()<=hasta); };
-  const sum = a => a.reduce((s,i)=>s+(Number(i.precio)||0),0);
-  const ingMes = sum(withClient.filter(i=>inM(i,0))), ingAnt = sum(withClient.filter(i=>inM(i,1,dia)));
-  const delta = ingAnt ? Math.round((ingMes-ingAnt)/ingAnt*100) : null;
-  const ventasMes = withClient.filter(i=>inM(i,0)).length;
-  const activos = uniq(withClient.filter(i=>!i.vencida)), nuevosHoy = uniq(withClient.filter(i=>i.inicio && now-new Date(i.inicio)<D));
-  const v7 = withClient.filter(i=>!i.vencida && i.restante!==null && i.restante<=7).length;
-  const libres = items.filter(i=>state(i).k==="av").length, prob = items.filter(i=>state(i).k==="pr").length;
-  const cap = getCap(), cuentas = [...capMap().values()].filter(a=>!a.prob), cupo = cuentas.reduce((t,a)=>t+Math.max(0,cap-used(a)),0);
-  const ocup = cuentas.length ? Math.round(cuentas.reduce((t,a)=>t+Math.min(cap,used(a)),0)/(cuentas.length*cap)*100) : 0;
-  const k = (ic, label, val, foot, cls="", go="") => `<div class="kpi ${cls}" ${go?`data-goto="${go}" role="button" tabindex="0"`:""}><div class="kpi-h"><span class="kpi-ic">${ic}</span>${label}</div><b>${val}</b><small>${foot}</small></div>`;
-  return k("💰","Ingresos del mes", money(ingMes), delta===null ? ventasMes+" venta"+(ventasMes===1?"":"s")+" este mes" : `<span class="${delta>=0?"up":"down"}">${delta>=0?"▲":"▼"} ${Math.abs(delta)}%</span> vs. el mes pasado a la fecha`, "big")
-    + k("👥","Clientes activos", `<span data-n="${activos}">0</span>`, nuevosHoy ? "+"+nuevosHoy+" nuevo"+(nuevosHoy===1?"":"s")+" hoy" : "Ningún cliente nuevo hoy", "", "cli")
-    + k("⏳","Vencen en 7 días", `<span data-n="${v7}">0</span>`, v7 ? "Escríbeles para renovar" : "Nadie por vencer", v7?"w":"", "cli")
-    + k("🎫","Códigos disponibles", `<span data-n="${libres}">0</span>`, "Listos para vender", libres?"":"w", "cod")
-    + (noCap() ? k("🧩","Cuentas en uso", `<span data-n="${cuentas.length}">0</span>`, cuentas.reduce((t,a)=>t+used(a),0)+" clientes activos repartidos · sin tope", "", "cta") : k("🧩","Cupo libre", `<span data-n="${cupo}">0</span>`, ocup+"% de ocupación en "+cuentas.length+" cuenta"+(cuentas.length===1?"":"s"), ocup>=85?"w":"", "cta"))
-    + k("⚠️","Con problemas", `<span data-n="${prob}">0</span>`, prob ? "Revisa y reemplaza" : "Todo funcionando", prob?"b":"g", "cod");
-}
+function statsHtml(){return businessKpisHtml();}
+
 function monthsHtml(){
   const now = new Date(), rows = [];
   for(let k=11;k>=0;k--){
@@ -170,7 +151,7 @@ function monthsHtml(){
   const tot = rows.reduce((s,r)=>s+r.v,0), nTot = rows.reduce((s,r)=>s+r.n,0);
   const bars = rows.map((r,i)=>{ const h=Math.max(r.v?4:0,(H-pt-pb)*r.v/mx), x=pl+i*bw+bw*.18, y=H-pb-h, w=bw*.64;
     return `<g class="bar${r.cur?" cur":""}"><title>${r.l} ${r.y}: ${money(r.v)} · ${r.n} venta${r.n===1?"":"s"}</title><rect x="${x}" y="${pt}" width="${w}" height="${H-pt-pb}" rx="6" class="bg"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" class="fg"/>${r.v?`<text x="${x+w/2}" y="${y-7}" class="val">${r.v>=1e6?(r.v/1e6).toFixed(1)+"M":Math.round(r.v/1000)+"k"}</text>`:""}<text x="${x+w/2}" y="${H-9}" class="lbl">${r.l}</text></g>`; }).join("");
-  return `<div class="chart-h"><div><b>${money(tot)}</b><small>${nTot} ventas en 12 meses</small></div></div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos por mes de los últimos 12 meses"><defs><linearGradient id="gBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>${bars}</svg>`;
+  return `<div class="chart-h"><div><b>${money(tot)}</b><small>${nTot} activaciones en 12 meses</small></div></div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Valor de activaciones por mes de los últimos 12 meses"><defs><linearGradient id="gBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>${bars}</svg>`;
 }
 function dailyHtml(){
   const D=86400000, today=new Date(); today.setHours(0,0,0,0); const pts=[];
@@ -185,7 +166,7 @@ function dailyHtml(){
   return `<div class="chart-h"><div><b>${total}</b><small>activaciones en 30 días · ${last7} en los últimos 7</small></div></div><svg class="chart line" viewBox="0 0 ${W} ${H}" role="img" aria-label="Activaciones por día"><defs><linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f43f5e" stop-opacity=".28"/><stop offset="1" stop-color="#f43f5e" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#gArea)"/><path d="${line}" class="ln"/>${dots}${ticks}</svg>`;
 }
 function mixHtml(){
-  const m = new Map(); items.filter(i=>i.cliente&&!i.vencida).forEach(i=>m.set(i.producto, (m.get(i.producto)||0)+1));
+  const m = new Map(); items.filter(i=>i.cliente&&IAPInsights.isActive(i,Date.now())).forEach(i=>m.set(i.producto, (m.get(i.producto)||0)+1));
   const arr = [...m.entries()].sort((a,b)=>b[1]-a[1]), tot = arr.reduce((s,a)=>s+a[1],0);
   if(!tot) return '<div class="empty">Aún no hay planes activos.</div>';
   const COL = ["#f43f5e","#8b5cf6","#ff8a65","#0ea5e9","#10b981","#f59e0b","#ec4899","#64748b"];
@@ -200,20 +181,20 @@ let FEED = {t:0, list:[]};
 const ago = iso => { const s=(Date.now()-new Date(iso))/1000; if(s<60) return "hace un momento"; if(s<3600) return "hace "+Math.floor(s/60)+" min"; if(s<86400) return "hace "+Math.floor(s/3600)+" h"; return new Date(iso).toLocaleDateString("es-CO",{day:"2-digit",month:"short"}); };
 function drawFeed(){
   const el = $("#feed"); if(!el) return;
-  el.innerHTML = FEED.list.length ? FEED.list.map(l=>`<li><span class="fd-dot"></span><div><b>${esc(l.evento)}</b><small>${esc(l.quien)} · ${esc(String(l.detalle).replace(/ · (Android|iPhone|Windows|Mac|Linux|Otro) · .*$/,""))}</small></div><time title="${esc(fdtL(l.fecha).replace(/<[^>]+>/g,""))}">${ago(l.fecha)}</time></li>`).join("") : '<li class="empty">Sin movimientos recientes.</li>';
+  el.innerHTML = FEED.list.length ? FEED.list.map(l=>`<li><span class="fd-dot"></span><div><b>${esc(l.evento)}</b><small>${esc(l.quien)} · ${esc(String(l.detalle||"").replace(/ · (Android|iPhone|Windows|Mac|Linux|Otro) · .*$/,""))}</small></div><time title="${esc(fdtL(l.fecha).replace(/<[^>]+>/g,""))}">${ago(l.fecha)}</time></li>`).join("") : '<li class="empty">Sin movimientos recientes.</li>';
 }
 async function loadFeed(force){
   if(!$("#feed")) return;
   if(!force && Date.now()-FEED.t < 60000){ drawFeed(); return; }
   try{ const r = (await api("admin_log")).log; const adm = (load("iap_user")||{}).email;
-    FEED = {t:Date.now(), list:r.filter(l=>l.quien && /@/.test(l.quien) && l.quien!==adm).slice(0,9)}; drawFeed(); }
+    FEED = {t:Date.now(), list:r.slice(0,12)}; drawFeed(); if($("#feedStatus")) $("#feedStatus").textContent="Últimos "+FEED.list.length+" eventos registrados · actualizado "+new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"}); }
   catch{ $("#feed").innerHTML = '<li class="empty">No se pudo cargar la actividad.</li>'; }
 }
 /* tabla de productos: ventas, ingresos y cupo */
 function prodTableHtml(){
   const cap = getCap(), cm = capMap(), m = new Map();
   items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,cuentas:new Set(),act:0,tot:0,libre:0,ing:0,mes:0}; a.cuentas.add(i.correo.toLowerCase());
-    if(i.cliente){ a.tot++; if(!i.vencida) a.act++; a.ing+=Number(i.precio)||0; const d=i.inicio&&new Date(i.inicio), n=new Date(); if(d&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()) a.mes+=Number(i.precio)||0; }
+    if(i.cliente){ a.tot++; if(IAPInsights.isActive(i,Date.now())) a.act++; a.ing+=Number(i.precio)||0; const d=i.inicio&&new Date(i.inicio), n=new Date(); if(d&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()) a.mes+=Number(i.precio)||0; }
     else if(state(i).k==="av") a.libre++; m.set(k,a); });
   const list = [...m.values()].sort((a,b)=>b.ing-a.ing);
   if(!list.length) return '<div class="empty">Aún no hay productos.</div>';
@@ -225,12 +206,12 @@ function prodTableHtml(){
 }
 function byProductHtml(){
   const m = new Map();
-  items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,act:0,tot:0,libre:0,ing:0}; if(i.cliente){ a.tot++; if(!i.vencida) a.act++; a.ing+=Number(i.precio)||0; } else a.libre++; m.set(k,a); });
+  items.forEach(i=>{ const k=i.producto||"—"; const a=m.get(k)||{k,act:0,tot:0,libre:0,ing:0}; if(i.cliente){ a.tot++; if(IAPInsights.isActive(i,Date.now())) a.act++; a.ing+=Number(i.precio)||0; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="pcard"><div class="pe">${EMO(a.k)}</div><b>${esc(a.k)}</b><div class="pn">${a.act} <small>activos</small></div><div class="pm">${a.tot} vendidos · ${a.libre} libres</div><div class="pm"><b>${money(a.ing)}</b> ingresos</div></div>`).join("") || '<div class="empty">Aún no hay productos.</div>';
 }
 function passListHtml(){
   const m = new Map();
-  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente&&!i.vencida) a.clientes++; m.set(k,a); });
+  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente&&IAPInsights.isActive(i,Date.now())) a.clientes++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente activo":"clientes activos"} · ${a.total} ${a.total===1?"código":"códigos"}</small></div>
     <div class="pr-cap">${(()=>{ const c=capMap().get(a.correo.toLowerCase()); return c?capBar(c,getCap()):""; })()}</div>
     <input class="pr-in" data-pk="${esc(a.k)}" data-orig="${esc(a.clave)}" value="${esc(a.clave)}" autocomplete="off" aria-label="Contraseña de ${esc(a.correo)}">
@@ -252,7 +233,7 @@ async function savePass(k){
 function byAccountHtml(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+" — "+i.correo; const a=m.get(k)||{k,fila:i.fila,act:0,tot:0,libre:0,v:0};
-    if(i.cliente){ a.tot++; if(i.vencida) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
+    if(i.cliente){ a.tot++; if(!IAPInsights.isActive(i,Date.now())) a.v++; else a.act++; } else a.libre++; m.set(k,a); });
   return [...m.values()].map(a=>`<div class="accrow"><div class="accname">${esc(a.k)}</div>
     <span class="tag t-ok">${a.act} activos</span><span class="tag t-av">${a.libre} códigos libres</span><span class="tag t-b">${a.v} vencidos</span><span class="tag t-g">${a.tot} clientes en total</span><span class="caprow2">${(()=>{ const c=capMap().get(a.k.split(" — ").slice(1).join(" — ").toLowerCase()); return c?capBar(c,getCap()):""; })()}</span><button class="btn s p" data-pa="${a.fila}">🔑 Cambiar contraseña</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
@@ -285,7 +266,7 @@ const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[
 const NAV = [
   {g:"General", t:"local", l:"Bots sin API", s:"Automatizaciones locales · sin consumo de IA · mientras el panel está abierto"},
   {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
-  {g:"General", t:"dios", l:"Modo Dios", s:"Controla todo: precios, asistente, respuestas automáticas y recordatorios"},
+  {g:"General", t:"dios", l:"Modo Dios", s:"Precios, instrucciones y asistente con cambios revisados"},
   {g:"Ventas", t:"cli", l:"Clientes", s:"Todos tus clientes, sus planes y vencimientos"},
   {g:"Ventas", t:"wa", l:"WhatsApp", s:"Ventas del asistente de WhatsApp: confirma el pago y se envía el enlace"},
   {g:"Ventas", t:"pay", l:"Pedidos en línea", s:"Pedidos de Wompi y PayPal"},
@@ -308,7 +289,7 @@ function drawNav(){
   $("#sideNav").innerHTML = NAV.map(n=>{ const h = n.g!==g ? `<div class="nvg">${n.g}</div>` : ""; g = n.g; const bd = b[n.t];
     return h+`<button type="button" class="nv" data-t="${n.t}" title="${esc(n.s)}" aria-label="${esc(n.l)}: ${esc(n.s)}">${svgI(n.t)}<span>${n.l}</span>${bd?`<em class="nvb ${bd.c}" title="${bd.n} ${bd.t}">${bd.n}</em>`:""}</button>`; }).join("");
 }
-function openSide(on){ document.body.classList.toggle("side-open", !!on); }
+function openSide(on){ document.body.classList.toggle("side-open", !!on); $("#sideBtn")?.setAttribute("aria-expanded",String(!!on)); }
 function setTab(t){
   const previousTab=curTab;
   if(!NAV.some(n=>n.t===t)) t = "res";
@@ -319,20 +300,22 @@ function setTab(t){
   const n = NAV.find(x=>x.t===t); $("#pageTitle").textContent = n.l; $("#pageSub").textContent = n.s; document.title = n.l + " · Panel IA Plus";
   openSide(false);
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
+
   if(t==="log") loadLog(logCli);
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
   if(t==="rev") loadRev();
   if(t==="ag") loadAgentes();
-  if(t==="dios") loadDios();
+  if(t==="dios" && !godDirty && !godSaving) loadDios();
   if(t==="res") loadFeed();
+  if(t==="cod") updateGeneratorPreview();
   if(t==="local") window.IAPLocalBots?.mount(document.getElementById("localBots"), items);
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
   if(!$("#profit").contains(document.activeElement)) $("#profit").innerHTML = profitHtml();
   if(!$("#passList").contains(document.activeElement)) $("#passList").innerHTML = passListHtml();
-  $("#byProd").innerHTML = byProductHtml(); $("#prodTable").innerHTML = prodTableHtml(); $("#daily").innerHTML = dailyHtml(); $("#mix").innerHTML = mixHtml(); drawNav(); setTab(curTab); countUp(); fillAccounts(); fillAuto(); crows(); rows();
+  $("#byProd").innerHTML = byProductHtml(); $("#prodTable").innerHTML = prodTableHtml(); $("#daily").innerHTML = dailyHtml(); $("#mix").innerHTML = mixHtml(); drawBusinessInsights(); drawNav(); setTab(curTab); countUp(); fillAccounts(); fillAuto(); crows(); rows();
   const u = load("iap_user")||{}; const h = new Date().getHours(); $("#hello").innerHTML = `${h<12?"Buenos días":h<19?"Buenas tardes":"Buenas noches"}${u.name?", "+esc(String(u.name).split(" ")[0]):""} 👋<small>${new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})}</small>`;
 }
 function render(){
@@ -353,16 +336,17 @@ function render(){
         <button class="btn" data-goto="dios">⚡ Modo Dios</button>
         <button class="btn" data-goto="rev">🤝 Revendedores</button>
       </div></div>
-    <div class="kpis" id="stats"></div>
+    <div class="insight-toolbar"><div><span class="overline">TU NEGOCIO EN UN VISTAZO</span><p>Clientes, activaciones y disponibilidad con los datos del panel.</p></div><div><label for="insightPeriod">Periodo de análisis</label><select id="insightPeriod"><option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="0">Todo el historial</option></select><button class="btn" id="insightExport" type="button">Descargar resumen</button></div></div>
+    <div class="kpis business-kpis" id="stats"></div><p class="insight-scope" id="insightScope"></p><div id="businessInsights" class="business-insights"></div>
     <div class="dgrid">
-      <div class="card span2"><h2>Ingresos por mes</h2><div id="months"></div><p class="hint">Activaciones por fecha de canje; el monto es el precio anotado en cada código.</p></div>
+      <div class="card span2"><h2>Valor de activaciones por mes</h2><div id="months"></div><p class="hint">Activaciones por fecha de canje; el monto es el precio anotado en cada código.</p></div>
       <div class="card"><h2>Planes activos por producto</h2><div id="mix"></div></div>
       <div class="card span2"><h2>Activaciones por día</h2><div id="daily"></div></div>
-      <div class="card"><h2>Actividad reciente <button class="btn s ghost" data-goto="log" style="float:right">Ver todo</button></h2><ul class="feed" id="feed"><li class="empty">Cargando…</li></ul></div>
+      <div class="card"><h2>Actividad reciente del negocio <button class="btn s ghost" data-goto="log" style="float:right">Ver todo</button></h2><p class="hint" id="feedStatus" role="status"></p><ul class="feed" id="feed"><li class="empty">Cargando…</li></ul></div>
       <div class="card"><h2>🔔 Alertas</h2><div id="alerts" class="alerts"></div></div>
       <div class="card span2"><h2>📅 Vencimientos de los próximos 14 días</h2><div id="due"></div></div>
       <div class="card span3"><h2>⚠️ Requieren atención (por vencer y vencidos)</h2><div id="attn"></div></div>
-      <div class="card span3"><h2>💰 Rentabilidad por cuenta</h2><div id="profit"></div></div>
+      <div class="card span3"><h2>Estimación de valor y costos por correo de acceso</h2><div id="profit"></div></div>
     </div>
   </section>
 
@@ -402,7 +386,7 @@ function render(){
     <div class="card"><h2>👥 Todos mis clientes</h2>
       <div class="tools">
         <input id="cq" placeholder="Buscar por nombre, Gmail, WhatsApp o nota…">
-        <select id="cst"><option value="">Todos</option><option value="ok">Activos</option><option value="w">Por vencer</option><option value="b">Vencidos</option></select>
+        <select id="cst"><option value="">Todos</option><option value="ok">Activos sin alerta</option><option value="active-all">Todos los activos</option><option value="inactive-all">Sin plan vigente</option><option value="due7">Vencen en 7 días</option><option value="w">Por vencer</option><option value="b">Vencidos</option></select>
         <select id="cso"><option value="rest">Ordenar: vencen primero</option><option value="gasto">Ordenar: más pagaron</option><option value="nuevo">Ordenar: más recientes</option><option value="nombre">Ordenar: nombre</option></select>
         <button class="btn s" id="ccsv">⬇ Exportar clientes CSV</button>
       </div>
@@ -411,21 +395,25 @@ function render(){
   </section>
 
   <section id="tab-cod" class="hide">
-    <div class="card"><h2>🎲 Generar códigos automáticos</h2>
-      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige el producto y cuántos códigos necesitas. El panel <b>reparte los códigos</b> entre las cuentas de ese producto, empezando por las que tienen menos clientes. <b>No hay tope:</b> cada cuenta recibe los clientes que sean.</p>
+    <div class="admin-section-intro"><span class="overline">ENTREGA PROFESIONAL</span><h2>Códigos listos para tus clientes.</h2><p>Configura el plan, revisa el lote y entrega un enlace de activación claro.</p></div>
+    <div class="card generator-card"><div class="card-heading"><div><span class="overline">GENERADOR DE ACCESOS</span><h2>Prepara tu próximo lote</h2></div><span class="tag t-av">Un código · un uso</span></div>
+      <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Los códigos se distribuyen entre las cuentas disponibles de menor carga. Las cuentas marcadas con problemas quedan fuera. Hasta 200 códigos por lote.</p>
+      <div class="generator-presets" role="group" aria-label="Plan rápido de ChatGPT"><span>ChatGPT rápido</span><button type="button" data-code-preset="ChatGPT">1 mes</button><button type="button" data-code-preset="ChatGPT 3 meses">3 meses</button><button type="button" data-code-preset="ChatGPT 6 meses">6 meses</button></div>
       <form id="autoForm" class="form">
         <div><label>Producto</label><select id="aProd" required></select></div>
-        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" value="1" required></div>
+        <div><label>Cantidad de códigos</label><input id="aQty" type="number" min="1" max="200" step="1" value="1" required></div>
         <div><label>Días del plan</label><input id="aDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="aPrice" type="number" min="0" step="500" value="10000"></div>
-        <div><button class="btn p" style="width:100%" type="submit">🎲 Generar</button></div>
+        <div><button class="btn p" style="width:100%" type="submit">Revisar y generar →</button></div>
       </form>
-      <div class="ttlbox"><span>🛡️ <b>Seguridad:</b> los códigos que nadie canjee se borran solos a los</span>
+      <div id="generatorPreview" class="generator-preview" aria-live="polite"></div>
+      <div id="batchProgress" class="batch-progress" hidden><div><b id="batchProgressText">Preparando lote…</b><span>No cierres esta pestaña.</span></div><progress max="100" value="0"></progress></div>
+      <details class="generator-options"><summary>Vigencia del código y opciones de reparto</summary><div class="ttlbox"><span>🛡️ <b>Seguridad:</b> los códigos que nadie canjee se borran solos a los</span>
         <select id="aTtl"><option value="0">Nunca</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option><option value="120">2 horas</option><option value="360">6 horas</option><option value="1440">24 horas</option></select>
         <button class="btn s" type="button" id="aClean" title="Invalida ahora mismo los códigos que ya pasaron el tiempo">🧹 Limpiar ahora</button></div>
       <label class="chk"><input type="checkbox" id="aCount"> Contar también los códigos generados que todavía no se han canjeado</label>
-      <div id="capInfo" class="capinfo"></div>
-      <div class="newcode" id="autoOut"></div>
+      </details><details class="capacity-details"><summary>Ver distribución y disponibilidad de cuentas</summary><div id="capInfo" class="capinfo"></div></details>
+      <div class="newcode" id="autoOut" aria-live="polite"></div>
     </div>
     <details class="card" id="manualBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">🔑 Generar código de una cuenta en particular</summary>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Se crea 1 código por defecto; puedes subir la cantidad si lo necesitas.</p>
@@ -433,7 +421,7 @@ function render(){
         <div style="grid-column:span 2"><label>Cuenta</label><select id="gAcc" required></select></div>
         <div><label>Días del plan</label><input id="gDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="gPrice" type="number" min="0" step="500" value="${DEFAULT_PRICE}"></div>
-        <div><label>Cantidad de códigos</label><input id="gQty" type="number" min="1" value="1" required></div>
+        <div><label>Cantidad de códigos</label><input id="gQty" type="number" min="1" max="200" step="1" value="1" required></div>
         <div><button class="btn p" style="width:100%" type="submit">Generar</button></div>
       </form>
       <div class="newcode" id="newcode"></div>
@@ -441,7 +429,7 @@ function render(){
     <div class="card"><h2>📋 Todos los códigos y clientes</h2>
       <div class="tools">
         <input id="q" placeholder="Buscar cliente, correo, código o nota…">
-        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas</option><option value="w">Por vencer</option><option value="b">Vencidas</option><option value="pr">Con problemas</option></select>
+        <select id="st"><option value="">Todos los estados</option><option value="av">Disponibles</option><option value="ok">Activas sin alerta</option><option value="active-plans">Todos los planes activos</option><option value="w">Por vencer</option><option value="b">Vencidas</option><option value="pr">Con problemas</option><option value="expired-code">Códigos sin canjear vencidos</option></select>
         <select id="pf"><option value="">Todos los productos</option></select>
         <button class="btn s" id="csv">⬇ Exportar CSV</button>
       </div>
@@ -457,8 +445,8 @@ function render(){
       <form id="addForm" class="form" style="margin-top:14px">
         <div><label>Producto</label><input id="fProd" value="ChatGPT" list="prodList" required><datalist id="prodList">${Object.keys(PRICES).map(k=>`<option value="${k}">`).join("")}</datalist></div>
         <div><label>Correo de la cuenta</label><input id="fMail" type="text" required autocomplete="off"></div>
-        <div><label>Contraseña de la cuenta</label><input id="fPass" type="text" required autocomplete="off"></div>
-        <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="text" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
+        <div><label>Contraseña de la cuenta</label><input id="fPass" type="password" required autocomplete="off"></div>
+        <div><label>Clave del autenticador 2FA (opcional)</label><input id="fKey" type="password" autocomplete="off" placeholder="Ej: ABCD EFGH IJKL MNOP"></div>
         <div><label>Días del plan</label><input id="fDays" type="number" min="1" max="366" value="30" required></div>
         <div><label>Precio (COP)</label><input id="fPrice" type="number" min="0" step="500" value="${DEFAULT_PRICE}"></div>
         <div><button class="btn p" style="width:100%" type="submit">Crear y generar código</button></div>
@@ -468,9 +456,11 @@ function render(){
   </section>
 
   <section id="tab-dios" class="hide">
-    <div class="god-hero"><div><h2>⚡ Modo Dios</h2><p>Aquí decides todo. Cada cambio se aplica al instante en la tienda, en el asistente de WhatsApp y en tus agentes. Sin tocar código.</p></div><div class="god-badges" id="godBadges"></div></div>
+    <div class="god-hero"><div><span class="overline">CONTROL DEL NEGOCIO</span><h2>Modo Dios</h2><p>Tu tienda, tus reglas. Revisa los cambios del asistente antes de guardarlos. Los precios se guardan por producto.</p></div><div class="god-badges" id="godBadges"></div></div>
+    <nav class="god-jumps" aria-label="Secciones de Modo Dios"><a href="#godAssistant">Asistente</a><a href="#godRules">Instrucciones</a><a href="#godAnswers">Respuestas</a><a href="#godCatalog">Planes y precios</a></nav>
+    <div class="god-savebar" id="godSavebar" data-state="saved"><div><span class="save-indicator"></span><span id="godSaveStatus" role="status">Cargando configuración…</span></div><div><button class="btn s" type="button" id="godDiscard" disabled>Descartar</button><button class="btn p" type="button" id="godSaveAll" disabled>Guardar cambios</button></div></div>
     <div class="god-grid">
-      <div class="card"><h2>🧠 Asistente de WhatsApp</h2>
+      <div class="card" id="godAssistant"><h2>Asistente de WhatsApp</h2>
         <label class="sw"><input type="checkbox" id="gAsis"><span></span><b>Asistente encendido</b><small>Si lo apagas, nadie responde por WhatsApp hasta que lo vuelvas a encender.</small></label>
         <label class="sw"><input type="checkbox" id="gSal"><span></span><b>Saludo automático gratis</b><small>A quien escribe "hola" por primera vez le llega la bienvenida con los planes, sin gastar IA.</small></label>
         <div class="acts" style="margin-top:10px"><button class="btn s" id="gReanudar">▶ Reactivar el asistente en todos los chats pausados</button></div>
@@ -482,19 +472,19 @@ function render(){
         <p class="god-hint">⚠️ Más mensajes = más ventas, pero también más riesgo de que WhatsApp bloquee el número. Recomendado: 60 por día y 25 antiguos.</p>
       </div>
     </div>
-    <div class="card"><h2>📜 Órdenes para la IA</h2>
-      <p class="god-hint">Escribe instrucciones en tus palabras y el asistente las seguirá siempre. Ejemplos: "Si preguntan por Netflix, di que llega la otra semana", "Los domingos ofrece el plan de 3 meses primero", "No vendas Canva por ahora".</p>
+    <div class="card" id="godRules"><h2>Instrucciones para la IA</h2>
+      <p class="god-hint">Escribe instrucciones en tus palabras y el asistente las usará como orientación. Ejemplos: "Si preguntan por Netflix, di que llega la otra semana", "Los domingos ofrece el plan de 3 meses primero", "No vendas Canva por ahora".</p>
       <textarea id="gReglas" rows="5" maxlength="3000" class="god-ta" placeholder="Tus órdenes para el asistente…"></textarea>
-      <div class="acts" style="justify-content:flex-end;margin-top:8px"><span class="god-hint" id="gReglasN"></span><button class="btn p" id="gReglasOk">Guardar órdenes</button></div>
+      <div class="acts" style="justify-content:flex-end;margin-top:8px"><span class="god-hint" id="gReglasN"></span><button class="btn p" id="gReglasOk">Revisar cambios</button></div>
     </div>
-    <div class="card"><h2>⚡ Respuestas automáticas <span class="tag t-ok" style="font-size:11px">gratis · sin IA</span></h2>
+    <div class="card" id="godAnswers"><h2>Respuestas automáticas <span class="tag t-ok" style="font-size:11px">gratis · sin IA</span></h2>
       <p class="god-hint">Si el cliente escribe una de estas palabras, se le responde al instante con tu texto, sin gastar saldo de IA. Si pregunta por otro producto o algo más complejo, responde la IA. Los precios de ChatGPT ($10.000 / $20.000 / $50.000) se actualizan solos con los de abajo.</p>
       <div id="gFaq" class="faq-list"></div>
-      <div class="acts" style="margin-top:10px"><button class="btn s" id="gFaqAdd">➕ Agregar respuesta</button><button class="btn s" id="gFaqReset">↺ Volver a las de fábrica</button><span style="flex:1"></span><button class="btn p" id="gFaqOk">Guardar respuestas</button></div>
+      <div class="acts" style="margin-top:10px"><button class="btn s" id="gFaqAdd">➕ Agregar respuesta</button><button class="btn s" id="gFaqReset">↺ Volver a las de fábrica</button><span style="flex:1"></span><button class="btn p" id="gFaqOk">Revisar cambios</button></div>
     </div>
-    <div class="card"><h2>🛒 Productos, planes y precios</h2>
+    <div class="card" id="godCatalog"><h2>Productos, planes y precios</h2>
       <p class="god-hint">Cambia el precio o los días y toca Guardar: se actualiza en la tienda, en el asistente, en los revendedores y en los códigos nuevos. "Visible" apagado lo esconde de la tienda y el asistente deja de ofrecerlo.</p>
-      <div class="wrapt"><table class="god-tab"><thead><tr><th>Producto</th><th>Precio (COP)</th><th>Días</th><th>Visible</th><th>Cuentas con cupo</th><th></th></tr></thead><tbody id="gProds"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody></table></div>
+      <div class="tools catalog-control-tools"><label class="control-search"><span>Buscar producto</span><input id="godProductSearch" placeholder="ChatGPT, Canva, CapCut…" type="search"></label><span id="godProductCount" class="hint"></span></div><div class="wrapt god-products"><table class="god-tab"><thead><tr><th>Producto</th><th>Precio (COP)</th><th>Días</th><th>Visible</th><th>Disponibilidad</th><th></th></tr></thead><tbody id="gProds"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody></table></div>
       <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">➕ Agregar un producto nuevo</summary>
         <div class="god-row" style="margin-top:10px"><label>Nombre<input id="nNom" placeholder="Ej: Netflix"></label><label>Precio<input id="nPre" type="number" placeholder="15000"></label><label>Días<input id="nDia" type="number" value="30"></label><button class="btn p" id="nOk" style="align-self:end">Crear</button></div>
         <p class="god-hint">Luego agrega sus cuentas en la pestaña Cuentas con un nombre que contenga la misma palabra (por ejemplo "Netflix"). En la tienda aparece en la lista del asistente; para mostrarlo con foto en la página, pídemelo.</p></details>
@@ -538,6 +528,10 @@ function render(){
   $("#aClean").onclick = async () => { try{ const j = await api("admin_cleanup"); toast(j.borrados? j.borrados+" código(s) vencido(s) invalidados ✔" : "No había códigos vencidos"); await refresh(); }catch(ex){ toast(/no válida|Acción/i.test(ex.message)?"Falta actualizar el backend (Code.gs)":ex.message); } };
   $("#aCount").onchange = () => { try{ localStorage.setItem(COUNT_KEY, JSON.stringify($("#aCount").checked)); }catch{} $("#capInfo").innerHTML = capInfoHtml(); updateViews(); };
   $("#gAcc").onchange = syncDays;
+  ["aQty","aDays","aPrice"].forEach(id=>$("#"+id).addEventListener("input",updateGeneratorPreview));
+  $("#aProd").addEventListener("change",updateGeneratorPreview);
+  $("#autoForm").querySelectorAll("label").forEach(label=>{const control=label.parentElement.querySelector("input,select");if(control)label.htmlFor=control.id;});
+  $("#genForm").querySelectorAll("label").forEach(label=>{const control=label.parentElement.querySelector("input,select");if(control)label.htmlFor=control.id;});
   let filterTimer;
   const redrawFilters = () => { clearTimeout(filterTimer); filterTimer = setTimeout(()=>{ rows(); crows(); }, 90); };
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = redrawFilters;
@@ -560,8 +554,8 @@ function quick(a){
 /* ---------- Clientes ---------- */
 function cFiltered(){
   const q = norm($("#cq")?.value||""), st = $("#cst")?.value||"", so = $("#cso")?.value||"rest";
-  const list = clients().filter(c=>(!st||cState(c).k===st) && (!q || norm([c.nombre,c.email,c.whatsapp,c.nota].join(" ")).includes(q)));
-  const rest = c => Math.min(...c.cuentas.filter(i=>!i.vencida).map(i=>i.restante??9999), 99999);
+  const list = clients().filter(c=>(!st||(st==="due7"?c.cuentas.some(i=>IAPInsights.isDue(i,Date.now())):st==="active-all"?c.cuentas.some(i=>IAPInsights.isActive(i,Date.now())):st==="inactive-all"?!c.cuentas.some(i=>IAPInsights.isActive(i,Date.now())):cState(c).k===st)) && (!q || norm([c.nombre,c.email,c.whatsapp,c.nota].join(" ")).includes(q)));
+  const rest = c => Math.min(...c.cuentas.filter(i=>IAPInsights.isActive(i,Date.now())).map(i=>i.restante??9999), 99999);
   const sorters = {rest:(a,b)=>rest(a)-rest(b), gasto:(a,b)=>b.gastado-a.gastado, nuevo:(a,b)=>String(b.ultima||"").localeCompare(String(a.ultima||"")), nombre:(a,b)=>(a.nombre||a.email).localeCompare(b.nombre||b.email)};
   return list.sort(sorters[so]);
 }
@@ -611,7 +605,7 @@ async function dar2fa(email){
 }
 async function grantAccounts(email){
   email = String(email||"").trim().toLowerCase(); if(!email) return;
-  const mine = new Set(items.filter(i=>(i.cliente||"").toLowerCase()===email && !i.vencida).map(i=>i.correo.toLowerCase()));
+  const mine = new Set(items.filter(i=>(i.cliente||"").toLowerCase()===email && IAPInsights.isActive(i,Date.now())).map(i=>i.correo.toLowerCase()));
   const libres = k => new Set(items.filter(i=>pkeyOf(i.producto)===k && i.estado!=="Con problemas" && !mine.has(i.correo.toLowerCase())).map(i=>i.correo.toLowerCase())).size;
   const opts = Object.keys(PKEYS).map(n=>({v:PKEYS[n], l:n+" — "+libres(PKEYS[n])+" cuenta(s) que aún no tiene"})).filter(o=>libres(o.v)>0);
   if(!opts.length) return toast("Este cliente ya tiene acceso a todas las cuentas.");
@@ -644,7 +638,7 @@ function capMap(){
     const k = i.correo.toLowerCase();
     const a = m.get(k) || {correo:i.correo, filas:{}, act:0, libres:0, prob:false};
     if(a.filas[i.producto]===undefined) a.filas[i.producto] = i.fila;
-    if(i.cliente){ if(!i.vencida) a.act++; }
+    if(i.cliente){ if(IAPInsights.isActive(i,Date.now())) a.act++; }
     else if(i.estado==="Con problemas") a.prob = true;
     else if(i.codigo && i.estado!=="Sin código") a.libres++;
     m.set(k,a);
@@ -693,50 +687,61 @@ function fillAuto(){
   if(ps.includes(prev)) sel.value = prev; else onAutoProd();
   $("#capInfo").innerHTML = capInfoHtml();
 }
-function onAutoProd(){ const p=$("#aProd").value; if(!p) return; $("#aDays").value = daysOf(p); $("#aPrice").value = priceOf(p); $("#capInfo").innerHTML = capInfoHtml(); }
+function onAutoProd(){ const p=$("#aProd").value; if(!p) return; $("#aDays").value = daysOf(p); $("#aPrice").value = priceOf(p); $("#capInfo").innerHTML = capInfoHtml(); updateGeneratorPreview(); }
 // Crea n códigos de una cuenta (bulk si el backend lo permite; si no, uno por uno)
-async function makeCodes(fila, n, dias, precio){
-  const out = [];
-  while(out.length<n){
-    const k = Math.min(100, n-out.length);
-    if(n>k) toast("Creando códigos… "+out.length+" de "+n);
-    try{ out.push(...(await api("admin_bulk",{fila,cantidad:k,dias,precio})).codigos); }
-    catch(ex){ if(!/no válida|Acción/i.test(ex.message)) throw ex; for(let t=0;t<k;t++) out.push((await api("admin_clone",{fila,dias,precio})).codigo); }
-  }
-  return out;
+let generationBusy=false;
+function updateGeneratorPreview(){
+  const el=$("#generatorPreview");if(!el)return;
+  try{
+    const v=IAPAdminTools.validateBatch({qty:$("#aQty").value,days:$("#aDays").value,price:$("#aPrice").value});
+    const product=$("#aProd").value,available=[...capMap().values()].filter(a=>!a.prob&&a.filas[product]!==undefined).length;
+    el.innerHTML=`<div><small>Tu lote</small><b>${v.qty} ${v.qty===1?"código":"códigos"}</b><span>${esc(product||"Agrega una cuenta")}</span></div><div><small>Duración por acceso</small><b>${v.days} días</b><span>Desde su activación</span></div><div><small>Precio por código</small><b>${money(v.price)}</b><span>${money(v.total)} valor total del lote</span></div><div><small>Reparto automático</small><b>${available} ${available===1?"cuenta":"cuentas"}</b><span>${available?"Disponibles para generar":"Agrega una cuenta en Cuentas"}</span></div>`;
+    el.dataset.valid="true";
+  }catch(e){el.textContent=e.message;el.dataset.valid="false";}
+}
+function reviewGeneration(product,v,plan){
+  return new Promise(resolve=>{
+    const d=document.createElement("dialog");d.className="generation-review";d.setAttribute("aria-labelledby","generationReviewTitle");
+    d.innerHTML=`<form method="dialog"><span class="overline">REVISA ANTES DE CREAR</span><h2 id="generationReviewTitle">Tu lote, listo para generar.</h2><p>Se crearán códigos reales de un solo uso para <b>${esc(product)}</b>.</p><div class="review-metrics"><div><small>Códigos</small><b>${v.qty}</b></div><div><small>Vigencia del plan</small><b>${v.days} días</b></div><div><small>Precio por acceso</small><b>${money(v.price)}</b></div></div><div class="review-accounts">${plan.map(p=>`<div><span>${esc(p.correo)}</span><b>+${p.n}</b></div>`).join("")}</div><p class="hint">${TTL?"Los códigos sin canjear caducan en "+(TTL>=60?TTL/60+" horas":TTL+" minutos")+".":"Los códigos sin canjear no tienen caducidad configurada."} La duración del plan empieza al activar el acceso.</p><div class="review-actions"><button class="btn" value="cancel">Volver</button><button class="btn p" value="generate">Crear ${v.qty} ${v.qty===1?"código":"códigos"}</button></div></form>`;
+    d.addEventListener("close",()=>{const ok=d.returnValue==="generate";d.remove();resolve(ok);},{once:true});
+    d.addEventListener("cancel",e=>{e.preventDefault();d.close("cancel");});document.body.appendChild(d);d.showModal();
+  });
+}
+async function makeCodes(fila,n,dias,precio,onProgress){return IAPAdminTools.createCodes(api,{row:fila,qty:n,days:dias,price:precio},onProgress);}
+function presentCodeBatch(out,res,product,v,failure){
+  const all=res.flatMap(r=>r.codes);out.classList.add("on");
+  out.innerHTML=`<div class="batch-result-head"><span class="batch-result-icon">${failure?"!":"✓"}</span><div><h3>${all.length} ${all.length===1?"código creado":"códigos creados"}</h3><p>${esc(product)} · ${v.days} días · ${money(v.price)} por acceso</p></div><span class="tag ${failure?"t-w":"t-ok"}">${failure?"Lote parcial":"Listo para entregar"}</span></div>${failure?`<p class="batch-error" role="alert">${esc(failure)}<br>Conservamos los códigos confirmados. Consulta la lista actualizada antes de repetir el resto.</p>`:""}<div class="batch-result-actions"><button class="btn p" data-batch-links>Copiar enlaces</button><button class="btn" data-batch-codes>Copiar códigos</button><button class="btn" data-batch-export>Descargar lote .txt</button></div><p class="hint">Envía a cada cliente su propio enlace. Podrá revisar su Gmail antes de activarlo.</p>${res.map(r=>`<div class="batch-group"><div class="batch-group-label">${esc(r.correo)} <span>${r.codes.length} ${r.codes.length===1?"código":"códigos"}</span></div>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><div><button class="btn s p" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><button class="btn s" data-cp="${esc(c)}">Código</button></div></div>`).join("")}</div>`).join("")}`;
+  out.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
+  out.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copy(linkFor(b.dataset.cl)));
+  out.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({producto:product,codigo:b.dataset.cm,dias:v.days})));
+  out.querySelector("[data-batch-links]").onclick=()=>copy(all.map(linkFor).join("\n"));
+  out.querySelector("[data-batch-codes]").onclick=()=>copy(all.join("\n"));
+  out.querySelector("[data-batch-export]").onclick=()=>{
+    const text=["IA Plus Colombia · Lote de accesos",product+" · "+v.days+" días · "+money(v.price)+" COP", "Creado: "+new Date().toLocaleString("es-CO",{timeZone:"America/Bogota"}),"",...all.map(c=>c+" · "+linkFor(c))].join("\n");
+    const url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="iaplus-codigos-"+new Intl.DateTimeFormat("en-CA",{timeZone:"America/Bogota",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())+".txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
 }
 async function autoGen(e){
-  e.preventDefault();
-  const prod=$("#aProd").value, qty=Math.max(1,Math.floor(+$("#aQty").value||1)), cap=getCap();
-  const dias=$("#aDays").value, precio=$("#aPrice").value; if(!prod) return toast("Primero agrega una cuenta");
-  const {plan, hechos, faltan} = planAuto(prod, qty, cap);
-  if(!hechos){ $("#capInfo").innerHTML = capInfoHtml(); return toast("No hay cuentas con cupo para "+prod+". Agrega una cuenta nueva."); }
-  const resumen = [...plan.values()].map(p=>"• "+p.correo+": +"+p.n+" códigos ("+p.antes+" clientes canjeados → hasta "+(p.antes+p.n)+(noCap()?"":" de "+cap)+")").join("\n");
-  if(!confirm("Se crearán "+hechos+" código"+(hechos===1?"":"s")+" de "+prod+" en "+plan.size+" cuenta"+(plan.size===1?"":"s")+":\n\n"+resumen+(faltan?"\n\n⚠️ Pediste "+qty+", pero solo hay cupo para "+hechos+". Agrega más cuentas para el resto.":"")+"\n\n¿Generar?")) return;
-  const b=e.target.querySelector("button"); b.disabled=true; b.textContent="Generando…";
-  const res=[]; let total=0;
+  e.preventDefault();if(generationBusy)return;
+  let v;try{v=IAPAdminTools.validateBatch({qty:$("#aQty").value,days:$("#aDays").value,price:$("#aPrice").value});}catch(ex){toast(ex.message);return;}
+  const product=$("#aProd").value,{plan,hechos}=planAuto(product,v.qty,getCap());
+  if(!product||hechos!==v.qty){toast("No hay cuentas disponibles para este lote. Revisa Cuentas.");return;}
+  generationBusy=true;const b=e.target.querySelector('[type="submit"]'),original=b.textContent;b.disabled=true;
+  const results=[];let failure="";
   try{
-    for(const p of plan.values()){
-      toast("Creando códigos… "+total+" de "+hechos);
-      const codes = await makeCodes(p.fila, p.n, dias, precio); total += codes.length; res.push({correo:p.correo, codes});
+    if(!await reviewGeneration(product,v,[...plan.values()]))return;
+    b.textContent="Creando lote…";const progress=$("#batchProgress");progress.hidden=false;let total=0;
+    for(const part of plan.values()){
+      try{const codes=await makeCodes(part.fila,part.n,v.days,v.price,done=>{$("#batchProgressText").textContent=(total+done)+" de "+v.qty+" códigos confirmados";progress.querySelector("progress").value=(total+done)/v.qty*100;});results.push({correo:part.correo,codes});total+=codes.length;}
+      catch(ex){if(ex.codes?.length)results.push({correo:part.correo,codes:ex.codes});throw ex;}
     }
-  }catch(ex){ toast("Se detuvo: "+ex.message); }
-  await refresh();
-  if(res.length){
-    const all = res.flatMap(r=>r.codes);
-    const out = $("#autoOut"); out.classList.add("on");
-    out.innerHTML = `${TTL?`<div class="capwarn" style="margin:0 0 10px">⏱ Si nadie los canjea, se borran solos en ${TTL>=60?(TTL/60)+" h":TTL+" min"}.</div>`:""}<div style="color:var(--mut);font-size:13px"><b>${all.length}</b> código${all.length===1?"":"s"} nuevo${all.length===1?"":"s"} de ${esc(prod)} (un solo uso)${faltan?` · faltaron ${faltan} por falta de cupo`:""}:</div>
-      ${res.map(r=>`<div class="grp"><small>${esc(r.correo)}</small>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s p" data-cl="${esc(c)}">🔗 Copiar enlace de activación</button><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({producto:prod,codigo:c,dias}))}">WhatsApp</a></div>`).join("")}</div>`).join("")}
-      <div class="acts" style="margin-top:10px"><button class="btn s p" id="clAllAuto">🔗 Copiar todos los enlaces</button><button class="btn s" id="cpAllAuto">Copiar todos los códigos</button></div>`;
-    out.querySelectorAll("[data-cp]").forEach(x=>x.onclick=()=>copy(x.dataset.cp));
-    out.querySelectorAll("[data-cl]").forEach(x=>x.onclick=()=>copy(linkFor(x.dataset.cl)));
-    out.querySelectorAll("[data-cm]").forEach(x=>x.onclick=()=>copy(msgFor({producto:prod,codigo:x.dataset.cm,dias})));
-    $("#cpAllAuto").onclick=()=>copy(all.join("\n"));
-    $("#clAllAuto").onclick=()=>copy(all.map(linkFor).join("\n"));
-    copyText(all.map(linkFor).join("\n")).then(()=>toast(all.length+(all.length===1?" código creado ✔ Enlace de activación copiado":" códigos creados ✔ Enlaces de activación copiados")));
+  }catch(ex){failure=ex.message;}
+  finally{
+    if(results.length||failure){await refresh();const out=$("#autoOut");if(results.length)presentCodeBatch(out,results,product,v,failure);else{out.classList.add("on");out.innerHTML=`<p class="batch-error" role="alert">${esc(failure)}<br>No recibimos códigos confirmados. Actualiza la lista antes de repetir el lote.</p>`;}out.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});toast(failure?"Lote detenido. Revisa el resultado.":"Lote creado. Elige cómo entregarlo.");}
+    generationBusy=false;b.disabled=false;b.textContent=original;$("#batchProgress").hidden=true;updateGeneratorPreview();
   }
-  b.disabled=false; b.textContent="🎲 Generar";
 }
+
 function accounts(){
   const m = new Map();
   items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
@@ -766,25 +771,22 @@ function showCodes(codes, it){
   const allL=$("#clAll"); if(allL) allL.onclick=()=>copy(codes.map(linkFor).join("\n"));
 }
 async function genCode(e){
-  e.preventDefault(); const a=accounts().find(x=>x.k===$("#gAcc").value); if(!a) return toast("Primero agrega una cuenta");
-  const b=e.target.querySelector("button"); b.disabled=true;
-  const dias=$("#gDays").value, precio=$("#gPrice").value, qty=Math.max(1,Math.floor(+$("#gQty").value||1));
-  const ci=capMap().get(a.correo.toLowerCase()), cap=getCap();
-  if(!noCap() && ci && used(ci)+qty>cap && !confirm("Esta cuenta ya tiene "+used(ci)+" de "+cap+" cupos ocupados. Con "+qty+" código(s) más pasaría del tope y se puede saturar.\n\nSugerencia: usa «Generar códigos automáticos» para repartirlos en cuentas con cupo.\n\n¿Generar de todos modos?")){ b.disabled=false; return; }
-  try{
-    let codes;
-    if(qty>1) codes = await makeCodes(a.fila, qty, dias, precio);
-    else codes = [(await api("admin_clone",{fila:a.fila,dias,precio})).codigo];
-    await copyText(codes.length>1?codes.map(linkFor).join("\n"):msgFor({producto:a.producto,codigo:codes[0],dias}));
-    await refresh(); showCodes(codes,{producto:a.producto,dias});
-    toast(codes.length>1?`${codes.length} códigos creados ✔ (enlaces de activación copiados)`:"Código creado ✔ (mensaje con el enlace de activación copiado)");
-  }catch(ex){ toast(ex.message); }
-  b.disabled=false;
+  e.preventDefault();if(generationBusy)return;const a=accounts().find(x=>x.k===$("#gAcc").value);if(!a)return toast("Primero agrega una cuenta");
+  let v;try{v=IAPAdminTools.validateBatch({qty:$("#gQty").value,days:$("#gDays").value,price:$("#gPrice").value});}catch(ex){toast(ex.message);return;}
+  const account=capMap().get(a.correo.toLowerCase());if(account?.prob)return toast("Esta cuenta está marcada con problemas. Elige otra.");
+  generationBusy=true;const b=e.target.querySelector("button"),original=b.textContent;b.disabled=true;let codes=[],failure="";
+  try{if(!await reviewGeneration(a.producto,v,[{correo:a.correo,n:v.qty}]))return;b.textContent="Generando…";codes=await makeCodes(a.fila,v.qty,v.days,v.price);}
+  catch(ex){codes=ex.codes||[];failure=ex.message;}
+  finally{
+    if(codes.length||failure){await refresh();const out=$("#newcode");if(codes.length){presentCodeBatch(out,[{correo:a.correo,codes}],a.producto,v,failure);$("#manualBox").open=true;}else{out.classList.add("on");out.innerHTML=`<p class="batch-error" role="alert">${esc(failure)}<br>No recibimos códigos confirmados. Revisa la lista antes de repetir.</p>`;$("#manualBox").open=true;}}
+    generationBusy=false;b.disabled=false;b.textContent=original;
+  }
 }
+
 function filtered(){
   const q = norm($("#q")?.value||""), st = $("#st")?.value||"";
   const pf = $("#pf")?.value||"";
-  return items.filter(i => (!st || state(i).k===st) && (!pf || i.producto===pf) && (!q || norm([i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ")).includes(q)))
+  return items.filter(i => (!st || (st==="active-plans"?!!i.cliente&&IAPInsights.isActive(i,Date.now()):st==="expired-code"?IAPInsights.isExpiredCode(i,Date.now(),TTL):st==="av"?state(i).k==="av"&&!IAPInsights.isExpiredCode(i,Date.now(),TTL):state(i).k===st)) && (!pf || i.producto===pf) && (!q || norm([i.cliente,i.nombre,i.correo,i.codigo,i.producto,i.nota].join(" ")).includes(q)))
     .sort((a,b)=> (b.codigo===hlCode)-(a.codigo===hlCode) || (a.restante??9999)-(b.restante??9999));
 }
 // Cuenta regresiva de un código sin canjear (se borra solo a los TTL minutos)
@@ -810,7 +812,7 @@ function rows(){
   el.innerHTML = list.length ? list.map(i=>{
     const s = state(i);
     const rest = !i.cliente ? "—" : i.vencida ? `<b style="color:var(--bad)">Venció</b>` : `<b>${i.restante} ${i.restante===1?"día":"días"}</b>`;
-    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${EMO(i.producto)} ${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${esc(i.clave)}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
+    return `<tr data-f="${i.fila}" class="${hlCode&&i.codigo===hlCode?"hl":""}"><td data-l="Producto">${EMO(i.producto)} ${esc(i.producto)}</td><td data-l="Cuenta"><div>${esc(i.correo)}<br><small style="color:var(--mut)">${i.clave?"••••••••":"Sin contraseña"}</small><br>${i.tiene2fa?'<span class="tag t-ok" title="Tiene autenticador 2FA">2FA ✓</span>':'<span class="tag t-w" title="Sin clave 2FA">sin 2FA</span>'}${i.nota?`<div class="note" style="margin-top:4px">📝 ${esc(i.nota)}</div>`:""}</div></td>
       <td class="mono" data-l="Código">${esc(i.codigo||"—")}${expiraHtml(i)}</td><td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
       <td data-l="Cliente" style="word-break:break-all">${i.cliente?`<div>${i.nombre?`<b>${esc(i.nombre)}</b><br>`:""}${esc(i.cliente)}${i.whatsapp?`<br><small style="color:var(--mut)">📱 ${esc(i.whatsapp)}</small>`:""}</div>`:"—"}</td><td data-l="Activada">${fdate(i.inicio)}</td><td data-l="Vence">${fdate(i.fin)}</td><td data-l="2FA usado">${i.cliente&&i.tiene2fa?`<span class="tag ${(i.usos2fa||0)>=(i.max2fa||5)?"t-b":"t-av"}">${i.usos2fa||0}/${i.max2fa||5}</span>`:"—"}</td><td data-l="Precio">${i.precio?money(i.precio):"—"}</td><td data-l="Restante"><div>${rest} <small style="color:var(--mut)">(plan ${i.dias} d)</small></div></td>
       <td class="acts-td"><div class="acts">
@@ -1016,7 +1018,7 @@ document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
   e.preventDefault(); if(curTab!=="cli"&&curTab!=="cod") setTab("cod"); (curTab==="cli"?$("#cq"):$("#q")).focus();
 });
 const isEditing = () => { const a=document.activeElement; return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); };
-start(); setInterval(()=>{ if(!document.hidden && !isEditing() && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
+start(); setInterval(()=>{ if(!document.hidden && !isEditing() && !godDirty && !generationBusy && !productDrafts.size && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 
 
 /* =====================================================================
@@ -1072,7 +1074,7 @@ function alertsHtml(){
   if(!noCap()) cm.filter(a=>!a.prob && used(a)>=cap).forEach(a=>out.push({t:"b",ic:"🚫",tx:`Cuenta llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. No le generes más códigos.`,go:"cta"}));
   if(!noCap()) cm.filter(a=>!a.prob && used(a)<cap && used(a)>=Math.ceil(cap*.8)).forEach(a=>out.push({t:"w",ic:"📈",tx:`Casi llena (${used(a)}/${cap}): <b>${esc(a.correo)}</b>. Conviene agregar una cuenta nueva.`,go:"cta"}));
   cm.filter(a=>a.prob).forEach(a=>out.push({t:"b",ic:"⚠️",tx:`Cuenta marcada con problemas: <b>${esc(a.correo)}</b>.`,go:"cta"}));
-  const sin2 = {}; items.forEach(i=>{ if(i.cliente && !i.vencida && !i.tiene2fa){ const k=i.correo.toLowerCase(); sin2[k]=(sin2[k]||0)+1; } });
+  const sin2 = {}; items.forEach(i=>{ if(i.cliente && IAPInsights.isActive(i,Date.now()) && !i.tiene2fa){ const k=i.correo.toLowerCase(); sin2[k]=(sin2[k]||0)+1; } });
   Object.entries(sin2).forEach(([k,n])=>out.push({t:"w",ic:"🔓",tx:`<b>${esc(k)}</b> tiene ${n} cliente${n===1?"":"s"} y no tiene clave 2FA guardada.`,go:"cta"}));
   const prods = new Set(items.map(i=>i.producto));
   prods.forEach(p=>{ const abiertas = cm.filter(a=>!a.prob && a.filas[p]!==undefined && (noCap() || used(a)<cap)); if(!abiertas.length && cm.some(a=>a.filas[p]!==undefined)) out.push({t:"b",ic:"🧯",tx:`Sin cupo para vender <b>${esc(p)}</b>: todas sus cuentas están llenas.`,go:"cod"}); });
@@ -1087,7 +1089,7 @@ function alertsHtml(){
 /* ---------- Vencimientos de los próximos 14 días ---------- */
 function dueHtml(){
   const days = [...Array(14)].map((_,k)=>({k, n:0, names:[], v:0}));
-  items.filter(i=>i.cliente && !i.vencida && i.fin).forEach(i=>{
+  items.filter(i=>i.cliente && IAPInsights.isActive(i,Date.now()) && i.fin).forEach(i=>{
     const d = Math.ceil((new Date(i.fin)-Date.now())/DAY_MS); if(d>=0 && d<14){ days[d].n++; days[d].names.push(i.nombre||i.cliente); days[d].v += Number(i.precio)||0; }
   });
   const mx = Math.max(1,...days.map(d=>d.n)), week = days.slice(0,7), nw = week.reduce((s,d)=>s+d.n,0), vw = week.reduce((s,d)=>s+d.v,0);
@@ -1104,7 +1106,7 @@ function profitHtml(){
   const costs = COSTS(), m = new Map();
   items.forEach(i=>{
     const k = i.correo.toLowerCase(), a = m.get(k) || {k, correo:i.correo, producto:i.producto, act:0, ing:0};
-    if(i.cliente && !i.vencida){ a.act++; a.ing += (Number(i.precio)||0) * 30 / Math.max(1, i.dias||30); }
+    if(i.cliente && IAPInsights.isActive(i,Date.now())){ a.act++; a.ing += (Number(i.precio)||0) * 30 / Math.max(1, i.dias||30); }
     m.set(k,a);
   });
   const list = [...m.values()].sort((a,b)=>b.ing-a.ing);
@@ -1115,7 +1117,7 @@ function profitHtml(){
       <div class="pr-c"><small>Costo/mes</small><input class="cost-in" data-ck="${esc(a.k)}" type="number" min="0" step="500" value="${c||""}" placeholder="0" aria-label="Costo de ${esc(a.correo)}"></div>
       <div class="pr-c"><small>Ganancia</small><b class="${g<0?"neg":"pos"}">${money(g)}</b></div></div>`; }).join("");
   const g = tIng - tCost;
-  return `<p style="color:var(--mut);font-size:13px;margin-bottom:10px">Ingreso mensual estimado = lo que pagan los clientes <b>activos</b> de cada cuenta (ajustado a 30 días). Escribe cuánto te cuesta cada cuenta al mes; se guarda en este navegador.</p>${rows||'<div class="empty">Aún no hay cuentas.</div>'}
+  return `<p style="color:var(--mut);font-size:13px;margin-bottom:10px">Valor mensual estimado = precios registrados de los planes de clientes <b>activos</b> de cada cuenta (ajustado a 30 días). Escribe cuánto te cuesta cada cuenta al mes; se guarda en este navegador. Es una estimación; no sustituye una conciliación de ingresos y gastos.</p>${rows||'<div class="empty">Aún no hay cuentas.</div>'}
     <div class="prow total"><div class="pr-n"><b>Total</b></div><div class="pr-c"><small>Ingreso/mes</small><b>${money(tIng)}</b></div><div class="pr-c"><small>Costos/mes</small><b>${money(tCost)}</b></div><div class="pr-c"><small>Ganancia</small><b class="${g<0?"neg":"pos"}">${money(g)}</b></div></div>`;
 }
 
@@ -1580,67 +1582,156 @@ function drawAgentes(a){
   </div>`;
 }
 
-/* ---------- Modo Dios ---------- */
-let GCFG = null, GPRODS = [];
-async function loadDios(){
-  const [c, p] = await Promise.allSettled([api("admin_wa_ajustes"), api("admin_catalogo")]);
-  if(c.status==="fulfilled"){ GCFG = c.value.config; drawDiosCfg(); } else toast("Asistente: "+c.reason.message);
-  if(p.status==="fulfilled"){ GPRODS = p.value.productos; syncPrecios(); drawProds(); } else $("#gProds").innerHTML = '<tr><td colspan="6" class="empty">'+esc(p.reason.message)+'</td></tr>';
+/* ---------- Modo Dios: staged changes and independent product drafts ---------- */
+let GCFG=null,GPRODS=[],godDirty=false,godSaving=false,godLoading=false,savedGodConfig=null;
+const productDrafts=new Map(),productSaving=new Set();
+function configShape(c={}){return {...c,asistente:!!c.asistente,saludo:!!c.saludo,reglas:c.reglas||'',rec:{activo:false,hora:9,max:60,viejos:25,...c.rec},faq:Array.isArray(c.faq)?c.faq:[]};}
+function godStatus(text,state){
+  const bar=$('#godSavebar');if(!bar)return;bar.dataset.state=state||'saved';$('#godSaveStatus').textContent=text;
+  $('#godSaveAll').disabled=!godDirty||godSaving||!GCFG;$('#godDiscard').disabled=!godDirty||godSaving;$('#godSaveAll').textContent=godSaving?'Guardando…':'Guardar cambios';
 }
-function syncPrecios(){ GPRODS.forEach(x=>{ PRICES[x.name] = x.price; DAYS[x.name] = x.dias; }); }
+function markGodDirty(){if(!GCFG||godSaving)return;godDirty=true;godStatus('Cambios sin guardar','dirty');}
+function godControlsDisabled(disabled){document.querySelectorAll('#godAssistant input,#godAssistant button,.god-grid input,.god-grid select,#godRules textarea,#godRules button,#godAnswers input,#godAnswers textarea,#godAnswers button').forEach(el=>el.disabled=disabled);}
+async function loadDios(){
+  if(godDirty||godSaving||godLoading)return;godLoading=true;godStatus('Cargando configuración…','loading');godControlsDisabled(true);
+  try{
+    const [c,p]=await Promise.allSettled([api('admin_wa_ajustes'),api('admin_catalogo')]);
+    if(c.status==='fulfilled'){GCFG=configShape(c.value.config);savedGodConfig=JSON.parse(JSON.stringify(GCFG));drawDiosCfg();godStatus('Todo guardado · los cambios se revisan antes de aplicar','saved');}
+    else godStatus('No se pudo cargar la configuración. Vuelve a abrir Modo Dios.','error');
+    if(p.status==='fulfilled'){GPRODS=p.value.productos||[];syncPrecios();drawProds();}
+    else $('#gProds').innerHTML='<tr><td colspan="6" class="empty">'+esc(p.reason.message)+'</td></tr>';
+  }finally{godLoading=false;godControlsDisabled(!GCFG);}
+}
+function syncPrecios(){GPRODS.forEach(x=>{PRICES[x.name]=x.price;DAYS[x.name]=x.dias;});updateGeneratorPreview();}
 function drawDiosCfg(){
-  const c = GCFG; if(!c) return;
-  $("#gAsis").checked = c.asistente; $("#gSal").checked = c.saludo; $("#gRec").checked = c.rec.activo;
-  $("#gRecH").value = c.rec.hora; $("#gRecMax").value = c.rec.max; $("#gRecV").value = c.rec.viejos;
-  $("#gReglas").value = c.reglas || ""; $("#gReglasN").textContent = (c.reglas||"").length+"/3000";
-  $("#godBadges").innerHTML = `<span class="tag ${c.asistente?"t-ok":"t-b"}">${c.asistente?"🟢 Asistente encendido":"🔴 Asistente apagado"}</span><span class="tag t-av">⚡ ${c.faq.filter(f=>f.activa).length} respuestas gratis</span><span class="tag ${c.rec.activo?"t-ok":"t-g"}">☀️ Recordatorios ${c.rec.activo?"a las "+c.rec.hora+":00":"apagados"}</span>`;
+  const c=GCFG;if(!c)return;
+  $('#gAsis').checked=c.asistente;$('#gSal').checked=c.saludo;$('#gRec').checked=c.rec.activo;
+  $('#gRecH').value=c.rec.hora;$('#gRecMax').value=c.rec.max;$('#gRecV').value=c.rec.viejos;
+  $('#gReglas').value=c.reglas;$('#gReglasN').textContent=c.reglas.length+'/3000';
+  $('#godBadges').innerHTML=`<span class="tag ${c.asistente?'t-ok':'t-g'}">Asistente ${c.asistente?'activo':'apagado'}</span><span class="tag t-av">${c.faq.filter(f=>f.activa).length} respuestas activas</span><span class="tag ${c.rec.activo?'t-ok':'t-g'}">Recordatorios ${c.rec.activo?c.rec.hora+':00':'apagados'}</span>`;
   drawFaq();
 }
 function drawFaq(){
-  $("#gFaq").innerHTML = GCFG.faq.map((f,i)=>`<div class="faq-it" data-fi="${i}">
-    <label class="sw sm"><input type="checkbox" data-fa ${f.activa?"checked":""}><span></span></label>
-    <div class="faq-b"><input data-fk value="${esc(f.claves.join(", "))}" placeholder="Palabras clave separadas por coma (ej: precio, cuanto vale)">
-      <textarea data-fr rows="2" placeholder="Respuesta que se envía">${esc(f.resp)}</textarea></div>
-    <button class="btn s d" data-fdel title="Quitar">🗑</button></div>`).join("") || '<div class="empty">No hay respuestas automáticas.</div>';
+  $('#gFaq').innerHTML=GCFG.faq.map((f,i)=>`<div class="faq-it" data-fi="${i}"><label class="sw sm"><input type="checkbox" data-fa aria-label="Activar respuesta ${i+1}" ${f.activa?'checked':''}><span></span></label><div class="faq-b"><label>Palabras clave<input data-fk value="${esc((f.claves||[]).join(', '))}" placeholder="precio, planes, cuánto vale"></label><label>Respuesta al cliente<textarea data-fr rows="3" placeholder="Escribe una respuesta clara y breve">${esc(f.resp)}</textarea></label></div><button type="button" class="btn s d" data-fdel title="Quitar respuesta" aria-label="Quitar respuesta ${i+1}">×</button></div>`).join('')||'<div class="empty">No hay respuestas automáticas. Agrega tu primera respuesta.</div>';
 }
-function leerFaq(){ return [...document.querySelectorAll(".faq-it")].map(el=>({id:GCFG.faq[+el.dataset.fi]?.id||("r"+Date.now()+el.dataset.fi), activa:el.querySelector("[data-fa]").checked,
-  claves:el.querySelector("[data-fk]").value.split(",").map(x=>x.trim()).filter(Boolean), resp:el.querySelector("[data-fr]").value.trim()})); }
-async function guardarCfg(parcial, msg){
-  try{ const j = await api("admin_wa_ajustes", {config:parcial}); GCFG = j.config; drawDiosCfg(); toast(msg||"Guardado ✔"); }
-  catch(ex){ toast(ex.message); drawDiosCfg(); }
+function leerFaq(){return [...document.querySelectorAll('.faq-it')].map(el=>({id:GCFG.faq[+el.dataset.fi]?.id||'r'+Date.now()+el.dataset.fi,activa:el.querySelector('[data-fa]').checked,claves:el.querySelector('[data-fk]').value.split(',').map(x=>x.trim()).filter(Boolean),resp:el.querySelector('[data-fr]').value.trim()}));}
+function readGodDraft(){
+  if(!GCFG)throw Error('Espera a que cargue la configuración.');
+  const rec={activo:$('#gRec').checked,hora:Number($('#gRecH').value),max:Number($('#gRecMax').value),viejos:Number($('#gRecV').value)};
+  if(!Number.isInteger(rec.hora)||rec.hora<5||rec.hora>21||!Number.isInteger(rec.max)||rec.max<0||rec.max>150||!Number.isInteger(rec.viejos)||rec.viejos<0||rec.viejos>60||rec.viejos>rec.max)throw Error('Revisa los recordatorios: máximo diario de 0 a 150 y antiguos de 0 a 60, sin superar el máximo diario.');
+  const faq=leerFaq();if(faq.some(f=>!f.claves.length||!f.resp))throw Error('Completa las palabras clave y la respuesta de cada fila, o elimina las filas vacías.');
+  return {asistente:$('#gAsis').checked,saludo:$('#gSal').checked,rec,reglas:$('#gReglas').value.trim(),faq};
+}
+function reviewGodChanges(draft){
+  return new Promise(resolve=>{
+    const d=document.createElement('dialog');d.className='god-review';d.setAttribute('aria-labelledby','godReviewTitle');
+    d.innerHTML=`<form method="dialog"><span class="overline">REVISA TUS CAMBIOS</span><h2 id="godReviewTitle">Así quedará tu asistente.</h2><dl class="god-review-list"><div><dt>Asistente de WhatsApp</dt><dd>${draft.asistente?'Encendido':'Apagado'}</dd></div><div><dt>Saludo automático</dt><dd>${draft.saludo?'Activo':'Inactivo'}</dd></div><div><dt>Recordatorios</dt><dd>${draft.rec.activo?draft.rec.hora+':00 · máximo '+draft.rec.max+' por día':'Apagados'}</dd></div><div><dt>Respuestas activas</dt><dd>${draft.faq.filter(f=>f.activa).length}</dd></div><div><dt>Instrucciones</dt><dd>${draft.reglas.length} caracteres</dd></div></dl>${savedGodConfig?.asistente&&!draft.asistente?'<p class="batch-error">El asistente dejará de responder por WhatsApp hasta que lo enciendas de nuevo.</p>':''}<p class="hint">Los precios se guardan por separado en cada producto. Esta acción actualiza la configuración del asistente.</p><div class="review-actions"><button class="btn" value="cancel">Volver</button><button class="btn p" value="save">Aplicar cambios</button></div></form>`;
+    d.addEventListener('close',()=>{const ok=d.returnValue==='save';d.remove();resolve(ok);},{once:true});d.addEventListener('cancel',e=>{e.preventDefault();d.close('cancel');});document.body.appendChild(d);d.showModal();
+  });
+}
+async function saveGodChanges(){
+  if(godSaving||!godDirty)return;let draft;
+  try{draft=readGodDraft();}catch(e){toast(e.message);return;}
+  godSaving=true;godControlsDisabled(true);godStatus('Revisa el resumen antes de aplicar','dirty');
+  try{
+    if(!await reviewGodChanges(draft))return;
+    godStatus('Guardando configuración…','loading');
+    const j=await api('admin_wa_ajustes',{config:draft});GCFG=configShape(j.config);savedGodConfig=JSON.parse(JSON.stringify(GCFG));godDirty=false;drawDiosCfg();godStatus('Cambios guardados correctamente','saved');toast('Configuración actualizada.');
+  }catch(e){godStatus('No se pudo guardar. Tus cambios siguen aquí.','error');toast(e.message);}
+  finally{godSaving=false;godControlsDisabled(false);godStatus(godDirty?'Cambios sin guardar':'Todo guardado',godDirty?'dirty':'saved');}
+}
+function guardarCfg(){return saveGodChanges();}
+function filterGodProducts(){
+  const q=norm($('#godProductSearch')?.value||'');let visible=0;
+  document.querySelectorAll('#gProds [data-pk]').forEach(row=>{const product=GPRODS.find(p=>p.k===row.dataset.pk);row.hidden=q&&!norm(product?.name||'').includes(q);if(!row.hidden)visible++;});
+  const count=$('#godProductCount');if(count)count.textContent=visible+' de '+GPRODS.length+' productos'+(productDrafts.size?' · '+productDrafts.size+' sin guardar':'');
 }
 function drawProds(){
-  $("#gProds").innerHTML = GPRODS.map(p=>`<tr data-pk="${esc(p.k)}"><td><b>${EMO(p.name)} ${esc(p.name)}</b>${p.plan?' <span class="tag t-av" style="font-size:10px">plan</span>':""}${p.cambiado?' <span class="tag t-w" style="font-size:10px">editado</span>':""}</td>
-    <td><input data-pp type="number" min="1000" step="1000" value="${p.price}" style="width:110px"></td>
-    <td><input data-pd type="number" min="1" max="730" value="${p.dias}" style="width:80px"></td>
-    <td><label class="sw sm"><input type="checkbox" data-pv ${p.oculto?"":"checked"}><span></span></label></td>
-    <td>${p.cuentas?'<span class="tag t-ok">'+p.cuentas+'</span>':'<span class="tag t-b">agotado</span>'}</td>
-    <td class="acts"><button class="btn s p" data-psave>Guardar</button>${p.cambiado?'<button class="btn s" data-preset title="Volver al precio de fábrica">↺</button>':""}</td></tr>`).join("");
+  $('#gProds').innerHTML=GPRODS.map(p=>{const draft=productDrafts.get(p.k)||{price:p.price,dias:p.dias,oculto:p.oculto};return `<tr data-pk="${esc(p.k)}" class="${productDrafts.has(p.k)?'product-dirty':''}"><td data-l="Producto"><b>${esc(p.name)}</b>${p.plan?' <span class="tag t-av">Plan</span>':''}</td><td data-l="Precio COP"><input aria-label="Precio de ${esc(p.name)}" data-pp type="number" min="1000" max="10000000" step="1000" value="${draft.price}"></td><td data-l="Días"><input aria-label="Días de ${esc(p.name)}" data-pd type="number" min="1" max="730" value="${draft.dias}"></td><td data-l="Visible"><label class="sw sm"><input type="checkbox" data-pv aria-label="Mostrar ${esc(p.name)} en la tienda" ${draft.oculto?'':'checked'}><span></span></label></td><td data-l="Disponibilidad"><span class="tag ${p.cuentas?'t-ok':'t-g'}">${p.cuentas?p.cuentas+' cuentas':'Sin cuentas'}</span></td><td class="acts" data-l="Acciones"><button class="btn s p" data-psave ${productSaving.has(p.k)?'disabled':''}>${productDrafts.has(p.k)?'Guardar cambios':'Guardar'}</button>${p.cambiado?'<button class="btn s" data-preset title="Restablecer precio y duración">Restablecer</button>':''}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">No se encontraron productos.</td></tr>';
+  filterGodProducts();
 }
-document.addEventListener("change", e=>{
-  if(!GCFG) return;
-  if(e.target.id==="gAsis"){ if(!e.target.checked && !confirm("¿Apagar el asistente? Nadie recibirá respuesta por WhatsApp hasta que lo enciendas.")){ e.target.checked = true; return; } guardarCfg({asistente:e.target.checked}, e.target.checked?"Asistente encendido ✔":"Asistente apagado"); }
-  if(e.target.id==="gSal") guardarCfg({saludo:e.target.checked});
-  if(["gRec","gRecH","gRecMax","gRecV"].includes(e.target.id)) guardarCfg({rec:{activo:$("#gRec").checked, hora:+$("#gRecH").value, max:+$("#gRecMax").value, viejos:+$("#gRecV").value}}, "Recordatorios guardados ✔");
+function draftProduct(row){const p=GPRODS.find(p=>p.k===row.dataset.pk);if(!p)return;const draft={price:Number(row.querySelector('[data-pp]').value),dias:Number(row.querySelector('[data-pd]').value),oculto:!row.querySelector('[data-pv]').checked};if(draft.price===p.price&&draft.dias===p.dias&&draft.oculto===!!p.oculto)productDrafts.delete(p.k);else productDrafts.set(p.k,draft);row.classList.toggle('product-dirty',productDrafts.has(p.k));row.querySelector('[data-psave]').textContent=productDrafts.has(p.k)?'Guardar cambios':'Guardar';filterGodProducts();}
+function validateProduct(p){if(!Number.isInteger(p.price)||p.price<1000||p.price>10000000||!Number.isInteger(p.dias)||p.dias<1||p.dias>730)throw Error('Precio: entre $1.000 y $10.000.000 COP. Duración: entre 1 y 730 días.');}
+async function saveProduct(row,reset=false){
+  const key=row.dataset.pk;if(productSaving.has(key))return;
+  const set={k:key,price:Number(row.querySelector('[data-pp]').value),dias:Number(row.querySelector('[data-pd]').value),oculto:!row.querySelector('[data-pv]').checked};
+  if(reset&&!confirm('¿Restablecer este producto a su precio y duración de fábrica?'))return;
+  try{if(!reset)validateProduct(set);}catch(e){toast(e.message);return;}
+  productSaving.add(key);row.querySelectorAll('button,input').forEach(el=>el.disabled=true);const b=row.querySelector('[data-psave]');b.textContent='Guardando…';
+  try{const j=await api('admin_catalogo',reset?{reset:key}:{set});GPRODS=j.productos;productDrafts.delete(key);syncPrecios();drawProds();toast('Producto guardado. Los demás borradores se conservan.');}
+  catch(e){toast(e.message);row.querySelectorAll('button,input').forEach(el=>el.disabled=false);b.textContent='Reintentar guardado';}
+  finally{productSaving.delete(key);const savedRow=[...document.querySelectorAll('#gProds [data-pk]')].find(r=>r.dataset.pk===key);savedRow?.querySelectorAll('button,input').forEach(el=>el.disabled=false);}
+}
+document.addEventListener('input',e=>{
+  if(e.target.id==='godProductSearch'){filterGodProducts();return;}
+  const row=e.target.closest('#gProds [data-pk]');if(row){draftProduct(row);return;}
+  if(e.target.id==='gReglas')$('#gReglasN').textContent=e.target.value.length+'/3000';
+  if(e.target.closest('#godRules,#godAnswers,.god-grid'))markGodDirty();
 });
-document.addEventListener("input", e=>{ if(e.target.id==="gReglas") $("#gReglasN").textContent = e.target.value.length+"/3000"; });
-document.addEventListener("click", async e=>{
-  const t = e.target;
-  if(t.id==="gReglasOk") return guardarCfg({reglas:$("#gReglas").value}, "Órdenes guardadas: el asistente ya las sigue ✔");
-  if(t.id==="gFaqAdd"){ GCFG.faq = leerFaq(); GCFG.faq.push({id:"r"+Date.now(), activa:true, claves:[], resp:""}); drawFaq(); const l=[...document.querySelectorAll("[data-fk]")].pop(); if(l) l.focus(); return; }
-  if(t.closest("[data-fdel]")){ GCFG.faq = leerFaq(); GCFG.faq.splice(+t.closest(".faq-it").dataset.fi, 1); drawFaq(); return; }
-  if(t.id==="gFaqOk"){ const f = leerFaq().filter(x=>x.claves.length && x.resp); return guardarCfg({faq:f}, "Respuestas automáticas guardadas ✔"); }
-  if(t.id==="gFaqReset"){ if(!confirm("¿Volver a las respuestas automáticas de fábrica?")) return; try{ const j = await api("admin_wa_ajustes", {reiniciarFaq:true}); GCFG = j.config; drawDiosCfg(); toast("Listo ✔"); }catch(ex){ toast(ex.message); } return; }
-  if(t.id==="gReanudar"){ try{ const j = await api("admin_wa_reanudar"); toast("Reactivado en "+(j.reanudados||0)+" chats ✔"); }catch(ex){ toast(ex.message); } return; }
-  const row = t.closest("[data-pk]");
-  if(row && t.closest("[data-psave]")){
-    const set = {k:row.dataset.pk, price:+row.querySelector("[data-pp]").value, dias:+row.querySelector("[data-pd]").value, oculto:!row.querySelector("[data-pv]").checked};
-    try{ GPRODS = (await api("admin_catalogo", {set})).productos; syncPrecios(); drawProds(); toast("Producto guardado: ya se ve así en la tienda ✔"); }catch(ex){ toast(ex.message); } return;
+document.addEventListener('change',e=>{
+  const row=e.target.closest('#gProds [data-pk]');if(row){draftProduct(row);return;}
+  if(e.target.closest('#godRules,#godAnswers,.god-grid'))markGodDirty();
+});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('button,a');if(!t)return;
+  if(t.dataset.codePreset){const select=$('#aProd'),option=[...select.options].find(o=>o.value===t.dataset.codePreset);if(!option)return toast('Agrega primero una cuenta de '+t.dataset.codePreset+'.');select.value=option.value;onAutoProd();updateGeneratorPreview();return;}
+  if(['godSaveAll','gReglasOk','gFaqOk'].includes(t.id))return saveGodChanges();
+  if(t.id==='godDiscard'){if(godSaving)return;GCFG=JSON.parse(JSON.stringify(savedGodConfig));godDirty=false;drawDiosCfg();godStatus('Cambios descartados. Se conserva la configuración guardada.','saved');return;}
+  if(t.id==='gFaqAdd'){if(!GCFG||godSaving)return;GCFG.faq=leerFaq();GCFG.faq.push({id:'r'+Date.now(),activa:true,claves:[],resp:''});drawFaq();markGodDirty();[...document.querySelectorAll('[data-fk]')].pop()?.focus();return;}
+  if(t.matches('[data-fdel]')){GCFG.faq=leerFaq();GCFG.faq.splice(+t.closest('.faq-it').dataset.fi,1);drawFaq();markGodDirty();return;}
+  if(t.id==='gFaqReset'){
+    if(!GCFG||godSaving||!confirm('¿Restablecer las respuestas automáticas guardadas a las de fábrica? Los demás borradores se conservan.'))return;
+    t.disabled=true;try{const j=await api('admin_wa_ajustes',{reiniciarFaq:true});const server=configShape(j.config);savedGodConfig=JSON.parse(JSON.stringify(server));GCFG.faq=server.faq;drawFaq();godStatus(godDirty?'Respuestas restablecidas. Hay otros cambios sin guardar.':'Respuestas de fábrica guardadas.',godDirty?'dirty':'saved');toast('Respuestas restablecidas.');}catch(e){toast(e.message);}finally{t.disabled=false;}return;
   }
-  if(row && t.closest("[data-preset]")){ try{ GPRODS = (await api("admin_catalogo", {reset:row.dataset.pk})).productos; syncPrecios(); drawProds(); toast("Volvió al precio de fábrica ✔"); }catch(ex){ toast(ex.message); } return; }
-  if(t.id==="nOk"){
-    const name = $("#nNom").value.trim(), k = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"").slice(0,20);
-    try{ GPRODS = (await api("admin_catalogo", {set:{k, name, price:+$("#nPre").value, dias:+$("#nDia").value, match:name}})).productos; syncPrecios(); drawProds(); toast("Producto creado ✔"); $("#nNom").value=""; $("#nPre").value=""; }catch(ex){ toast(ex.message); }
+  if(t.id==='gReanudar'){if(!confirm('¿Reactivar el asistente en todos los chats pausados?'))return;t.disabled=true;try{const j=await api('admin_wa_reanudar');toast('Asistente reactivado en '+(j.reanudados||0)+' chats.');}catch(e){toast(e.message);}finally{t.disabled=false;}return;}
+  const row=t.closest('[data-pk]');if(row&&t.matches('[data-psave]'))return saveProduct(row);if(row&&t.matches('[data-preset]'))return saveProduct(row,true);
+  if(t.id==='nOk'){
+    const name=$('#nNom').value.trim(),k=norm(name).replace(/[^a-z0-9]/g,'').slice(0,20),set={k,name,price:Number($('#nPre').value),dias:Number($('#nDia').value),match:name};
+    try{if(!name||name.length>80||!k)throw Error('Escribe un nombre válido para el producto.');if(GPRODS.some(p=>p.k===k||norm(p.name)===norm(name)))throw Error('Este producto ya existe. Edítalo en la lista.');validateProduct(set);t.disabled=true;GPRODS=(await api('admin_catalogo',{set})).productos;syncPrecios();drawProds();$('#nNom').value='';$('#nPre').value='';toast('Producto creado. Agrega sus cuentas para generar códigos.');}catch(e){toast(e.message);}finally{t.disabled=false;}return;
   }
 });
-
+addEventListener('beforeunload',e=>{if(godDirty||productDrafts.size||generationBusy){e.preventDefault();e.returnValue='';}});
+/* ---------- Business overview: unique clients, periods and operational signals ---------- */
+let insightPeriod=30;
+const insightPeriodText=()=>insightPeriod===0?'todo el historial':insightPeriod===1?'hoy':'últimos '+insightPeriod+' días';
+function businessSnapshot(){return IAPInsights.compute(items,{days:insightPeriod,ttl:TTL});}
+function businessKpisHtml(){
+ const m=businessSnapshot(),period=insightPeriodText();
+ const k=(label,value,foot,kind='',go='')=>`<div class="kpi ${kind}" ${go?`data-insight-action="${go}" role="button" tabindex="0"`:''}><div class="kpi-h">${label}</div><b>${typeof value==='number'?'<span data-n="'+value+'">0</span>':value}</b><small>${foot}</small></div>`;
+ return k('Clientes totales',m.totalCustomers,'Personas únicas por Gmail','kpi-customers','all-clients')+
+ k('Clientes activos',m.activeCustomers,'Con al menos un plan vigente','','active-clients')+
+ k('Clientes sin plan vigente',m.expiredCustomers,'Todos sus planes están vencidos','','expired-clients')+
+ k('Planes activos',m.activePlans,'Una persona puede tener varios planes','','plans')+
+ k('Nuevos clientes',m.newCustomers,'Primera activación · '+period)+
+ k('Planes activados',m.periodActivations,'Activaciones registradas · '+period)+
+ k('Valor de planes activados',money(m.periodValue),'COP · '+period,'metric-value')+
+ k('Códigos disponibles',m.availableCodes,'Sin canjear y vigentes según el panel','','codes');
+}
+function drawBusinessInsights(){
+ const el=$('#businessInsights');if(!el)return;const m=businessSnapshot(),period=insightPeriodText();
+ const select=$('#insightPeriod');if(select)select.value=String(insightPeriod);
+ const ratio=m.totalCustomers?Math.round(m.activeCustomers/m.totalCustomers*100):0;
+ const queue=(label,note,count,action,cls='')=>`<button class="insight-attention ${cls}" data-insight-action="${action}"><span><b>${label}</b><small>${note}</small></span><strong>${count}</strong><span aria-hidden="true">↗</span></button>`;
+ const top=m.topProducts.slice(0,5),max=Math.max(1,...top.map(p=>p.activations));
+ el.innerHTML=`<section class="card insight-customer-card"><div class="insight-card-head"><div><span class="overline">BASE DE CLIENTES</span><h2>Quiénes compran contigo</h2></div><button class="btn s" data-insight-action="all-clients">Ver clientes ↗</button></div><div class="customer-health"><strong>${ratio}%</strong><span>de tus clientes tienen<br>un plan activo hoy</span></div><div class="customer-health-bar" role="img" aria-label="${m.activeCustomers} clientes activos de ${m.totalCustomers}"><i style="width:${ratio}%"></i></div><div class="insight-pairs"><div><b>${m.activeCustomers}</b><span>Activos</span></div><div><b>${m.expiredCustomers}</b><span>Sin plan vigente</span></div><div><b>${m.repeatCustomers}</b><span>Con más de un plan en su historial</span></div></div><p class="hint">Los clientes se cuentan una vez por Gmail. Tener varios planes no aumenta el total de personas.</p><details class="insight-top-clients"><summary>Clientes con más activaciones · ${period}</summary>${m.topCustomers.length?m.topCustomers.map(c=>`<button data-insight-client="${esc(c.email)}"><span><b>${esc(c.name||c.email)}</b><small>${esc(c.email)}</small></span><span><b>${c.periodPlans} ${c.periodPlans===1?'plan':'planes'}</b><small>${money(c.periodValue)} COP</small></span></button>`).join(''):'<p class="hint">No hay activaciones con fecha registrada en este periodo.</p>'}</details></section>
+ <section class="card insight-attention-card"><div class="insight-card-head"><div><span class="overline">PRÓXIMOS PASOS</span><h2>Lo que necesita atención</h2></div><span class="tag t-av">Estado actual</span></div>${queue('Clientes por vencer','Al menos un plan vence en 7 días',m.dueCustomers,'due-clients','due')}${queue('Clientes sin acceso vigente','Revisa sus planes antes de ofrecer una renovación',m.expiredCustomers,'expired-clients')}${queue('Cuentas con problemas','Cuentas distintas marcadas con una incidencia',m.problemAccounts,'problems',m.problemAccounts?'problem':'')}${queue('Códigos sin canjear vencidos','Según la vigencia de seguridad configurada',m.expiredUnused,'expired-codes')}<p class="hint">Cada acceso abre la lista correspondiente. Tú decides qué acción realizar.</p></section>
+ <section class="card"><div class="insight-card-head"><div><span class="overline">PLANES MÁS ACTIVADOS</span><h2>Qué eligen tus clientes</h2></div><span class="tag t-av">${insightPeriod===0?'Historial':insightPeriod===1?'Hoy':insightPeriod+' días'}</span></div>${top.length?`<div class="insight-product-list">${top.map(p=>`<div><div><b>${esc(p.name)}</b><span>${p.activations} ${p.activations===1?'activación':'activaciones'}</span></div><div class="insight-product-bar"><i style="width:${p.activations/max*100}%"></i></div><small>${money(p.value)} COP · valor registrado de los planes</small></div>`).join('')}</div>`:'<div class="insight-empty">Todavía no hay activaciones con fecha en este periodo.</div>'}<div class="insight-bottom-metrics"><div><span>Clientes que activaron</span><b>${m.periodBuyers}</b></div><div><span>Valor medio por plan</span><b>${money(m.averagePlan)} COP</b></div></div></section>
+ <section class="card"><div class="insight-card-head"><div><span class="overline">INVENTARIO Y ENTREGA</span><h2>De tu cuenta al cliente</h2></div><button class="btn s" data-insight-action="codes">Ver códigos ↗</button></div><div class="code-funnel"><div><b>${m.totalAccounts}</b><span>Cuentas de productos</span></div><span aria-hidden="true">→</span><div><b>${m.availableCodes}</b><span>Códigos disponibles</span></div><span aria-hidden="true">→</span><div><b>${m.redeemedCodes}</b><span>Códigos canjeados</span></div></div><div class="insight-stock"><div><span>Registros sin código</span><b>${m.withoutCode}</b></div><div><span>Cuentas con problemas</span><b>${m.problemAccounts}</b></div><div><span>Cuentas sin 2FA registrado</span><b>${m.accountsWithout2fa}</b></div><div><span>Canje en registros actuales</span><b>${m.redemptionRate===null?'—':m.redemptionRate+'%'}</b></div></div><p class="hint">El porcentaje usa solo los códigos que conserva el panel; no representa conversión de visitantes. Las cuentas de ChatGPT de distintas duraciones se agrupan por correo.</p></section>`;
+ $('#insightScope').textContent='La base de clientes y el estado de accesos muestran todos los registros disponibles. Nuevos clientes, activaciones y valor usan '+period+' (hora de Colombia). El valor activado es la suma de los precios registrados; no sustituye la conciliación de pagos.'+(m.missingActivationDates?' '+m.missingActivationDates+' planes no tienen fecha de activación; se incluyen en Todo el historial y se excluyen al filtrar por fecha.':'');
+}
+function insightNavigate(action,email){
+ if(['all-clients','active-clients','expired-clients','due-clients'].includes(action)||email){
+   setTab('cli');$('#cq').value=email||'';$('#cst').value=action==='expired-clients'?'inactive-all':action==='due-clients'?'due7':'';$('#cso').value='rest';
+   if(action==='active-clients')$('#cst').value='active-all';crows();return;
+ }
+ setTab('cod');$('#q').value='';$('#pf').value='';$('#st').value=action==='plans'?'active-plans':action==='codes'?'av':action==='problems'?'pr':action==='expired-codes'?'expired-code':'';rows();
+ const table=$('#rows')?.closest('.card');if(table)table.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
+}
+function exportBusinessSnapshot(){
+ const m=businessSnapshot(),rows=[['Métrica','Valor','Alcance'],['Periodo',insightPeriodText(),'Hora de Colombia'],['Clientes totales',m.totalCustomers,'Todos los registros'],['Clientes activos',m.activeCustomers,'Estado actual'],['Clientes sin plan vigente',m.expiredCustomers,'Estado actual'],['Planes activos',m.activePlans,'Estado actual'],['Nuevos clientes',m.newCustomers,'Periodo seleccionado'],['Activaciones',m.periodActivations,'Periodo seleccionado'],['Valor de planes activados COP',m.periodValue,'Precios registrados; no es conciliación de pagos'],['Valor medio por plan COP',m.averagePlan,'Periodo seleccionado'],['Clientes por vencer en 7 días',m.dueCustomers,'Estado actual'],['Códigos disponibles',m.availableCodes,'Estado actual'],['Cuentas con problemas',m.problemAccounts,'Estado actual'],['Planes sin fecha de activación',m.missingActivationDates,'Todos los registros']];
+ const text='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='iaplus-resumen-'+new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.addEventListener('change',e=>{if(e.target.id!=='insightPeriod')return;const period=Number(e.target.value);if(![0,1,7,30,90].includes(period))return;insightPeriod=period;$('#stats').innerHTML=businessKpisHtml();drawBusinessInsights();countUp();});
+document.addEventListener('click',e=>{const el=e.target.closest('[data-insight-action],[data-insight-client],#insightExport');if(!el)return;if(el.id==='insightExport')return exportBusinessSnapshot();insightNavigate(el.dataset.insightAction,el.dataset.insightClient);});
+document.addEventListener('keydown',e=>{const el=e.target.closest('[data-insight-action][role="button"]');if(el&&['Enter',' '].includes(e.key)){e.preventDefault();el.click();}});
