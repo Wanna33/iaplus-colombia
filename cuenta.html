@@ -361,7 +361,7 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <link rel="stylesheet" href="customer-theme.css">
 <link rel="stylesheet" href="customer-glass.css?v=20261022">
 <link rel="stylesheet" href="premium-2026.css?v=20261022-1">
-<link rel="stylesheet" href="activation-welcome.css?v=20261022-colombia-real-1">
+<link rel="stylesheet" href="activation-welcome.css?v=20261023-video-1">
 <link rel="stylesheet" href="activation-celebrate.css?v=20261022">
 <link rel="stylesheet" href="halloween-fx.css?v=20261022">
 </head>
@@ -382,10 +382,25 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
     </ol>
     <div class="activation-welcome-actions">
       <a class="activation-welcome-primary" id="activationWelcomePrimary" href="#app">Continuar con mi Gmail <span aria-hidden="true">→</span></a>
+      <a class="activation-welcome-video-link" href="#activationVideoGuide">Ver el video de activación <span aria-hidden="true">↓</span></a>
       <a class="activation-welcome-help" id="activationWelcomeHelp" href="https://wa.me/573102035327?text=Hola%2C%20necesito%20ayuda%20para%20activar%20mi%20acceso" target="_blank" rel="noopener">Necesito ayuda por WhatsApp</a>
     </div>
     <small class="activation-welcome-note" id="activationWelcomeNote">Por tu seguridad, nunca compartas tu contraseña ni códigos de verificación.</small>
   </div>
+</section>
+<section class="activation-video-guide" id="activationVideoGuide" hidden aria-labelledby="activationVideoTitle">
+  <div class="activation-video-copy">
+    <span class="activation-video-kicker">GUÍA PARA CLIENTES · 3 MIN 29 S</span>
+    <h2 id="activationVideoTitle">Mira cómo activar tu acceso</h2>
+    <p>Te mostramos, paso a paso, cómo abrir tu enlace o ingresar tu código, confirmar tu plan y encontrar tus datos en «Mi cuenta».</p>
+  </div>
+  <div class="activation-video-frame">
+    <video controls playsinline preload="none" poster="assets/video/como-activar-poster.jpg?v=20261023-1" aria-label="Video explicativo para activar ChatGPT Plus en IA Plus Colombia">
+      <source src="assets/video/como-activar-chatgpt-plus.mp4?v=20261023-1" type="video/mp4">
+      Tu navegador no puede reproducir este video. Actualiza el navegador o solicita ayuda por WhatsApp.
+    </video>
+  </div>
+  <p class="activation-video-note">Usa el Gmail donde quieres recibir el acceso. Nunca compartas tu contraseña ni códigos de verificación.</p>
 </section>
 <header class="top"><div class="top-in">
   <a class="logo" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia"></a>
@@ -408,7 +423,7 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <script src="net.js"></script>
 <script src="catalog-utils.js"></script>
 <script src="activation-utils.js"></script>
-<script src="activation-welcome.js?v=20261022-colombia-real-1"></script>
+<script src="activation-welcome.js?v=20261023-video-1"></script>
 <script src="seasonal.js?v=20261022"></script>
 <script src="halloween-fx.js?v=20261022"></script>
 <script src="activation-celebrate.js?v=20261022"></script>

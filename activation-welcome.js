@@ -2,9 +2,13 @@
   try {
     const params = new URLSearchParams(location.search);
     const welcome = document.getElementById("activationWelcome");
+    const videoGuide = document.getElementById("activationVideoGuide");
     if (!welcome) return;
     const text = id => document.getElementById(id);
-    const show = () => { welcome.hidden = false; };
+    const show = () => {
+      welcome.hidden = false;
+      if (videoGuide) videoGuide.hidden = false;
+    };
     if (params.get("codigo") || params.get("code")) show();
     window.IAPActivationWelcome = {
       hideForSuccess() { welcome.hidden = true; },
