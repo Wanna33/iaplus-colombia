@@ -183,7 +183,7 @@ function logout(){
 function renderAuth(){
   const a = $("#authArea");
   if(!user){
-    a.innerHTML = `<button class="btn btn-google" id="loginBtn">Ingresar con Gmail</button>`;
+    a.innerHTML = `<button class="btn btn-google" id="loginBtn" aria-label="Iniciar sesión con Google">Iniciar sesión</button>`;
     $("#loginBtn").onclick = openLogin;
     return;
   }

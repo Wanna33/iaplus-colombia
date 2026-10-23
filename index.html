@@ -16,16 +16,25 @@
 <meta name="apple-mobile-web-app-title" content="IA Plus">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="canonical" href="https://wanna33.github.io/iaplus-colombia/">
-<meta name="theme-color" content="#f2f6fc">
+<meta name="theme-color" content="#14533d">
 <meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_CO">
-<meta property="og:site_name" content="IA Plus Colombia">
-<meta property="og:title" content="IA Plus Colombia | Cuentas digitales premium">
-<meta property="og:description" content="Tus cuentas digitales favoritas, en un solo lugar. Compara planes, revisa las condiciones y consulta los medios de pago.">
+<meta property="og:site_name" content="iapluscolombia">
+<meta property="og:title" content="iapluscolombia | ChatGPT Plus y cuentas digitales">
+<meta property="og:description" content="Tus cuentas digitales, claras y fáciles de activar. Compara ChatGPT Plus, Canva, CapCut y más en IA Plus Colombia.">
 <meta property="og:url" content="https://wanna33.github.io/iaplus-colombia/">
-<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/logo-og.jpg">
+<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/assets/og-iapluscolombia.jpg">
+<meta property="og:image:secure_url" content="https://wanna33.github.io/iaplus-colombia/assets/og-iapluscolombia.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="iapluscolombia sobre un paisaje cafetero de Colombia al amanecer">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="iapluscolombia | ChatGPT Plus y cuentas digitales">
+<meta name="twitter:description" content="Tus cuentas digitales, claras y fáciles de activar. Compara planes con identidad colombiana.">
+<meta name="twitter:image" content="https://wanna33.github.io/iaplus-colombia/assets/og-iapluscolombia.jpg">
+<meta name="twitter:image:alt" content="iapluscolombia sobre un paisaje cafetero de Colombia al amanecer">
 <link rel="preload" as="image" href="assets/brand-iaplus.svg?v=pro4" type="image/svg+xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"IA Plus Colombia","url":"https://wanna33.github.io/iaplus-colombia/","image":"https://wanna33.github.io/iaplus-colombia/icon-512.png","areaServed":"CO","priceRange":"COP"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +58,7 @@
 <link rel="stylesheet" href="seasonal.css?v=20261022">
 <link rel="stylesheet" href="halloween-fx.css?v=20261022">
 <link rel="stylesheet" href="video-guide.css?v=20261022">
-<link rel="stylesheet" href="storefront-polish.css?v=20261023-6">
+<link rel="stylesheet" href="storefront-polish.css?v=20261023-8">
 
 </head>
 <body class="storefront">
@@ -85,7 +94,7 @@
     </nav>
     <div class="nav-right">
       <div id="authArea">
-        <button class="btn btn-google" id="loginBtn">Ingresar con Gmail</button>
+        <button class="btn btn-google" id="loginBtn" aria-label="Iniciar sesión con Google">Iniciar sesión</button>
       </div>
       <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">☰</button>
     </div>
@@ -104,6 +113,12 @@
         <a href="#planes-chatgpt" class="btn btn-primary btn-lg">Ver planes ChatGPT Plus <svg class="ic"><use href="#i-right"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="#activar">Ya tengo mi código</a>
       </div>
+      <aside class="first-visit-guide" id="firstVisitVideoTip" hidden aria-label="Guía para quienes visitan la tienda por primera vez">
+        <span class="first-visit-guide__play" aria-hidden="true">▶</span>
+        <span class="first-visit-guide__copy"><b>¿Primera vez por aquí?</b><small>Aprende a activar tu cuenta en 3 minutos.</small></span>
+        <a class="first-visit-guide__action" href="#videoGuia" data-first-visit-video>Ver video guía</a>
+        <button class="first-visit-guide__close" type="button" data-first-visit-dismiss aria-label="Cerrar sugerencia del video">×</button>
+      </aside>
       <div class="hero-product-peek" id="heroProductPeek"></div>
       <div class="hstats"><div><b data-count="auto">0</b><span>cuentas premium</span></div><div><b class="hero-from">—</b><span>plan recomendado</span></div><div><b data-count="30">0</b><span>días de acceso</span></div></div>
       <ul class="trust">
@@ -332,6 +347,7 @@
 <script src="seasonal.js?v=20261022"></script>
 <script src="halloween-fx.js?v=20261022"></script>
 <script src="pwa.js"></script>
+<script src="first-visit-guide.js?v=20261023-1"></script>
 </body>
 </html>
 
