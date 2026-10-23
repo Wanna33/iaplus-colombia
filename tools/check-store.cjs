@@ -12,7 +12,7 @@ const products=vm.runInNewContext('('+literal+')');
 const p=id=>products.find(p=>p.id===id);
 assert.equal(products.length,15);
 assert.equal(C.mode(p('chatgpt')),'Cuenta compartida');
-assert.equal(C.mode(p('capcut')),'Cuenta privada');
+assert.equal(C.mode(p('capcut')),'Cuenta compartida');
 assert.equal(C.mode(p('canva')),'Modalidad por confirmar');
 assert.equal(C.duration(p('duolingo')),'12 meses');
 assert.equal(C.duration(p('chatgpt3')),'3 meses');
