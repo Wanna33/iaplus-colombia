@@ -1,0 +1,5 @@
+.activation-welcome{max-width:920px;margin:22px auto 0;padding:0 18px;text-align:center}
+.activation-welcome img{display:block;width:100%;height:auto;max-height:484px;object-fit:cover;border-radius:22px;box-shadow:0 14px 42px rgba(20,48,39,.16)}
+.activation-welcome p{margin:12px auto 0;max-width:740px;color:#475569;font-size:15px;font-weight:650;line-height:1.65}
+.activation-welcome[hidden]{display:none!important}
+@media(max-width:600px){.activation-welcome{margin:12px auto 0;padding:0 12px}.activation-welcome img{border-radius:16px}.activation-welcome p{margin-top:9px;font-size:13px;padding:0 4px}}

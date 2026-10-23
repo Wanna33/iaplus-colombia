@@ -8,6 +8,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi suscripción | IA Plus Colombia</title>
 <meta name="robots" content="noindex">
+<meta name="description" content="Gracias por confiar en IA Plus Colombia. Abre tu enlace, elige tu Gmail y activa tu acceso paso a paso.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="IA Plus Colombia">
+<meta property="og:title" content="¡Gracias por confiar en IA Plus Colombia!">
+<meta property="og:description" content="Abre tu enlace, entra con Gmail y activa tu acceso paso a paso.">
+<meta property="og:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Gracias por confiar en IA Plus Colombia. Tu acceso está a un paso.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="¡Gracias por confiar en IA Plus Colombia!">
+<meta name="twitter:description" content="Abre tu enlace, entra con Gmail y activa tu acceso paso a paso.">
+<meta name="twitter:image" content="https://wanna33.github.io/iaplus-colombia/assets/gracias-ia-plus-colombia.jpg">
 <link rel="icon" href="assets/brand-mark.svg?v=2" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/brand-mark-192.png">
@@ -347,9 +361,14 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <link rel="stylesheet" href="customer-theme.css">
 <link rel="stylesheet" href="customer-glass.css?v=20261022">
 <link rel="stylesheet" href="premium-2026.css?v=20261022-1">
+<link rel="stylesheet" href="activation-welcome.css?v=20261022">
 </head>
 <body class="account-app">
 <noscript><p style="padding:20px;text-align:center">Activa JavaScript para usar esta página.</p></noscript>
+<section class="activation-welcome" id="activationWelcome" hidden aria-label="Bienvenida de IA Plus Colombia">
+  <img src="assets/gracias-ia-plus-colombia.jpg" width="1200" height="630" alt="¡Gracias por confiar en IA Plus Colombia! Abre este enlace, elige tu Gmail y sigue las instrucciones para activar tu código." fetchpriority="high">
+  <p>Tu código ya está listo para revisar. Entra con tu Gmail y confirma la activación cuando veas tu plan.</p>
+</section>
 <header class="top"><div class="top-in">
   <a class="logo" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro2" alt="IA Plus Colombia"></a>
   <nav class="nav"><a href="index.html?tienda=1#catalogo">Catálogo</a><a href="index.html?tienda=1#porque">Beneficios</a><a href="index.html?tienda=1#faq">Ayuda</a></nav>
@@ -371,6 +390,7 @@ body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,s
 <script src="net.js"></script>
 <script src="catalog-utils.js"></script>
 <script src="activation-utils.js"></script>
+<script src="activation-welcome.js?v=20261022"></script>
 <script src="cuenta-20261022.js"></script>
 <script src="pwa.js"></script>
 </body>

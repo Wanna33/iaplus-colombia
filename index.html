@@ -45,6 +45,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="premium-2026.css?v=20261022-1">
 <link rel="stylesheet" href="trust-story.css?v=20261022-5">
+<link rel="stylesheet" href="seasonal.css?v=20261022">
 </head>
 <body class="storefront">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -91,12 +92,12 @@
   <div class="hero-bg" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div></div>
   <div class="wrap hero-in">
     <div class="hero-text">
-      <span class="pill"><span class="dot"></span>Cuentas digitales · Precios en pesos colombianos</span>
-      <h1>Tus cuentas premium.<br><span class="grad">Un solo lugar.</span></h1>
-      <p>ChatGPT, Canva, CapCut y más. Encuentra tu plan, revisa sus condiciones y activa tu acceso con un código. Con acompañamiento por WhatsApp.</p>
+      <span class="pill"><span class="dot"></span>🇨🇴 Hecho para Colombia · Precios en COP</span>
+      <h1>ChatGPT Plus.<br><span class="grad">A tu manera.</span></h1>
+      <p>Elige tu plan de ChatGPT Plus y revisa duración, modalidad y precio antes de comprar. También encuentra Canva, CapCut y más cuentas digitales, con acompañamiento por WhatsApp.</p>
       <div class="cta">
-        <a href="#catalogo" class="btn btn-primary btn-lg">Explorar cuentas <svg class="ic"><use href="#i-right"/></svg></a>
-        <a class="btn btn-ghost btn-lg" href="#activar">Activar mi código</a>
+        <a href="#planes-chatgpt" class="btn btn-primary btn-lg">Ver planes ChatGPT Plus <svg class="ic"><use href="#i-right"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="#activar">Ya tengo mi código</a>
       </div>
       <div class="hero-product-peek" id="heroProductPeek"></div>
       <div class="hstats"><div><b data-count="auto">0</b><span>cuentas premium</span></div><div><b class="hero-from">—</b><span>plan recomendado</span></div><div><b data-count="30">0</b><span>días de acceso</span></div></div>
@@ -121,6 +122,10 @@
     </div>
   </div>
 </section>
+<div class="seasonal-banner" id="seasonalBanner" aria-labelledby="seasonalTitle" hidden>
+  <div><span>EDICIÓN DE TEMPORADA · COLOMBIA</span><h2 id="seasonalTitle">Un toque de Halloween, por tiempo limitado.</h2><p>Los planes y la atención de IA Plus siguen aquí para ti.</p></div>
+</div>
+<section class="section featured-section" id="planes-chatgpt" aria-labelledby="featuredTitle"><div class="wrap"><div class="section-heading"><div><span class="eyebrow">ELIGE TU TIEMPO. EMPIEZA CON CHATGPT.</span><h2 class="title" id="featuredTitle">Tu plan de <span class="grad">ChatGPT Plus.</span></h2></div><a class="text-link" href="#catalogo">Ver otras cuentas ↗</a></div><div class="featured-plans" id="featuredPlans"></div></div></section>
 <section class="trust-story wrap" aria-labelledby="trustStoryTitle">
   <div class="trust-story-visual">
     <img class="trust-photo-main" src="assets/trust-person-man.png" width="900" height="879" loading="lazy" decoding="async" alt="Retrato editorial recortado de un hombre con camisa azul">
@@ -143,14 +148,12 @@
   </div>
 </section>
 <section class="activation-hub wrap" id="activar" aria-labelledby="activationTitle">
-  <div class="activation-intro"><span class="eyebrow">DE TU CÓDIGO A TU CUENTA</span><h2 id="activationTitle">Activa. Entra. Empieza.</h2><p>Usa el código que recibiste con tu compra. Tu acceso queda asociado a tu cuenta de Google.</p><ol class="activation-steps"><li><b>1</b><span>Pega tu código</span></li><li><b>2</b><span>Entra con Google</span></li><li><b>3</b><span>Abre tu cuenta</span></li></ol><a class="text-link" href="cuenta.html">Ya activé mi acceso → Mi cuenta</a></div>
-  <div class="activation-card"><span class="activation-kicker">TU ACCESO EMPIEZA AQUÍ</span><h3>¿Tienes tu código?</h3><p>Pega el código o el enlace de activación completo.</p><form id="activationForm" novalidate><label for="activationCode">Código de activación</label><input id="activationCode" type="text" placeholder="IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="200" aria-describedby="activationHint activationError" required><small id="activationHint">Lo encuentras en el mensaje de tu compra. No es el código de verificación de 6 dígitos.</small><p id="activationError" class="activation-error" role="alert" hidden></p><button type="submit" class="btn btn-primary full">Continuar con mi código <span aria-hidden="true">→</span></button></form><small class="activation-privacy">Antes de activarlo, verás con qué cuenta de Google estás entrando. <a href="privacidad.html">Privacidad</a></small></div>
+  <div class="activation-intro"><span class="eyebrow">CANJEAR ES FÁCIL</span><h2 id="activationTitle">Tu código, en pocos pasos.</h2><p>Si es tu primera vez, abre el enlace que te enviamos y entra con tu Gmail. Revisa los datos y confirma la activación.</p><ol class="activation-steps"><li><b>1</b><span>Abre tu enlace</span></li><li><b>2</b><span>Elige tu Gmail</span></li><li><b>3</b><span>Confirma tu acceso</span></li></ol><a class="text-link" href="cuenta.html">Ya activé mi acceso → Mi cuenta</a></div>
+  <div class="activation-card"><span class="activation-kicker">AYUDA PARA TU PRIMER CANJE</span><h3>¿Tienes un código?</h3><p>Lo más fácil es abrir el enlace que recibiste. También puedes pegar aquí el código o el enlace completo.</p><form id="activationForm" novalidate><label for="activationCode">Código o enlace de activación</label><input id="activationCode" type="text" placeholder="IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="200" aria-describedby="activationHint activationError" required><small id="activationHint">Continúa con tu Gmail personal. Nunca escribas aquí tu contraseña ni un código de verificación.</small><p id="activationError" class="activation-error" role="alert" hidden></p><button type="submit" class="btn btn-primary full">Continuar con mi código <span aria-hidden="true">→</span></button></form><small class="activation-privacy">Antes de activar, puedes revisar el Gmail seleccionado. <a href="privacidad.html">Privacidad</a></small></div>
   <div class="account-login activation-login" hidden><div id="orbit"></div><div class="login-card" id="heroCard"><div id="gBtnHero"></div></div></div>
 </section>
 
 <div class="marquee" aria-label="Productos del catálogo"><div class="mq-track" id="mq"></div></div>
-
-<section class="section featured-section" id="planes-chatgpt" aria-labelledby="featuredTitle"><div class="wrap"><div class="section-heading"><div><span class="eyebrow">ELIGE TU TIEMPO. EMPIEZA CON CHATGPT.</span><h2 class="title" id="featuredTitle">Tu plan de <span class="grad">ChatGPT Plus.</span></h2></div><a class="text-link" href="#catalogo">Ver otras cuentas ↗</a></div><div class="featured-plans" id="featuredPlans"></div></div></section>
 
 <section class="section" id="catalogo">
   <div class="wrap">
@@ -305,6 +308,7 @@
 <script src="paypal-checkout.js"></script>
 <script src="public-assistant.js"></script>
 <script src="assistants.js"></script>
+<script src="seasonal.js?v=20261022"></script>
 <script src="pwa.js"></script>
 </body>
 </html>

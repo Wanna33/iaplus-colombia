@@ -710,11 +710,11 @@ function reviewGeneration(product,v,plan){
 async function makeCodes(fila,n,dias,precio,onProgress){return IAPAdminTools.createCodes(api,{row:fila,qty:n,days:dias,price:precio},onProgress);}
 function presentCodeBatch(out,res,product,v,failure){
   const all=res.flatMap(r=>r.codes);out.classList.add("on");
-  out.innerHTML=`<div class="batch-result-head"><span class="batch-result-icon">${failure?"!":"✓"}</span><div><h3>${all.length} ${all.length===1?"código creado":"códigos creados"}</h3><p>${esc(product)} · ${v.days} días · ${money(v.price)} por acceso</p></div><span class="tag ${failure?"t-w":"t-ok"}">${failure?"Lote parcial":"Listo para entregar"}</span></div>${failure?`<p class="batch-error" role="alert">${esc(failure)}<br>Conservamos los códigos confirmados. Consulta la lista actualizada antes de repetir el resto.</p>`:""}<div class="batch-result-actions"><button class="btn p" data-batch-links>Copiar enlaces</button><button class="btn" data-batch-codes>Copiar códigos</button><button class="btn" data-batch-export>Descargar lote .txt</button></div><p class="hint">Envía a cada cliente su propio enlace. Podrá revisar su Gmail antes de activarlo.</p>${res.map(r=>`<div class="batch-group"><div class="batch-group-label">${esc(r.correo)} <span>${r.codes.length} ${r.codes.length===1?"código":"códigos"}</span></div>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><div><button class="btn s p" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><button class="btn s" data-cp="${esc(c)}">Código</button></div></div>`).join("")}</div>`).join("")}`;
+  out.innerHTML=`<div class="batch-result-head"><span class="batch-result-icon">${failure?"!":"✓"}</span><div><h3>${all.length} ${all.length===1?"código creado":"códigos creados"}</h3><p>${esc(product)} · ${v.days} días · ${money(v.price)} por acceso</p></div><span class="tag ${failure?"t-w":"t-ok"}">${failure?"Lote parcial":"Listo para entregar"}</span></div>${failure?`<p class="batch-error" role="alert">${esc(failure)}<br>Conservamos los códigos confirmados. Consulta la lista actualizada antes de repetir el resto.</p>`:""}<div class="batch-result-actions"><button class="btn p" data-batch-links>Copiar enlaces</button><button class="btn" data-batch-codes>Copiar códigos</button><button class="btn" data-batch-export>Descargar lote .txt</button></div><div class="batch-welcome"><img src="assets/gracias-ia-plus-colombia.jpg" width="1200" height="630" alt="Tarjeta de bienvenida de IA Plus Colombia"><div><b>Tarjeta de bienvenida lista</b><small>Al compartir cada enlace por WhatsApp, el cliente verá esta imagen y una guía rápida para canjear su código.</small></div></div><p class="hint">Envía a cada cliente su propio enlace. Podrá revisar su Gmail antes de activarlo.</p>${res.map(r=>`<div class="batch-group"><div class="batch-group-label">${esc(r.correo)} <span>${r.codes.length} ${r.codes.length===1?"código":"códigos"}</span></div>${r.codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><div><button class="btn s p" data-cl="${esc(c)}">Copiar enlace</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><button class="btn s" data-cp="${esc(c)}">Código</button></div></div>`).join("")}</div>`).join("")}`;
   out.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
-  out.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copy(linkFor(b.dataset.cl)));
+  out.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copyText(linkFor(b.dataset.cl)).then(()=>toast("Enlace copiado ✔ Al compartirlo por WhatsApp se verá la tarjeta de bienvenida.")));
   out.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({producto:product,codigo:b.dataset.cm,dias:v.days})));
-  out.querySelector("[data-batch-links]").onclick=()=>copy(all.map(linkFor).join("\n"));
+  out.querySelector("[data-batch-links]").onclick=()=>copyText(all.map(linkFor).join("\n")).then(()=>toast("Enlaces copiados ✔ Cada uno incluye la bienvenida para el cliente."));
   out.querySelector("[data-batch-codes]").onclick=()=>copy(all.join("\n"));
   out.querySelector("[data-batch-export]").onclick=()=>{
     const text=["IA Plus Colombia · Lote de accesos",product+" · "+v.days+" días · "+money(v.price)+" COP", "Creado: "+new Date().toLocaleString("es-CO",{timeZone:"America/Bogota"}),"",...all.map(c=>c+" · "+linkFor(c))].join("\n");
@@ -765,7 +765,7 @@ function showCodes(codes, it){
     ${codes.map(c=>`<div class="codeline"><span class="mono">${esc(c)}</span><button class="btn s p" data-cl="${esc(c)}">🔗 Copiar enlace de activación</button><button class="btn s" data-cp="${esc(c)}">Copiar código</button><button class="btn s" data-cm="${esc(c)}">Copiar mensaje</button><a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msgFor({...it,codigo:c}))}">Enviar por WhatsApp</a></div>`).join("")}
     ${codes.length>1?`<div class="acts" style="margin-top:10px"><button class="btn s p" id="clAll">🔗 Copiar todos los enlaces</button><button class="btn s" id="cpAll">Copiar todos los códigos</button></div>`:""}`;
   n.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(b.dataset.cp));
-  n.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copy(linkFor(b.dataset.cl)));
+  n.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>copyText(linkFor(b.dataset.cl)).then(()=>toast("Enlace copiado ✔ Al compartirlo por WhatsApp se verá la tarjeta de bienvenida.")));
   n.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>copy(msgFor({...it,codigo:b.dataset.cm})));
   const all=$("#cpAll"); if(all) all.onclick=()=>copy(codes.join("\n"));
   const allL=$("#clAll"); if(allL) allL.onclick=()=>copy(codes.map(linkFor).join("\n"));
@@ -957,7 +957,7 @@ document.addEventListener("click", async e=>{
   const a = bt.dataset.a;
   try{
     if(a==="msg"){ copy(msgFor(i)); return; }
-    if(a==="link"){ copyText(linkFor(i.codigo)).then(()=>toast("Enlace copiado ✔ Al abrirlo, el plan se activa en su cuenta")); return; }
+    if(a==="link"){ copyText(linkFor(i.codigo)).then(()=>toast("Enlace copiado ✔ Al compartirlo por WhatsApp se verá la tarjeta de bienvenida.")); return; }
     if(a==="v2fa"){ await show2fa(i); return; }
     if(a==="repl"){
       const dests = accounts().filter(x=>x.correo.toLowerCase()!==i.correo.toLowerCase() && items.some(z=>z.correo===x.correo && z.estado!=="Con problemas"));

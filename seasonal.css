@@ -1,0 +1,17 @@
+.seasonal-banner[hidden]{display:none!important}
+.seasonal-banner{position:relative;isolation:isolate;display:flex;align-items:center;min-height:210px;max-width:1320px;margin:24px auto 8px;padding:30px clamp(22px,6vw,72px);overflow:hidden;border-radius:28px;color:#fff;background:#211b35 url("assets/halloween-colombia.jpg") center 56%/cover no-repeat;box-shadow:0 16px 45px #20172c24}
+.seasonal-banner::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#171326ef 0%,#171326c9 46%,#1713261c 100%)}
+.seasonal-banner>div{max-width:570px}.seasonal-banner span{font-size:10px;font-weight:800;letter-spacing:.16em;color:#ffd98c}.seasonal-banner h2{font-size:clamp(23px,3vw,34px);line-height:1.15;letter-spacing:-.04em;margin:10px 0}.seasonal-banner p{font-size:14px;color:#f5eafc;line-height:1.6}
+html.halloween-theme{--seasonal-accent:#9b70d8;--seasonal-warm:#f0a247}
+html.halloween-theme .nav{border-bottom-color:#e8e0f3}
+html.halloween-theme .nav .brand{position:relative}
+html.halloween-theme .nav .brand::after{content:"COLOMBIA";position:absolute;left:0;bottom:-5px;font-size:7px;font-weight:800;letter-spacing:.13em;color:#3d506c}
+html.halloween-theme .hero .pill{border-color:#eadcf8;background:#f6f0fd;color:#533d72}
+html.halloween-theme .hero .pill .dot{background:linear-gradient(135deg,#e89a42,#9971d2)}
+html.halloween-theme .hero .grad{background-image:linear-gradient(105deg,#865ac7,#d1883c);-webkit-background-clip:text;background-clip:text;color:transparent}
+html.halloween-theme .featured-section .eyebrow{color:#7651a4}
+html.halloween-theme .activation-card{box-shadow:0 18px 48px #58377a14,inset 0 1px 0 #fff}
+html.halloween-theme .activation-card .btn-primary{background:linear-gradient(120deg,#8052bd,#a869b2)}
+@media(max-width:1368px){.seasonal-banner{margin-left:24px;margin-right:24px}}
+@media(max-width:600px){.seasonal-banner{min-height:188px;margin:14px 16px 4px;padding:23px 20px;border-radius:22px;background-position:58% center}.seasonal-banner::before{background:linear-gradient(90deg,#171326ed,#171326a8 65%,#17132652)}.seasonal-banner span{font-size:8px}.seasonal-banner h2{max-width:300px;font-size:24px}.seasonal-banner p{max-width:270px;font-size:12px}.section.featured-section{scroll-margin-top:78px}.activation-hub{scroll-margin-top:76px}}
+@media(prefers-reduced-motion:reduce){.seasonal-banner *{animation:none!important;scroll-behavior:auto!important}}
