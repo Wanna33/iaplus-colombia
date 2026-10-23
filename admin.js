@@ -390,7 +390,13 @@ function render(){
         <select id="cso"><option value="rest">Ordenar: vencen primero</option><option value="gasto">Ordenar: más pagaron</option><option value="nuevo">Ordenar: más recientes</option><option value="nombre">Ordenar: nombre</option></select>
         <button class="btn s" id="ccsv">⬇ Exportar clientes CSV</button>
       </div>
-      <div class="wrapt"><table><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Cuentas</th><th>Estado</th><th>Vence</th><th>Cliente desde</th><th>Total pagado</th><th>Nota</th><th>Acciones</th></tr></thead><tbody id="crows"></tbody></table></div>
+      <div class="tools hide bulk-bar" id="cBulk" role="region" aria-label="Acciones con los clientes seleccionados">
+        <b id="cBulkN">0 seleccionados</b>
+        <button class="btn s" id="cBulkCsv">⬇ Exportar seleccionados</button>
+        <button class="btn s" id="cBulkTel">📋 Copiar WhatsApp</button>
+        <button class="btn s" id="cBulkClr">Quitar selección</button>
+      </div>
+      <div class="wrapt"><table><thead><tr><th class="sel-th"><input type="checkbox" id="cselAll" aria-label="Seleccionar todos los clientes visibles"></th><th>Cliente</th><th>WhatsApp</th><th>Cuentas</th><th>Estado</th><th>Vence</th><th>Cliente desde</th><th>Total pagado</th><th>Nota</th><th>Acciones</th></tr></thead><tbody id="crows"></tbody></table></div>
     </div>
   </section>
 
@@ -536,7 +542,7 @@ function render(){
   const redrawFilters = () => { clearTimeout(filterTimer); filterTimer = setTimeout(()=>{ rows(); crows(); }, 90); };
   $("#q").oninput = $("#st").onchange = $("#pf").onchange = redrawFilters;
   $("#cq").oninput = $("#cst").onchange = $("#cso").onchange = redrawFilters;
-  $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv;
+  $("#csv").onclick = exportCsv; $("#ccsv").onclick = exportClientsCsv; wireClientSelection();
   $("#payReload").onclick = loadPagos; $("#logReload").onclick = ()=>{ $("#lcli").value=""; loadLog(); }; $("#lq").oninput = drawLog;
   $("#lcliGo").onclick = ()=>loadLog($("#lcli").value.trim().toLowerCase()); $("#lcli").onkeydown = e=>{ if(e.key==="Enter") $("#lcliGo").click(); };
   document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>quick(b.dataset.qa));
@@ -564,7 +570,7 @@ function crows(){
   const list = cFiltered();
   el.innerHTML = list.length ? list.map(c=>{
     const s = cState(c);
-    return `<tr data-c="${esc(c.email)}"><td data-l="Cliente"><div><b>${esc(c.nombre||"(sin nombre)")}</b><br><small style="color:var(--mut)">${esc(c.email)}</small></div></td>
+    return `<tr data-c="${esc(c.email)}"><td class="sel-td" data-l="Seleccionar"><input type="checkbox" class="csel" data-sel="${esc(c.email)}" ${cSel.has(c.email)?"checked":""} aria-label="Seleccionar a ${esc(c.nombre||c.email)}"></td><td data-l="Cliente"><div><b>${esc(c.nombre||"(sin nombre)")}</b><br><small style="color:var(--mut)">${esc(c.email)}</small></div></td>
       <td data-l="WhatsApp">${c.whatsapp?esc(c.whatsapp):'<span style="color:var(--mut)">—</span>'}</td>
       <td data-l="Cuentas">${c.cuentas.length} <small style="color:var(--mut)">(${c.activos} activas${c.vencidos?`, ${c.vencidos} vencidas`:""})</small></td>
       <td data-l="Estado"><span class="tag t-${s.k}">${s.t}</span></td>
@@ -572,7 +578,8 @@ function crows(){
       <td data-l="Pagado"><b>${money(c.gastado)}</b></td><td data-l="Nota"><div class="note">${esc(c.nota||"—")}</div></td>
       <td class="acts-td"><div class="acts"><button class="btn s" data-ca="info">Ver detalle</button><button class="btn s" data-ca="edit">Datos / nota</button><button class="btn s p" data-ca="grant" title="Darle acceso a más cuentas de un producto">➕ Dar más cuentas</button><button class="btn s" data-ca="2fa" title="Darle más pedidos del código de verificación">🔢 Más códigos 2FA</button>
         ${c.whatsapp?`<a class="btn s wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp, renewMsg({...c.cuentas[0],nombre:c.nombre}))}">💬 WhatsApp</a>`:""}</div></td></tr>`;
-  }).join("") : `<tr><td colspan="9" class="empty">No hay clientes que coincidan.</td></tr>`;
+  }).join("") : `<tr><td colspan="10" class="empty">No hay clientes que coincidan.</td></tr>`;
+  cSelUpdate();
 }
 function clientDetail(c){
   const s = cState(c);
@@ -891,10 +898,42 @@ function exportCsv(){
   download("cuentas-iaplus.csv",["Producto","Cuenta","Codigo","Estado","Cliente","Nombre","WhatsApp","Activada","Vence","Dias restantes","Dias del plan","Precio","Nota"],
     filtered().map(i=>[i.producto,i.correo,i.codigo,state(i).t,i.cliente,i.nombre,i.whatsapp,fdate(i.inicio),fdate(i.fin),i.restante??"",i.dias,i.precio||"",i.nota]));
 }
-function exportClientsCsv(){
-  download("clientes-iaplus.csv",["Nombre","Gmail","WhatsApp","Cuentas","Activas","Vencidas","Estado","Vence","Cliente desde","Total pagado","Nota"],
-    cFiltered().map(c=>[c.nombre,c.email,c.whatsapp,c.cuentas.length,c.activos,c.vencidos,cState(c).t,fdate(c.vence),fdate(c.primera),c.gastado,c.nota]));
+const CLIENT_HEAD = ["Nombre","Gmail","WhatsApp","Cuentas","Activas","Vencidas","Estado","Vence","Cliente desde","Total pagado","Nota"];
+const clientRow = c => [c.nombre,c.email,c.whatsapp,c.cuentas.length,c.activos,c.vencidos,cState(c).t,fdate(c.vence),fdate(c.primera),c.gastado,c.nota];
+function exportClientsCsv(){ download("clientes-iaplus.csv", CLIENT_HEAD, cFiltered().map(clientRow)); }
+
+/* ---------- Selección masiva de clientes ---------- */
+const cSel = new Set(); // Gmail de los clientes marcados; sobrevive a los filtros mientras el panel esté abierto
+function cSelUpdate(){
+  const bar = $("#cBulk"); if(!bar) return;
+  const n = cSel.size;
+  bar.classList.toggle("hide", n===0); $("#cBulkN").textContent = n+(n===1?" seleccionado":" seleccionados");
+  const all = $("#cselAll"), vis = cFiltered().map(c=>c.email);
+  if(all){ all.checked = vis.length>0 && vis.every(e=>cSel.has(e)); all.indeterminate = !all.checked && vis.some(e=>cSel.has(e)); }
 }
+function cSelected(){ const byMail = new Map(clients().map(c=>[c.email,c])); return [...cSel].map(e=>byMail.get(e)).filter(Boolean); }
+function exportSelectedCsv(){ download("clientes-seleccionados-iaplus.csv", CLIENT_HEAD, cSelected().map(clientRow)); }
+async function copySelectedPhones(){
+  const nums = cSelected().map(c=>c.whatsapp).filter(Boolean);
+  if(!nums.length) return toast("Los clientes seleccionados no tienen WhatsApp guardado");
+  try{ await navigator.clipboard.writeText(nums.join("\n")); toast(nums.length+" WhatsApp copiados ✔"); }
+  catch{ toast("No pudimos copiar. Selecciona los números a mano."); }
+}
+function wireClientSelection(){
+  $("#cBulkCsv").onclick = exportSelectedCsv;
+  $("#cBulkTel").onclick = copySelectedPhones;
+  $("#cBulkClr").onclick = ()=>{ cSel.clear(); crows(); };
+  $("#cselAll").onchange = e=>{ cFiltered().forEach(c=>e.target.checked ? cSel.add(c.email) : cSel.delete(c.email)); crows(); };
+  $("#crows").onchange = e=>{ const b = e.target.closest(".csel"); if(!b) return; b.checked ? cSel.add(b.dataset.sel) : cSel.delete(b.dataset.sel); cSelUpdate(); };
+}
+
+/* ---------- Seguridad: cierre automático por inactividad ---------- */
+// Si el panel queda sin usar 30 minutos, se borra la sesión y hay que volver a entrar con Google.
+const IDLE_MS = 30*60*1000; let idleTimer = 0;
+function idleLock(){ if(!load("iap_cred")) return; try{ localStorage.removeItem("iap_cred"); }catch{} location.reload(); }
+function resetIdle(){ clearTimeout(idleTimer); idleTimer = setTimeout(idleLock, IDLE_MS); }
+["pointerdown","keydown","touchstart","scroll"].forEach(ev=>document.addEventListener(ev, resetIdle, {passive:true}));
+resetIdle();
 
 /* ---------- Ver código 2FA (soporte) ---------- */
 async function show2fa(i){
