@@ -601,7 +601,7 @@ async function dar2fa(email){
   email = String(email||"").trim().toLowerCase(); if(!email) return;
   const actual = Math.max(0, ...items.filter(i=>(i.cliente||"").toLowerCase()===email).map(i=>Number(i.max2fa)||0)) || 2;
   const v = await askForm("Códigos de verificación de "+email,[
-    {id:"modo",label:"¿Qué quieres hacer?",type:"select",value:"hoy",opts:[{v:"hoy",l:"Darle códigos extra solo por hoy"},{v:"siempre",l:"Cambiar su límite diario (para siempre)"},{v:"normal",l:"Volver al normal (2 por día)"}]},
+    {id:"modo",label:"¿Qué quieres hacer?",type:"select",value:"hoy",opts:[{v:"hoy",l:"Darle códigos extra solo por hoy"},{v:"siempre",l:"Cambiar su límite diario (para siempre)"},{v:"normal",l:"Volver al normal (7 por día)"}]},
     {id:"cantidad",label:"Cantidad (extra de hoy, o el nuevo límite diario)",type:"number",value:3}],
     "Hoy puede pedir <b>"+actual+"</b> código(s) en total. Los pedidos se comparten entre todas sus cuentas.","Guardar");
   if(!v) return;
