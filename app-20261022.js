@@ -189,7 +189,7 @@ function renderAuth(){
   }
   const mine = (myItems&&myItems.length) ? '<a class="btn btn-ghost" href="cuenta.html" style="padding:8px 14px">Mi cuenta</a> ' : '';
   const adm = load("iap_admin", false) ? '<a class="btn btn-primary" href="admin.html" style="padding:8px 14px">Panel admin</a> ' : '';
-  a.innerHTML = `${adm}${mine}<div class="user">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
+  a.innerHTML = `${adm}${mine}<div class="user ${myItems?.some(i=>IAPAccountState.isActive(i))?'member-active':''}">${avatarOf(36)}<div class="uname">${esc(user.name)}<small>${esc(user.email)}</small></div><button id="logout">Salir</button></div>`;
   $("#logout").onclick = logout;
 }
 function hasAccount(){ return !!(user && (load("iap_has", false) || (myItems&&myItems.length))); }

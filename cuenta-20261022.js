@@ -167,16 +167,16 @@ const APPS=[
 const appOf=it=>APPS.find(a=>String(it.producto||"").toLowerCase().includes(a.k))||{k:"",n:it.producto||"tu cuenta",url:"",host:""};
 let ITEMS = [], tab = "sub", filterQ = "";
 function card(it, idx){
-  const app=appOf(it), ex=it.vencida, duration=IAPCatalog.duration({days:Number(it.dias)||30});
+  const app=appOf(it), ex=IAPAccountState.isExpired(it), active=IAPAccountState.isActive(it), duration=IAPCatalog.duration({days:Number(it.dias)||30});
   const start = it.inicio ? new Date(it.inicio) : null;
   const end = it.fin ? new Date(it.fin) : null;
   const left = end ? Math.max(0, Math.ceil((end - Date.now())/DAY)) : 30;
   const pct = start && end ? Math.min(100, Math.max(0,(Date.now()-start)/(end-start)*100)) : 0;
-  const renew = "index.html#catalogo";
+  const renew = "index.html?tienda=1#catalogo";
   const prob = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, tengo un problema con mi cuenta "+it.producto+" ("+it.correo+"). ¿Me ayudan o me dan otra cuenta?");
   const icon = app.img ? `<img src="${app.img}" alt="" style="${app.dark?"background:#000;padding:8px":""}">` : "📦";
   const access = ex ? "" : `
-    <div class="access on" id="acc${idx}">
+    <div class="access" id="acc${idx}" aria-hidden="true">
       <div class="lbl">${I.mail} Cuenta de acceso</div>
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar correo" aria-label="Copiar correo de acceso">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
@@ -186,7 +186,7 @@ function card(it, idx){
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>🔐 Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
         <p class="tnote"></p><button class="cta tmore" type="button" data-mas style="display:none;margin-top:6px">➕ Pedir 2 códigos más</button></div>`:""}
-      <div class="how"><h3>Cómo iniciar sesión</h3>
+      <details class="account-help"><summary>Cómo entrar y condiciones de uso</summary><div class="how"><h3>Cómo iniciar sesión</h3>
         <ol><li>Abre ${esc(app.n)}${app.url?` → <a class="l" href="${app.url}" target="_blank" rel="noopener">${esc(app.host||"ir al sitio")}</a>`:""}.</li>
         <li>Copia la <b>cuenta de acceso</b>, pégala y pulsa "Continuar".</li>
         <li>Copia la <b>contraseña</b>, pégala y entra. Si te pide verificación, usa el código de dos pasos o escríbenos.</li></ol></div>
@@ -197,27 +197,26 @@ function card(it, idx){
           <li>Desactiva extensiones (bloqueadores de anuncios, VPN) o prueba con <b>Google Chrome</b> actualizado.</li>
           <li>Abre un <b>chat nuevo</b> y elige el modelo desde la lista de arriba.</li>
           <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li></ol></details>`:""}
+      </details>
     </div>`;
   return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${idx*80}ms" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
     <div class="sub-head"><div class="picon">${icon}</div>
-      <div class="pname"><h2>${esc(it.producto||app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
+      <div class="pname"><h2>${esc(it.producto||app.n)}</h2><small>${esc(duration)} · Cuenta ${idx+1}</small></div>
+      <span class="account-status ${active?'active':ex?'ended':'pending'}">${active?'Activa':ex?'Vencida':'Por confirmar'}</span>
     </div>
     <div class="sub-body">
-      ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-expanded="true"><span>🔑 Mis datos de acceso · <b data-end="${it.fin||""}">--</b></span><span class="chev">⌃</span></button>`}
-      <div class="rows">
-        ${ex?`<div class="stamp">EXPIRADO</div>`:`<div class="stamp okst">ACTIVO<br><small style="font-size:15px">${left} ${left===1?"día":"días"}</small></div>`}
-        <div class="rw"><span>Tiempo de inicio</span><span>${start?fmtT(start):"—"}</span></div>
-        <div class="rw"><span>Expira el tiempo</span><span>${end?fmtT(end):"—"}</span></div>
-      </div>
+      <div class="account-time"><strong>${ex?'Tu plan terminó':end?left+' '+(left===1?'día restante':'días restantes'):'Revisa tu plan'}</strong><span>${end?'Vence el '+fmt(end):'Sin fecha disponible'}</span></div>
       ${ex?"":`<div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>`}
+      <div class="account-meta"><span>Inicio: ${start?fmt(start):'—'}</span><span>${ex?'Acceso finalizado':end?'Tiempo real · <b data-end="'+esc(it.fin)+'">--</b>':''}</span></div>
+      ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-controls="acc${idx}" aria-expanded="false"><span>Ver datos de acceso</span><span class="chev" aria-hidden="true">⌄</span></button>`}
     </div>
     ${access}
-    <div class="foot"><a href="index.html?tienda=1#faq"><span class="q">?</span> Ayuda</a><a href="${prob}" target="_blank" rel="noopener"><span class="q">!</span> Soporte</a><a class="buyagain" href="${renew}" target="_blank" rel="noopener">${ex?"🔁 Renovar mi plan":"🔁 Renovar / comprar otra vez"}</a></div>
+    <div class="foot">${!ex&&app.url?`<a class="account-open" href="${app.url}" target="_blank" rel="noopener">Abrir ${esc(app.n)} ↗</a>`:`<a href="${renew}">Renovar mi plan ↗</a>`}<a href="${prob}" target="_blank" rel="noopener">Soporte</a><a class="buyagain" href="${renew}">Renovar</a></div>
   </article>`;
 }
 function histHtml(){
   return `<div class="hist"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Inicio</th><th>Vence</th><th>Plan</th><th>Estado</th></tr></thead><tbody>
-    ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${it.vencida?"e":"a"}">${it.vencida?"Expirado":"Activo"}</span></td></tr>`).join("")}</tbody></table></div>`;
+    ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${IAPAccountState.isExpired(it)?"e":"a"}">${IAPAccountState.isExpired(it)?"Expirado":"Activo"}</span></td></tr>`).join("")}</tbody></table></div>`;
 }
 function addBox(first){
   return `<div class="addbox" id="addbox"><span class="eyebrow">ACTIVACIÓN DE ACCESO</span><h3>${first?"Tu primer acceso empieza aquí":"¿Tienes otro código?"}</h3>
@@ -266,28 +265,30 @@ function warnHtml(){
   const out=[];
   ITEMS.forEach(it=>{
     const app=appOf(it), name=app.n==="tu cuenta"?it.producto:app.n, end=it.fin?new Date(it.fin):null;
-    const link="index.html#catalogo";
-    if(it.vencida) out.push(`<div class="warn bad"><span>⛔ Tu plan de <b>${esc(name)}</b> ya venció.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
+    const link="index.html?tienda=1#catalogo";
+    if(IAPAccountState.isExpired(it)) out.push(`<div class="warn bad"><span>⛔ Tu plan de <b>${esc(name)}</b> ya venció.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
     else if(end){ const d=Math.ceil((end-Date.now())/DAY); if(d<=5) out.push(`<div class="warn"><span>⏰ Tu plan de <b>${esc(name)}</b> vence ${d<=0?"hoy":d===1?"mañana":"en "+d+" días"}.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`); }
   });
   return out.slice(0,3).join("");
 }
 function renderMain(){
-  const act = ITEMS.filter(i=>!i.vencida).length;
+  document.querySelectorAll('.pw').forEach(hidePassword);
+  const act = ITEMS.filter(i=>IAPAccountState.isActive(i)).length;
   $("#app").innerHTML = `
     ${warnHtml()}
-    <div class="ttl"><h1><em>Mi suscripción</em> (${ITEMS.length})</h1><span class="tag">IA Plus</span><span style="color:var(--mut);font-weight:700">${act} ${act===1?"activa":"activas"}</span>${act?'<button class="guiabtn" id="guiaBtn" type="button">❓ Guía paso a paso</button>':""}</div>
+    <section class="account-overview"><div><span class="account-eyebrow">TU ESPACIO · IA PLUS COLOMBIA</span><h1>Tus cuentas, a la mano.</h1><p>${ITEMS.length} ${ITEMS.length===1?"cuenta":"cuentas"} · ${act} ${act===1?"plan vigente":"planes vigentes"}</p></div><div class="account-overview-actions"><a href="#addbox">Activar otro código <span aria-hidden="true">＋</span></a>${act?'<button class="guiabtn" id="guiaBtn" type="button">Guía paso a paso ↗</button>':""}</div></section>
     <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab" aria-selected="${tab==="sub"}">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab" aria-selected="${tab==="hist"}">Historial de pedidos</button></div>
     <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
     ${addBox(false)}`;
-  bindAdd(); applyFilter(); tick(); refreshTotp();
+  bindAdd(); applyFilter(); tick(); refreshTotp(); buildMenu();
   const gb = $("#guiaBtn"); if(gb) gb.onclick = ()=>guia();
-  let vista = false; try{ vista = !!localStorage.getItem("iap_guia_v1"); }catch{}
-  if(act && !vista && tab==="sub") setTimeout(()=>guia(), 700);
+  // The guide opens on request, without covering the customer's accounts on arrival.
 }
 /* ---------- Guía paso a paso ---------- */
 function guia(){
   const card = [...document.querySelectorAll(".sub-card:not(.expired)")][0]; if(!card) return;
+  setAccess(card.querySelector("[data-acc]"),true);
+  const help=card.querySelector(".account-help");if(help)help.open=true;
   const fields = card.querySelectorAll(".access .field"), ask = card.querySelector("[data-ask]"), how = card.querySelector(".how");
   const pasos = [
     {el:card, t:"¡Tu plan está activo! 🎉", d:"Te muestro en 4 pasos cómo entrar a tu cuenta. Tarda menos de un minuto."},
@@ -323,6 +324,8 @@ function applyFilter(){
   $("#nores").hidden = n>0;
 }
 function tick(){
+  const expiredNow=ITEMS.filter(i=>!i.vencida&&IAPAccountState.isExpired(i));
+  if(expiredNow.length){expiredNow.forEach(i=>i.vencida=true);buildMenu();renderMain();return;}
   document.querySelectorAll("[data-end]").forEach(el=>{
     const e = el.dataset.end; if(!e) return;
     const ms = new Date(e) - Date.now(); if(ms<=0){ el.textContent="0 días"; return; }
@@ -332,12 +335,10 @@ function tick(){
 }
 /* ---------- menú de usuario ---------- */
 function buildMenu(){
-  const u = load("iap_user") || {}; const em = String(u.email||"");
-  const av = $("#avBtn");
-  av.innerHTML = u.picture ? `<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">` : esc((u.name||em||"?")[0].toUpperCase());
-  const act = ITEMS.filter(i=>!i.vencida).length;
-  $("#menu").innerHTML = `<div class="who">${esc(em||"Mi cuenta")}</div><div class="sub">${esc(u.name||"Información personal")}</div>
-    <div class="saved">${act} ${act===1?"suscripción activa":"suscripciones activas"} en IA Plus</div><hr>
+  const u=load("iap_user")||{}, em=String(u.email||""),act=ITEMS.filter(i=>IAPAccountState.isActive(i)).length;
+  const portrait=u.picture?`<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">`:`<span class="avatar-initial">${esc((u.name||em||"?")[0].toUpperCase())}</span>`;
+  const av=$("#avBtn");av.innerHTML=portrait;av.classList.toggle("co-member-ring",act>0);av.setAttribute("aria-label",act?`Menú de usuario · ${act} planes activos · Colombia`:"Menú de usuario");
+  $("#menu").innerHTML=`<div class="member-profile"><div class="member-avatar ${act?'co-member-ring':''}">${portrait}</div><div><div class="who">${esc(u.name||"Mi cuenta")}</div><div class="sub">${esc(em)}</div><span class="member-level">${act?'🇨🇴 Miembro activo':'Mi cuenta'}</span></div></div><div class="saved">${act} ${act===1?'plan vigente':'planes vigentes'} en IA Plus</div><hr>
     <button class="mi on" data-go="sub"><span class="ic">🔑</span>Mi suscripción</button>
     <button class="mi" data-go="hist"><span class="ic">🧾</span>Pedidos históricos</button>
     <a href="index.html?tienda=1#catalogo"><span class="ic">🛍️</span>Comprar más cuentas</a>
@@ -347,25 +348,30 @@ function buildMenu(){
     ${IS_ADMIN?`<a href="admin.html"><span class="ic">🛠️</span>Panel admin</a>`:""}
     <hr><button class="mi" id="logout"><span class="ic">🚪</span>Cerrar sesión</button>`;
 }
+const passwordTimers=new Map();
+function hidePassword(pw){clearTimeout(passwordTimers.get(pw));passwordTimers.delete(pw);pw.textContent="••••••••••";const b=pw.parentElement.querySelector(".tog");if(b){b.innerHTML=I.eye;b.setAttribute("aria-pressed","false");}}
+function setAccess(button,open){if(!button)return;document.querySelectorAll("[data-acc]").forEach(b=>{const panel=document.getElementById(b.dataset.acc),on=b===button&&open;if(!panel)return;panel.classList.toggle("on",on);panel.setAttribute("aria-hidden",String(!on));b.setAttribute("aria-expanded",String(on));b.querySelector("span").textContent=on?"Ocultar datos de acceso":"Ver datos de acceso";if(!on)panel.querySelectorAll(".pw").forEach(hidePassword);});}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)document.querySelectorAll(".pw").forEach(hidePassword);});
 document.addEventListener("click", e=>{
+  if(!e.target.closest('#menu,#avBtn')){const menu=$('#menu');if(menu)menu.classList.remove('on');$('#avBtn')?.setAttribute('aria-expanded','false');}
   const c = e.target.closest("[data-copy]");
   if(c){ copyText(c.dataset.copy).then(()=>{ const t=c.innerHTML; c.classList.add("ok"); c.innerHTML=I.ok; setTimeout(()=>{c.classList.remove("ok");c.innerHTML=t;},1500); const x=document.createElement("div"); x.className="toastc"; x.textContent="Copiado ✔"; document.body.appendChild(x); setTimeout(()=>x.remove(),1300); }); return; }
   if(e.target.closest("[data-retry]")){ $("#app").innerHTML='<div class="skel"><i></i><i></i><i></i></div>'; loadAll(); return; }
   const ask = e.target.closest("[data-ask]");
   if(ask){ askTotp(ask.closest("[data-totp]")); return; }
   const g = e.target.closest(".tog");
-  if(g){ const pw=g.parentElement.querySelector(".pw"); const hid = pw.textContent.includes("•"); pw.textContent = hid ? pw.dataset.pw : "•".repeat(10); g.innerHTML = hid ? I.eyeoff : I.eye; return; }
+  if(g){const pw=g.parentElement.querySelector(".pw"),show=pw.textContent.includes("•");hidePassword(pw);if(show){pw.textContent=pw.dataset.pw;g.innerHTML=I.eyeoff;g.setAttribute("aria-pressed","true");passwordTimers.set(pw,setTimeout(()=>hidePassword(pw),30000));}return;}
   const ba = e.target.closest("[data-acc]");
-  if(ba){ const p=document.getElementById(ba.dataset.acc); const on=p.classList.toggle("on"); ba.setAttribute("aria-expanded",on); return; }
+  if(ba){setAccess(ba,ba.getAttribute("aria-expanded")!=="true");return;}
   const tb = e.target.closest("[data-tab]");
   if(tb){ tab=tb.dataset.tab; renderMain(); return; }
   const go = e.target.closest("[data-go]");
   if(go){ tab=go.dataset.go; $("#menu").classList.remove("on"); renderMain(); window.scrollTo({top:0,behavior:"smooth"}); return; }
   if(e.target.closest("#logout")){ try{ ["iap_user","iap_cred","iap_has","iap_admin","iap_pwa_seen"].forEach(k=>localStorage.removeItem(k)); sessionStorage.clear(); }catch{} try{ google.accounts.id.disableAutoSelect(); }catch{} location.href="index.html?tienda=1"; return; }
-  if(e.target.closest("#avBtn")){ $("#menu").classList.toggle("on"); return; }
+  if(e.target.closest("#avBtn")){ const open=$("#menu").classList.toggle("on");$('#avBtn').setAttribute('aria-expanded',String(open));return; }
   if(!e.target.closest("#menu")) $("#menu").classList.remove("on");
 });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#menu").classList.remove("on"); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ $("#menu").classList.remove("on");$('#avBtn').setAttribute('aria-expanded','false');document.querySelectorAll('.pw').forEach(hidePassword);} });
 /* ---------- actividad: cada movimiento queda registrado con su hora (lo ve el administrador en el panel) ---------- */
 document.addEventListener("click", e=>{
   if(!window.iapTrack) return;
@@ -412,7 +418,7 @@ async function loadAll(){
     renderMain(); showFlash();
     if(WELCOME_CODE){ const c=WELCOME_CODE; WELCOME_CODE=null; window.IAPCelebrate?.show(ITEMS.find(i=>i.codigo===c)||ITEMS.find(i=>!i.vencida)||null); }
     if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
-    if(ITEMS.some(i=>!i.vencida) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
+    if(ITEMS.some(i=>IAPAccountState.isActive(i)) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
   }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
 }
 loadAll();

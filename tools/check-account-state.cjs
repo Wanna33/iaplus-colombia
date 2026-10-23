@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),{isActive,isExpired}=require('../account-state.js');const now=Date.parse('2026-10-23T15:00:00-05:00');
+assert.equal(isActive({vencida:false,fin:'2026-10-23T15:00:01-05:00'},now),true);
+assert.equal(isActive({vencida:false,fin:'2026-10-23T15:00:00-05:00'},now),false);
+assert.equal(isExpired({vencida:false,fin:'2026-10-23T15:00:00-05:00'},now),true);
+assert.equal(isActive({vencida:true,fin:'2027-01-01'},now),false);
+assert.equal(isActive({fin:'invalid'},now),false);
+assert.equal(isActive({},now),false);
+assert.equal(isExpired({fin:'2026-10-23T19:59:59Z'},now),true);
+assert.equal(isActive({fin:'2026-10-23T20:00:01Z'},now),true);
+console.log('PASS: membership uses actual expiry, boundary, timezone, server state and missing dates.');
