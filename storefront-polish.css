@@ -94,3 +94,34 @@
   .storefront .cta-band{border-radius:22px}
 }
 @media(prefers-reduced-motion:reduce){.storefront *,.storefront *:before,.storefront *:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* Creator collage inspired by the supplied reference, built from a light transparent WebP. */
+.storefront .hero-side{width:100%;max-width:610px;margin-inline:auto}
+.storefront .hero-collage{position:relative;isolation:isolate;width:100%;max-width:610px;margin-inline:auto}
+.storefront .hero-colombia-art{display:block;width:100%;height:auto;object-fit:contain}
+.storefront .collage-country{position:absolute;top:7%;left:7%;display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border:1px solid rgba(255,255,255,.86);border-radius:999px;background:rgba(255,255,255,.93);box-shadow:0 8px 24px rgba(35,70,48,.12);color:#176b4c;font-size:10px;font-weight:800;letter-spacing:.015em}
+.storefront .collage-country>span{font-size:15px;line-height:1}
+.storefront .collage-plan{position:absolute;top:34%;right:3%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:8px;width:34%;min-height:70px;padding:9px 10px;border:1px solid rgba(38,83,54,.12);border-radius:15px;background:rgba(255,255,255,.96);box-shadow:0 10px 28px rgba(37,62,42,.13);color:#213a2b;text-decoration:none;transition:transform .2s,box-shadow .2s}
+.storefront .collage-plan:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(37,62,42,.18)}
+.storefront .collage-plan>img{width:36px;height:36px;object-fit:contain;border-radius:10px}
+.storefront .collage-plan>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.storefront .collage-plan b{font-size:12px;line-height:1.2;white-space:nowrap}
+.storefront .collage-plan small{color:#637468;font-size:9px;line-height:1.25}
+.storefront .collage-plan>span:last-child{color:#168451;font-size:18px;font-weight:800}
+.storefront .collage-tools{position:absolute;right:5%;bottom:4%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;width:38%;padding:7px;border:1px solid rgba(38,83,54,.12);border-radius:15px;background:rgba(255,255,255,.97);box-shadow:0 10px 28px rgba(37,62,42,.13)}
+.storefront .collage-tools .stage-product{display:grid;justify-items:center;align-content:center;gap:4px;min-width:0;padding:5px 2px;border:0;border-radius:9px;background:transparent;color:#405748;font-family:inherit;font-size:9px;font-weight:700;line-height:1.1}
+.storefront .collage-tools .stage-product:hover{background:#eef6eb;color:#08794f}
+.storefront .collage-tools .stage-product img{width:25px;height:25px;object-fit:contain;margin:0;border-radius:7px}
+@media(max-width:600px){
+  .storefront .hero-collage{width:100%}
+  .storefront .collage-country{top:6%;left:5%;gap:4px;padding:6px 8px;font-size:8px}
+  .storefront .collage-country>span{font-size:12px}
+  .storefront .collage-plan{top:34%;right:2%;grid-template-columns:27px minmax(0,1fr) auto;gap:5px;width:39%;min-height:56px;padding:7px;border-radius:12px}
+  .storefront .collage-plan>img{width:27px;height:27px}
+  .storefront .collage-plan b{font-size:9px}
+  .storefront .collage-plan small{font-size:8px}
+  .storefront .collage-plan>span:last-child{font-size:14px}
+  .storefront .collage-tools{right:3%;bottom:4%;width:44%;gap:1px;padding:5px;border-radius:12px}
+  .storefront .collage-tools .stage-product{gap:3px;padding:4px 1px;font-size:8px}
+  .storefront .collage-tools .stage-product img{width:21px;height:21px}
+}
