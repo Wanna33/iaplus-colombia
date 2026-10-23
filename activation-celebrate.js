@@ -4,22 +4,22 @@
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const WHATSAPP = "573102035327";
   const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isSpooky = () => document.documentElement.classList.contains("halloween-theme");
   const userName = () => {
     try { return (JSON.parse(localStorage.getItem("iap_user")) || {}).name || ""; } catch { return ""; }
   };
   const fecha = d => d ? new Date(d).toLocaleDateString("es-CO", {day: "numeric", month: "long", year: "numeric"}) : "";
 
-  // Confeti de emojis que cae una vez y se borra solo.
-  function burst(host, spooky){
+  // Small gold and emerald accents, shown once and removed automatically.
+  function burst(host){
     if (reduceMotion()) return;
-    const set = spooky ? ["🎃", "👻", "🦇", "✨"] : ["🎉", "✨", "🎊", "💜"];
+    const set = ["✦", "✧", "•"];
     const wrap = document.createElement("div");
     wrap.className = "cel-burst";
     wrap.setAttribute("aria-hidden", "true");
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < 14; i++) {
       const s = document.createElement("span");
       s.textContent = set[i % set.length];
+      s.style.color = i % 2 ? "#c4a14c" : "#12815a";
       s.style.left = (Math.random() * 100).toFixed(1) + "%";
       s.style.animationDelay = (Math.random() * 0.6).toFixed(2) + "s";
       s.style.fontSize = (14 + Math.random() * 14).toFixed(0) + "px";
@@ -30,40 +30,48 @@
   }
 
   function show(item){
-    const spooky = isSpooky();
     const first = userName().split(" ")[0];
     const gmail = (() => { try { return (JSON.parse(localStorage.getItem("iap_user")) || {}).email || ""; } catch { return ""; } })();
     const dlg = document.createElement("dialog");
-    dlg.className = "celebrate" + (spooky ? " spooky" : "");
+    dlg.className = "celebrate celebrate-colombia";
     dlg.setAttribute("aria-labelledby", "celTitle");
     const producto = item ? esc(item.producto) : "tu acceso";
     const vence = item && item.fin ? `Vence el <b>${esc(fecha(item.fin))}</b>.` : "";
-    dlg.innerHTML = `<form method="dialog" class="cel-box">
-      <div class="cel-icon" aria-hidden="true">${spooky ? "🎃" : "🎉"}</div>
-      <span class="eyebrow">ACTIVACIÓN COMPLETA</span>
-      <h2 id="celTitle">¡Bienvenido${first ? ", " + esc(first) : ""}!</h2>
-      <p>Tu <b>${producto}</b> ya está activo. ${vence}</p>
+    dlg.innerHTML = `<form method="dialog" class="cel-welcome-form">
+      <header class="cel-colombia-hero">
+        <div class="cel-brand">ia<span>plus</span>colombia</div>
+        <button class="cel-close" type="submit" value="go" aria-label="Cerrar bienvenida y ver mis cuentas">×</button>
+        <div class="cel-hero-copy"><span class="cel-confirmed"><span aria-hidden="true">✓</span> ACTIVACIÓN COMPLETA</span><h2 id="celTitle">¡Bienvenido${first ? ", " + esc(first) : ""}!</h2><span class="cel-hero-thanks">Gracias por confiar en nosotros.</span></div>
+      </header>
+      <div class="cel-box">
+      <p class="cel-plan-ready">Tu <b>${producto}</b> ya está activo. ${vence}</p>
       <ol class="cel-steps">
-        <li><span class="cel-n">1</span><div><b>Entra con tu Gmail</b><small>${gmail ? "Usa <b>" + esc(gmail) + "</b> para ver tus datos." : "Usa el mismo Gmail con el que activaste."}</small></div></li>
+        <li><span class="cel-n">1</span><div><b>Tu acceso está en Mi cuenta</b><small>${gmail ? "Vinculado a <b>" + esc(gmail) + "</b>." : "Vinculado al Gmail con el que activaste."}</small></div></li>
         <li><span class="cel-n">2</span><div><b>Copia tus datos de acceso</b><small>El correo y la contraseña están en Mi cuenta, con un botón para copiar.</small></div></li>
-        <li><span class="cel-n">3</span><div><b>Pide el código de verificación cuando lo necesites</b><small>Si el correo te lo pide, toca «Pedir código» en Mi cuenta.</small></div></li>
+        <li><span class="cel-n">3</span><div><b>Verifica solo si te lo pide</b><small>Si la aplicación solicita un código, toca «Pedir código» en Mi cuenta.</small></div></li>
       </ol>
       <div class="cel-actions">
         <button class="cta cel-go" value="go" type="submit">Ver mis datos de acceso →</button>
         <button class="guide-video-btn cel-video" type="button" data-guide-video>▶ Ver el video guía · 3 min</button>
-        <a class="cel-help" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, acabo de activar mi cuenta y tengo una duda")}" target="_blank" rel="noopener">¿Necesitas ayuda? Escríbenos por WhatsApp</a>
+        <a class="cel-help" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, acabo de activar mi cuenta y tengo una duda")}" target="_blank" rel="noopener">¿Necesitas ayuda? Estamos en WhatsApp ↗</a>
+      </div>
+      <small class="cel-signature"><span aria-hidden="true">🇨🇴</span> Colombia, contigo en cada paso.</small>
       </div>
     </form>`;
     document.body.appendChild(dlg);
     dlg.addEventListener("close", () => {
       const go = dlg.returnValue === "go";
       dlg.remove();
-      if (go) document.getElementById("app")?.scrollIntoView({behavior: "smooth", block: "start"});
+      if (go) {
+        const open = new CustomEvent("iap:open-access", {cancelable:true,detail:{codigo:item?.codigo,correo:item?.correo}});
+        document.dispatchEvent(open);
+        if (!open.defaultPrevented) document.getElementById("app")?.scrollIntoView({behavior: reduceMotion()?"auto":"smooth", block: "start"});
+      }
     }, {once: true});
     dlg.addEventListener("cancel", e => { e.preventDefault(); dlg.close("go"); });
     dlg.showModal();
-    dlg.querySelector(".cel-go")?.focus();
-    burst(dlg, spooky);
+    dlg.querySelector(".cel-go")?.focus({preventScroll:true});
+    burst(dlg);
   }
 
   // Video guía: se abre grande y se puede minimizar a un reproductor flotante (como YouTube) sin cortar el video.

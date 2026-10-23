@@ -27,6 +27,40 @@
 .celebrate.spooky .cel-steps small{color:#cbbbe0}
 .celebrate.spooky .cel-help{color:#ffd98c}
 
+/* Colombian welcome: natural scenery, pearl surfaces, emerald and restrained gold. */
+.celebrate.celebrate-colombia{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:#fcfdf8;color:#1b392c;border:1px solid #d6e1d6;border-radius:24px;box-shadow:0 26px 90px #0d302a52;font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+.celebrate-colombia::backdrop{background:#102e28a6;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.cel-welcome-form{position:relative;z-index:1;margin:0}
+.cel-colombia-hero{position:relative;isolation:isolate;min-height:190px;padding:20px 24px;box-sizing:border-box;background:linear-gradient(180deg,#0d372955,#073b2ace 100%),url('assets/rio-colombia-panel.webp') center 45%/cover;color:#fff;text-align:left}
+.cel-brand{font-size:19px;font-weight:850;letter-spacing:-.06em;color:#fff;padding-right:35px}
+.cel-brand>span{color:#f0ce7b}
+.cel-close{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:50%;border:1px solid #ffffff75;color:#fff;background:#123c2e70;font-size:25px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.cel-close:hover{background:#123c2edb}
+.cel-hero-copy{margin-top:27px}
+.cel-confirmed{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.15em;font-weight:800;color:#ffe7a4}
+.cel-confirmed>span{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;border:1px solid #efd08a;background:#fbf7e8;color:#0b6c49;font-size:12px}
+.celebrate-colombia .cel-colombia-hero h2{font-size:28px;line-height:1.15;letter-spacing:-.045em;color:#fff;margin:9px 0 5px;overflow-wrap:anywhere}
+.cel-hero-thanks{font-size:11px;line-height:1.5;color:#edf4e9}
+.celebrate-colombia .cel-box{padding:20px 22px 16px;text-align:left}
+.celebrate-colombia .cel-plan-ready{font-size:13px;line-height:1.65;color:#4a6052;margin:0 0 16px}
+.celebrate-colombia .cel-plan-ready b{color:#174b32}
+.celebrate-colombia .cel-steps{gap:8px;margin:0 0 18px}
+.celebrate-colombia .cel-steps li{gap:11px;padding:12px;border-radius:12px;background:#fff;border:1px solid #e1e9dd}
+.celebrate-colombia .cel-steps b{font-size:12px;font-weight:800;line-height:1.45;color:#284a34}
+.celebrate-colombia .cel-steps small{font-size:11px;line-height:1.65;color:#5c7061;margin-top:3px;overflow-wrap:anywhere}
+.celebrate-colombia .cel-steps small b{font-size:inherit;display:inline;color:#35523d;overflow-wrap:anywhere}
+.celebrate-colombia .cel-n{width:26px;height:26px;font-size:11px;background:#edf5e8;border:1px solid #d4d9b2;color:#176d45}
+.celebrate-colombia .cel-actions{gap:9px}
+.celebrate-colombia .cel-go{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 15px;min-height:48px;background:linear-gradient(115deg,#08764f,#096544);border:1px solid #c6a34e;color:#fff;border-radius:12px;font-family:inherit;font-size:13px;font-weight:800;box-shadow:0 7px 18px #0a673b21;cursor:pointer}
+.celebrate-colombia .cel-go:hover{background:#075e40;transform:translateY(-1px)}
+.celebrate-colombia .cel-go:focus-visible,.celebrate-colombia .cel-close:focus-visible,.celebrate-colombia .cel-video:focus-visible{outline:2px solid #b9943d!important;outline-offset:3px}
+.celebrate-colombia .cel-video{margin:0;display:flex;width:100%;min-height:44px;padding:10px 13px;border:1px solid #cadbc9;border-radius:12px;background:#fff;color:#315c40;font-size:12px;font-weight:750;box-shadow:none}
+.celebrate-colombia .cel-video:hover{background:#eef5eb}
+.celebrate-colombia .cel-help{display:flex;align-items:center;justify-content:center;min-height:40px;padding:7px 4px;color:#2d6a45;font-size:11px;font-weight:750;line-height:1.5;text-align:center;text-decoration:none}
+.cel-signature{display:flex;align-items:center;justify-content:center;gap:6px;padding-top:11px;border-top:1px solid #e1e9db;color:#7b8878;font-size:9px;font-weight:600;line-height:1.5}
+@media(max-width:480px){.celebrate.celebrate-colombia{width:calc(100vw - 24px);border-radius:21px}.cel-colombia-hero{min-height:174px;padding:18px 20px}.cel-hero-copy{margin-top:23px}.celebrate-colombia .cel-colombia-hero h2{font-size:25px}.celebrate-colombia .cel-box{padding:17px 17px 13px}.celebrate-colombia .cel-plan-ready{font-size:12px;margin-bottom:13px}.celebrate-colombia .cel-steps li{padding:11px;gap:9px}.celebrate-colombia .cel-steps{margin-bottom:15px}}
+@media(prefers-reduced-motion:reduce){.celebrate-colombia[open],.celebrate-colombia .cel-icon{animation:none}.celebrate-colombia .cel-burst{display:none}}
+
 @keyframes celIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes celPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes celFall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--sway,0),520px,0) rotate(300deg);opacity:0}}

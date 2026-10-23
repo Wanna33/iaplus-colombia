@@ -352,6 +352,16 @@ const passwordTimers=new Map();
 function hidePassword(pw){clearTimeout(passwordTimers.get(pw));passwordTimers.delete(pw);pw.textContent="••••••••••";const b=pw.parentElement.querySelector(".tog");if(b){b.innerHTML=I.eye;b.setAttribute("aria-pressed","false");}}
 function setAccess(button,open){if(!button)return;document.querySelectorAll("[data-acc]").forEach(b=>{const panel=document.getElementById(b.dataset.acc),on=b===button&&open;if(!panel)return;panel.classList.toggle("on",on);panel.setAttribute("aria-hidden",String(!on));b.setAttribute("aria-expanded",String(on));b.querySelector("span").textContent=on?"Ocultar datos de acceso":"Ver datos de acceso";if(!on)panel.querySelectorAll(".pw").forEach(hidePassword);});}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)document.querySelectorAll(".pw").forEach(hidePassword);});
+document.addEventListener('iap:open-access',e=>{
+  if(tab!=='sub'){tab='sub';renderMain();}
+  const detail=e.detail||{};
+  let index=ITEMS.findIndex(it=>IAPAccountState.isActive(it)&&((detail.codigo&&it.codigo===detail.codigo)||(detail.correo&&it.correo===detail.correo)));
+  if(index<0)index=ITEMS.findIndex(it=>IAPAccountState.isActive(it));
+  const panel=document.getElementById('acc'+index),button=document.querySelector('[data-acc="acc'+index+'"]');
+  if(!panel||!button)return;
+  filterQ='';const search=$('#q');if(search)search.value='';applyFilter();
+  e.preventDefault();setAccess(button,true);button.focus({preventScroll:true});panel.closest('.sub-card')?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+});
 document.addEventListener("click", e=>{
   if(!e.target.closest('#menu,#avBtn')){const menu=$('#menu');if(menu)menu.classList.remove('on');$('#avBtn')?.setAttribute('aria-expanded','false');}
   const c = e.target.closest("[data-copy]");
