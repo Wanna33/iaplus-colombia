@@ -200,3 +200,76 @@
   .storefront .seasonal-banner::before{background:linear-gradient(90deg,rgba(11,45,31,.84),rgba(11,45,31,.59) 72%,rgba(11,45,31,.32))}
   .storefront .featured-section{background-position:60% center}
 }
+
+/* Clearer surfaces and stronger text contrast across the storefront. */
+.storefront{color:#20372b;background:#f7f8f3}
+.storefront .nav,.storefront .nav.scrolled{background:#fffdf8!important;border-color:#d4ddd4!important;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 5px 20px rgba(30,57,39,.1)}
+.storefront .nav .links a,.storefront .nav.dark .links a{color:#30473a}
+.storefront .nav .links a:hover,.storefront .nav .links a.on,.storefront .nav.dark .links a.on{background:#eaf3e9;color:#075e3d}
+.storefront .nav .btn-google{background:#fff!important;border:1px solid #738579!important;color:#12442f!important;box-shadow:0 3px 10px rgba(22,55,36,.12)!important;font-weight:800}
+.storefront .hero{background:linear-gradient(135deg,#f5f7ef 0%,#edf3ec 58%,#f4f1e6 100%)}
+.storefront .hero h1,.storefront .section-heading .title,.storefront .activation-intro h2,.storefront .trust-story-copy h2{color:#18372a}
+.storefront .hero h1 .grad,.storefront .title .grad{background:linear-gradient(100deg,#08794f 0%,#08794f 55%,#84621c 100%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.storefront .hero-text>p,.storefront .section p,.storefront .trust-story-copy p,.storefront .activation-intro p{color:#465c4d}
+.storefront .pill,.storefront .first-visit-guide{background:#fffdf5;border-color:#c8ae66}
+.storefront .first-visit-guide__copy b{color:#183d2b}
+.storefront .first-visit-guide__copy small{color:#4e6153}
+.storefront .featured-section,.storefront #planes-chatgpt,.storefront #asistentes,.storefront #como,.storefront .section.alt{background-color:#f1f4eb;background-image:linear-gradient(145deg,#f2f6ee 0%,#faf9f2 100%)}
+.storefront .featured-plan:not(.feature-chatgpt3),.storefront .grid .card,.storefront .card,.storefront .activation-card,.storefront .assistant-panel,.storefront .why-i,.storefront .step,.storefront #faq details,.storefront .goal-shortcuts button,.storefront .compare-tray{background-color:#fff!important;background-image:none!important;color:#21392b;border-color:#cbd7cc;box-shadow:0 8px 24px rgba(27,58,39,.09)}
+.storefront .featured-plan.feature-chatgpt3{background-color:#0a6041!important;background-image:linear-gradient(145deg,#0b6847,#124c38)!important;color:#fff;border-color:#b9933d}
+.storefront .featured-plan p,.storefront .card p,.storefront .featured-plan small,.storefront .card small,.storefront .why-i p,.storefront .step p,.storefront #faq details p{color:#4a5e50;opacity:1}
+.storefront .feature-chatgpt3 p,.storefront .feature-chatgpt3 small,.storefront .feature-chatgpt3 h3,.storefront .feature-chatgpt3>button{color:#fff!important;opacity:1}
+.storefront .feature-chatgpt3 .feature-price span{color:#f3e9cf!important}
+.storefront .feature-badge,.storefront .card-badge{background:#e4f2e5;color:#145c3e;border:1px solid #b9d4be}
+.storefront .goal-shortcuts button,.storefront .assistant-tabs button{color:#274b38}
+.storefront .activation-card label,.storefront .activation-card small,.storefront .activation-privacy{color:#43594a}
+.storefront .activation-card input,.storefront .toolbar input,.storefront .toolbar select,.storefront input,.storefront select,.storefront textarea{background:#fff!important;color:#20372b;border-color:#aebdae}
+.storefront .activation-card input::placeholder,.storefront .toolbar input::placeholder,.storefront input::placeholder{color:#657568;opacity:1}
+.storefront .trust-story-visual,.storefront .trust-story-copy,.storefront .trust-story-points li{color:#20372b}
+.storefront .trust-image-cta{background:#fff;color:#193c2c;border:1px solid #c9d5ca;box-shadow:0 10px 30px rgba(24,55,37,.17)}
+.storefront .trust-story-points small{color:#526658}
+.storefront .hero-colombia-art{border-radius:24px;box-shadow:0 18px 44px rgba(37,68,48,.18);background:#fff;border:1px solid #d6dfd6}
+.storefront .collage-country,.storefront .collage-plan,.storefront .collage-tools{background:#fff;border-color:#c8d5ca;color:#203d2e}
+.storefront .seasonal-banner{border-color:#d2b155}
+.storefront .seasonal-banner::before{background:linear-gradient(90deg,rgba(9,42,29,.94),rgba(9,42,29,.82) 58%,rgba(9,42,29,.4))}
+.storefront .text-link,.storefront .trust-story-link{color:#086341;text-decoration-thickness:1.5px;text-underline-offset:3px}
+.storefront .footer{background:#12372a;color:#f6f6ed}
+.storefront .footer p,.storefront .footer small,.storefront .foot-links a{color:#e0e9df}
+.storefront .cta-band .btn-ghost{background:#fff;color:#124a34;border-color:#d7bd75}
+.storefront .modal{background:rgba(12,30,21,.76);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.storefront .modal-box{max-height:min(88dvh,720px);overflow-y:auto;background:#fffdf8;border:1px solid #d8dfd4;color:#20372b;box-shadow:0 30px 90px rgba(8,28,18,.36)}
+.storefront .modal-box h3{color:#173a2b}
+.storefront .modal-box p{color:#465a4c}
+.storefront .modal-box .legal{color:#536658}
+.storefront .modal-logo{width:min(138px,42vw);height:auto;max-height:88px;object-fit:contain}
+@media(max-width:600px){
+  .storefront .nav{position:sticky;top:0}
+  .storefront .nav-in.wrap{min-height:68px;height:auto;padding-right:12px!important;padding-left:12px!important;gap:7px}
+  .storefront .nav .brand img{width:112px!important;height:auto!important;max-height:43px;object-fit:contain}
+  .storefront .nav-right{gap:7px}
+  .storefront .nav .btn-google{min-width:104px;min-height:44px;padding:0 12px;font-size:12px;line-height:1.15;border-radius:12px}
+  .storefront .burger{width:42px;height:42px;min-width:42px;border:1px solid #cbd7cc;border-radius:12px;background:#edf4eb;color:#124b34;font-size:20px}
+  .storefront .hero{padding:30px 0 42px}
+  .storefront .hero-in{gap:23px}
+  .storefront .hero-text{order:0}
+  .storefront .hero-side{order:1;margin-top:0}
+  .storefront .hero h1{font-size:clamp(34px,9vw,42px);line-height:1.08;letter-spacing:-.045em}
+  .storefront .hero-text>p{font-size:15px;color:#405647}
+  .storefront .hero .cta .btn{min-height:52px;padding:10px 9px;font-size:11px;font-weight:800}
+  .storefront .hero-collage{max-width:390px;padding:7px;border:1px solid #d5dfd5;border-radius:25px;background:linear-gradient(145deg,#fff,#f4f6ed);box-shadow:0 14px 35px rgba(36,64,44,.13)}
+  .storefront .hero-art-picture{width:min(100%,350px)}
+  .storefront .hero-colombia-art{border-radius:18px;box-shadow:none}
+  .storefront .collage-country{top:13px;left:13px;background:#fff;border-color:#d8dfd4;font-size:10px}
+  .storefront .collage-plan,.storefront .collage-tools{width:100%;margin-left:0;margin-right:0}
+  .storefront .modal{padding:12px;place-items:center;align-items:center}
+  .storefront .modal-box{width:100%;max-width:430px;max-height:calc(100dvh - 24px);padding:26px 20px 24px;border-radius:24px}
+  .storefront .modal-box h3{font-size:22px}
+  .storefront .modal-box p{font-size:14px;line-height:1.6}
+  .storefront .modal-x{width:42px;height:42px;background:#edf2eb;color:#254a35}
+  .storefront .modal-box .gbtn,.storefront .modal-box .gbtn>div{max-width:100%;margin-inline:auto}
+}
+@media(max-width:360px){
+  .storefront .nav .brand img{width:100px!important}
+  .storefront .nav .btn-google{min-width:98px;padding:0 9px;font-size:11px}
+  .storefront .nav-in.wrap{padding-left:9px!important;padding-right:9px!important}
+}
