@@ -1,0 +1,56 @@
+/* An open, editorial sign-in layout, scoped to the unauthenticated account view. */
+body.account-app.is-signing-in{background:#fff!important;color:#172c26;padding-bottom:0}
+.is-signing-in>.top,.is-signing-in>.bn,.is-signing-in .hw-fx{display:none!important}
+.is-signing-in main#app{max-width:1240px;padding:0 36px;margin:auto}
+.account-app .account-signin{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);grid-template-rows:auto 1fr auto;column-gap:64px;width:100%;max-width:none;min-height:100svh;margin:0;padding:0;border:0;border-radius:0;background:#fff;box-shadow:none;text-align:left;box-sizing:border-box}
+.account-signin .signin-masthead{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:102px}
+.account-app .account-signin .signin-brand{display:block;width:190px;flex:none;margin:0}
+.account-signin .signin-brand img{width:100%;height:auto}
+.account-signin .signin-store-link{font-size:12px!important;font-weight:700;color:#264738!important;text-decoration:none}
+.account-signin .signin-store-link span{margin-left:8px}
+.signin-showcase{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:12px 0 40px}
+.signin-scene{position:relative;display:grid;place-items:center;width:100%;max-width:490px;margin:0 auto;isolation:isolate}
+.signin-scene:before{content:"";position:absolute;z-index:-1;inset:13% 6% 4%;border-radius:45% 45% 30% 30%;background:radial-gradient(ellipse at 30% 20%,#fff2c5,transparent 60%),linear-gradient(145deg,#f2f8f0,#e7f2eb)}
+.signin-scene>img{display:block;width:auto;max-width:100%;height:clamp(350px,52svh,510px);object-fit:contain;filter:drop-shadow(0 16px 20px #213e2410)}
+.signin-colombia{position:absolute;bottom:12px;left:4%;padding:10px 14px;border:1px solid #e1e7df;border-radius:50px;background:#fff;color:#28503b;font-size:11px;font-weight:700;box-shadow:0 5px 22px #1838250d}
+.account-signin .signin-showcase h1{margin:23px 0 0;font-size:clamp(32px,3.5vw,48px);font-weight:800;line-height:1.08;letter-spacing:-.055em;color:#18382b}
+.signin-showcase h1 em{font-style:normal;color:#098357}
+.signin-access{display:flex;flex-direction:column;justify-content:center;align-self:stretch;min-width:0;padding:44px 0 44px 48px;border-left:1px solid #e6eae5}
+.signin-kicker{font-size:10px;letter-spacing:.14em;font-weight:800;color:#62796a}
+.signin-access h2{font-size:32px;line-height:1.13;letter-spacing:-.045em;margin:14px 0;color:#19372a}
+.signin-access .signin-intro{font-size:14px;line-height:1.8;color:#58685d;margin:0 0 24px;max-width:340px}
+.account-signin .signin-google-prominent{display:flex;justify-content:flex-start;width:100%;min-height:44px;margin:0}
+.account-signin .signin-google-prominent>div{max-width:100%;margin:0}
+.account-signin .signin-wait{min-height:18px;font-size:11px;line-height:1.5;margin:9px 0 0;color:#637269}
+.signin-reassurance{display:flex;align-items:center;gap:7px;font-size:11px;color:#526b59;margin:15px 0 28px}
+.signin-reassurance>span{color:#078455;font-weight:800}
+.signin-assistance{padding:22px 0;border-top:1px solid #e6eae5;border-bottom:1px solid #e6eae5}
+.signin-assistance>span{display:block;font-size:12px;color:#4e6555;margin-bottom:9px}
+.account-signin .signin-assistance .guide-video-btn{display:flex;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:10px 14px;border:1px solid #c9d9cb;border-radius:10px;background:#f5faf4;color:#086642;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;box-shadow:none}
+.signin-access .signin-legal{display:block;font-size:10px;line-height:1.8;color:#748078;margin:20px 0 0}
+.account-signin .signin-access a{color:#236a48;text-underline-offset:3px}
+.signin-footer{grid-column:1/-1;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid #e9ede7;min-height:70px;padding:22px 0;box-sizing:border-box;font-size:10px;color:#748078}
+.account-signin .signin-footer a{color:#365e45;font-size:10px}
+@media(max-width:760px){
+ .is-signing-in main#app{padding:0 24px 24px}
+ .account-app .account-signin{grid-template-columns:minmax(0,1fr);gap:0;min-height:100svh}
+ .account-signin .signin-masthead{min-height:76px;grid-column:1}
+ .account-app .account-signin .signin-brand{width:160px}
+ .signin-showcase{padding:8px 0 0}
+ .signin-scene{max-width:360px}
+ .signin-scene>img{height:clamp(250px,37svh,330px);max-width:100%;width:auto}
+ .signin-colombia{bottom:6px;font-size:9px;padding:8px 11px;left:2%}
+ .account-signin .signin-showcase h1{order:-1;margin:6px 0 18px;font-size:30px;line-height:1.13;text-align:center}
+ .signin-showcase h1 br{display:none}
+ .signin-access{border:0;padding:22px 0 27px;align-items:center;text-align:center;width:100%;max-width:390px;margin:auto}
+ .signin-access .signin-kicker,.signin-access h2,.signin-access .signin-intro{display:none}
+ .signin-kicker{font-size:9px}
+ .signin-access h2{font-size:23px;margin:9px 0}
+ .signin-access .signin-intro{font-size:12px;line-height:1.7;margin:0 0 20px;max-width:330px}
+ .account-signin .signin-google-prominent{justify-content:center;min-height:44px;margin:0}
+ .signin-reassurance{margin:13px 0 22px;font-size:10px}
+ .signin-assistance{width:100%;padding:17px 0;text-align:left}
+ .signin-access .signin-legal{font-size:10px;margin-top:15px;max-width:310px}
+ .signin-footer{justify-content:center;text-align:center;gap:8px;padding:18px 0 0;min-height:50px}
+}
+@media(max-width:360px){.is-signing-in main#app{padding-inline:16px}.account-app .account-signin .signin-brand{width:145px}.signin-scene>img{height:260px}.account-signin .signin-showcase h1{font-size:27px}.account-signin .signin-store-link{font-size:11px!important}}

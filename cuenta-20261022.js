@@ -19,8 +19,26 @@ function ensureCred(){
     let bar = document.getElementById("relogin");
     if(!bar){ bar = document.createElement("div"); bar.id="relogin";
       bar.className="account-signin";
+      document.body.classList.add("is-signing-in");
       const act=!!load("iap_pending_code");
-      bar.innerHTML=`<a class="signin-brand" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia" width="200" height="58"></a><span class="eyebrow">${act?"PASO 2 DE 3 · CONFIRMA TU IDENTIDAD":"TU ESPACIO PERSONAL"}</span><h1>${act?"Tu código ya está aquí.":"Todo tu acceso, en un lugar."}</h1><p>${act?"Entra con tu cuenta de Google. Después revisarás y confirmarás la activación.":"Entra con el mismo Gmail que usaste para activar tu plan. Aquí encontrarás tus accesos y tus pedidos."}</p>${act?'<div class="pending-code">Código recibido <span>✓ Listo para revisar</span></div><button type="button" class="guide-video-btn" data-guide-video>▶ Ver el video guía · 3 min</button>':""}<div class="signin-welcome-visual"><img src="assets/hero-colombia-creadora-mobile.webp?v=20261023" width="780" height="975" alt="Creadora colombiana de IA Plus Colombia, con una escena cafetera" fetchpriority="high" decoding="async"></div><div id="relBtn" class="signin-google signin-google-prominent"></div><p id="loginWait" class="signin-wait" role="status">Preparando el acceso con Google…</p><small>Al continuar aceptas los <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>. No pedimos tu contraseña de Google.</small><a class="signin-back" href="index.html?tienda=1#activar">← Volver a la tienda</a>`;
+      bar.innerHTML=`
+        <header class="signin-masthead"><a class="signin-brand" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia" width="200" height="58"></a><a class="signin-store-link" href="index.html?tienda=1">Ir a la tienda <span aria-hidden="true">↗</span></a></header>
+        <section class="signin-showcase" aria-labelledby="signinWelcomeTitle">
+          <div class="signin-scene"><img src="assets/hero-colombia-creadora-mobile.webp?v=20261023" width="780" height="975" alt="Creadora colombiana sonriente, con flores y un paisaje cafetero" fetchpriority="high" decoding="async"><span class="signin-colombia">🇨🇴 Con el corazón en Colombia</span></div>
+          <h1 id="signinWelcomeTitle">Tu mundo digital.<br> <em>Más cerca de ti.</em></h1>
+        </section>
+        <section class="signin-access" aria-labelledby="signinAccessTitle">
+          <span class="signin-kicker">${act?"PASO 2 DE 3 · TU IDENTIDAD":"BIENVENIDO A TU ESPACIO"}</span>
+          <h2 id="signinAccessTitle">${act?"Activa tu próximo paso.":"Todo empieza contigo."}</h2>
+          <p class="signin-intro">${act?"Tu código está listo. Entra con Google para revisar tu plan y confirmar la activación.":"Entra con el Gmail de tu compra para encontrar tus cuentas, accesos y pedidos."}</p>
+          ${act?'<div class="pending-code">Código recibido <span>✓ Listo para revisar</span></div>':""}
+          <div id="relBtn" class="signin-google signin-google-prominent"></div>
+          <p id="loginWait" class="signin-wait" role="status">Preparando el acceso con Google…</p>
+          <div class="signin-reassurance"><span aria-hidden="true">✓</span> Tu contraseña se queda con Google.</div>
+          <div class="signin-assistance"><span>¿Es tu primera vez?</span><button type="button" class="guide-video-btn" data-guide-video>Ver cómo activar mi cuenta <span aria-hidden="true">↗</span></button></div>
+          <small class="signin-legal">Al continuar aceptas nuestros <a href="terminos.html">Términos</a> y la <a href="privacidad.html">Política de datos</a>.</small>
+        </section>
+        <footer class="signin-footer"><span>iapluscolombia · Cuentas digitales, a tu ritmo.</span><a href="https://wa.me/573102035327" target="_blank" rel="noopener">¿Necesitas ayuda?</a></footer>`;
       $("#app").replaceChildren(bar); }
     let loginTries=0;
 
@@ -32,7 +50,7 @@ function ensureCred(){
       google.accounts.id.initialize({client_id:CLIENT_ID, auto_select:true, callback:r=>{
         const p=parseJwt(r.credential); const cr={token:r.credential,exp:p.exp*1000};
         save("iap_cred",cr); save("iap_user",{email:p.email,name:p.name||p.email,picture:p.picture||""});
-        bar.remove(); credP=null; resolve(cr);
+        bar.remove(); document.body.classList.remove("is-signing-in"); credP=null; resolve(cr);
       }});
       google.accounts.id.renderButton(document.getElementById("relBtn"),{theme:"outline",size:"large",shape:"pill",locale:"es"});
       if($("#loginWait")) $("#loginWait").textContent="Elige tu Gmail para continuar.";
