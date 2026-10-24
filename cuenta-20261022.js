@@ -377,7 +377,7 @@ document.addEventListener("click", e=>{
   if(tb){ tab=tb.dataset.tab; renderMain(); return; }
   const go = e.target.closest("[data-go]");
   if(go){ tab=go.dataset.go; $("#menu").classList.remove("on"); renderMain(); window.scrollTo({top:0,behavior:"smooth"}); return; }
-  if(e.target.closest("#logout")){ try{ ["iap_user","iap_cred","iap_has","iap_admin","iap_pwa_seen"].forEach(k=>localStorage.removeItem(k)); sessionStorage.clear(); }catch{} try{ google.accounts.id.disableAutoSelect(); }catch{} location.href="index.html?tienda=1"; return; }
+  if(e.target.closest("#logout")){ try{ ["iap_user","iap_cred","iap_has","iap_admin","iap_pwa_seen",LIST_CACHE].forEach(k=>localStorage.removeItem(k)); sessionStorage.clear(); }catch{} try{ google.accounts.id.disableAutoSelect(); }catch{} location.href="index.html?tienda=1"; return; }
   if(e.target.closest("#avBtn")){ const open=$("#menu").classList.toggle("on");$('#avBtn').setAttribute('aria-expanded',String(open));return; }
   if(!e.target.closest("#menu")) $("#menu").classList.remove("on");
 });
@@ -408,6 +408,23 @@ let timer=null;
 let FLASH=null;
 let WELCOME_CODE=null; // código recién activado: al cargar la cuenta se muestra la bienvenida una vez
 function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(f.ok){ if(window.IAPCelebrate){ window.IAPActivationWelcome?.hideForSuccess(); }else{ window.IAPActivationWelcome?.showSuccess(); } }else{ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
+/* Rapidez: la última lista de accesos se guarda en el navegador y se muestra al instante; se actualiza en segundo plano. */
+const LIST_CACHE = "iap_list_cache_v1";
+function listKey(items){ return JSON.stringify((items||[]).map(i=>[i.correo,i.clave,i.producto,!!i.vencida,i.inicio,i.fin,!!i.tiene2fa,!!i.adicional])); }
+function readListCache(){
+  try{
+    const u = load("iap_user"), cr = load("iap_cred"), c = JSON.parse(localStorage.getItem(LIST_CACHE)||"null");
+    if(!u || !cr || !c || c.u !== u.email || !Array.isArray(c.items) || !c.items.length || Date.now()-c.t > 7*864e5){ if(c) localStorage.removeItem(LIST_CACHE); return null; }
+    return c;
+  }catch{ return null; }
+}
+function writeListCache(j){
+  try{
+    const u = load("iap_user");
+    if(u && j && j.ok && !j.admin && Array.isArray(j.items) && j.items.length) localStorage.setItem(LIST_CACHE, JSON.stringify({u:u.email, t:Date.now(), items:j.items, admin:false}));
+    else localStorage.removeItem(LIST_CACHE);
+  }catch{}
+}
 async function loadAll(){
   const pc = load("iap_pending_code");
   if(pc && !activationBusy){
@@ -421,15 +438,32 @@ async function loadAll(){
     }catch(e){FLASH={ok:false,t:e.message||"La conexión se interrumpió. Consulta tus accesos antes de volver a intentarlo."};}
     finally{activationBusy=false;}
   }
+  let paintedKey = "";
   try{
-    const j = await callApi({action:"list"}); if(!j.ok) throw new Error(j.error||"Error");
+    const cached = (!pc && !WELCOME_CODE && !FLASH) ? readListCache() : null;
+    if(cached){ // se pinta lo último que se vio mientras llega la respuesta del servidor
+      ITEMS = cached.items; IS_ADMIN = false; buildMenu(); renderMain(); paintedKey = listKey(cached.items);
+      if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
+    }
+    let j = null; const early = window.__earlyList; window.__earlyList = null;
+    if(early && !pc && Date.now()-early.t < 30000){
+      try{ const e = await early.p; if(e && e.ok){ j = e; if(e.ses && e.sesExp){ try{ localStorage.setItem("iap_cred", JSON.stringify({token:e.ses, exp:e.sesExp})); }catch{} } } }catch{}
+    }
+    if(!j) j = await callApi({action:"list"});
+    if(!j.ok) throw new Error(j.error||"Error");
+    writeListCache(j);
+    if(paintedKey && listKey(j.items) === paintedKey){ // nada cambió: no se vuelve a dibujar
+      ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); return;
+    }
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
     if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); if(WELCOME_CODE){ WELCOME_CODE=null; window.IAPCelebrate?.show(null); } return; }
     renderMain(); showFlash();
     if(WELCOME_CODE){ const c=WELCOME_CODE; WELCOME_CODE=null; window.IAPCelebrate?.show(ITEMS.find(i=>i.codigo===c)||ITEMS.find(i=>!i.vencida)||null); }
     if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
     if(ITEMS.some(i=>IAPAccountState.isActive(i)) && !sessionStorage.getItem("iap_conf")){ sessionStorage.setItem("iap_conf","1"); confetti(); }
-  }catch(err){ message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
+  }catch(err){
+    if(paintedKey){ toastMsg("No pudimos actualizar. Estás viendo los últimos datos guardados."); return; }
+    message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
 }
 loadAll();
 (function(){
