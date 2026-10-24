@@ -58,6 +58,7 @@
 <link rel="stylesheet" href="seasonal.css?v=20261022">
 <link rel="stylesheet" href="halloween-fx.css?v=20261022">
 <link rel="stylesheet" href="video-guide.css?v=20261022">
+<link rel="stylesheet" href="video-chapters.css?v=20261024">
 <link rel="stylesheet" href="storefront-polish.css?v=20261023-9">
 
 <link rel="stylesheet" href="account-panel.css?v=20261023-1">
@@ -116,7 +117,7 @@
       </div>
       <aside class="first-visit-guide" id="firstVisitVideoTip" hidden aria-label="Guía para quienes visitan la tienda por primera vez">
         <span class="first-visit-guide__play" aria-hidden="true">▶</span>
-        <span class="first-visit-guide__copy"><b>¿Primera vez por aquí?</b><small>Aprende a activar tu cuenta en 3 minutos.</small></span>
+        <span class="first-visit-guide__copy"><b>¿Primera vez por aquí?</b><small>Aprende a activar tu cuenta paso a paso.</small></span>
         <a class="first-visit-guide__action" href="#videoGuia" data-first-visit-video>Ver video guía</a>
         <button class="first-visit-guide__close" type="button" data-first-visit-dismiss aria-label="Cerrar sugerencia del video">×</button>
       </aside>
@@ -234,11 +235,11 @@
     <div class="how-video reveal" id="videoGuia">
       <div class="how-video-head">
         <span class="eyebrow">Video guía</span>
-        <h3>Míralo en 3 minutos</h3>
+        <h3>Míralo paso a paso</h3>
         <p>Cómo activar tu código o enlace y cómo entrar a tu ChatGPT Plus, paso a paso.</p>
       </div>
-      <video controls playsinline preload="none" poster="assets/video/como-activar-poster.jpg" aria-label="Video: cómo activar tu código o enlace y entrar a ChatGPT Plus">
-        <source src="assets/video/como-activar-chatgpt-plus.mp4" type="video/mp4">
+      <video data-chapters controls playsinline preload="none" poster="assets/video/como-activar-v2-poster.jpg" aria-label="Video: cómo activar tu código o enlace y entrar a ChatGPT Plus">
+        <source src="assets/video/como-activar-v2.mp4" type="video/mp4">
         Tu navegador no puede reproducir este video.
       </video>
       <ul class="how-video-points" aria-label="Qué verás en el video">
@@ -350,6 +351,7 @@
 <script src="halloween-fx.js?v=20261022"></script>
 <script src="pwa.js"></script>
 <script src="first-visit-guide.js?v=20261023-1"></script>
+<script src="video-chapters.js?v=20261024"></script>
 </body>
 </html>
 

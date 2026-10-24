@@ -1,0 +1,14 @@
+/* Capítulos del video guía */
+.video-chapters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;justify-content:center}
+.video-chapters button{display:inline-flex;align-items:center;gap:8px;padding:8px 13px 8px 9px;border-radius:999px;border:1px solid rgba(20,35,29,.16);background:rgba(255,255,255,.92);color:#14231d;font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;transition:background .2s,transform .2s}
+.video-chapters button i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e6efe9;font-style:normal;font-size:11px;font-weight:800}
+.video-chapters button small{color:#6b7c73;font-size:11.5px;font-weight:700}
+.video-chapters button:hover{background:#fff;transform:translateY(-1px)}
+.video-chapters button.on{background:#14573a;color:#fff;border-color:#14573a}
+.video-chapters button.on i{background:#f2b84b;color:#14231d}.video-chapters button.on small{color:#cfe5d9}
+.how-video .video-chapters button,.guide-video .video-chapters button{background:rgba(255,255,255,.1);color:#f1ecff;border-color:rgba(255,255,255,.2)}
+.how-video .video-chapters button i,.guide-video .video-chapters button i{background:rgba(255,255,255,.16)}
+.how-video .video-chapters button small,.guide-video .video-chapters button small{color:#cdd8d2}
+.how-video .video-chapters button.on,.guide-video .video-chapters button.on{background:#f2b84b;color:#14231d;border-color:#f2b84b}
+.guide-video .video-chapters{max-height:96px;overflow:auto;justify-content:flex-start;margin-top:10px}
+@media(max-width:600px){.video-chapters button span{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}

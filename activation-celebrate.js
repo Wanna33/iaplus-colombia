@@ -52,7 +52,7 @@
       </ol>
       <div class="cel-actions">
         <button class="cta cel-go" value="go" type="submit">Ver mis datos de acceso →</button>
-        <button class="guide-video-btn cel-video" type="button" data-guide-video>▶ Ver el video guía · 3 min</button>
+        <button class="guide-video-btn cel-video" type="button" data-guide-video>▶ Ver el video guía</button>
         <a class="cel-help" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, acabo de activar mi cuenta y tengo una duda")}" target="_blank" rel="noopener">¿Necesitas ayuda? Estamos en WhatsApp ↗</a>
       </div>
       <small class="cel-signature"><span aria-hidden="true">🇨🇴</span> Colombia, contigo en cada paso.</small>
@@ -137,9 +137,10 @@
         <button type="button" class="gv-btn" data-gv="max" title="Ampliar" aria-label="Ampliar el video" hidden>⤢</button>
         <button type="button" class="gv-btn" data-gv="close" title="Cerrar" aria-label="Cerrar el video">✕</button></div></div>
       <div class="gv-body"><span class="eyebrow">VIDEO GUÍA</span><h2>Activa y entra a tu cuenta</h2>
-      <video controls playsinline autoplay poster="assets/video/como-activar-poster.jpg"><source src="assets/video/como-activar-chatgpt-plus.mp4" type="video/mp4"></video>
-      <p>En 3 minutos: activar con enlace o código y entrar a tu ChatGPT Plus. <b>Toca ⌄ para minimizarlo</b> y seguir los pasos mientras lo ves.</p></div>`;
+      <video controls playsinline autoplay poster="assets/video/como-activar-v2-poster.jpg"><source src="assets/video/como-activar-v2.mp4" type="video/mp4"></video>
+      <p>Paso a paso: tienda, pagos, activar con enlace o código y entrar a tu ChatGPT Plus. <b>Toca ⌄ para minimizarlo</b> y seguir los pasos mientras lo ves.</p></div>`;
     document.body.appendChild(d);
+    try { window.IAPVideoChapters && IAPVideoChapters.mount(d.querySelector("video")); } catch {}
     d.addEventListener("click", e => {
       const b = e.target.closest("[data-gv]"); if (!b) return;
       const k = b.dataset.gv;

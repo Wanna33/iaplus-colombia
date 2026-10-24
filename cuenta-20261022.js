@@ -223,7 +223,7 @@ function addBox(first){
     <p>Pega tu código o el enlace que recibiste. Quedará asociado a tu Gmail actual.</p>
     <form class="addrow" id="addForm" novalidate><label class="sr-only" for="addCode">Código de activación</label><input id="addCode" placeholder="IAP-AB12-CD34" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="200" aria-describedby="addErr" required><button class="cta" type="submit">Revisar código →</button></form>
     <div class="adderr" id="addErr" role="alert" hidden></div>
-    <button type="button" class="guide-video-btn" data-guide-video>▶ Ver el video guía · 3 min</button>
+    <button type="button" class="guide-video-btn" data-guide-video>▶ Ver el video guía</button>
     <a class="activation-shop" href="index.html?tienda=1#planes-chatgpt">¿Aún no tienes uno? Elige tu plan de ChatGPT →</a></div>`;
 }
 let activationBusy=false,activationDraft="";
