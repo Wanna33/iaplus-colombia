@@ -1,0 +1,7 @@
+/* Franja de regalos en la portada */
+.gift-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;max-width:1180px;margin:18px auto;padding:16px 22px;border-radius:24px;background:linear-gradient(120deg,#f47521,#ff9a4d);color:#fff;text-decoration:none;box-shadow:0 16px 40px #f4752138}
+.gift-strip-copy{display:flex;align-items:center;gap:14px;min-width:0}
+.gift-strip-ic{display:grid;place-items:center;width:48px;height:48px;border-radius:16px;background:#ffffff2e;font-size:26px;flex:none}
+.gift-strip b{display:block;font-size:18px;letter-spacing:-.02em}.gift-strip small{display:block;font-size:13.5px;font-weight:600;opacity:.95;margin-top:2px}
+.gift-strip-btn{background:#fff;color:#c4560f;font-weight:800;padding:12px 20px;border-radius:999px;font-size:14.5px;white-space:nowrap}
+@media(max-width:620px){.gift-strip{margin:14px 16px;padding:14px 16px}.gift-strip-btn{width:100%;text-align:center}}

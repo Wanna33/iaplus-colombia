@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Preparar las cuentas del día | IA Plus Colombia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="regalos.css?v=20261024">
+<style>
+.ed{max-width:760px;margin:0 auto;padding:20px 20px 60px}.ed h1{font-size:clamp(26px,4vw,36px);letter-spacing:-.03em;margin:8px 0 6px}.ed p.sub{color:var(--mut);font-weight:600;line-height:1.55;margin-bottom:18px}
+.ed label{display:block;font-weight:800;font-size:14px;margin:16px 0 6px}.ed textarea,.ed input{width:100%;font:inherit;font-size:15px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fff}
+.ed textarea{min-height:170px;font-family:Consolas,monospace}.ed .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.ed button,.ed a.b{font:inherit;font-weight:800;border:0;border-radius:999px;padding:13px 20px;cursor:pointer;text-decoration:none;display:inline-block}
+.ed .p{background:var(--green);color:#fff}.ed .s{background:#fff;border:1px solid var(--line);color:var(--ink)}.ed .g{background:var(--gold);color:var(--ink)}
+.ed ol{margin:14px 0 0 20px;line-height:1.7;font-weight:600;color:#33473d}.ed .ok{margin-top:10px;font-weight:800;color:#12814a;min-height:22px}
+</style>
+</head>
+<body>
+<div class="ed">
+  <a href="regalos.html" style="font-weight:800;text-decoration:none">← Ver la página de regalos</a>
+  <h1>Preparar las cuentas del día</h1>
+  <p class="sub">Pega una cuenta por línea (usuario, un espacio y la contraseña). Se arma el archivo que publica las cuentas en la página.</p>
+  <label for="cuentas">Cuentas (una por línea)</label>
+  <textarea id="cuentas" placeholder="usuario1@correo.com  claveUno123&#10;usuario2@correo.com  claveDos456" spellcheck="false" autocomplete="off"></textarea>
+  <label for="plan">Plan de las cuentas (opcional)</label>
+  <input id="plan" placeholder="Ej.: Fan, Mega Fan" maxlength="30">
+  <label for="msg">Mensaje para los usuarios (opcional)</label>
+  <input id="msg" placeholder="Ej.: Hoy usa el perfil 3, por favor." maxlength="160">
+  <div class="row"><button class="p" id="gen" type="button">Generar archivo</button><button class="s" id="clr" type="button">Limpiar</button></div>
+  <label for="out">Resultado: contenido de regalos.json</label>
+  <textarea id="out" readonly></textarea>
+  <div class="row"><button class="g" id="copy" type="button">Copiar</button><button class="s" id="dl" type="button">Descargar regalos.json</button></div>
+  <div class="ok" id="ok" role="status"></div>
+  <h2 style="margin-top:26px;font-size:20px">Para publicarlo (1 minuto)</h2>
+  <ol>
+    <li>Pulsa <b>Copiar</b>.</li>
+    <li>Abre <a href="https://github.com/Wanna33/iaplus-colombia/edit/main/regalos.json" target="_blank" rel="noopener">el archivo regalos.json en GitHub</a>.</li>
+    <li>Borra todo, pega lo copiado y pulsa <b>Commit changes</b>.</li>
+    <li>En un minuto aparece en <a href="regalos.html">la página de regalos</a>.</li>
+  </ol>
+</div>
+<script src="regalos-editor.js?v=20261024"></script>
+</body>
+</html>
