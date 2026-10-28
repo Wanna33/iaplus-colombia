@@ -1605,7 +1605,7 @@ function drawInbox(){
     : '<div class="empty">No hay chats con ese filtro.</div>';
 }
 const RAPIDAS = [
-  {l:"💳 Datos de pago", t:"Puedes pagar por *Nequi* al *310 203 5327*. Cuando pagues, envíame la captura del comprobante y tu correo de Gmail 🙌"},
+  {l:"💳 Datos de pago", t:"Puedes pagar por *Nequi* al *310 203 5327* (a nombre de *Nelson Gomez*). Cuando pagues, envíame la captura del comprobante y tu correo de Gmail 🙌"},
   {l:"💲 Precios", t:"*ChatGPT Plus* cuesta *$10.000* por 30 días (hasta 2 dispositivos). Mira todos los productos aquí: " + SITE},
   {l:"🔑 Cómo entrar", t:"Entra a *Mi suscripción* con tu Gmail: " + SITE + "cuenta.html — ahí ves el correo, la contraseña y el código de verificación."},
   {l:"🤝 Es compartida", t:"Te cuento que la cuenta es *compartida* con otros usuarios: por eso el precio es tan bajo. Por favor no cambies la contraseña ni los datos de la cuenta 🙏"},
