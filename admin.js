@@ -1404,21 +1404,31 @@ async function loadWaCfg(){
       <div class="form" style="grid-template-columns:1fr auto"><input id="waUrl" placeholder="https://iaplus-whatsapp.TU-USUARIO.workers.dev" value="${esc(c.workerUrl)}"><button class="btn p" id="waSave">Guardar</button></div>
       <p style="margin:12px 0 6px"><b>Clave del asistente</b> <small style="color:var(--mut)">(va en Cloudflare como <span class="mono">BOT_SECRET</span>; no la compartas)</small></p>
       <div class="codeline"><span class="mono" id="waSec">••••••••••••</span><button class="btn s" id="waShow">Mostrar</button><button class="btn s" id="waCp">Copiar</button></div>
-      <p style="margin:12px 0 6px"><b>Clave de Claude (API)</b> <small style="color:var(--mut)">(pégala aquí; se guarda en tu asistente, no en la página)</small></p>
-      <div class="form" style="grid-template-columns:1fr auto"><input id="waIaKey" type="password" autocomplete="off" placeholder="sk-ant-…"><button class="btn p" id="waIaSave" type="button">Guardar clave</button></div>
+      <p style="margin:12px 0 6px"><b>Inteligencia artificial del asistente</b> <small style="color:var(--mut)">(las claves se guardan en tu asistente, no en la página)</small></p>
+      <div class="form" style="grid-template-columns:1fr auto"><select id="waProv"><option value="claude"${e.proveedor!=="chatgpt"?" selected":""}>Claude (Anthropic) · modelo más económico</option><option value="chatgpt"${e.proveedor==="chatgpt"?" selected":""}>ChatGPT (OpenAI)</option></select><button class="btn p" id="waProvSave" type="button">Usar este</button></div>
+      <p style="margin:10px 0 4px"><small>Clave de Claude ${e.tiene_claude?'<span class="tag t-ok">✔ guardada</span>':'<span class="tag t-b">falta</span>'}</small></p>
+      <div class="form" style="grid-template-columns:1fr auto"><input id="waIaKey" type="password" autocomplete="off" placeholder="sk-ant-…"><button class="btn p" id="waIaSave" type="button">Guardar clave de Claude</button></div>
+      <p style="margin:10px 0 4px"><small>Clave de ChatGPT ${e.tiene_chatgpt?'<span class="tag t-ok">✔ guardada</span>':'<span class="tag t-b">falta</span>'}</small></p>
+      <div class="form" style="grid-template-columns:1fr auto"><input id="waGptKey" type="password" autocomplete="off" placeholder="sk-…"><button class="btn p" id="waGptSave" type="button">Guardar clave de ChatGPT</button></div>
+      <div class="form" style="grid-template-columns:1fr auto;margin-top:6px"><input id="waGptModel" placeholder="Modelo de ChatGPT (económico)" value="${esc(e.modelo_chatgpt||"gpt-5-nano")}"><button class="btn s" id="waGptModelSave" type="button">Guardar modelo</button></div>
+      <p style="color:var(--mut);font-size:13px;margin:6px 0 0">Límite fijo: 3,000 tokens por respuesta, con cualquiera de los dos.</p>
       ${c.workerUrl?`<div class="acts" style="margin-top:12px">${e.ok?`${e.modo==="meta"?'<span class="tag t-ok">☁️ Nube activa · PC apagado</span>':'<span class="tag t-w">📱 QR activo · PC encendido</span>'}${ck(e.whatsapp,"WhatsApp")}${ck(e.ia,"Clave de IA")}${ck(e.tienda,"Conexión con la tienda")}${e.meta?ck(e.meta.webhook,"Webhook Meta"):""}${e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa (los atiendes tú)</span>`:""}`:`<span class="tag t-b">No responde: ${esc(e.error||"revisa la dirección")}</span>`}</div>`:""}`;
     $("#waSave").onclick = async()=>{ try{ await api("admin_wa_config",{workerUrl:$("#waUrl").value}); toast("Guardado ✔"); delete $("#waCfgBox").dataset.ok; loadWaCfg(); }catch(ex){ toast(ex.message); } };
-    $("#waIaSave").onclick = async()=>{
-      const inp = $("#waIaKey"), clave = inp.value.trim(); if(!clave) return toast("Pega la clave primero");
+    const iaPost = async(datos, btn, ok)=>{
       if(!c.workerUrl) return toast("Primero guarda la dirección del asistente");
-      const b = $("#waIaSave"); b.disabled = true;
+      btn.disabled = true;
       try{
-        const r = await fetch(c.workerUrl.replace(/\/+$/,"")+"/clave-ia",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+c.secret},body:JSON.stringify({clave})});
+        const r = await fetch(c.workerUrl.replace(/\/+$/,"")+"/clave-ia",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+c.secret},body:JSON.stringify(datos)});
         const j = await r.json().catch(()=>({}));
-        if(!r.ok||!j.ok) throw new Error(j.error||"No se pudo guardar la clave");
-        inp.value = ""; toast("Clave de Claude guardada ✔ (termina en "+j.terminacion+")"); delete $("#waCfgBox").dataset.ok; loadWaCfg();
-      }catch(ex){ toast(ex.message); } finally{ b.disabled = false; }
+        if(!r.ok||!j.ok) throw new Error(j.error||"No se pudo guardar");
+        toast(ok(j)); delete $("#waCfgBox").dataset.ok; loadWaCfg();
+      }catch(ex){ toast(ex.message); } finally{ btn.disabled = false; }
     };
+    const guardaClave = (inputId, btnId, tipo, nombre)=>{ $(btnId).onclick = ()=>{ const inp = $(inputId), clave = inp.value.trim(); if(!clave) return toast("Pega la clave primero"); iaPost({clave,tipo}, $(btnId), j=>{ inp.value = ""; return "Clave de "+nombre+" guardada ✔ (termina en "+j.terminacion+")"; }); }; };
+    guardaClave("#waIaKey","#waIaSave","claude","Claude");
+    guardaClave("#waGptKey","#waGptSave","openai","ChatGPT");
+    $("#waProvSave").onclick = ()=>iaPost({proveedor:$("#waProv").value}, $("#waProvSave"), j=>"Ahora responde "+(j.proveedor==="chatgpt"?"ChatGPT":"Claude")+" ✔");
+    $("#waGptModelSave").onclick = ()=>iaPost({modelo:$("#waGptModel").value}, $("#waGptModelSave"), ()=>"Modelo guardado ✔");
     $("#waShow").onclick = ()=>{ $("#waSec").textContent = c.secret; };
     $("#waCp").onclick = ()=>copy(c.secret);
     $("#waTermReload").onclick = refrescarTerminal;
