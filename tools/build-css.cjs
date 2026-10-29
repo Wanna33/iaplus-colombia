@@ -21,7 +21,8 @@ for (const [salida, { paginas, hojas }] of Object.entries(PAQUETES)) {
   const { code } = esbuild.transformSync(css, { loader: 'css', minify: true, legalComments: 'none' });
   const ver = crypto.createHash('sha1').update(code).digest('hex').slice(0, 10);
   const enlace = `<link rel="stylesheet" href="${salida}?v=${ver}">`;
-  const actual = fs.existsSync(path.join(root, salida)) ? fs.readFileSync(path.join(root, salida), 'utf8') : '';
+  // Git en Windows puede cambiar los saltos de línea al sacar el archivo: no cuenta como cambio.
+  const actual = fs.existsSync(path.join(root, salida)) ? fs.readFileSync(path.join(root, salida), 'utf8').replace(/\r\n/g, '\n') : '';
   if (actual !== code) { desactualizado = true; if (!soloRevisar) fs.writeFileSync(path.join(root, salida), code); }
   for (const p of paginas) {
     const html = fs.readFileSync(path.join(root, p), 'utf8');
