@@ -1626,7 +1626,7 @@ function drawInbox(){
     : '<div class="empty">No hay chats con ese filtro.</div>';
 }
 const RAPIDAS = [
-  {l:"💳 Datos de pago", t:"Puedes pagar por *Nequi* al *310 203 5327* (a nombre de *Nelson Gomez*). Cuando pagues, envíame la captura del comprobante y tu correo de Gmail 🙌"},
+  {l:"💳 Datos de pago", t:"Envía el pago a la *Nequi 310 203 5327* (a nombre de *Nelson Gomez*) desde cualquier banco o app. Cuando pagues, envíame la captura del comprobante y tu correo de Gmail 🙌"},
   {l:"💲 Precios", t:"*ChatGPT Plus* cuesta *$10.000* por 30 días (hasta 2 dispositivos). Mira todos los productos aquí: " + SITE},
   {l:"🔑 Cómo entrar", t:"Entra a *Mi suscripción* con tu Gmail: " + SITE + "cuenta.html — ahí ves el correo, la contraseña y el código de verificación."},
   {l:"🤝 Es compartida", t:"Te cuento que la cuenta es *compartida* con otros usuarios: por eso el precio es tan bajo. Por favor no cambies la contraseña ni los datos de la cuenta 🙏"},
@@ -1695,7 +1695,7 @@ const ROLES = [
   {d:"💼 Ventas", k:"vendedor", ic:"💬", n:"Vendedores (clones)", ia:"IA económica", p:"Atienden muchos chats a la vez, resuelven dudas y llevan al cliente a pagar. Cada vez que suben de nivel entran más vendedores.", clones:true},
   {d:"💼 Ventas", k:"control_calidad", ic:"✅", n:"Control de calidad", ia:"Gratis", p:"Revisa cada respuesta antes de enviarla: evita promesas de atención humana, filtra el plan de 1 mes si no lo preguntaron y mantiene respuestas breves y coherentes."},
   {d:"💼 Ventas", k:"seguimiento", ic:"🔁", n:"Agente de seguimiento", ia:"IA económica", p:"Le vuelve a escribir a quien dejó de responder sin comprar (a las 3 horas y al día siguiente)."},
-  {d:"💰 Caja", k:"cajero", ic:"🧾", n:"Cajero", ia:"IA precisa · solo comprobantes", p:"Revisa la captura de Nequi: monto, destinatario, fecha y referencia. Una referencia nunca se acepta dos veces."},
+  {d:"💰 Caja", k:"cajero", ic:"🧾", n:"Cajero", ia:"IA precisa · solo comprobantes", p:"Revisa el comprobante de cualquier banco o app: que el dinero haya llegado a tu Nequi, el monto, la fecha y la referencia. Una referencia nunca se acepta dos veces."},
   {d:"💰 Caja", k:"entregas", ic:"🔗", n:"Entregas", ia:"Gratis", p:"Si el pago es válido, crea el código y le manda al cliente su enlace de activación al instante."},
   {d:"🛠️ Atención al cliente", k:"soporte", ic:"🛠️", n:"Soporte técnico", ia:"IA económica", p:"Revisa planes, cambia cuentas que fallan, da códigos 2FA extra y registra reembolsos."},
   {d:"📣 Marketing", k:"revisor_a", et:"etiquetador_a", ic:"🏷️", n:"Etiquetador A · chats recientes", ia:"Gratis", p:"Marca a los clientes que escribieron estos días como Pagó o Pendiente, aquí y en tu WhatsApp Business."},
