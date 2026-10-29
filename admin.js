@@ -516,6 +516,8 @@ function render(){
           <div class="acts" style="justify-content:space-between;margin-top:8px"><button class="btn s" type="button" id="cmdBienBase">↺ Cargar la de fábrica</button><span class="acts"><span id="cmdBienN" class="god-hint" style="margin:0"></span><button class="btn p" type="button" id="cmdBienOk">Guardar bienvenida</button></span></div>
         </div>
       </div>
+      <h3 class="cmd-sub">Clientes que esperan respuesta</h3>
+      <div id="cmdAtencion" class="cmd-pagos"><div class="empty">Nadie esperando. 🎉</div></div>
       <h3 class="cmd-sub">Últimos pagos revisados por el asistente</h3>
       <div id="cmdPagos" class="cmd-pagos"><div class="empty">Aún no hay pagos.</div></div>
     </div>
@@ -1766,6 +1768,7 @@ function drawCmd(j){
   }
   CMD.base=j.bienvenidaBase||'';
   $('#cmdPagos').innerHTML=(j.pagos||[]).map(p=>{const [c,l]=PAGO_TXT[p.res]||['t-g',p.res];return `<div class="pay-row"><span class="tag ${c}">${l}</span><div><b>${esc(p.nombre||'+'+p.tel)}</b><small>${esc(p.producto)} · ${p.monto?money(p.monto):'sin monto'}${p.ref?' · ref '+esc(p.ref):''}${p.nota?' · '+esc(p.nota):''}</small></div><time>${esc(ago(new Date(p.ts).toISOString()))}</time></div>`;}).join('')||'<div class="empty">Aún no hay pagos.</div>';
+  $('#cmdAtencion').innerHTML=(j.atencion||[]).map(c=>`<div class="pay-row"><span class="tag ${c.urgente?'t-b':'t-w'}">${c.urgente?'🚨 Urgente':'⏳ Espera'}</span><div><b>${esc(c.nombre||'+'+c.tel)}</b><small>${esc(c.ultimo||'')}</small></div><a class="btn s" href="https://wa.me/${esc(c.tel)}" target="_blank" rel="noopener">Abrir</a></div>`).join('')||'<div class="empty">Nadie esperando. 🎉</div>';
   $('#cmdStamp').textContent='Actualizado '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
 }
 async function loadCmd(body,okMsg){
