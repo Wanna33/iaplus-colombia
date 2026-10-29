@@ -24,7 +24,7 @@ function ensureCred(){
       bar.innerHTML=`
         <header class="signin-masthead"><a class="signin-brand" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia" width="200" height="58"></a><a class="signin-store-link" href="index.html?tienda=1">Ir a la tienda <span aria-hidden="true">↗</span></a></header>
         <section class="signin-showcase" aria-labelledby="signinWelcomeTitle">
-          <div class="signin-scene"><img src="assets/hero-colombia-creadora-mobile.webp?v=20261023" width="780" height="975" alt="Creadora colombiana sonriente, con flores y un paisaje cafetero" fetchpriority="high" decoding="async"><span class="signin-colombia">🇨🇴 Con el corazón en Colombia</span></div>
+          <div class="signin-scene"><img src="assets/hero-colombia-creadora-mobile-640.webp" width="640" height="800" alt="Creadora colombiana sonriente, con flores y un paisaje cafetero" fetchpriority="high" decoding="async"><span class="signin-colombia">🇨🇴 Con el corazón en Colombia</span></div>
           <h1 id="signinWelcomeTitle">Tu mundo digital.<br> <em>Más cerca de ti.</em></h1>
         </section>
         <section class="signin-access" aria-labelledby="signinAccessTitle">

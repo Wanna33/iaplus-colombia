@@ -50,4 +50,5 @@ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 const shell=JSON.parse(sw.match(/const SHELL = (\[[^;]+\]);/)[1]);
 for(const f of shell)assert.ok(fs.existsSync(path.join(root,f)),`Missing precache: ${f}`);
 for(const f of ['app.js','assistants.js','public-assistant.js','store-tools.js','catalog-utils.js','sw.js'])execFileSync(process.execPath,['--check',path.join(root,f)]);
-console.log('PASS: 15 planes; modalidad, dispositivos, duracion, busqueda, contexto, presupuesto, precios actualizados, recursos offline y sintaxis.');
+execFileSync(process.execPath,[path.join(root,'tools','build-css.cjs'),'--check']);
+console.log('PASS: 15 planes; modalidad, dispositivos, duracion, busqueda, contexto, presupuesto, precios actualizados, recursos offline, estilos al día y sintaxis.');

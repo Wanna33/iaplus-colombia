@@ -1357,7 +1357,7 @@ async function loadWa(){
   api("admin_wa_clientes").then(j=>{ WACLI = j.clientes||[]; drawWaCli(); }).catch(()=>{ const c=$("#waCli"); if(c) c.innerHTML='<div class="empty">Aún no hay etiquetas.</div>'; });
   if($("#waCfgBox") && !$("#waCfgBox").dataset.ok) loadWaCfg();
   loadInbox();
-  clearInterval(waTimer); waTimer = setInterval(()=>{ if(curTab==="wa" && !document.querySelector("dialog[open]")) api("admin_wa_list").then(j=>{ WAV=j.ventas; drawWa(); }).catch(()=>{}); }, 45000);
+  clearInterval(waTimer); waTimer = setInterval(()=>{ if(curTab==="wa" && !document.hidden && !document.querySelector("dialog[open]")) api("admin_wa_list").then(j=>{ WAV=j.ventas; drawWa(); }).catch(()=>{}); }, 45000);
 }
 function drawWa(){
   const el = $("#waRows"); if(!el) return; const pend = $("#waSt").value==="pend";

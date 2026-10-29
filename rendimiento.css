@@ -1,0 +1,19 @@
+/* Rendimiento: menos trabajo para el teléfono sin cambiar el diseño. Va de último en los paquetes de estilos (tools/build-css.cjs). */
+
+/* Lo principal aparece de una vez: antes entraba con animación y la pantalla se veía casi en blanco cerca de 1 segundo. */
+.hero-text,.hero-text>*,.glass-scene{animation:none}
+
+/* La guía de primera visita viene visible en el HTML; guard.js marca a quien ya la cerró para ocultarla antes de pintar. */
+.guia-vista #firstVisitVideoTip{display:none!important}
+
+/* Efectos que obligaban a repintar en cada cuadro: quedan quietos (se ven igual). */
+.hero h1 .grad{animation:none}
+.pill .dot{animation:none}
+
+/* Desenfoque detrás de fondos sólidos: no se nota y gasta batería. */
+.pill,.compare-tray,.store-dialog{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* En el celular, los fondos decorativos dejan de moverse para que el desplazamiento vaya fluido. */
+@media (max-width:820px),(pointer:coarse){
+  .storefront::before,.glass-scene:before,.glass-scene:after,.glass-float,.orb,.glow{animation:none}
+}

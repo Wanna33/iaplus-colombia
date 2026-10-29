@@ -42,27 +42,10 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" data-async-css>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="studio.css">
-<link rel="stylesheet" href="public-assistant.css">
-<link rel="stylesheet" href="shop-experience.css">
-<link rel="stylesheet" href="paypal-checkout.css">
-<link rel="stylesheet" href="visual-refresh.css?v=operacion-1">
-<link rel="stylesheet" href="liquid-glass.css?v=pro-20261022">
-<link rel="stylesheet" href="experience-pro.css?v=20261022">
+<!-- Todas las hojas de la tienda en un solo archivo. Si cambias un .css, corre: node tools/build-css.cjs -->
+<link rel="stylesheet" href="tienda.min.css?v=3dc7a8f51f">
 <noscript><style>.reveal{opacity:1!important;translate:none!important}</style></noscript>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<link rel="stylesheet" href="premium-2026.css?v=20261022-1">
-<link rel="stylesheet" href="trust-story.css?v=20261023-6">
-<link rel="stylesheet" href="colombia-identity.css?v=20261023-2">
-<link rel="stylesheet" href="seasonal.css?v=20261022">
-<link rel="stylesheet" href="halloween-fx.css?v=20261022">
-<link rel="stylesheet" href="video-guide.css?v=20261022">
-<link rel="stylesheet" href="video-chapters.css?v=20261024">
-<link rel="stylesheet" href="regalos-strip.css?v=20261024">
-<link rel="stylesheet" href="storefront-polish.css?v=20261023-9">
-
-<link rel="stylesheet" href="account-panel.css?v=20261023-1">
 <style>/* rendimiento: las secciones de abajo se pintan cuando se acercan a la pantalla */#asistentes,#porque,#como,#faq,#empezar,#contacto{content-visibility:auto;contain-intrinsic-size:auto 760px}</style>
 </head>
 <body class="storefront">
@@ -118,13 +101,13 @@
         <a href="#planes-chatgpt" class="btn btn-primary btn-lg">Ver planes ChatGPT Plus <svg class="ic"><use href="#i-right"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="#activar">Ya tengo mi código</a>
       </div>
-      <aside class="first-visit-guide" id="firstVisitVideoTip" hidden aria-label="Guía para quienes visitan la tienda por primera vez">
+      <aside class="first-visit-guide" id="firstVisitVideoTip" aria-label="Guía para quienes visitan la tienda por primera vez">
         <span class="first-visit-guide__play" aria-hidden="true">▶</span>
         <span class="first-visit-guide__copy"><b>¿Primera vez por aquí?</b><small>Aprende a activar tu cuenta paso a paso.</small></span>
         <a class="first-visit-guide__action" href="#videoGuia" data-first-visit-video>Ver video guía</a>
         <button class="first-visit-guide__close" type="button" data-first-visit-dismiss aria-label="Cerrar sugerencia del video">×</button>
       </aside>
-      <div class="hero-product-peek" id="heroProductPeek"></div>
+      <div class="hero-product-peek" id="heroProductPeek"><a href="#catalogo" data-details="chatgpt3"><img src="chatgpt.webp" width="28" height="28" alt=""><span>ChatGPT · $20.000 COP / 3 meses<small>Cuenta compartida · ver condiciones ↗</small></span></a></div>
       <div class="hstats"><div><b data-count="auto">0</b><span>cuentas premium</span></div><div><b class="hero-from">—</b><span>plan recomendado</span></div><div><b data-count="30">0</b><span>días de acceso</span></div></div>
       <ul class="trust">
         <li><svg class="ic"><use href="#i-bolt"/></svg>Entrega rápida</li>
@@ -135,7 +118,7 @@
     <div class="hero-side">
       <div class="hero-collage" aria-label="Cuentas digitales para Colombia">
         <picture class="hero-art-picture">
-          <source media="(max-width: 600px)" srcset="assets/hero-colombia-creadora-mobile.webp?v=20261023" width="780" height="975">
+          <source media="(max-width: 600px)" srcset="assets/hero-colombia-creadora-mobile-640.webp" width="640" height="800">
           <img class="hero-colombia-art" src="assets/hero-colombia-creadora.webp?v=20261023" alt="Creadora colombiana sonriente con una escena cafetera y tarjetas de historias" width="1120" height="747" fetchpriority="high" decoding="async">
         </picture>
         <span class="collage-country"><span aria-hidden="true">🇨🇴</span> Hecho para Colombia</span>
@@ -152,12 +135,12 @@
 <div class="seasonal-banner" id="seasonalBanner" aria-labelledby="seasonalTitle" hidden>
   <div><span>EDICIÓN DE TEMPORADA · COLOMBIA</span><h2 id="seasonalTitle">Un toque de Halloween, por tiempo limitado.</h2><p>Los planes y la atención de IA Plus siguen aquí para ti.</p></div>
 </div>
-<a class="gift-strip" href="regalos.html" aria-label="Cuentas gratis de Crunchyroll cada día"><span class="gift-strip-copy"><span class="gift-strip-ic" aria-hidden="true">🎁</span><span><b>Cuentas gratis de Crunchyroll, todos los días</b><small>Entra, copia el usuario y la contraseña y mira anime hoy.</small></span></span><span class="gift-strip-btn">Ver cuentas de hoy →</span></a>
+<a class="gift-strip" href="regalos.html"><span class="gift-strip-copy"><span class="gift-strip-ic" aria-hidden="true">🎁</span><span><b>Cuentas gratis de Crunchyroll, todos los días</b><small>Entra, copia el usuario y la contraseña y mira anime hoy.</small></span></span><span class="gift-strip-btn">Ver cuentas de hoy →</span></a>
 <section class="section featured-section" id="planes-chatgpt" aria-labelledby="featuredTitle"><div class="wrap"><div class="section-heading"><div><span class="eyebrow">ELIGE TU TIEMPO. EMPIEZA CON CHATGPT.</span><h2 class="title" id="featuredTitle">Tu plan de <span class="grad">ChatGPT Plus.</span></h2></div><a class="text-link" href="#catalogo">Ver otras cuentas ↗</a></div><div class="featured-plans" id="featuredPlans"></div></div></section>
 <section class="trust-story wrap" aria-labelledby="trustStoryTitle">
   <div class="trust-story-visual">
-    <img class="trust-photo-main" src="assets/trust-colombia-halloween.webp?v=20261023" width="1280" height="960" loading="lazy" decoding="async" alt="Pareja colombiana sonriente con disfraces de arriero cafetero y bruja cumbiambera, invitando a conocer los planes">
-    <a class="trust-image-cta" href="#planes-chatgpt" aria-label="Ver planes de ChatGPT Plus">
+    <img class="trust-photo-main" src="assets/trust-colombia-halloween-720.webp" srcset="assets/trust-colombia-halloween-720.webp 720w, assets/trust-colombia-halloween.webp 1280w" sizes="(max-width: 760px) 92vw, 620px" width="1280" height="960" loading="lazy" decoding="async" alt="Pareja colombiana sonriente con disfraces de arriero cafetero y bruja cumbiambera, invitando a conocer los planes">
+    <a class="trust-image-cta" href="#planes-chatgpt">
       <small>CHATGPT PLUS</small><b>Un plan para tus ideas</b><span>Ver planes <i aria-hidden="true">↗</i></span>
     </a>
   </div>
@@ -345,7 +328,7 @@
 <script defer src="catalog-utils.js"></script>
 <script defer src="account-state.js?v=20261023-1"></script>
 <script defer src="activation-utils.js"></script>
-<script defer src="app-20261022.js?v=20261023-member-1"></script>
+<script defer src="app-20261022.js?v=20261029-ligero"></script>
 <script defer src="store-tools-20261022.js"></script>
 <script defer src="storefront-pro.js"></script>
 <script defer src="paypal-checkout.js"></script>

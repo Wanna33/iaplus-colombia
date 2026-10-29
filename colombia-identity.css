@@ -1,7 +1,7 @@
 /* Colombian visual identity with small WebP assets and clear content contrast. */
 .storefront .hero{
   background-color:#f5f6ed;
-  background-image:linear-gradient(90deg,rgba(248,249,244,.94) 0%,rgba(248,249,244,.82) 48%,rgba(248,249,244,.63) 100%),url("assets/fondo-colombia-tienda.webp?v=20261023");
+  background-image:linear-gradient(90deg,rgba(248,249,244,.94) 0%,rgba(248,249,244,.82) 48%,rgba(248,249,244,.63) 100%),url("assets/fondo-colombia-tienda-v2.webp");
   background-size:cover;
   background-position:center 54%;
 }
@@ -30,6 +30,6 @@ body.account-app{
   background-repeat:no-repeat!important;
 }
 @media(max-width:760px){
-  .storefront .hero{background-image:linear-gradient(90deg,rgba(248,249,244,.94),rgba(248,249,244,.82)),url("assets/fondo-colombia-tienda.webp?v=20261023");background-position:center 54%}
+  .storefront .hero{background-image:linear-gradient(90deg,rgba(248,249,244,.94),rgba(248,249,244,.82)),url("assets/fondo-colombia-tienda-v2.webp");background-position:center 54%}
   body.admin-app{background-attachment:scroll!important;background-position:center top!important}
 }

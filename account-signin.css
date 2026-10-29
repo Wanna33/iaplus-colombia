@@ -27,9 +27,9 @@ body.account-app.is-signing-in{background:#fff!important;color:#172c26;padding-b
 .signin-assistance{padding:22px 0;border-top:1px solid #e6eae5;border-bottom:1px solid #e6eae5}
 .signin-assistance>span{display:block;font-size:12px;color:#4e6555;margin-bottom:9px}
 .account-signin .signin-assistance .guide-video-btn{display:flex;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:10px 14px;border:1px solid #c9d9cb;border-radius:10px;background:#f5faf4;color:#086642;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;box-shadow:none}
-.signin-access .signin-legal{display:block;font-size:10px;line-height:1.8;color:#748078;margin:20px 0 0}
+.signin-access .signin-legal{display:block;font-size:10px;line-height:1.8;color:#5d6a62;margin:20px 0 0}
 .account-signin .signin-access a{color:#236a48;text-underline-offset:3px}
-.signin-footer{grid-column:1/-1;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid #e9ede7;min-height:70px;padding:22px 0;box-sizing:border-box;font-size:10px;color:#748078}
+.signin-footer{grid-column:1/-1;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid #e9ede7;min-height:70px;padding:22px 0;box-sizing:border-box;font-size:10px;color:#5d6a62}
 .account-signin .signin-footer a{color:#365e45;font-size:10px}
 @media(max-width:760px){
  .is-signing-in main#app{padding:0 24px 24px}
@@ -54,3 +54,4 @@ body.account-app.is-signing-in{background:#fff!important;color:#172c26;padding-b
  .signin-footer{justify-content:center;text-align:center;gap:8px;padding:18px 0 0;min-height:50px}
 }
 @media(max-width:360px){.is-signing-in main#app{padding-inline:16px}.account-app .account-signin .signin-brand{width:145px}.signin-scene>img{height:260px}.account-signin .signin-showcase h1{font-size:27px}.account-signin .signin-store-link{font-size:11px!important}}
+.signin-access .signin-legal a{text-decoration:underline;text-underline-offset:2px}
