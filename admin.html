@@ -365,6 +365,18 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 .sw input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
 .sw b{font-size:14px}.sw small{font-size:12.5px;color:var(--mut)}
 .sw.sm{display:inline-grid;padding:0}.sw.sm span{width:40px;height:22px}.sw.sm span::after{width:16px;height:16px}.sw.sm input:checked+span::after{transform:translateX(18px)}
+#godCmd{margin-bottom:20px}
+.cmd-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}.cmd-head h2{margin:0}
+.cmd-live{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cmd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.cmd-kpis .kpi b{font-size:22px}.cmd-kpis .kpi-warn{border-color:var(--warn,#f59e0b)}
+.cmd-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.god-lbl{display:block;font-size:14px;font-weight:700;margin-bottom:6px}.god-lbl small{font-weight:400;color:var(--mut)}
+.cmd-sub{font-size:14px;margin:18px 0 8px}
+.cmd-pagos{display:grid;gap:6px}
+.pay-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.pay-row small{display:block;color:var(--mut);font-size:12.5px;overflow-wrap:anywhere}.pay-row time{font-size:12px;color:var(--mut);white-space:nowrap}
+@media (max-width:560px){.pay-row{grid-template-columns:1fr auto}.pay-row .tag{grid-column:1/-1;justify-self:start}.cmd-kpis{grid-template-columns:repeat(2,1fr)}.god-hero{padding:18px}}
 .faq-list{display:grid;gap:10px}
 .faq-it{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:10px;animation:godIn .3s ease}
 .faq-b{display:grid;gap:6px}.faq-b input,.faq-b textarea{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);width:100%}
@@ -448,6 +460,6 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 <script defer src="net.js"></script>
 <script defer src="admin-workflow.js"></script>
 <script defer src="admin-insights.js"></script>
-<script defer src="admin.js?v=proveedor-ia-20261028"></script>
+<script defer src="admin.js?v=modo-dios-20261029"></script>
 </body>
 </html>

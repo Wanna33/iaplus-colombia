@@ -501,6 +501,24 @@ function render(){
     <div class="god-hero"><div><span class="overline">CONTROL DEL NEGOCIO</span><h2>Modo Dios</h2><p>Tu tienda, tus reglas. Revisa los cambios del asistente antes de guardarlos. Los precios se guardan por producto.</p></div><div class="god-badges" id="godBadges"></div></div>
     <nav class="god-jumps" aria-label="Secciones de Modo Dios"><a href="#godAssistant">Asistente</a><a href="#godRules">Instrucciones</a><a href="#godAnswers">Respuestas</a><a href="#godCatalog">Planes y precios</a></nav>
     <div class="god-savebar" id="godSavebar" data-state="saved"><div><span class="save-indicator"></span><span id="godSaveStatus" role="status">Cargando configuración…</span></div><div><button class="btn s" type="button" id="godDiscard" disabled>Descartar</button><button class="btn p" type="button" id="godSaveAll" disabled>Guardar cambios</button></div></div>
+    <div class="card" id="godCmd"><div class="cmd-head"><h2>🎛️ Centro de mando</h2><div class="acts"><span id="cmdStamp" class="god-hint" style="margin:0"></span><button class="btn s" type="button" id="cmdReload">↻ Actualizar</button></div></div>
+      <div id="cmdLive" class="cmd-live"><span class="tag t-g">Cargando estado…</span></div>
+      <div id="cmdKpis" class="cmd-kpis"></div>
+      <div class="cmd-cols">
+        <div>
+          <label class="sw"><input type="checkbox" id="cmdAuto"><span></span><b>Validar pagos por captura</b><small>El asistente lee el comprobante, verifica monto, destino y fecha, y entrega el enlace de activación. Apagado: todo pago queda en tu panel para revisarlo tú.</small></label>
+          <div class="god-row"><label>Nequi que recibe<input id="cmdNequi" inputmode="numeric" maxlength="10" placeholder="3102035327"></label><label>A nombre de<input id="cmdTitular" maxlength="60" placeholder="Nelson Gomez"></label><button class="btn p" type="button" id="cmdPagoOk" style="align-self:end">Guardar</button></div>
+          <p class="god-hint">El comprobante solo es válido si va a este número o a este nombre.</p>
+        </div>
+        <div>
+          <label class="god-lbl" for="cmdBien">Mensaje de bienvenida <small>(se envía gratis a quien escribe "hola" o pide información; el link de la página va incluido)</small></label>
+          <textarea id="cmdBien" rows="7" maxlength="1500" class="god-ta" placeholder="Vacío = usa el mensaje de fábrica"></textarea>
+          <div class="acts" style="justify-content:space-between;margin-top:8px"><button class="btn s" type="button" id="cmdBienBase">↺ Cargar la de fábrica</button><span class="acts"><span id="cmdBienN" class="god-hint" style="margin:0"></span><button class="btn p" type="button" id="cmdBienOk">Guardar bienvenida</button></span></div>
+        </div>
+      </div>
+      <h3 class="cmd-sub">Últimos pagos revisados por el asistente</h3>
+      <div id="cmdPagos" class="cmd-pagos"><div class="empty">Aún no hay pagos.</div></div>
+    </div>
     <div class="god-grid">
       <div class="card" id="godAssistant"><h2>Asistente de WhatsApp</h2>
         <label class="sw"><input type="checkbox" id="gAsis"><span></span><b>Asistente encendido</b><small>Si lo apagas, nadie responde por WhatsApp hasta que lo vuelvas a encender.</small></label>
@@ -1727,7 +1745,50 @@ function godStatus(text,state){
 }
 function markGodDirty(){if(!GCFG||godSaving)return;godDirty=true;godStatus('Cambios sin guardar','dirty');}
 function godControlsDisabled(disabled){document.querySelectorAll('#godAssistant input,#godAssistant button,.god-grid input,.god-grid select,#godRules textarea,#godRules button,#godAnswers input,#godAnswers textarea,#godAnswers button').forEach(el=>el.disabled=disabled);}
+/* ---------- Centro de mando: estado en vivo, pagos por captura, bienvenida y resumen del día ---------- */
+let CMD=null,cmdTimer=null,cmdBusy=false,cmdDirty=false;
+async function cmdFetch(body){
+  if(!CMD){const c=await api("admin_wa_config");CMD={url:String(c.workerUrl||"").replace(/\/+$/,""),secret:c.secret};}
+  if(!CMD.url)throw Error("Primero guarda la dirección del asistente en la pestaña WhatsApp.");
+  const r=await fetch(CMD.url+"/panel",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+CMD.secret},body:JSON.stringify(body||{})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw Error(j.error||"El asistente no respondió");return j;
+}
+const PAGO_TXT={activado:['t-ok','✔ Activado'],revision:['t-w','⚠ Por revisar'],rechazado:['t-b','✖ No válido'],manual:['t-w','✋ Manual'],error:['t-b','✖ Error tienda']};
+function drawCmd(j){
+  const e=j.estado||{},a=j.ajustes||{},r=j.resumen||{},t=e.terminal||{},live=e.whatsapp&&t.conectada!==false;
+  const s=Number(t.hace_segundos),cuando=Number.isFinite(s)?(s<60?'hace '+s+' s':'hace '+Math.round(s/60)+' min'):'sin señal';
+  $('#cmdLive').innerHTML=`<span class="tag ${live?'t-ok':'t-b'}">${live?'● WhatsApp conectado':'● WhatsApp sin conexión'}</span><span class="tag ${e.ia?'t-ok':'t-b'}">${e.ia?'✔ IA lista · '+(e.proveedor==='chatgpt'?'ChatGPT':'Claude'):'✖ Falta clave de IA'}</span><span class="tag ${e.tienda?'t-ok':'t-b'}">${e.tienda?'✔ Tienda conectada':'✖ Tienda sin respuesta'}</span><span class="tag t-g">Última señal ${cuando}</span>${e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa</span>`:''}${!live?'<span class="tag t-b">El PC está apagado, dormido o sin internet</span>':''}`;
+  const k=(l,v,f,c='')=>`<div class="kpi ${c}"><div class="kpi-h">${l}</div><b>${v}</b><small>${f}</small></div>`;
+  $('#cmdKpis').innerHTML=k('Chats hoy',r.chatsHoy||0,'Con mensajes hoy')+k('Esperan respuesta',r.esperando||0,'Último mensaje del cliente, 72 h',r.esperando?'kpi-warn':'')+k('Urgentes',r.urgentes||0,'Etiquetados urgente, 7 días',r.urgentes?'kpi-warn':'')+k('Pagos activados',r.pagosActivados||0,'Hoy, por captura')+k('Por revisar',r.pagosRevision||0,'Pagos que no cuadraron hoy',r.pagosRevision?'kpi-warn':'')+k('Ventas hoy',money(r.ventasHoy||0),'Suma de pagos activados');
+  if(!cmdDirty){
+    $('#cmdAuto').checked=a.autopago!==false;$('#cmdNequi').value=a.nequi||'';$('#cmdTitular').value=a.titular||'';
+    $('#cmdBien').value=a.bienvenida||'';$('#cmdBienN').textContent=($('#cmdBien').value.length)+'/1500';
+  }
+  CMD.base=j.bienvenidaBase||'';
+  $('#cmdPagos').innerHTML=(j.pagos||[]).map(p=>{const [c,l]=PAGO_TXT[p.res]||['t-g',p.res];return `<div class="pay-row"><span class="tag ${c}">${l}</span><div><b>${esc(p.nombre||'+'+p.tel)}</b><small>${esc(p.producto)} · ${p.monto?money(p.monto):'sin monto'}${p.ref?' · ref '+esc(p.ref):''}${p.nota?' · '+esc(p.nota):''}</small></div><time>${esc(ago(new Date(p.ts).toISOString()))}</time></div>`;}).join('')||'<div class="empty">Aún no hay pagos.</div>';
+  $('#cmdStamp').textContent='Actualizado '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+}
+async function loadCmd(body,okMsg){
+  if(cmdBusy)return;cmdBusy=true;
+  try{const j=await cmdFetch(body);if(body)cmdDirty=false;drawCmd(j);if(okMsg)toast(okMsg);}
+  catch(e){$('#cmdLive').innerHTML='<span class="tag t-b">'+esc(e.message)+'</span>';if(okMsg)toast(e.message);}
+  finally{cmdBusy=false;}
+}
+function startCmd(){
+  loadCmd();clearInterval(cmdTimer);
+  cmdTimer=setInterval(()=>{if($('#godCmd')&&!document.hidden&&!$('#tab-dios').classList.contains('hide'))loadCmd();else if($('#tab-dios')?.classList.contains('hide'))clearInterval(cmdTimer);},60000);
+}
+document.addEventListener('input',e=>{if(e.target.closest('#godCmd')&&e.target.id!=='cmdAuto'){cmdDirty=true;if(e.target.id==='cmdBien')$('#cmdBienN').textContent=e.target.value.length+'/1500';}});
+document.addEventListener('change',e=>{if(e.target.id==='cmdAuto')loadCmd({ajustes:{autopago:e.target.checked}},e.target.checked?'Validación automática de pagos encendida.':'Apagada: los pagos quedarán para tu revisión.');});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('#godCmd button');if(!t)return;
+  if(t.id==='cmdReload'){cmdDirty=false;loadCmd();return;}
+  if(t.id==='cmdPagoOk')return loadCmd({ajustes:{nequi:$('#cmdNequi').value,titular:$('#cmdTitular').value}},'Datos de pago guardados.');
+  if(t.id==='cmdBienOk')return loadCmd({ajustes:{bienvenida:$('#cmdBien').value}},$('#cmdBien').value.trim()?'Bienvenida guardada.':'Se usará la bienvenida de fábrica.');
+  if(t.id==='cmdBienBase'){$('#cmdBien').value=CMD?.base||'';$('#cmdBienN').textContent=$('#cmdBien').value.length+'/1500';cmdDirty=true;toast('Edítala y toca Guardar bienvenida.');}
+});
 async function loadDios(){
+  startCmd();
   if(godDirty||godSaving||godLoading)return;godLoading=true;godStatus('Cargando configuración…','loading');godControlsDisabled(true);
   try{
     const [c,p]=await Promise.allSettled([api('admin_wa_ajustes'),api('admin_catalogo')]);
