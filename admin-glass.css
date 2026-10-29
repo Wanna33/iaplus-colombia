@@ -49,3 +49,5 @@ input,select,textarea{transition:border-color .2s,box-shadow .2s}::placeholder{c
 .sw{border-radius:12px;padding:10px 8px;transition:background .2s}.sw:hover{background:var(--soft)}
 @media (max-width:760px){.god-hero h2{font-size:21px}.god-savebar{top:4px}.god-jumps{margin-inline:-14px;padding-inline:14px}.btn{min-height:40px}}
 @media (prefers-reduced-motion:reduce){.save-indicator{animation:none!important}}
+.cmd-power{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;margin-bottom:14px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+.cmd-power small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px;max-width:560px}

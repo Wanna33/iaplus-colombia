@@ -503,6 +503,7 @@ function render(){
     <div class="god-savebar" id="godSavebar" data-state="saved"><div><span class="save-indicator"></span><span id="godSaveStatus" role="status">Cargando configuración…</span></div><div><button class="btn s" type="button" id="godDiscard" disabled>Descartar</button><button class="btn p" type="button" id="godSaveAll" disabled>Guardar cambios</button></div></div>
     <div class="card" id="godCmd"><div class="cmd-head"><h2>🎛️ Centro de mando</h2><div class="acts"><span id="cmdStamp" class="god-hint" style="margin:0"></span><button class="btn s" type="button" id="cmdReload">↻ Actualizar</button></div></div>
       <div id="cmdLive" class="cmd-live"><span class="tag t-g">Cargando estado…</span></div>
+      <div class="cmd-power"><div><b>🔌 Encender o reiniciar el bot</b><small id="cmdPowerNote">Si el bot se cayó o está trabado, envía la orden: tu PC la recoge en menos de 2 minutos y lo reinicia. El PC tiene que estar prendido y con internet.</small></div><button class="btn p" type="button" id="cmdPower">Encender / reiniciar</button></div>
       <div id="cmdKpis" class="cmd-kpis"></div>
       <div class="cmd-cols">
         <div>
@@ -1760,6 +1761,9 @@ function drawCmd(j){
   const e=j.estado||{},a=j.ajustes||{},r=j.resumen||{},t=e.terminal||{},live=e.whatsapp&&t.conectada!==false;
   const s=Number(t.hace_segundos),cuando=Number.isFinite(s)?(s<60?'hace '+s+' s':'hace '+Math.round(s/60)+' min'):'sin señal';
   $('#cmdLive').innerHTML=`<span class="tag ${live?'t-ok':'t-b'}">${live?'● WhatsApp conectado':'● WhatsApp sin conexión'}</span><span class="tag ${e.ia?'t-ok':'t-b'}">${e.ia?'✔ IA lista · '+(e.proveedor==='chatgpt'?'ChatGPT':'Claude'):'✖ Falta clave de IA'}</span><span class="tag ${e.tienda?'t-ok':'t-b'}">${e.tienda?'✔ Tienda conectada':'✖ Tienda sin respuesta'}</span><span class="tag t-g">Última señal ${cuando}</span>${e.pausados?`<span class="tag t-w">${e.pausados} chat(s) en pausa</span>`:''}${!live?'<span class="tag t-b">El PC está apagado, dormido o sin internet</span>':''}`;
+  const pw=$('#cmdPower'),pn=$('#cmdPowerNote');
+  if(j.ordenPuente){pw.disabled=true;pw.textContent='Orden enviada…';pn.textContent='Orden enviada '+ago(new Date(j.ordenPuente).toISOString())+'. Espera hasta 2 minutos; si el PC está apagado, se ejecuta cuando lo prendas (la orden dura 1 hora).';}
+  else{pw.disabled=false;pw.textContent=live?'Reiniciar bot':'Encender bot';pn.textContent=live?'El bot está funcionando. Reinícialo solo si no responde.':'El bot no está conectado. Envía la orden: tu PC la recoge en menos de 2 minutos. Si el PC está apagado, primero préndelo.';}
   const k=(l,v,f,c='')=>`<div class="kpi ${c}"><div class="kpi-h">${l}</div><b>${v}</b><small>${f}</small></div>`;
   $('#cmdKpis').innerHTML=k('Chats hoy',r.chatsHoy||0,'Con mensajes hoy')+k('Esperan respuesta',r.esperando||0,'Último mensaje del cliente, 72 h',r.esperando?'kpi-warn':'')+k('Urgentes',r.urgentes||0,'Etiquetados urgente, 7 días',r.urgentes?'kpi-warn':'')+k('Pagos activados',r.pagosActivados||0,'Hoy, por captura')+k('Por revisar',r.pagosRevision||0,'Pagos que no cuadraron hoy',r.pagosRevision?'kpi-warn':'')+k('Ventas hoy',money(r.ventasHoy||0),'Suma de pagos activados');
   if(!cmdDirty){
@@ -1786,6 +1790,7 @@ document.addEventListener('change',e=>{if(e.target.id==='cmdAuto')loadCmd({ajust
 document.addEventListener('click',e=>{
   const t=e.target.closest('#godCmd button');if(!t)return;
   if(t.id==='cmdReload'){cmdDirty=false;loadCmd();return;}
+  if(t.id==='cmdPower'){if(!confirm('¿Enviar la orden de encender/reiniciar el bot? Se corta la conexión unos segundos.'))return;return loadCmd({puente:'reiniciar'},'Orden enviada. Tu PC la recoge en menos de 2 minutos.');}
   if(t.id==='cmdPagoOk')return loadCmd({ajustes:{nequi:$('#cmdNequi').value,titular:$('#cmdTitular').value}},'Datos de pago guardados.');
   if(t.id==='cmdBienOk')return loadCmd({ajustes:{bienvenida:$('#cmdBien').value}},$('#cmdBien').value.trim()?'Bienvenida guardada.':'Se usará la bienvenida de fábrica.');
   if(t.id==='cmdBienBase'){$('#cmdBien').value=CMD?.base||'';$('#cmdBienN').textContent=$('#cmdBien').value.length+'/1500';cmdDirty=true;toast('Edítala y toca Guardar bienvenida.');}
