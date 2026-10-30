@@ -1,7 +1,7 @@
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
-const PRICES = {"ChatGPT":10000,"ChatGPT 3 meses":20000,"ChatGPT 6 meses":50000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"Filmora":10000,"Duolingo":30000,"Canva":10000,"Xbox Game Pass Ultimate":26000,"Adobe Premiere Pro":20000,"Adobe Photoshop":20000,"DaVinci Resolve":30000,"YouTube Premium":30000};
+const PRICES = {"ChatGPT":10000,"ChatGPT 3 meses":20000,"ChatGPT 6 meses":35000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"Filmora":10000,"Duolingo":30000,"Canva":10000,"Xbox Game Pass Ultimate":26000,"Adobe Premiere Pro":20000,"Adobe Photoshop":20000,"DaVinci Resolve":30000,"YouTube Premium":30000};
 const DAYS = {"Duolingo":365,"YouTube Premium":90,"ChatGPT 3 meses":90,"ChatGPT 6 meses":180};
 const daysOf = p => { const k = Object.keys(DAYS).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? DAYS[k] : 30; };
 const DEFAULT_PRICE = 10000;
