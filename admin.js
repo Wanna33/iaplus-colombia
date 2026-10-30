@@ -1686,6 +1686,7 @@ const nivelDe = n => Math.min(10, 1 + Math.floor(Math.log2(1 + (n||0) / 25)));
 const sigNivel = nv => 25 * (Math.pow(2, nv) - 1);
 const ROLES = [
   {d:"👔 Dirección", k:"gerente", ic:"👔", n:"Gerente general (CEO)", ia:"IA precisa · 2 veces al día", p:"Estudia todo el negocio, decide qué mejorar y escribe las instrucciones que siguen todos los empleados."},
+  {d:"👔 Dirección", k:"reporte", ic:"📊", n:"Gerente de turno", ia:"Gratis · cada hora", p:"De 9 a. m. a 10 p. m. te manda cada hora a WhatsApp el resumen: clientes, respuestas, ventas del día, quién espera y urgentes.", siempre:true},
   {d:"👔 Dirección", k:"secretaria", ic:"🗂️", n:"Secretaria", ia:"Gratis", p:"Te manda al correo el resumen del día: ventas, qué preguntan los clientes y qué mejorar."},
   {d:"👔 Dirección", k:"contador", ic:"🧮", n:"Contador", ia:"Gratis", p:"Lleva la cuenta de lo que gasta la IA y te avisa antes de que se acabe el saldo.", siempre:true},
   {d:"💼 Ventas", k:"despachador", ic:"🧭", n:"Despachador", ia:"Gratis", p:"Lee cada mensaje y decide qué empleado lo atiende, para que la IA solo se use cuando hace falta."},
@@ -1696,15 +1697,18 @@ const ROLES = [
   {d:"💼 Ventas", k:"control_calidad", ic:"✅", n:"Control de calidad", ia:"Gratis", p:"Revisa cada respuesta antes de enviarla: evita promesas de atención humana, filtra el plan de 1 mes si no lo preguntaron y mantiene respuestas breves y coherentes."},
   {d:"💼 Ventas", k:"seguimiento", ic:"🔁", n:"Agente de seguimiento", ia:"IA económica", p:"Le vuelve a escribir a quien dejó de responder sin comprar (a las 3 horas y al día siguiente)."},
   {d:"💰 Caja", k:"cajero", ic:"🧾", n:"Cajero", ia:"IA precisa · solo comprobantes", p:"Revisa el comprobante de cualquier banco o app: que el dinero haya llegado a tu Nequi, el monto, la fecha y la referencia. Una referencia nunca se acepta dos veces."},
+  {d:"💰 Caja", k:"aviso_caja", ic:"💵", n:"Cajero de avisos", ia:"Gratis · cada 5 min", p:"Revisa los pagos que no se pudieron aprobar solos (comprobante dudoso, referencia repetida, monto incompleto) y te avisa por WhatsApp a tu número para que los mires."},
   {d:"💰 Caja", k:"entregas", ic:"🔗", n:"Entregas", ia:"Gratis", p:"Si el pago es válido, crea el código y le manda al cliente su enlace de activación al instante."},
   {d:"🛠️ Atención al cliente", k:"soporte", ic:"🛠️", n:"Soporte técnico", ia:"IA económica", p:"Revisa planes, cambia cuentas que fallan, da códigos 2FA extra y registra reembolsos."},
   {d:"📣 Marketing", k:"revisor_a", et:"etiquetador_a", ic:"🏷️", n:"Etiquetador A · chats recientes", ia:"Gratis", p:"Marca a los clientes que escribieron estos días como Pagó o Pendiente, aquí y en tu WhatsApp Business."},
   {d:"📣 Marketing", k:"revisor_b", et:"etiquetador_b", ic:"🏷️", n:"Etiquetador B · viejos y archivados", ia:"Gratis", p:"Revisa los chats antiguos y archivados y los marca, para saber a quién recordarle."},
-  {d:"📣 Marketing", k:"recordador_a", ic:"☀️", n:"Recordador A · pendientes", ia:"Gratis", p:"A las 7:00 a. m. les recuerda a los pendientes recientes que pueden tener ChatGPT en tu página."},
-  {d:"📣 Marketing", k:"recordador_b", ic:"☀️", n:"Recordador B · clientes antiguos", ia:"Gratis", p:"Le escribe con cuidado a los clientes antiguos: máximo 25 por noche y uno cada 3 días por persona."},
+  {d:"📣 Marketing", k:"recordador_a", ic:"☀️", n:"Recordador A · pendientes", ia:"Gratis", p:"Durante el día (8 a. m. a 8 p. m.), en goteo de uno cada 4 a 9 minutos, les recuerda a los pendientes recientes los planes de ChatGPT."},
+  {d:"📣 Marketing", k:"recordador_b", ic:"☀️", n:"Recordador B · clientes antiguos", ia:"Gratis", p:"Le escribe con cuidado a los clientes antiguos durante el día: máximo 40 al día y uno cada 3 días por persona."},
   {d:"🛡️ Seguridad", k:"seguridad", ic:"🛡️", n:"Seguridad", ia:"Gratis", p:"Nunca escribe a tus contactos, rechaza comprobantes falsos o repetidos y corta los bucles con otros bots.", siempre:true},
-  {d:"🛡️ Seguridad", k:"supervisor", ic:"👀", n:"Supervisor", ia:"Gratis", p:"Cada 10 minutos busca chats que se quedaron sin respuesta y hace que se respondan."},
+  {d:"🛡️ Seguridad", k:"vigia", ic:"👁️", n:"Vigía", ia:"Gratis · cada 15 s", p:"Cada 15 segundos revisa que ningún cliente se quede sin respuesta: contesta los chats que esperan más de 45 s y destraba los que se quedan pegados.", siempre:true},
+  {d:"🛡️ Seguridad", k:"supervisor", ic:"👀", n:"Supervisor de ventas", ia:"Gratis · cada 10 min", p:"Cada 10 minutos busca a quien dejó de responder sin comprar y le pasa el chat al agente de seguimiento."},
   {d:"🛡️ Seguridad", k:"vigilante", ic:"🚨", n:"Vigilante", ia:"Gratis", p:"Cada 30 minutos revisa que WhatsApp esté conectado y que haya saldo. Si algo falla, te escribe al correo.", siempre:true},
+  {d:"🛡️ Seguridad", k:"guardia", ic:"🛡️", n:"Guardia", ia:"Gratis · cada 30 min", p:"Revisa el saldo de la IA, que la tienda responda y que la memoria no se llene. Si algo falla te escribe por WhatsApp a tu número.", siempre:true},
   {d:"🎓 Capacitación", k:"capacitador", ic:"🎓", n:"Capacitador", ia:"(lo hace el CEO)", p:"Convierte las mejores conversaciones y tus respuestas en lecciones para todos los empleados."},
 ];
 function drawAgentes(a){
