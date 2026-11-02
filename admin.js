@@ -1,8 +1,8 @@
 const CLIENT_ID = "912360874722-idm6s6ujebsi7bbvmduq7ql88efb9uq9.apps.googleusercontent.com";
 const API_URL = "https://script.google.com/macros/s/AKfycbyIINkQAuYouCXVr722gi_8K1dHPLeF6N5XlmzHgCRA0ETF4cBc-VpIw0933mz1lFg8qA/exec";
 const SITE = "https://wanna33.github.io/iaplus-colombia/";
-const PRICES = {"ChatGPT":10000,"ChatGPT 3 meses":20000,"ChatGPT 6 meses":35000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"Filmora":10000,"Duolingo":30000,"Canva":10000,"Xbox Game Pass Ultimate":26000,"Adobe Premiere Pro":20000,"Adobe Photoshop":20000,"DaVinci Resolve":30000,"YouTube Premium":30000};
-const DAYS = {"Duolingo":365,"YouTube Premium":90,"ChatGPT 3 meses":90,"ChatGPT 6 meses":180};
+const PRICES = {"ChatGPT":10000,"ChatGPT 3 meses":20000,"ChatGPT 6 meses":35000,"Claude Code":30000,"Gemini Pro":10000,"Flow":20000,"CapCut Pro":15000,"CapCut Pro 3 meses":30000,"CapCut Pro 6 meses":45000,"Filmora":10000,"Duolingo":30000,"Canva":10000,"Xbox Game Pass Ultimate":26000,"Adobe Premiere Pro":20000,"Adobe Photoshop":20000,"DaVinci Resolve":30000,"YouTube Premium":30000};
+const DAYS = {"Duolingo":365,"YouTube Premium":90,"ChatGPT 3 meses":90,"ChatGPT 6 meses":180,"CapCut Pro 3 meses":90,"CapCut Pro 6 meses":180};
 const daysOf = p => { const k = Object.keys(DAYS).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? DAYS[k] : 30; };
 const DEFAULT_PRICE = 10000;
 const priceOf = p => { const k = Object.keys(PRICES).find(x=>x.toLowerCase()===String(p||"").trim().toLowerCase()); return k ? PRICES[k] : DEFAULT_PRICE; };
@@ -668,7 +668,7 @@ function clientDetail(c){
       2FA: ${i.tiene2fa?`${i.usos2fa}/${i.max2fa} usos${i.ultimo2fa?" · último "+fdt(i.ultimo2fa):""}`:"sin clave"} · Precio ${money(i.precio)}</div>`;}).join("")}`);
 }
 // Dar acceso a más cuentas de un producto: el cliente las ve en «Mi suscripción» y vencen igual que su plan.
-const PKEYS = {"ChatGPT":"chatgpt","Claude Code":"claude","Gemini Pro":"gemini","Flow":"flow","Duolingo":"duolingo","Canva":"canva","Xbox Game Pass Ultimate":"xbox","Adobe Premiere Pro":"premiere","Adobe Photoshop":"photoshop","DaVinci Resolve":"davinci","YouTube Premium":"youtube","CapCut Pro":"capcut","Filmora":"filmora"};
+const PKEYS = {"ChatGPT":"chatgpt","Claude Code":"claude","Gemini Pro":"gemini","Flow":"flow","Duolingo":"duolingo","Canva":"canva","Xbox Game Pass Ultimate":"xbox","Adobe Premiere Pro":"premiere","Adobe Photoshop":"photoshop","DaVinci Resolve":"davinci","YouTube Premium":"youtube","CapCut Pro":"capcut","CapCut Pro 3 meses":"capcut","CapCut Pro 6 meses":"capcut","Filmora":"filmora"};
 const pkeyOf = name => { const n=String(name||"").toLowerCase(); const hit=Object.keys(PKEYS).find(k=>n.includes(k.toLowerCase())||n.includes(PKEYS[k])); return hit?PKEYS[hit]:""; };
 // Más pedidos del código de verificación (2FA) para un cliente: solo por hoy, un límite fijo, o volver al normal
 async function dar2fa(email){

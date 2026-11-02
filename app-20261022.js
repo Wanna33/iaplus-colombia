@@ -26,7 +26,9 @@ const PRODUCTS = [
   {id:"photoshop", name:"Adobe Photoshop", cat:"Diseño", ico:"🖼️", img:"photoshop.webp", lt:true, price:20000, per:"/mes", feats:["Programa para PC","Edición de fotos y diseño profesional","Entrega rápida por WhatsApp","Garantía durante el plan"]},
   {id:"davinci", name:"DaVinci Resolve", cat:"Edición de video", ico:"🎬", img:"davinci.webp", lt:true, price:30000, per:"/mes", feats:["Programa para PC","Edición y color de nivel profesional","Entrega rápida por WhatsApp","Garantía durante el plan"]},
   {id:"youtube", name:"YouTube Premium", cat:"Streaming", ico:"▶️", img:"youtube.webp", lt:true, price:30000, per:"/3 meses", days:90, feats:["YouTube Premium por 3 meses","Sin anuncios y con reproducción en segundo plano","Entrega rápida por WhatsApp","Garantía incluida"]},
-  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["Cuenta compartida con acceso Pro","Entrega rápida por WhatsApp","Garantía durante el plan"]},
+  {id:"capcut", name:"CapCut Pro", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:15000, per:"/mes", feats:["CapCut Pro: exportación en 4K y efectos premium","Cuenta compartida con acceso Pro","Activación por enlace en WhatsApp","Garantía durante el plan"]},
+  {id:"capcut3", name:"CapCut Pro 3 meses", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:30000, per:"/3 meses", days:90, badge:"Más pedido", feats:["CapCut Pro por 3 meses","Pago único por la duración indicada","Cuenta compartida con acceso Pro","Activación por enlace en WhatsApp"]},
+  {id:"capcut6", name:"CapCut Pro 6 meses", cat:"Edición de video", ico:"🎬", img:"capcut.webp", lt:true, price:45000, per:"/6 meses", days:180, badge:"Mejor precio por mes", feats:["CapCut Pro por 6 meses","Sale a $7.500 al mes, el mejor precio","Cuenta compartida con acceso Pro","Activación por enlace en WhatsApp"]},
   {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
 ];
 
