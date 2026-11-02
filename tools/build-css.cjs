@@ -10,8 +10,8 @@ const esbuild = require(require.resolve('esbuild', { paths: [root, path.join(roo
 
 // El orden importa: es el mismo orden en que la página cargaba cada hoja (las de abajo mandan).
 const PAQUETES = {
-  'tienda.min.css': { paginas: ['index.html'], hojas: ['styles.css', 'studio.css', 'public-assistant.css', 'shop-experience.css', 'paypal-checkout.css', 'visual-refresh.css', 'liquid-glass.css', 'experience-pro.css', 'premium-2026.css', 'trust-story.css', 'colombia-identity.css', 'seasonal.css', 'halloween-fx.css', 'video-guide.css', 'video-chapters.css', 'regalos-strip.css', 'storefront-polish.css', 'account-panel.css', 'rendimiento.css'] },
-  'cuenta.min.css': { paginas: ['cuenta.html'], hojas: ['customer-theme.css', 'customer-glass.css', 'premium-2026.css', 'activation-welcome.css', 'colombia-identity.css', 'activation-celebrate.css', 'video-chapters.css', 'halloween-fx.css', 'account-signin.css', 'account-panel.css', 'rendimiento.css'] },
+  'tienda.min.css': { paginas: ['index.html'], hojas: ['styles.css', 'studio.css', 'public-assistant.css', 'shop-experience.css', 'paypal-checkout.css', 'visual-refresh.css', 'liquid-glass.css', 'experience-pro.css', 'premium-2026.css', 'trust-story.css', 'colombia-identity.css', 'seasonal.css', 'video-guide.css', 'video-chapters.css', 'regalos-strip.css', 'storefront-polish.css', 'account-panel.css', 'rendimiento.css'] },
+  'cuenta.min.css': { paginas: ['cuenta.html'], hojas: ['customer-theme.css', 'customer-glass.css', 'premium-2026.css', 'activation-welcome.css', 'colombia-identity.css', 'activation-celebrate.css', 'video-chapters.css', 'account-signin.css', 'account-panel.css', 'rendimiento.css'] },
 };
 
 const soloRevisar = process.argv.includes('--check');
