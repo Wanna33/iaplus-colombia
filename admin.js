@@ -531,7 +531,7 @@ function render(){
       <div class="card"><h2>☀️ Recordatorios automáticos</h2>
         <label class="sw"><input type="checkbox" id="gRec"><span></span><b>Enviar recordatorios</b><small>A clientes que no han comprado (nunca a tus contactos), máximo 1 cada 3 días por persona.</small></label>
         <div class="god-row"><label>Hora<select id="gRecH"><option value="5">5:00 a. m.</option><option value="6">6:00 a. m.</option><option value="7">7:00 a. m.</option><option value="8">8:00 a. m.</option><option value="9">9:00 a. m.</option><option value="10">10:00 a. m.</option><option value="11">11:00 a. m.</option><option value="12">12:00 m.</option><option value="13">1:00 p. m.</option><option value="14">2:00 p. m.</option><option value="15">3:00 p. m.</option><option value="16">4:00 p. m.</option><option value="17">5:00 p. m.</option><option value="18">6:00 p. m.</option><option value="19">7:00 p. m.</option><option value="20">8:00 p. m.</option><option value="21">9:00 p. m.</option></select></label>
-          <label>Máximo por día<input id="gRecMax" type="number" min="0" max="150"></label><label>De esos, clientes antiguos<input id="gRecV" type="number" min="0" max="60"></label></div>
+          <label>Máximo por día<input id="gRecMax" type="number" min="0" max="300"></label><label>De esos, clientes antiguos<input id="gRecV" type="number" min="0" max="150"></label></div>
         <p class="god-hint">⚠️ Más mensajes = más ventas, pero también más riesgo de que WhatsApp bloquee el número. Recomendado: 60 por día y 25 antiguos.</p>
       </div>
     </div>
@@ -1826,7 +1826,7 @@ function leerFaq(){return [...document.querySelectorAll('.faq-it')].map(el=>({id
 function readGodDraft(){
   if(!GCFG)throw Error('Espera a que cargue la configuración.');
   const rec={activo:$('#gRec').checked,hora:Number($('#gRecH').value),max:Number($('#gRecMax').value),viejos:Number($('#gRecV').value)};
-  if(!Number.isInteger(rec.hora)||rec.hora<5||rec.hora>21||!Number.isInteger(rec.max)||rec.max<0||rec.max>150||!Number.isInteger(rec.viejos)||rec.viejos<0||rec.viejos>60||rec.viejos>rec.max)throw Error('Revisa los recordatorios: máximo diario de 0 a 150 y antiguos de 0 a 60, sin superar el máximo diario.');
+  if(!Number.isInteger(rec.hora)||rec.hora<5||rec.hora>21||!Number.isInteger(rec.max)||rec.max<0||rec.max>300||!Number.isInteger(rec.viejos)||rec.viejos<0||rec.viejos>150||rec.viejos>rec.max)throw Error('Revisa los recordatorios: máximo diario de 0 a 300 y antiguos de 0 a 150, sin superar el máximo diario.');
   const faq=leerFaq();if(faq.some(f=>!f.claves.length||!f.resp))throw Error('Completa las palabras clave y la respuesta de cada fila, o elimina las filas vacías.');
   return {asistente:$('#gAsis').checked,saludo:$('#gSal').checked,rec,reglas:$('#gReglas').value.trim(),faq};
 }
