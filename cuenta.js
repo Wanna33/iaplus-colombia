@@ -185,6 +185,7 @@ function card(it, idx){
       <div class="pname"><h2>${esc(it.producto||app.n)}</h2><small>Plan de ${it.dias||30} días · ${esc(it.correo)}</small></div>
     </div>
     <div class="sub-body">
+      ${active&&it.recomendada&&!it.retirada?'<p class="note" role="status"><b>★ Recomendada por IA Plus</b><br>Una de las cuentas que mejor está funcionando en este momento.</p>':''}
       ${ex?"":`<button class="banner" type="button" data-acc="acc${idx}" aria-expanded="true"><span>🔑 Mis datos de acceso · <b data-end="${it.fin||""}">--</b></span><span class="chev">⌃</span></button>`}
       <div class="rows">
         ${ex?`<div class="stamp">EXPIRADO</div>`:`<div class="stamp okst">ACTIVO<br><small style="font-size:15px">${left} ${left===1?"día":"días"}</small></div>`}
@@ -254,6 +255,7 @@ function warnHtml(){
   return out.slice(0,3).join("");
 }
 function renderMain(){
+  ITEMS.sort((a,b)=>Number(!!a.retirada)-Number(!!b.retirada)||(Number(b.ordenCuenta)||0)-(Number(a.ordenCuenta)||0));
   const act = ITEMS.filter(i=>!i.vencida).length;
   $("#app").innerHTML = `
     ${warnHtml()}

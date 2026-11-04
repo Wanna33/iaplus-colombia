@@ -205,6 +205,7 @@ function card(it, idx){
       <span class="account-status ${active?'active':ex?'ended':'pending'}">${active?'Activa':ex?'Vencida':'Por confirmar'}</span>
     </div>
     <div class="sub-body">
+      ${active&&it.recomendada&&!it.retirada?'<p class="note" role="status"><b>★ Recomendada por IA Plus</b><br>Una de las cuentas que mejor está funcionando en este momento.</p>':''}
       <div class="account-time"><strong>${ex?'Tu plan terminó':end?left+' '+(left===1?'día restante':'días restantes'):'Revisa tu plan'}</strong><span>${end?'Vence el '+fmt(end):'Sin fecha disponible'}</span></div>
       ${ex?"":`<div class="prog"><i style="width:${pct.toFixed(1)}%"></i></div>`}
       <div class="account-meta"><span>Inicio: ${start?fmt(start):'—'}</span><span>${ex?'Acceso finalizado':end?'Tiempo real · <b data-end="'+esc(it.fin)+'">--</b>':''}</span></div>
@@ -272,6 +273,7 @@ function warnHtml(){
   return out.slice(0,3).join("");
 }
 function renderMain(){
+  ITEMS.sort((a,b)=>Number(!!a.retirada)-Number(!!b.retirada)||(Number(b.ordenCuenta)||0)-(Number(a.ordenCuenta)||0));
   document.querySelectorAll('.pw').forEach(hidePassword);
   const act = ITEMS.filter(i=>IAPAccountState.isActive(i)).length;
   $("#app").innerHTML = `
@@ -410,7 +412,7 @@ let WELCOME_CODE=null; // código recién activado: al cargar la cuenta se muest
 function showFlash(){ if(!FLASH) return; const f=FLASH; FLASH=null; toastMsg(f.t, f.ok?4500:7000); if(f.ok){ if(window.IAPCelebrate){ window.IAPActivationWelcome?.hideForSuccess(); }else{ window.IAPActivationWelcome?.showSuccess(); } }else{ const a=$("#app"); if(a) a.insertAdjacentHTML("afterbegin",`<div class="warn bad"><span>⚠️ ${esc(f.t)}</span><a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, mi enlace de activación no funcionó")}" target="_blank" rel="noopener">Pedir ayuda</a></div>`); } }
 /* Rapidez: la última lista de accesos se guarda en el navegador y se muestra al instante; se actualiza en segundo plano. */
 const LIST_CACHE = "iap_list_cache_v1";
-function listKey(items){ return JSON.stringify((items||[]).map(i=>[i.correo,i.clave,i.producto,!!i.vencida,i.inicio,i.fin,!!i.tiene2fa,!!i.adicional])); }
+function listKey(items){ return JSON.stringify((items||[]).map(i=>[i.correo,i.clave,i.producto,!!i.vencida,i.inicio,i.fin,!!i.tiene2fa,!!i.adicional,!!i.recomendada,!!i.retirada,i.ordenCuenta])); }
 function readListCache(){
   try{
     const u = load("iap_user"), cr = load("iap_cred"), c = JSON.parse(localStorage.getItem(LIST_CACHE)||"null");
