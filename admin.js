@@ -92,6 +92,7 @@ async function refresh(){
     const sync=$("#syncState");if(sync){sync.textContent="Actualizado "+new Date().toLocaleTimeString("es-CO",{timeZone:"America/Bogota",hour:"2-digit",minute:"2-digit"});sync.dataset.state="ok";}
   }
   catch(e){
+    const failedSync=$("#syncState");if(failedSync){failedSync.textContent="No se pudo actualizar · puedes reintentar";failedSync.dataset.state="error";}
     if(/administrador/i.test(e.message)) message("Acceso denegado","Esta cuenta no es administradora.",'<a class="btn" href="index.html">Volver a la tienda</a>');
     else if(/sesión|venció|Inicia/i.test(e.message)) showLogin();
     else if($("#addForm")){ toast("No se pudo actualizar: "+e.message); const sync=$("#syncState");if(sync){sync.textContent="Datos pendientes de actualizar";sync.dataset.state="error";} }
@@ -103,7 +104,7 @@ function start(){
   const u = load("iap_user"); const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()){ showLogin(); return; }
   $("#who").textContent = u ? u.email : ""; $("#reload").classList.remove("hide"); $("#gSearch").classList.remove("hide"); $("#gSettings").classList.remove("hide");
-  refresh().then(()=>{setTimeout(()=>{if(!document.hidden&&window.matchMedia("(min-width: 761px)").matches&&!$("#gSettings")?.classList.contains("hide"))loadSaldo();},2500);});
+  refresh().then(()=>{setTimeout(()=>{if($("#addForm")&&!document.hidden&&window.matchMedia("(min-width: 761px)").matches&&!$("#gSettings")?.classList.contains("hide"))loadSaldo();},2500);});
   clearInterval(window._saldoT); window._saldoT = setInterval(()=>{ if(!document.hidden&&window.matchMedia("(min-width: 761px)").matches) loadSaldo(); }, 300000);
 }
 
