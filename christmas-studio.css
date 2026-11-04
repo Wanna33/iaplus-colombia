@@ -1,0 +1,74 @@
+/* Christmas studio composition. Pure presentation; existing catalog actions remain intact. */
+.christmas-theme{--xmas-forest:#0b3327;--xmas-ruby:#a33247;--xmas-gold:#d5b271;--xmas-ivory:#fffaf0;--xmas-ink:#1e3e32;--xmas-ease:cubic-bezier(.22,.75,.25,1)}
+.christmas-theme .storefront .nav{background:#fffaf2f5!important;border-bottom:1px solid #d5b27180!important;box-shadow:0 4px 22px #14372509!important;backdrop-filter:blur(18px)}
+.christmas-theme .storefront .nav-in{min-height:84px;gap:22px}
+.christmas-theme .storefront .nav .studio-brand{display:flex;align-items:center;gap:10px;flex:none;text-decoration:none;color:var(--xmas-ink)}
+.christmas-theme .storefront .nav .studio-brand img{width:40px!important;height:40px!important;filter:none;object-fit:contain}
+.studio-wordmark{font-size:20px;line-height:1.1;font-weight:800;letter-spacing:-.07em;white-space:nowrap}
+.studio-wordmark>span{color:#9d7939}
+.studio-wordmark small{display:block;margin-top:6px;font-size:7px;line-height:1.2;font-weight:750;letter-spacing:.17em;color:#766143}
+.christmas-theme .storefront .nav .links a{border-radius:999px!important;transition:background 180ms,color 180ms}
+.christmas-theme .storefront .nav .links a.on{background:#eae9d7!important;color:#123c2c!important}
+.christmas-theme .storefront .nav .btn-google{border-color:#cabc99!important;border-radius:13px!important;min-height:44px}
+.christmas-theme .storefront .hero{padding:87px 0 54px;background:radial-gradient(ellipse at 80% 32%,#3a654755,transparent 58%),linear-gradient(112deg,#082c22,#143e2b 68%,#092b20);border-bottom:0}
+.christmas-theme .storefront .hero:after{height:auto;opacity:.24;animation:none;background-size:137px 163px,233px 257px}
+.christmas-theme .storefront .hero:before{opacity:.85}
+.christmas-theme .storefront .hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);grid-template-areas:'heading art' 'intro art' 'actions art' 'guide products' 'trust products';column-gap:58px;row-gap:19px;align-items:center}
+.christmas-theme .storefront .hero-text{display:contents;animation:none}
+.christmas-theme .storefront .studio-heading{grid-area:heading;align-self:end;animation:studio-enter 520ms var(--xmas-ease) both}
+.christmas-theme .storefront .hero .pill{padding:8px 0;border:0;background:none;box-shadow:none;font-size:9px;letter-spacing:.16em;color:#e7c789;gap:10px}
+.christmas-theme .storefront .hero .pill>span{font-size:19px;font-family:Georgia,serif;line-height:1;color:#ecc879}
+.christmas-theme .storefront .hero h1{font-size:clamp(46px,5.2vw,70px);line-height:1.04;letter-spacing:-.06em;margin:17px 0 0;font-weight:800}
+.christmas-theme .storefront .hero h1 .grad{color:#e7c475}
+.christmas-theme .storefront .hero-text>.studio-intro{grid-area:intro;margin:0;max-width:420px;color:#dce8da;font-size:15px;line-height:1.85;animation:studio-enter 520ms var(--xmas-ease) 70ms both}
+.christmas-theme .storefront .hero .cta{grid-area:actions;margin:0;display:flex;gap:10px;align-items:center;align-self:start}
+.christmas-theme .storefront .hero .cta .btn{min-height:52px;padding:15px 19px;font-size:12px;border-radius:13px;transition:transform 180ms,box-shadow 180ms,background 180ms}
+.christmas-theme .storefront .hero .btn-primary{background:linear-gradient(110deg,#a33247,#b14350)!important;border-color:#e0be7c;box-shadow:0 8px 25px #0002!important;color:#fffaf0}
+.christmas-theme .storefront .hero .btn-primary:hover{background:#b33b50!important;box-shadow:0 10px 30px #0003!important;transform:translateY(-2px)}
+.christmas-theme .storefront .hero .btn-ghost{border:1px solid #d9c595!important;background:#fffaf0!important;color:#214535!important}
+.christmas-theme .storefront .hero .first-visit-guide{grid-area:guide;margin:0;width:100%;max-width:430px;padding:11px 12px;min-height:66px;border-color:#ffffff24!important;background:#ffffff0c!important;box-shadow:none;border-radius:14px;backdrop-filter:blur(8px)}
+.christmas-theme .storefront .first-visit-guide__copy b{color:#f7f1df;font-size:11px}
+.christmas-theme .storefront .first-visit-guide__copy small{color:#d2dfce;font-size:10px}
+.christmas-theme .storefront .first-visit-guide__play{background:#f5dca712;color:#f4d58e;box-shadow:none}
+.christmas-theme .storefront .first-visit-guide__action{display:grid;place-items:center;min-height:44px;padding:8px 12px;background:#f9eed8!important;border-color:#ead8b7;color:#244534!important;font-size:10px}
+.christmas-theme .storefront .first-visit-guide__close{color:#eee3c9;min-width:28px;min-height:44px;font-size:18px}
+.christmas-theme .storefront .hero .trust{grid-area:trust;gap:16px;margin:0;padding-top:2px;align-self:start}
+.christmas-theme .storefront .hero .trust li{color:#dce5d5;font-size:10px;gap:6px}
+.christmas-theme .storefront .hero .trust .ic{width:14px;height:14px;color:#e1c07c}
+.christmas-theme .storefront .hero-side{grid-area:art;max-width:none;align-self:center;animation:studio-enter 650ms var(--xmas-ease) 80ms both}
+.christmas-theme .storefront .hero-collage{position:relative;border:1px solid #b79658;border-radius:28px;box-shadow:0 0 0 7px #e7c78308,0 24px 60px #0005;background:#0b2b1d;overflow:hidden;transform:none}
+.christmas-theme .storefront .hero-art-picture{border-radius:26px 26px 0 0;overflow:hidden}
+.christmas-theme .storefront .hero-colombia-art{width:100%;height:auto;max-height:none;aspect-ratio:4/3;object-fit:contain;transform:none}
+.studio-art-caption{display:flex;align-items:center;justify-content:center;gap:20px;padding:15px 18px;background:linear-gradient(100deg,#0f3426,#17432d,#0f3426);border-top:1px solid #c4a56770;color:#efd8a6;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.2;text-align:center}
+.studio-art-caption>span:first-child,.studio-art-caption>span:last-child{color:#d2ad63;font-size:19px}
+.studio-art-caption small{display:block;margin-top:6px;color:#bacaad;font-family:'Plus Jakarta Sans',sans-serif;font-size:7px;font-weight:600;letter-spacing:.18em}
+.studio-product-dock{grid-area:products;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-self:start;padding-top:2px}
+.studio-product-dock>a,.studio-product-dock>button{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 9px;min-height:62px;min-width:0;border:1px solid #d7bb7b42;border-radius:14px;background:#fff8e60a;color:#fff6dd;font:700 11px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left;text-decoration:none;box-shadow:none;transition:background 180ms,border-color 180ms,transform 180ms}
+.studio-product-dock img{display:block;width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:#fff}
+.studio-product-dock small{display:block;font-size:8px;line-height:1.4;font-weight:500;color:#d0dcbf;margin-top:3px}
+.studio-product-dock>a:hover,.studio-product-dock>button:hover{background:#fff8e617;border-color:#d5b271;transform:translateY(-2px)}
+.christmas-theme .storefront .hero :is(a,button):focus-visible{outline:3px solid #f1d89e!important;outline-offset:4px}
+.christmas-theme .seasonal-banner{max-width:1192px;min-height:170px;margin-block:30px 20px;padding:32px 38px;border-radius:22px;box-shadow:0 14px 36px #752a3510}
+.christmas-theme .seasonal-banner h2{font-size:clamp(24px,2.7vw,32px);letter-spacing:-.04em;line-height:1.2;margin-block:10px}
+.christmas-theme .seasonal-banner p{max-width:720px;font-size:13px}
+.christmas-theme .seasonal-banner:after{right:45px;font-size:96px;opacity:.6}
+.christmas-theme .storefront .trust-story{gap:56px;margin-bottom:58px;align-items:center}
+.christmas-theme .storefront .trust-story-visual{border:1px solid #bfa166;box-shadow:0 22px 48px #173b2514;border-radius:24px}
+.christmas-theme .storefront .trust-image-cta{display:grid;grid-template-columns:1fr auto;justify-items:start;text-align:left;gap:5px 20px;padding:18px 22px;border-top-color:#b99c6570}
+.christmas-theme .storefront .trust-image-cta small{grid-column:1;font-size:8px;letter-spacing:.16em}
+.christmas-theme .storefront .trust-image-cta b{grid-column:1;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:400;color:#fff7e6}
+.christmas-theme .storefront .trust-image-cta>span{grid-column:2;grid-row:1/3;align-self:center;min-height:44px;padding:10px 15px;border-radius:12px;background:#f3dfaf;box-shadow:none;color:#183e2a}
+.christmas-theme .storefront .trust-story-points li>span{background:#eee5cc;color:#73542b;border:1px solid #dcccab}
+.christmas-theme .storefront .public-help-launch{background:#173f30!important;border:1px solid #ceb274!important;box-shadow:0 6px 25px #102d2126!important;color:#fff6df!important;font-size:11px;border-radius:999px!important}
+.christmas-theme .storefront .public-help-launch>span{color:#e7c779}
+.christmas-theme .storefront .ph-header{background:#103d2c;border-bottom:1px solid #c5a05c}.christmas-theme .storefront .ph-form button{background:#993348}.christmas-theme .storefront .ph-topics button{min-height:44px;border-color:#d8cba9;background:#fffaf0}.christmas-theme .storefront .ph-topics button:focus-visible{outline-color:#9c753b!important}
+@media(min-width:761px){.christmas-theme .storefront .public-help-launch{right:86px!important;bottom:26px!important;min-height:44px;padding:10px 16px}.christmas-theme .storefront .wa-float{right:24px!important;bottom:24px!important;width:48px;height:48px}}
+@media(min-width:861px){.christmas-theme .storefront.comparing :is(.public-help-launch,.wa-float){bottom:112px!important}.christmas-theme .storefront.comparing .totop{bottom:170px!important}}
+@media(max-width:860px){.christmas-theme .storefront.comparing :is(.public-help-launch,.wa-float,.totop){bottom:calc(226px + env(safe-area-inset-bottom))!important}}
+@media(min-width:1000px){.christmas-theme .storefront .hero-in{grid-template-columns:minmax(0,.98fr) minmax(0,1.1fr)}}
+@media(max-width:1100px){.christmas-theme .storefront .hero-in{column-gap:32px}.christmas-theme .storefront .hero h1{font-size:56px}.studio-product-dock{gap:6px}.studio-product-dock>a,.studio-product-dock>button{gap:6px;padding:11px 6px;font-size:10px}.studio-product-dock img{width:25px;height:25px}.christmas-theme .storefront .nav-in{gap:15px}.studio-wordmark{font-size:18px}}
+@media(max-width:980px){.christmas-theme .storefront .hero-in{grid-template-columns:minmax(0,1fr);grid-template-areas:'heading' 'art' 'intro' 'actions' 'guide' 'products' 'trust';max-width:720px;row-gap:24px}.christmas-theme .storefront .studio-heading{text-align:center}.christmas-theme .storefront .hero h1{font-size:64px;line-height:1.03;margin-top:13px}.christmas-theme .storefront .hero-side{max-width:640px;width:100%;margin:auto}.christmas-theme .storefront .hero-text>.studio-intro{max-width:620px;text-align:center;justify-self:center}.christmas-theme .storefront .hero .cta{justify-content:center}.christmas-theme .storefront .hero .first-visit-guide{max-width:620px;justify-self:center}.studio-product-dock{width:100%;max-width:620px;justify-self:center}.christmas-theme .storefront .hero .trust{justify-content:center}.christmas-theme .storefront .trust-story{gap:32px}}
+@media(max-width:600px){.christmas-theme .storefront .nav-in{min-height:72px;gap:12px}.christmas-theme .storefront .nav .studio-brand{gap:8px}.christmas-theme .storefront .nav .studio-brand img{width:34px!important;height:34px!important}.studio-wordmark{font-size:18px}.studio-wordmark small{font-size:6px;margin-top:5px;letter-spacing:.1em}.christmas-theme .storefront .nav .btn-google{min-height:44px;padding:10px 12px}.christmas-theme .storefront .hero{padding-top:56px;padding-bottom:32px}.christmas-theme .storefront .hero-in{row-gap:21px;padding-inline:20px}.christmas-theme .storefront .hero .pill{font-size:8px;letter-spacing:.13em;padding:4px 0}.christmas-theme .storefront .hero h1{font-size:clamp(38px,11.4vw,60px);margin-top:12px;line-height:1.02}.christmas-theme .storefront .hero-collage{border-radius:22px}.christmas-theme .storefront .hero-art-picture{border-radius:20px 20px 0 0}.studio-art-caption{font-size:13px;padding:12px 10px;gap:12px}.studio-art-caption small{font-size:6px;letter-spacing:.13em}.christmas-theme .storefront .hero-text>.studio-intro{text-align:left;font-size:13px;line-height:1.8}.christmas-theme .storefront .hero .cta{display:grid;grid-template-columns:1fr;gap:9px}.christmas-theme .storefront .hero .cta .btn{font-size:13px;min-height:50px;padding:13px}.christmas-theme .storefront .hero .first-visit-guide{padding:10px;gap:8px}.christmas-theme .storefront .first-visit-guide__copy b{font-size:10px}.christmas-theme .storefront .first-visit-guide__copy small{display:none}.christmas-theme .storefront .first-visit-guide__play{width:28px;height:28px;font-size:10px;flex:none}.studio-product-dock{gap:7px}.studio-product-dock>a,.studio-product-dock>button{flex-direction:column;text-align:center;gap:7px;padding:12px 4px;min-height:78px;font-size:10px;border-radius:13px}.studio-product-dock img{width:26px;height:26px}.studio-product-dock small{display:none}.christmas-theme .storefront .hero .trust{gap:13px;justify-content:flex-start}.christmas-theme .storefront .hero .trust li{font-size:9px}.christmas-theme .seasonal-banner{margin:22px 20px 16px;padding:28px 23px;min-height:180px}.christmas-theme .seasonal-banner h2{font-size:25px}.christmas-theme .seasonal-banner:after{font-size:30px;top:25px;right:16px}.christmas-theme .storefront .trust-story{margin-bottom:38px}.christmas-theme .storefront .trust-image-cta{padding:16px;gap:5px 12px}.christmas-theme .storefront .trust-image-cta b{font-size:18px}.christmas-theme .storefront .trust-image-cta>span{font-size:10px;padding:9px 12px}.christmas-theme .storefront .trust-story-copy h2{font-size:31px}}
+@media(max-width:360px){.christmas-theme .storefront .nav-in{padding-inline:15px;gap:8px}.studio-wordmark{font-size:16px}.studio-wordmark small{font-size:5px}.christmas-theme .storefront .nav .studio-brand img{width:30px!important;height:30px!important}.christmas-theme .storefront .nav .btn-google{font-size:10px;padding-inline:9px}.christmas-theme .storefront .hero-in{padding-inline:16px}.christmas-theme .storefront .hero .pill{letter-spacing:.08em}.studio-art-caption{font-size:12px}.studio-art-caption>span:first-child,.studio-art-caption>span:last-child{font-size:14px}}
+@keyframes studio-enter{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){.christmas-theme .storefront :is(.studio-heading,.hero-side,.studio-intro){animation:none!important}.studio-product-dock>a,.studio-product-dock>button{transition:none}.studio-product-dock>a:hover,.studio-product-dock>button:hover{transform:none}}

@@ -94,17 +94,23 @@ let toastT;
 function toast(msg){ const t=$("#toast"); clearTimeout(toastT); t.classList.remove("on"); void t.offsetWidth; t.textContent=msg; t.classList.add("on"); toastT=setTimeout(()=>t.classList.remove("on"),2600); }
 
 /* ============ CATÁLOGO ============ */
+function prefersReducedMotion(){return !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}
 function renderFilters(){
+  const filters=$("#filters"),hadFocus=filters.contains(document.activeElement);
+  const focusedCategory=hadFocus?document.activeElement.closest('.chip')?.dataset.c:null;
   const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
   if(!cats.includes(filter))filter="Todos";
-  if(cats.length<3){ $("#filters").innerHTML=""; return; }
-  $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}" aria-pressed="${c===filter}">${c}</button>`).join("");
-  $("#filters").onclick = e => { const b=e.target.closest(".chip"), c=b&&b.dataset.c; if(c && c!==filter){ filter=c; renderFilters(); swapGrid(); $("#filters .chip.on")?.scrollIntoView?.({inline:"center",block:"nearest",behavior:"smooth"}); } };
+  if(cats.length<3){ filters.innerHTML=""; if(hadFocus)$("#search")?.focus({preventScroll:true}); return; }
+  filters.innerHTML = cats.map(c=>`<button type="button" class="chip ${c===filter?"on":""}" data-c="${c}" aria-pressed="${c===filter}">${c}</button>`).join("");
+  if(hadFocus)([...filters.querySelectorAll('.chip')].find(button=>button.dataset.c===focusedCategory)||filters.querySelector('.chip.on'))?.focus({preventScroll:true});
+  filters.onclick = e => { const b=e.target.closest(".chip"), c=b&&b.dataset.c; if(c && c!==filter){ filter=c; renderFilters(); swapGrid(); filters.querySelector('.chip.on')?.scrollIntoView?.({inline:"center",block:"nearest",behavior:prefersReducedMotion()?"instant":"smooth"}); } };
 }
 // cambio suave del catálogo: se desvanece, se redibuja y las tarjetas entran escalonadas
 let gridFirst = true, swapT;
 function swapGrid(){
-  const g=$("#grid"); clearTimeout(swapT); g.classList.add("swap");
+  const g=$("#grid"); clearTimeout(swapT);
+  if(prefersReducedMotion()){g.classList.remove("swap");renderGrid();return;}
+  g.classList.add("swap");
   swapT=setTimeout(()=>{ renderGrid(); g.classList.remove("swap"); }, 180);
 }
 function renderGrid(){
@@ -278,7 +284,7 @@ async function loadMine(){
 }
 
 /* ============ INIT ============ */
-if($("#heroLogin")) $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión"); else $("#heroCard").scrollIntoView({behavior:"smooth",block:"center"}); };
+if($("#heroLogin")) $("#heroLogin").onclick = () => { if(user) toast("Ya iniciaste sesión"); else $("#heroCard").scrollIntoView({behavior:prefersReducedMotion()?"instant":"smooth",block:"center"}); };
 $("#burger").onclick = () => { const on = $("#links").classList.toggle("on"); $("#burger").setAttribute("aria-expanded", on); };
 $("#links").onclick = () => $("#links").classList.remove("on");
 $("#waContact").href = `https://wa.me/${CONFIG.WHATSAPP}`;
@@ -376,9 +382,9 @@ document.addEventListener("pointerdown", e => {
   let tick=false;
   const onScroll=()=>{ if(tick) return; tick=true; requestAnimationFrame(()=>{ const h=document.documentElement; const max=h.scrollHeight-h.clientHeight, f=max>0?h.scrollTop/max:0; if(pr) pr.style.transform="scaleX("+f+")"; if(ring) ring.style.strokeDashoffset=(138.2*(1-f)).toFixed(1); if(tt) tt.classList.toggle("on", h.scrollTop>700); tick=false; }); };
   addEventListener("scroll", onScroll, {passive:true}); onScroll();
-  if(tt) tt.onclick=()=>scrollTo({top:0,behavior:"smooth"});
+  if(tt) tt.onclick=()=>scrollTo({top:0,behavior:prefersReducedMotion()?"instant":"smooth"});
   // contador animado en la portada
-  document.querySelectorAll("[data-count]").forEach(el=>{ const to=el.dataset.count==="auto"?PRODUCTS.length:+el.dataset.count; const t0=performance.now()+350; const step=t=>{ const p=Math.max(0,Math.min(1,(t-t0)/1300)); el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); }; requestAnimationFrame(step); });
+  document.querySelectorAll("[data-count]").forEach(el=>{ const to=el.dataset.count==="auto"?PRODUCTS.length:+el.dataset.count; if(prefersReducedMotion()){el.textContent=String(to);return;} const t0=performance.now()+350; const step=t=>{ const p=Math.max(0,Math.min(1,(t-t0)/1300)); el.textContent=Math.round(to*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); }; requestAnimationFrame(step); });
 })();
 
 

@@ -1,0 +1,173 @@
+/* Christmas workspace finish. Load after seasonal.css and page-specific styles.
+   Scope is limited to existing account, administrator and gifts components.
+   No layout changes to tables, scene coordinates, images, authentication or plan states. */
+.christmas-theme :is(.account-app,.admin-app,.gifts-app){--cw-green:#0b3327;--cw-ruby:#a33247;--cw-gold:#d5b271;--cw-ivory:#fffaf0;--cw-ink:#193c30;--cw-muted:#55695e;--cw-line:#dfd4bc;--cw-shadow:0 8px 26px #153c2810}
+
+/* Access workspace: a quiet surface separates controls from the account cards.
+   Selection styling never changes active/ended/pending badges or expiry text. */
+.christmas-theme .account-app #accountWorkspace{color:var(--cw-ink)}
+.christmas-theme .account-app .aw-summary{gap:12px}
+.christmas-theme .account-app .aw-summary>div{border-color:var(--cw-line);background:linear-gradient(145deg,#fffdf8,var(--cw-ivory));box-shadow:0 3px 14px #173d2706}
+.christmas-theme .account-app .aw-summary>div:nth-child(3){background:linear-gradient(145deg,#fffbef,#f5ecd9);border-color:#d9c296}
+.christmas-theme .account-app .aw-summary strong{color:var(--cw-green)}
+.christmas-theme .account-app :is(.aw-summary span,.aw-summary small,.aw-heading p,.aw-results){color:var(--cw-muted)}
+.christmas-theme .account-app .aw-tools{background:#fffdf8;border-color:var(--cw-line);box-shadow:var(--cw-shadow)}
+.christmas-theme .account-app .aw-heading h2{color:var(--cw-green);letter-spacing:-.025em}
+.christmas-theme .account-app .aw-controls :is(input,select){background:#fffefb;border-color:#c9d3c7;color:var(--cw-ink);transition:border-color 160ms ease,box-shadow 160ms ease}
+.christmas-theme .account-app .aw-controls :is(input,select):focus{background:#fffefb;border-color:#6b8f79;box-shadow:0 0 0 3px #0b33270a}
+.christmas-theme .account-app .aw-controls input::placeholder{color:#637367}
+.christmas-theme .account-app .aw-filters button{min-height:44px;background:#fffdf8;border-color:#d8dece;color:#405b4c;transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease}
+.christmas-theme .account-app .aw-filters button>span{background:#e9eee3;color:#415a48;font-variant-numeric:tabular-nums}
+.christmas-theme .account-app .aw-filters button[aria-pressed=true]{background:var(--cw-green);border-color:var(--cw-green);color:var(--cw-ivory);box-shadow:0 3px 10px #0b332717}
+.christmas-theme .account-app .aw-filters button[aria-pressed=true]>span{background:#315b45;color:#fff4d9}
+.christmas-theme .account-app .aw-reset{background:#f6f1e6;border-color:var(--cw-line);color:#526348;min-height:44px}
+.christmas-theme .account-app .aw-results{border-top-color:#e5decd;line-height:1.65}
+.christmas-theme .account-app .sub-card{border-color:#d9dfcf;box-shadow:var(--cw-shadow);transition:border-color 180ms ease,box-shadow 180ms ease}
+.christmas-theme .account-app .sub-head{background:linear-gradient(110deg,#fffdf7,#fff);border-bottom-color:#ece6d8}
+.christmas-theme .account-app .sub-card .field{border-color:#d5dece;background:#fafcf6}
+.christmas-theme .account-app .sub-card .foot{background:#faf8f0;border-top-color:#e6dfce}
+.christmas-theme .account-app .sub-card .banner{background:var(--cw-green);border-color:#1c503c;color:var(--cw-ivory);transition:background-color 160ms ease,box-shadow 160ms ease}
+.christmas-theme .account-app .tabs{border-bottom-color:#d6dbc9}
+.christmas-theme .account-app .tabs button.on{color:var(--cw-green)}
+.christmas-theme .account-app .tabs button.on:after{background:var(--cw-ruby)}
+
+/* Welcome and confirmed-success copy. The approved Santa artwork is untouched.
+   Extra line spacing also accommodates the seasonal emoji without clipping. */
+.christmas-theme .account-app .activation-welcome{border-color:var(--cw-gold);box-shadow:0 15px 42px #123c2420}
+.christmas-theme .account-app .activation-welcome-copy{min-width:0;padding:clamp(24px,3vw,36px)}
+.christmas-theme .account-app .activation-welcome-kicker{font-size:11px;line-height:1.7;letter-spacing:.07em;color:#8e3548}
+.christmas-theme .account-app .activation-welcome h2{color:var(--cw-green);line-height:1.2;letter-spacing:-.035em;text-wrap:balance;margin-block:10px 12px}
+.christmas-theme .account-app .activation-welcome-copy>p{line-height:1.75;color:var(--cw-muted);max-width:62ch}
+.christmas-theme .account-app .activation-welcome-steps{gap:12px;margin-block:22px}
+.christmas-theme .account-app .activation-welcome-steps li{min-width:0;gap:12px;padding:10px 12px;border:1px solid #e6decb;border-radius:12px;background:#fffdf8}
+.christmas-theme .account-app .activation-welcome-steps li>span{background:var(--cw-ruby);border-color:#b88664;line-height:1;color:var(--cw-ivory)}
+.christmas-theme .account-app .activation-welcome-steps b{line-height:1.5;color:var(--cw-ink)}
+.christmas-theme .account-app .activation-welcome-steps small{line-height:1.65;color:var(--cw-muted)}
+.christmas-theme .account-app .activation-welcome-actions{gap:10px}
+.christmas-theme .account-app .activation-welcome-primary{min-height:48px;background:var(--cw-ruby);border-color:#bc975e;color:var(--cw-ivory);box-shadow:0 5px 15px #a332471c;line-height:1.4;transition:background-color 160ms ease,box-shadow 160ms ease}
+.christmas-theme .account-app .activation-welcome-video-link{border-color:#cbd6c9;background:#fffdf8;color:var(--cw-green)}
+.christmas-theme .account-app .activation-welcome-help{color:#315b46;line-height:1.6;text-underline-offset:4px}
+.christmas-theme .account-app .activation-welcome-note{line-height:1.75;color:#58695d;padding-top:12px;border-top:1px solid #e5ddc9}
+.christmas-theme .account-app .activation-welcome--success:before{animation:none;opacity:.85}
+.christmas-theme .account-app .celebrate-colombia{border-color:var(--cw-gold)}
+.christmas-theme .account-app .celebrate-colombia .cel-box{background:var(--cw-ivory)}
+.christmas-theme .account-app .celebrate-colombia .cel-hero-thanks{line-height:1.65}
+.christmas-theme .account-app .celebrate-colombia .cel-steps li{border-color:#e2d9c5;background:#fffef9}
+.christmas-theme .account-app .celebrate-colombia .cel-go{background:var(--cw-ruby);border-color:var(--cw-gold);transition:background-color 160ms ease,box-shadow 160ms ease}
+.christmas-theme .account-app .celebrate-colombia .cel-signature{font-size:11px;line-height:1.7;color:#586959;border-top-color:#e1d6bd;align-items:flex-start}
+
+/* Admin trim is neutral and bounded: no table sizing, status colors or map layout.
+   Light surfaces are explicitly excluded from the administrator's dark theme.
+   !important is limited to properties already locked by admin-pro.css. */
+.christmas-theme .admin-app :is(.card,.kpi,.stat){transition:border-color 180ms ease,box-shadow 180ms ease!important}
+html.christmas-theme:not([data-theme=dark]) .admin-app :is(.card,.kpi,.stat){border-color:#ddd8c7!important;box-shadow:0 5px 20px #163c290a!important}
+html.christmas-theme:not([data-theme=dark]) .admin-app .bar{border-color:#e4d5b7!important}
+html.christmas-theme:not([data-theme=dark]) .admin-app .insight-toolbar{border-color:#dfd5bf}
+.christmas-theme .admin-app .btn.p{background:var(--cw-green)!important;border-color:#2e614a!important;color:var(--cw-ivory)!important}
+.christmas-theme .admin-app .side .nv.on{border-color:#d5b27166!important;box-shadow:inset 3px 0 var(--cw-gold),0 4px 12px #071e201a!important}
+.christmas-theme .admin-app :is(.world-shell,.world-viewport){border-color:#bca574;box-shadow:0 8px 24px #153a2910}
+.christmas-theme .admin-app .business-kpis [data-insight-action]{cursor:pointer}
+.christmas-theme .admin-app .business-kpis .kpi b{font-variant-numeric:tabular-nums}
+html.christmas-theme[data-theme=dark] .admin-app :is(.card,.kpi,.stat,.bar){border-color:#536054!important;box-shadow:0 5px 20px #040c161a!important}
+html.christmas-theme[data-theme=dark] .admin-app :is(.card h2,.bar h1){color:var(--text)}
+html.christmas-theme[data-theme=dark] .admin-app .btn.p{background:#1a5140!important;border-color:#64816b!important}
+html.christmas-theme[data-theme=dark] .admin-app .side .nv.on{border-color:#d5b27180!important}
+
+/* Dark controls and shop chrome use the existing admin navy palette.
+   Keep the illustrated SVG, characters, stage labels and event dots untouched. */
+html.christmas-theme[data-theme=dark] .admin-app{--cw-dark-base:#122238;--cw-dark-surface:#192a42;--cw-dark-raised:#223652;--cw-dark-hover:#2a425e;--cw-dark-line:#415879;--cw-dark-text:#e0e9f7;--cw-dark-muted:#b8c9df}
+html.christmas-theme[data-theme=dark] .admin-app :is(#saldoIA,#gSearch,.bar .ops-link){background:var(--cw-dark-raised)!important;color:var(--cw-dark-text)!important;border-color:var(--cw-dark-line)!important}
+html.christmas-theme[data-theme=dark] .admin-app #gSearch kbd{background:var(--cw-dark-base);color:var(--cw-dark-muted);border-color:var(--cw-dark-line)}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA .bar{position:static!important;margin:0!important;top:auto!important;background:#405570!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA .bar i{background:#7ac6a1}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA.w{color:#f3d18d!important;border-color:#947b4b!important}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA.w .bar i{background:#e3ba6c}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA.b{color:#ffb8b3!important;border-color:#b77576!important}
+html.christmas-theme[data-theme=dark] .admin-app #saldoIA.b .bar i{background:#ed9692}
+html.christmas-theme[data-theme=dark] .admin-app :is(#syncState,#cmdStamp){color:var(--cw-dark-muted)!important}
+html.christmas-theme[data-theme=dark] .admin-app .world-shell{--world-ink:var(--cw-dark-text);--world-muted:var(--cw-dark-muted);--world-line:var(--cw-dark-line);background:var(--cw-dark-base);color:var(--cw-dark-text);border-color:#536054}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-panel,.world-camera,.world-metrics>div,.world-roster>div,.world-empty){background:var(--cw-dark-surface);border-color:var(--cw-dark-line)}
+html.christmas-theme[data-theme=dark] .admin-app .world-metrics>div:nth-child(2){background:#3b3426;border-color:#776544}
+html.christmas-theme[data-theme=dark] .admin-app .world-metrics>div:nth-child(3){background:#302b44;border-color:#66527b}
+html.christmas-theme[data-theme=dark] .admin-app .world-metrics>div:nth-child(4){background:#1d3c34;border-color:#477564}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-head h2,.world-panel h3,.world-directory-head h3,.world-metrics b,.world-roster b,.world-events b,.world-client-list b,.world-camera-info b){color:var(--cw-dark-text)}
+html.christmas-theme[data-theme=dark] .admin-app .world-head h2 span{color:var(--cw-gold)}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-eyebrow,.world-head p,.world-metrics span,.world-metrics small,.world-status,.world-camera-info,.world-camera-info>span,.world-zoom-value,.world-scene-count,.world-legend,.world-roster small,.world-activity-total,.world-events li,.world-events span,.world-events small,.world-directory-head p,.world-client-list small,.world-page-info,.world-empty,.world-footer p){color:var(--cw-dark-muted)}
+html.christmas-theme[data-theme=dark] .admin-app .world-status[data-error=true]{color:#f3d18d}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-directory,.world-legend,.world-footer,.world-feed-title,.world-events li){border-color:var(--cw-dark-line)}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-panel h3>span,.world-roster i,.world-directory-total){background:var(--cw-dark-raised);color:#d9d8b8}
+html.christmas-theme[data-theme=dark] .admin-app :is(.world-actions button,.world-camera button,.world-scene-bar button,.world-pagination button,.world-client-list button){background:var(--cw-dark-raised);border-color:var(--cw-dark-line);color:var(--cw-dark-text)}
+html.christmas-theme[data-theme=dark] .admin-app .world-actions .world-refresh{background:#1a5140;border-color:#64816b;color:#fffaf0}
+html.christmas-theme[data-theme=dark] .admin-app .world-directory-controls :is(input,select){background:var(--cw-dark-raised)!important;border-color:var(--cw-dark-line)!important;color:var(--cw-dark-text)!important;color-scheme:dark}
+html.christmas-theme[data-theme=dark] .admin-app .world-search::placeholder{color:var(--cw-dark-muted);opacity:1}
+html.christmas-theme[data-theme=dark] .admin-app .world-client-initial{background:#234c40;color:#caecd9}
+html.christmas-theme[data-theme=dark] .admin-app .world-client-initial[data-stage=support]{background:#443654;color:#e1c8f1}
+html.christmas-theme[data-theme=dark] .admin-app .world-client-initial[data-stage=waiting]{background:#4b3c29;color:#f4d79c}
+html.christmas-theme[data-theme=dark] .admin-app .world-client-initial[data-stage=payment]{background:#2a4661;color:#c5e3fa}
+html.christmas-theme[data-theme=dark] .admin-app .world-chat-arrow{color:var(--cw-gold)}
+html.christmas-theme[data-theme=dark] .admin-app .world-viewport{background:var(--cw-dark-base);border-color:#536054;box-shadow:inset 0 0 0 1px #b8c9df12,0 8px 24px #040c1620;scrollbar-color:#6f8193 var(--cw-dark-base)}
+html.christmas-theme[data-theme=dark] .admin-app .world-expanded{background:var(--cw-dark-base);scrollbar-color:#6f8193 var(--cw-dark-base)}
+html.christmas-theme[data-theme=dark] .admin-app .world-expanded .world-head{background:#122238f5;border-color:var(--cw-dark-line)}
+html.christmas-theme[data-theme=dark] .admin-app .world-events{scrollbar-color:#6f8193 transparent}
+
+/* Gifts reuse their existing credential rows, copied feedback and old-state opacity. */
+.christmas-theme .gifts-app .rg-top{border-bottom:1px solid #decaa160}
+.christmas-theme .gifts-app .rg-hero{box-shadow:0 12px 32px #183a2710}
+.christmas-theme .gifts-app .rg-hero h1 span{color:var(--cw-ruby)}
+.christmas-theme .gifts-app .rg-chips li{background:#fffdf7;border-color:#ddcfb2;color:#365740}
+.christmas-theme .gifts-app .rg-hero-art img{transform:none;box-shadow:none}
+.christmas-theme .gifts-app .rg-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:20px}
+.christmas-theme .gifts-app :is(.rg-card,.rg-steps,.rg-rules){border-color:var(--cw-line);box-shadow:0 5px 20px #14352608}
+.christmas-theme .gifts-app .rg-card{background:#fffef9;transition:border-color 180ms ease,box-shadow 180ms ease}
+.christmas-theme .gifts-app .rg-num{background:var(--cw-ruby);color:var(--cw-ivory)}
+.christmas-theme .gifts-app .rg-val{background:#f7f6ed;border-color:#dcd9c6;color:var(--cw-ink)}
+.christmas-theme .gifts-app .rg-ib:not(.copied){background:#fffdf7;border-color:#d7d9c7;color:var(--cw-green)}
+.christmas-theme .gifts-app .rg-open{background:var(--cw-green);color:var(--cw-ivory);box-shadow:0 4px 12px #0b332715;min-height:44px;display:inline-flex;align-items:center}
+.christmas-theme .gifts-app .rg-steps li{background:#f9f4e7}
+.christmas-theme .gifts-app .rg-cta{background:linear-gradient(120deg,var(--cw-green),#1d4c37);border:1px solid #a58a50}
+.christmas-theme .gifts-app .rg-btn{background:var(--cw-gold);color:var(--cw-green);min-height:46px;display:inline-flex;align-items:center}
+.christmas-theme .gifts-app :is(.rg-open,.rg-btn,.rg-ib,.rg-nav a){transition:background-color 160ms ease,border-color 160ms ease,box-shadow 160ms ease}
+
+/* Keyboard rings use darker gold on ivory; light gold is reserved for dark admin.
+   Focus is added to real controls only, without changing any disabled state. */
+.christmas-theme .account-app:not(.is-signing-in) :is(button,a,input,select,summary):focus-visible,
+.christmas-theme .gifts-app :is(button,a,input,summary):focus-visible,
+.christmas-theme .admin-app :is(button,a,input,select,textarea,summary,[role=button]):focus-visible{outline:3px solid #92702e!important;outline-offset:3px}
+html.christmas-theme[data-theme=dark] .admin-app :is(button,a,input,select,textarea,summary,[role=button]):focus-visible{outline-color:#edcb85!important}
+@media(hover:hover) and (pointer:fine){
+ .christmas-theme .account-app .sub-card:hover,.christmas-theme .gifts-app .rg-card:hover{border-color:#bdc6ad;box-shadow:0 10px 28px #173c2815}
+ .christmas-theme .account-app .aw-filters button:hover:not([aria-pressed=true]){background:#f1f4e9;border-color:#b8c6aa}
+ .christmas-theme .account-app .aw-reset:hover:not(:disabled){background:#eee8d9;border-color:#cbb78d}
+ .christmas-theme .account-app .sub-card .banner:hover{background:#164f39}
+ .christmas-theme .account-app :is(.activation-welcome-primary,.celebrate-colombia .cel-go):hover{background:#87263b;box-shadow:0 7px 18px #a3324726;transform:none}
+ .christmas-theme .admin-app .btn.p:hover:not(:disabled){background:#215b43!important}
+ html.christmas-theme[data-theme=dark] .admin-app :is(#saldoIA,#gSearch,.bar .ops-link):hover{background:var(--cw-dark-hover)!important}
+ html.christmas-theme[data-theme=dark] .admin-app :is(.world-actions button,.world-camera button,.world-scene-bar button,.world-pagination button,.world-client-list button):hover:not(:disabled){background:var(--cw-dark-hover);border-color:#809375}
+ html.christmas-theme[data-theme=dark] .admin-app .world-actions .world-refresh:hover:not(:disabled){background:#28654d;border-color:#9eb795}
+ .christmas-theme .gifts-app .rg-open:hover{background:#1a513b}
+ .christmas-theme .gifts-app .rg-btn:hover{background:#e2c38b}
+}
+@media(max-width:600px){
+ .christmas-theme .account-app .aw-summary{gap:9px}
+ .christmas-theme .account-app .aw-summary>div{padding:15px 12px}
+ .christmas-theme .account-app .aw-summary small{font-size:11px;line-height:1.6}
+ .christmas-theme .account-app .aw-tools{padding:18px 15px}
+ .christmas-theme .account-app .aw-filters{gap:8px}
+ .christmas-theme .account-app .activation-welcome-copy{padding:23px 19px}
+ .christmas-theme .account-app .activation-welcome h2{font-size:25px;line-height:1.22}
+ .christmas-theme .account-app .activation-welcome-steps{gap:10px;margin-block:18px}
+ .christmas-theme .account-app .activation-welcome-steps li{padding:11px;gap:10px}
+ .christmas-theme .account-app .activation-welcome-actions{gap:9px}
+ .christmas-theme .account-app .activation-welcome-primary{box-sizing:border-box;padding:12px 16px}
+ .christmas-theme .account-app .activation-welcome-help{padding:10px;min-height:44px}
+ .christmas-theme .account-app .celebrate-colombia .cel-signature{font-size:10px}
+ .christmas-theme .gifts-app .rg-list{gap:22px}
+ .christmas-theme .gifts-app :is(.rg-steps,.rg-rules){padding:22px 18px}
+ .christmas-theme .gifts-app .rg-nav{font-size:12px}
+}
+/* No new continuous animation. Hover transitions are capped at 180 ms. */
+@media(prefers-reduced-motion:reduce){
+ .christmas-theme .account-app :is(.sub-card,.banner,.aw-filters button,.aw-controls input,.aw-controls select,.activation-welcome-primary,.cel-go),
+ .christmas-theme .admin-app :is(.card,.kpi,.stat,.btn),
+ .christmas-theme .gifts-app :is(.rg-card,.rg-open,.rg-btn,.rg-ib,.rg-nav a){transition:none!important}
+}

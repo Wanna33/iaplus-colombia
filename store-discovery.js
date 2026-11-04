@@ -59,7 +59,11 @@
     const model=createModel({getProducts,storage:()=>win.localStorage});
     const duration=doc.getElementById('discoveryDuration'),budget=doc.getElementById('discoveryBudget');
     const only=doc.getElementById('discoveryFavorites'),clear=doc.getElementById('discoveryClear');
-    let durationKey='',budgetKey='';
+    const more=doc.getElementById('discoveryMore'),activeCount=doc.getElementById('discoveryActiveCount');
+    const summary=more?.querySelector('summary');
+    // Respect controls restored by the browser as well as saved product choices.
+    model.configure({duration:duration.value,budget:budget.value,favoritesOnly:only.getAttribute?.('aria-pressed')==='true'});
+    let durationKey='',budgetKey='',disclosureInitialized=false;
     const bookmark='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"/></svg>';
     const label=id=>getProducts().find(p=>p.id===id)?.name||'este plan';
     function cardAction(plan){
@@ -77,8 +81,16 @@
       // Search already has its own clear control; this resets combined filters.
       clear.hidden=!(model.active()||category!=='Todos'||sort);
       controls.hidden=false;
+      const active=Number(!!model.state.duration)+Number(!!model.state.budget)+Number(model.state.favoritesOnly);
+      if(activeCount){activeCount.textContent=`${active} ${active===1?'activo':'activos'}`;activeCount.hidden=!active;}
+      if(more){
+        // Set the initial layout once; native details then keeps the user's choice.
+        if(!disclosureInitialized){more.open=!win.matchMedia?.('(max-width: 600px)').matches||model.active()||model.count()>0;disclosureInitialized=true;}
+        more.hidden=false;
+      }
     }
     function reset(){model.reset();onReset();}
+    function focusFilter(target=duration){(more&&!more.open?summary:target)?.focus({preventScroll:true});}
     function updateFavoriteButton(button,id){
       const selected=model.has(id);
       button.setAttribute('aria-pressed',String(selected));
@@ -94,7 +106,7 @@
     duration.addEventListener('change',()=>{model.configure({duration:duration.value});onChange();});
     budget.addEventListener('change',()=>{model.configure({budget:budget.value});onChange();});
     only.addEventListener('click',()=>{model.configure({favoritesOnly:!model.state.favoritesOnly});onChange();});
-    clear.addEventListener('click',()=>{reset();duration.focus();});
+    clear.addEventListener('click',()=>{reset();focusFilter();});
     doc.addEventListener('click',event=>{
       const saved=event.target.closest?.('[data-favorite]');
       if(saved){
@@ -103,12 +115,12 @@
         if(model.state.favoritesOnly)onChange();
         else{updateFavoriteButton(saved,id);only.querySelector('[data-favorite-count]').textContent=String(model.count());}
         const current=[...doc.querySelectorAll('[data-favorite]')].find(b=>b.dataset.favorite===id);
-        (current||only).focus({preventScroll:true});
+        if(current)current.focus({preventScroll:true});else focusFilter(only);
         if(current){current.classList.remove('just-saved');if(result.selected)current.classList.add('just-saved');}
         notify?.(`${label(id)} ${result.selected?'guardado en favoritos':'quitado de favoritos'}.${result.saved?'':' El cambio solo se conserva mientras esta página esté abierta.'}`);
         return;
       }
-      if(event.target.closest?.('[data-reset-discovery]')){reset();duration.focus();}
+      if(event.target.closest?.('[data-reset-discovery]')){reset();focusFilter();}
     });
     win.addEventListener('storage',event=>{
       if(event.key!==KEY&&event.key!==null)return;
