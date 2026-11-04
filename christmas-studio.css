@@ -45,6 +45,7 @@
 .studio-product-dock{grid-area:products;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-self:start;padding-top:2px}
 .studio-product-dock>a,.studio-product-dock>button{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 9px;min-height:62px;min-width:0;border:1px solid #d7bb7b42;border-radius:14px;background:#fff8e60a;color:#fff6dd;font:700 11px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left;text-decoration:none;box-shadow:none;transition:background 180ms,border-color 180ms,transform 180ms}
 .studio-product-dock img{display:block;width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:#fff}
+.studio-product-dock>a img{background:#0b3327}
 .studio-product-dock small{display:block;font-size:8px;line-height:1.4;font-weight:500;color:#d0dcbf;margin-top:3px}
 .studio-product-dock>a:hover,.studio-product-dock>button:hover{background:#fff8e617;border-color:#d5b271;transform:translateY(-2px)}
 .christmas-theme .storefront .hero :is(a,button):focus-visible{outline:3px solid #f1d89e!important;outline-offset:4px}
