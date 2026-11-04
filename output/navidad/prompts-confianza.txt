@@ -1,0 +1,19 @@
+# Initial generation prompt (built-in image_gen)
+
+Use case: photorealistic-natural
+Asset type: premium editorial lifestyle photograph for the trust section of a Colombian digital-account storefront.
+Primary request: Create one original horizontal 16:9 photograph of a contemporary Colombian adult couple smiling naturally while choosing a digital account together on a laptop in a bright, inviting coffee-farm living room or café, decorated for Christmas.
+Scene/backdrop: an authentic Colombian coffee-growing finca interior with warm wood, cream plaster, large openings to lush tropical greenery. A tasteful Christmas tree with warm white lights, a green garland, and restrained burgundy and gold ornaments establishes the festive season. Tropical warmth, no winter setting.
+Subject: two contemporary Colombian adults, one woman and one man, casually elegant light clothing suitable for warm weather, seated together by a wooden table. Their attention and a natural shared smile are directed toward the laptop as they browse; relaxed, credible candid moment, realistic skin texture and anatomy.
+Composition/framing: horizontal 16:9 wide editorial photograph. Both faces grouped around the center-left, comfortable space around their heads, the laptop and hands clearly composed in the lower central area, Christmas decor visible toward the right. Allow generous breathing room for responsive website cropping. Human connection and trust are the focus.
+Lighting/mood: luminous natural late-afternoon daylight and soft warm Christmas lights, inviting, premium and authentic. Balanced highlights, clean warm-neutral colors, gentle depth of field, clear faces.
+Color palette: cream, natural wood, rich green foliage, small burgundy and muted gold details.
+Constraints: no words, lettering, prices, logos, brands or watermark anywhere. The laptop is unbranded, with a softly visible abstract interface containing only nonverbal shapes and no legible words. Exactly two adults.
+Avoid: snow, cold winter scenery, costumes, Santa outfits, pumpkins, bats, ghosts, Halloween decorations, cartoon styling, exaggerated reactions, plastic skin, overprocessed HDR, clutter.
+
+# Targeted correction prompt (built-in image_gen)
+
+Use case: precise-object-edit
+Edit target: the supplied Christmas lifestyle photograph.
+Change only the outward-facing laptop lid: remove the pale rectangular screen/interface graphic currently printed on the back of the laptop. Replace that entire visible rear lid with one physically plausible, unbranded matte warm-gray laptop surface, matching the existing laptop edges, material, lighting, perspective and reflections. No display, screen, sticker, text, logo or rectangular panel on the outward-facing rear lid. The couple is looking at the actual screen on their side, which is hidden from the camera.
+Keep everything else exactly unchanged: the two adults, their faces and expressions, hands, clothing, coffee-farm scenery, table, laptop position and base, Christmas tree, garland, lighting, burgundy and gold details, composition, framing and 16:9 dimensions. Preserve natural editorial photographic quality. Do not add any words, prices, marks or objects.

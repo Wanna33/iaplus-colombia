@@ -18,14 +18,6 @@
 .cel-burst{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
 .cel-burst span{position:absolute;top:-40px;animation:celFall 3.6s ease-in forwards}
 
-/* Versión de Halloween: se activa solo con html.halloween-theme */
-.celebrate.spooky{background:linear-gradient(180deg,#241d3b,#2f2350 60%,#3a2a44);color:#f5eafc;box-shadow:0 28px 80px rgba(240,162,71,.25)}
-.celebrate.spooky h2{color:#ffd98c}
-.celebrate.spooky .eyebrow{color:#f0a247}
-.celebrate.spooky p{color:#e9dcf7}
-.celebrate.spooky .cel-steps li{background:rgba(255,255,255,.07)}
-.celebrate.spooky .cel-steps small{color:#cbbbe0}
-.celebrate.spooky .cel-help{color:#ffd98c}
 
 /* Colombian welcome: natural scenery, pearl surfaces, emerald and restrained gold. */
 .celebrate.celebrate-colombia{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:#fcfdf8;color:#1b392c;border:1px solid #d6e1d6;border-radius:24px;box-shadow:0 26px 90px #0d302a52;font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
@@ -70,7 +62,6 @@
 .guide-video-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;margin:14px auto 4px;padding:12px 20px;border-radius:999px;border:1.5px solid #d9d4ee;background:#f6f2ff;color:#4c2f9c;font:inherit;font-weight:800;font-size:14.5px;cursor:pointer;min-height:44px;transition:transform .2s,background .2s}
 .guide-video-btn:hover{background:#efe8ff;transform:translateY(-1px)}
 .cel-video{width:100%}
-.celebrate.spooky .guide-video-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#ffd98c}
 .guide-video{position:fixed;inset:0;margin:auto;width:min(860px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:0;border-radius:26px;padding:0;background:linear-gradient(160deg,#17122e,#2a1f4d 62%,#1c1537);color:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5);z-index:2147483000}
 .guide-video::backdrop{background:rgba(12,10,24,.72);backdrop-filter:blur(6px)}
 .gv-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 0 20px}

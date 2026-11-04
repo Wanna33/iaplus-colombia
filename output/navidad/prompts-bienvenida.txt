@@ -1,0 +1,13 @@
+Use case: ads-marketing.
+Asset type: premium photorealistic Christmas welcome banner for IA Plus Colombia digital-account activation links.
+Create ONE finished landscape image with exact 16:9 composition, preferably 2048×1152 pixels.
+Scene: a warm contemporary Colombian coffee-farm interior, refined natural wood, cream plaster and dark emerald accents. An elegant adult Colombian woman in her early thirties smiles naturally toward the viewer, seated behind a beautiful wood desk with an open laptop and one emerald-green gift wrapped with a gold ribbon. The laptop has no visible brand or readable screen text. A tasteful Christmas tree with warm golden fairy lights creates soft photographic bokeh in the right background. Include a single discreet red festive detail. Realistic skin, hands and fabric; high-end editorial lifestyle photography, natural warm light, sophisticated and welcoming.
+Composition: the woman occupies the RIGHT THIRD, with her face, laptop and gift fully visible and comfortable margins. The LEFT HALF is uncluttered, very dark emerald-green space integrated naturally into the composition, with ample contrast for large clear typography. Compose for a wide website banner, with visual depth and generous breathing space.
+Text must be actually rendered into the image, perfectly spelled and highly legible. On the LEFT, use generous modern bold warm-ivory typography for exactly this headline, preserving punctuation and capitalization:
+"¡Bienvenido a IA Plus!"
+Directly below it, smaller but still easily readable warm-ivory typography, exactly:
+"Tu acceso está a un paso"
+The headline may occupy two balanced lines. The two phrases above are the ONLY text anywhere in the image. Render the inverted exclamation mark and the accent in "está" correctly. No extra lettering, logo, watermark, button or fabricated brand mark.
+Palette: deep emerald green, warm cream, natural wood, restrained metallic gold, subtle red detail.
+Avoid: snow, winter landscapes, Santa outfits, costumes, Halloween, cartoon appearance, plastic skin, extra people, clutter, codes, activation codes, passwords, prices, currency signs and deformed logos. No additional slogans. Keep the festive Colombian setting warm and contemporary.
+Output should be an opaque, polished, crisp 16:9 hero image.

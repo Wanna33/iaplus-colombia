@@ -2,7 +2,7 @@
 (function (scope) {
   'use strict';
   function markup() {
-    return `<svg class="world-map world-map-pro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720" role="img" aria-label="Tienda virtual de IA Plus. A la izquierda están recepción, sala de espera e inventario. En el centro, los exhibidores de cuentas digitales y sus pasillos. A la derecha, una oficina de soporte con tres escritorios y dos cajas. La entrada está abajo a la izquierda y la salida abajo a la derecha.">
+    return `<svg class="world-map world-map-pro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720" role="img" aria-label="Tienda virtual de IA Plus con guirnaldas navideñas y un pequeño árbol con regalos en el rincón izquierdo. A la izquierda están recepción, sala de espera e inventario. En el centro, los exhibidores de cuentas digitales y sus pasillos. A la derecha, una oficina de soporte con tres escritorios y dos cajas. La entrada está abajo a la izquierda y la salida abajo a la derecha.">
     <defs>
       <linearGradient id="ws-wall" x2="0" y2="1"><stop stop-color="#587b6d"/><stop offset="1" stop-color="#3c6054"/></linearGradient>
       <linearGradient id="ws-floor" x2="0" y2="1"><stop stop-color="#f5f1e5"/><stop offset="1" stop-color="#e7e8d8"/></linearGradient>
@@ -17,6 +17,8 @@
       <g id="ws-monitor"><rect x="-19" y="-15" width="38" height="27" rx="4" fill="#315a53"/><rect x="-15" y="-11" width="30" height="18" rx="2" fill="#a8d8c6"/><path d="M-11-6H2M-11-1H9M-11 3H-2" stroke="#649c89" stroke-width="1.4" stroke-linecap="round"/><path d="M0 12v5m-9 0H9" stroke="#315a53" stroke-width="3" stroke-linecap="round"/></g>
       <g id="ws-box"><path d="M-13-7l13-6 13 6v19L0 18l-13-6z" fill="#d5af76"/><path d="M-13-7L0-1l13-6M0-1v19" fill="none" stroke="#b68e54" stroke-width="1.2"/><path d="M-6-10L7-4v7" fill="none" stroke="#f6dfb5" stroke-width="4"/><path d="M5 9l5-2" stroke="#927445" stroke-width="1.2"/></g>
       <g id="ws-lamp"><ellipse cy="13" rx="15" ry="4" fill="#f8e5ab" opacity=".22"/><path d="M0-12v5" stroke="#c8b786" stroke-width="2"/><path d="M-12 6q2-15 12-15T12 6z" fill="#e0c28c"/><ellipse cy="6" rx="12" ry="4" fill="#fff0c4"/></g>
+      <g id="ws-christmas-tree"><ellipse cy="17" rx="23" ry="7" fill="#274b3820"/><rect x="-5" y="1" width="10" height="17" rx="2" fill="#9b7850"/><path d="M0-48 14-23H-14z" fill="#427d58"/><path d="M0-35 19-4H-19z" fill="#356f50"/><path d="M0-23 22 10H-22z" fill="#2a654a"/><path d="M-11-25q11 8 22 0M-15-9q15 10 30 0M-17 5q17 8 34 0" fill="none" stroke="#d8ba72" stroke-width="1.5"/><path d="m0-58 2.5 5 5.5.8-4 3.9.9 5.5L0-45.4-4.9-42.8-4-48.3l-4-3.9 5.5-.8z" fill="#f4d58b"/><g fill="#f6dfa1"><circle cx="-9" cy="-24" r="2"/><circle cx="9" cy="-24" r="2"/><circle cx="-13" cy="-8" r="2"/><circle cx="13" cy="-8" r="2"/><circle cy="8" r="2"/></g><g fill="#b96a56"><circle cy="-17" r="2.5"/><circle cx="-10" cy="1" r="2.5"/><circle cx="10" cy="1" r="2.5"/></g></g>
+      <g id="ws-holiday-garland"><path d="M0 0q37 15 74 0t74 0t74 0" fill="none" stroke="#2c5746" stroke-width="6" stroke-linecap="round"/><path d="M0 0q37 15 74 0t74 0t74 0" fill="none" stroke="#7e9a66" stroke-width="1.4" stroke-dasharray="2 5"/><g fill="#f4d58b"><circle cx="18" cy="5.5" r="2.2"/><circle cx="55" cy="5.7" r="2.2"/><circle cx="92" cy="-5.5" r="2.2"/><circle cx="129" cy="-5.7" r="2.2"/><circle cx="166" cy="5.5" r="2.2"/><circle cx="203" cy="5.7" r="2.2"/></g><path d="m74-2-6-4v8l6-2 6 2v-8zm148 0-6-4v8l6-2 6 2v-8z" fill="#b7705e"/></g>
       <style>
         .ws-label{font-family:inherit;font-weight:750;font-size:11px;letter-spacing:1.2px;fill:#4b6857}
         .ws-small{font-family:inherit;font-weight:600;font-size:9px;letter-spacing:.5px;fill:#6c7d66}
@@ -39,6 +41,8 @@
     <text x="600" y="57" class="ws-title" font-size="10" text-anchor="middle">UN EQUIPO. MUCHAS POSIBILIDADES.</text>
     <path d="M875 48h61M885 56h51M895 64h41" stroke="#91ad8d" stroke-width="2" stroke-linecap="round" opacity=".6"/>
     <circle cx="849" cy="56" r="12" fill="#e6d6a9"/><path d="M849 48v9l5 3" fill="none" stroke="#53785e" stroke-width="2" stroke-linecap="round"/>
+    <!-- Static Christmas trim stays on the wall, above every label and walking route. -->
+    <g aria-hidden="true"><use href="#ws-holiday-garland" x="348" y="76"/><use href="#ws-holiday-garland" x="586" y="76"/></g>
 
     <!-- Soft ceiling light pools and floor zoning, without obscuring paths. -->
     <ellipse cx="175" cy="195" rx="145" ry="110" fill="url(#ws-light)"/>
@@ -61,7 +65,8 @@
       <rect x="231" y="182" width="12" height="14" rx="3" fill="#7f9d86"/><path d="M234 182l-2-10m5 10 3-12" stroke="#456e5b" stroke-width="2"/>
     </g>
     <text x="100" y="245" class="ws-label">RECEPCIÓN</text>
-    <use href="#ws-plant" x="63" y="271" transform="translate(0 0)"/>
+    <!-- Reuses the small plant corner; kept left of Luna, the desk and reception label. -->
+    <g aria-hidden="true"><use href="#ws-christmas-tree" x="64" y="289"/><rect x="44" y="301" width="15" height="13" rx="2" fill="#d7b77b"/><path d="M51.5 301v13m-7.5-8h15" stroke="#f8e4b7" stroke-width="2"/><path d="M51 300q-9-8-8-1 0 3 8 1m1 0q8-8 8-1 0 3-8 1" fill="none" stroke="#f8e4b7" stroke-width="1.5"/><rect x="70" y="306" width="16" height="12" rx="2" fill="#ad6959"/><path d="M78 306v12m-8-8h16" stroke="#ebd7a6" stroke-width="2"/><path d="M78 305q-7-7-7-2 0 3 7 2m0 0q7-7 7-2 0 3-7 2" fill="none" stroke="#ebd7a6" stroke-width="1.5"/></g>
 
     <!-- Waiting lounge and coffee corner. -->
     <rect x="50" y="324" width="228" height="133" rx="18" fill="#d9e6d5" stroke="#c6d6bf"/>

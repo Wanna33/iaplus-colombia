@@ -350,7 +350,7 @@ function setTab(t){
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
 
   if(t==="log"){ loadLog(logCli); loadSeg(); }
-  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104-world7"),loadAdminScript("admin-world-scene.js?v=20261104-world7"),loadAdminScript("admin-world.js?v=20261104-world7")]).then(()=>{
+  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104-world7"),loadAdminScript("admin-world-scene.js?v=20261104-navidad1"),loadAdminScript("admin-world.js?v=20261104-world7")]).then(()=>{
     if(curTab!=="world")return;
     window.IAPWorld.mount(document.getElementById("adminWorld"),{
       readChats:async()=>{

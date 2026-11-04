@@ -1,17 +1,47 @@
+/* Christmas collection: evergreen, burgundy, candlelight and Colombian photography. */
+html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasonal-green:#173f31}
 .seasonal-banner[hidden]{display:none!important}
-.seasonal-banner{position:relative;isolation:isolate;display:flex;align-items:center;min-height:210px;max-width:1320px;margin:24px auto 8px;padding:30px clamp(22px,6vw,72px);overflow:hidden;border-radius:28px;color:#fff;background:#211b35 url("assets/halloween-colombia.jpg") center 56%/cover no-repeat;box-shadow:0 16px 45px #20172c24}
-.seasonal-banner::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#171326ef 0%,#171326c9 46%,#1713261c 100%)}
-.seasonal-banner>div{max-width:570px}.seasonal-banner span{font-size:10px;font-weight:800;letter-spacing:.16em;color:#ffd98c}.seasonal-banner h2{font-size:clamp(23px,3vw,34px);line-height:1.15;letter-spacing:-.04em;margin:10px 0}.seasonal-banner p{font-size:14px;color:#f5eafc;line-height:1.6}
-html.halloween-theme{--seasonal-accent:#9b70d8;--seasonal-warm:#f0a247}
-html.halloween-theme .nav{border-bottom-color:#e8e0f3}
-html.halloween-theme .nav .brand{position:relative}
-html.halloween-theme .nav .brand::after{content:"COLOMBIA";position:absolute;left:0;bottom:-5px;font-size:7px;font-weight:800;letter-spacing:.13em;color:#3d506c}
-html.halloween-theme .hero .pill{border-color:#eadcf8;background:#f6f0fd;color:#533d72}
-html.halloween-theme .hero .pill .dot{background:linear-gradient(135deg,#e89a42,#9971d2)}
-html.halloween-theme .hero .grad{background-image:linear-gradient(105deg,#865ac7,#d1883c);-webkit-background-clip:text;background-clip:text;color:transparent}
-html.halloween-theme .featured-section .eyebrow{color:#7651a4}
-html.halloween-theme .activation-card{box-shadow:0 18px 48px #58377a14,inset 0 1px 0 #fff}
-html.halloween-theme .activation-card .btn-primary{background:linear-gradient(120deg,#8052bd,#a869b2)}
-@media(max-width:1368px){.seasonal-banner{margin-left:24px;margin-right:24px}}
-@media(max-width:600px){.seasonal-banner{min-height:188px;margin:14px 16px 4px;padding:23px 20px;border-radius:22px;background-position:58% center}.seasonal-banner::before{background:linear-gradient(90deg,#171326ed,#171326a8 65%,#17132652)}.seasonal-banner span{font-size:8px}.seasonal-banner h2{max-width:300px;font-size:24px}.seasonal-banner p{max-width:270px;font-size:12px}.section.featured-section{scroll-margin-top:78px}.activation-hub{scroll-margin-top:76px}}
-@media(prefers-reduced-motion:reduce){.seasonal-banner *{animation:none!important;scroll-behavior:auto!important}}
+.seasonal-banner{position:relative;isolation:isolate;display:flex;align-items:center;min-height:154px;max-width:1192px;margin:26px auto;padding:28px 38px;overflow:hidden;border:1px solid #be9a574d;border-radius:22px;color:#fff7e6;background:linear-gradient(100deg,#113f32 0%,#1b4c39 66%,#264f36);box-shadow:0 12px 30px #153a2910}
+.seasonal-banner:after{content:'✦';position:absolute;right:48px;top:50%;translate:0 -50%;font-size:100px;line-height:1;color:#d3b778;opacity:.8;pointer-events:none}
+.seasonal-banner:before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 82% 30%,#d4bb794a 0 2px,transparent 3px),radial-gradient(circle at 93% 65%,#ebd29975 0 3px,transparent 4px),radial-gradient(circle at 77% 74%,#d4bb794a 0 2px,transparent 3px)}
+.seasonal-banner>div{max-width:78%}.seasonal-banner span{font-size:10px;font-weight:800;letter-spacing:.15em;color:#edd298}.seasonal-banner h2{font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-.04em;margin:10px 0}.seasonal-banner p{font-size:14px;color:#e1eadd;line-height:1.7;margin:0}
+.christmas-theme .storefront{background:#faf9f3}
+.christmas-theme .storefront .hero{background:linear-gradient(120deg,#faf7ec,#f0f3e8 60%,#e6eee2)}
+.christmas-theme .storefront .hero .pill{color:#6f3840;border-color:#dcc7ab;background:#fff9ec}
+.christmas-theme .storefront .hero .pill .dot{background:#a04a50;box-shadow:none;animation:none}
+.christmas-theme .storefront .hero-colombia-art{aspect-ratio:4/3;height:auto;max-height:none;object-fit:contain}
+.christmas-theme .storefront .hero-collage{border-color:#d4bd8c;box-shadow:0 22px 56px #20422e18}
+.christmas-theme .storefront .collage-country{background:#fff7e5f0;color:#68532f;border:1px solid #dfca9a}
+.christmas-theme .storefront .collage-plan{background:#fffaf0f5;border-color:#dfc793}
+.christmas-theme .storefront .feature-chatgpt3{background:linear-gradient(145deg,#173f31,#1c513b);border-color:#b79b59}
+.christmas-theme .storefront .trust-story-visual{min-height:0;border:1px solid #dac9a8;aspect-ratio:16/9}
+.christmas-theme .storefront .trust-photo-main{width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;object-position:center}
+.christmas-theme .storefront .trust-image-cta{background:#173f31ec;border-color:#ddc68b;color:#fff8e4}
+.christmas-theme .storefront .gift-strip{background:#fff8e8;border-color:#e3ce9e}
+.christmas-theme .storefront .gift-strip-ic{background:#8b3541;color:#fff9e9}
+.christmas-theme .storefront .gift-strip-btn{background:#7c303c;color:#fff8e4;border-color:#7c303c}
+.christmas-theme .storefront .activation-hub{background:#f2f2e5;border-color:#daca9f}
+.christmas-theme .storefront .eyebrow{color:#7c4744}
+.christmas-theme .storefront .nav{border-bottom-color:#d5bd86}
+.christmas-theme .account-app .account-overview{background:linear-gradient(110deg,#153f31,#265c40);border:1px solid #c9ad6b}
+.christmas-theme .account-app .account-eyebrow{color:#f0d59d}
+.christmas-theme .activation-welcome{grid-template-columns:minmax(0,1.12fr) minmax(310px,.88fr);background:#fffcf4;border-color:#d9c697;align-items:center}
+.christmas-theme .activation-welcome-art{min-height:0;aspect-ratio:16/9;background:#0c2c20}
+.christmas-theme .activation-welcome-art img{display:block;width:100%;height:auto;min-height:0;aspect-ratio:16/9;object-fit:contain}
+.christmas-theme .activation-welcome-art:after{display:none}
+.christmas-theme .activation-welcome-kicker{color:#853c45}
+.christmas-theme .activation-welcome-kicker:before{content:'🎄'}
+.christmas-theme .activation-welcome-primary{background:#214f38;border:1px solid #bc9b53}
+.christmas-theme .celebrate-colombia .cel-colombia-hero{background:linear-gradient(90deg,#123b2fe6,#123b2f9c 62%,#123b2f35),url('assets/navidad-portada-2026-640.webp') center 38%/cover;color:#fff9e7;border-bottom:1px solid #c1a15d}
+.christmas-theme .celebrate-colombia .cel-confirmed{color:#ffe2a2}
+.christmas-theme .admin-app .side-brand small:after{content:' · NAVIDAD';color:#ead092}
+.christmas-theme .admin-app .side{border-right-color:#bfa064}
+.christmas-theme .admin-app .bar{border-bottom-color:#ddc99a}
+.christmas-theme .gifts-app{--orange:#913b42;--bg:#fcfaf3;background:#fcfaf3}
+.christmas-theme .gifts-app .rg-hero-art{border:1px solid #d6c193;border-radius:22px;overflow:hidden;background:#f2ebd7}
+.christmas-theme .gifts-app .rg-hero-art img{width:100%;height:auto;display:block;aspect-ratio:16/9;object-fit:contain}
+.christmas-theme .gifts-app .rg-eyebrow{color:#873a42}
+@media(max-width:1240px){.seasonal-banner{margin-inline:24px}}
+@media(max-width:800px){.christmas-theme .activation-welcome{grid-template-columns:1fr}.christmas-theme .activation-welcome-art{width:100%}.christmas-theme .activation-welcome-copy{padding:24px}.christmas-theme .storefront .trust-story-visual{max-width:620px}}
+@media(max-width:600px){.seasonal-banner{margin:18px 20px;padding:24px 20px;min-height:150px;border-radius:18px}.seasonal-banner>div{max-width:88%}.seasonal-banner:after{right:15px;font-size:47px;opacity:.4}.seasonal-banner h2{font-size:24px}.seasonal-banner p{font-size:13px}.seasonal-banner span{font-size:9px}.christmas-theme .storefront .hero-colombia-art{aspect-ratio:4/3}.christmas-theme .storefront .trust-image-cta{padding:12px 15px;max-width:calc(100% - 30px)}.christmas-theme .storefront .trust-image-cta b{font-size:18px}.christmas-theme .activation-welcome-copy{padding:22px 20px}}
+@media(prefers-reduced-motion:reduce){.seasonal-banner *{animation:none!important;transition:none!important}}

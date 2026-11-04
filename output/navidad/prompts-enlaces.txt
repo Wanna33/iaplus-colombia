@@ -1,0 +1,11 @@
+Use case: ads-marketing.
+Asset type: Open Graph and WhatsApp link preview for IA Plus Colombia. Create ONE final image, horizontal 1200 x 630 pixels, 1.91:1 aspect ratio, full bleed with no border.
+Primary request: a polished premium Christmas brand advertisement with photorealistic holiday interiors and perfectly legible editorial typography.
+Scene/backdrop: a modern Colombian home or boutique interior at Christmas, tasteful warm cream walls with subtle natural texture, a realistic green Christmas tree with small warm golden lights, and gift boxes wrapped in deep green and burgundy. Place the tree, gifts and small Christmas decorations toward the sides. No people. The scene should feel inviting, refined and believable, with soft golden evening lighting.
+Composition/framing: wide horizontal composition. Reserve the central area as calm, uncluttered warm cream negative space with high contrast deep forest green lettering. All three lines of text must fit comfortably within the central safe area, well clear of the edges, legible when the image is displayed as a small social preview. Keep the decorative objects at the margins, framing rather than covering the text.
+Text (verbatim, and no other text):
+Line 1, largest and most prominent: "IA Plus Colombia"
+Line 2, medium size: "Navidad a tu manera"
+Line 3, smaller but still clearly readable: "Cuentas digitales · Activación guiada"
+Typography: clean, premium, professional brand typography. Crisp letterforms with excellent spacing. Preserve every accent and the middle dot exactly. Center the typography as a balanced three-line lockup.
+Constraints: use original photography-style imagery and clean typography only, not an existing raster logo. No prices, discount offers, extra slogans, product logos, watermarks or interface elements. No Halloween objects, snow, snowflakes or wintry landscape. Colombian Christmas atmosphere with natural greenery, warm lights, cream, deep green, gold and burgundy.

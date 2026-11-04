@@ -19,7 +19,7 @@ const soloRevisar = process.argv.includes('--check');
 for(const bundle of Object.values(PAQUETES))bundle.hojas.push('pro-refresh.css');
 PAQUETES['tienda.min.css'].hojas.push('store-discovery.css');
 PAQUETES['cuenta.min.css'].hojas.push('account-workspace.css');
-for(const bundle of Object.values(PAQUETES))bundle.hojas.push('interface-motion.css');
+for(const bundle of Object.values(PAQUETES)){bundle.hojas=bundle.hojas.filter(file=>file!=='seasonal.css');bundle.hojas.push('interface-motion.css','seasonal.css');}
 let desactualizado = false;
 for (const [salida, { paginas, hojas }] of Object.entries(PAQUETES)) {
   const css = hojas.map((h) => fs.readFileSync(path.join(root, h), 'utf8')).join('\n');
