@@ -1431,7 +1431,7 @@ let PEDIDOS = [];
 const PAY_TAG = {ENTREGADO:["t-ok","Entregado"], PENDIENTE:["t-w","Pendiente"], APROBADO_SIN_STOCK:["t-b","Aprobado · sin cupo"], RECHAZADO:["t-g","Rechazado"]};
 /* ---------- Ventas del asistente de WhatsApp ---------- */
 let waTimer = null, waCfgTimer = null;
-const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pagó · por confirmar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"RECLAMO":["t-b","⚠️ Reclamo (devolución u otro)"],"NO VERIFICADO":["t-g","🤖 Comprobante no válido · lo maneja el asistente"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"AUTO-CONFIRMADO":["t-ok","🤖 Venta automática · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
+const WA_TAG = {"POR CONFIRMAR":["t-w","💰 Pago por revisar"],"NECESITA AYUDA":["t-b","🙋 Pide hablar contigo"],"RECLAMO":["t-b","⚠️ Reclamo (devolución u otro)"],"NO VERIFICADO":["t-g","🧾 Comprobante pendiente de verificación"],"CONFIRMADO":["t-ok","✔ Confirmado · enlace enviado"],"AUTO-CONFIRMADO":["t-ok","🤖 Venta automática · enlace enviado"],"CONFIRMADO (enviar a mano)":["t-w","✔ Confirmado · envía el enlace a mano"],"RECHAZADO":["t-g","✖ Rechazado"],"ATENDIDO":["t-g","✔ Atendido"]};
 async function loadWa(){
   const el = $("#waRows"); if(!el) return;
   try{ WAV = (await api("admin_wa_list")).ventas; drawWa(); }
@@ -1448,8 +1448,8 @@ function drawWa(){
   el.innerHTML = list.length ? list.map(v=>{ const [c,t] = WA_TAG[v.estado]||["t-g",v.estado];
     return `<div class="wacard" data-wa="${esc(v.id)}"><div class="wah"><b>${esc(v.nombre||"Cliente")}</b> <a href="https://wa.me/${esc(v.telefono)}" target="_blank" rel="noopener" class="mono">+${esc(v.telefono)}</a> <span class="tag ${c}">${t}</span><small style="color:var(--mut);margin-left:auto">${fdt(v.fecha)}</small></div>
       <div class="wab">${v.producto?`${EMO(v.producto)} <b>${esc(v.producto)}</b> · ${money(v.monto)}`:""}${v.gmail?` · Gmail: <span class="mono">${esc(v.gmail)}</span>`:""}${v.codigo?` · Código <span class="mono">${esc(v.codigo)}</span>`:""}${v.nota?`<div class="note">📝 ${esc(v.nota)}</div>`:""}</div>
-      <div class="acts">${v.comprobante?`<button class="btn s" data-wv="media">🧾 Ver comprobante</button>`:""}
-        ${v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"?`<button class="btn s p" data-wv="ok">🛠 Resolver excepción</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
+      <p class="hint">Autoriza después de verificar el ingreso. Se generará el acceso y se intentará enviar su enlace por WhatsApp.</p><div class="acts">${v.comprobante?`<button class="btn s" data-wv="media">🧾 Ver comprobante</button>`:""}
+        ${v.estado==="POR CONFIRMAR"||v.estado==="NO VERIFICADO"?`<button class="btn s p" data-wv="quick" title="Autoriza solo después de comprobar que recibiste este pago">✔ Autorizar y enviar acceso</button><button class="btn s" data-wv="ok">Revisar / corregir datos</button><button class="btn s d" data-wv="no">✖ Rechazar</button>`:""}
         ${v.estado==="NECESITA AYUDA"?`<button class="btn s p" data-wv="ok">✔ Confirmar una venta</button><button class="btn s" data-wv="done">Marcar atendido</button>`:""}${v.estado==="RECLAMO"?`<button class="btn s" data-wv="done">Marcar resuelto</button>`:""}
         ${v.codigo?`<button class="btn s" data-wv="link">🔗 Copiar enlace</button>`:""}
         <a class="btn s wa" target="_blank" rel="noopener" href="https://wa.me/${esc(v.telefono)}">💬 Abrir chat</a></div></div>`; }).join("")
@@ -1476,12 +1476,13 @@ async function waAction(v, a){
     const f = await askForm("Rechazar el pago de "+(v.nombre||"+"+v.telefono),[{id:"motivo",label:"Mensaje para el cliente (opcional)",area:true,value:"Hola, no encontramos tu pago. ¿Me envías de nuevo el comprobante, por favor?"},{id:"avisar",label:"Enviarle este mensaje por WhatsApp",type:"check",value:true}],"","Rechazar");
     if(!f) return; const j = await api("admin_wa_reject",{id:v.id,motivo:f.motivo,avisar:!!f.avisar}); toast(j.enviado?"Rechazado y avisado ✔":"Rechazado ✔"); return loadWa();
   }
-  if(a==="ok"){
+  if(a==="ok" || a==="quick"){
     const opts = Object.keys(PKEYS).map(n=>({v:PKEYS[n], l:n+" — "+money(priceOf(n))}));
-    const f = await askForm("Confirmar pago de "+(v.nombre||"+"+v.telefono),[{id:"producto",label:"Producto que compró",type:"select",opts,value:pkeyOf(v.producto)||"chatgpt"},{id:"monto",label:"Monto recibido (COP)",type:"number",value:v.monto||priceOf(v.producto)}],
+    const quick = a==="quick" && pkeyOf(v.producto) && Number(v.monto)>0;
+    const f = quick ? {producto:pkeyOf(v.producto),monto:Number(v.monto)} : await askForm("Confirmar pago de "+(v.nombre||"+"+v.telefono),[{id:"producto",label:"Producto que compró",type:"select",opts,value:pkeyOf(v.producto)||"chatgpt"},{id:"monto",label:"Monto recibido (COP)",type:"number",value:v.monto||priceOf(v.producto)}],
       "¿Ya te llegó el dinero? Al confirmar se crea un código y al cliente le llega su enlace de activación por WhatsApp.","Confirmar y enviar");
     if(!f) return; const j = await api("admin_wa_confirm",{id:v.id,producto:f.producto,monto:f.monto});
-    if(j.enviado) toast("Pago confirmado ✔ El cliente ya recibió su enlace de activación");
+    if(j.enviado) toast("Pago autorizado ✔ Enlace enviado por el servicio de WhatsApp");
     else { copyText(j.texto); showInfo(`<h2>✔ Código creado</h2><p>No se pudo enviar por WhatsApp${j.error?": "+esc(j.error):""}. El mensaje con el enlace quedó <b>copiado</b>; pégalo en el chat.</p><div class="acts" style="margin-top:10px"><a class="btn p wa" target="_blank" rel="noopener" href="https://wa.me/${esc(j.telefono)}?text=${encodeURIComponent(j.texto)}">💬 Enviar por WhatsApp</a></div>`); }
     await refresh(); return loadWa();
   }
@@ -1538,10 +1539,15 @@ async function loadWaCfg(){
     clearInterval(waCfgTimer); waCfgTimer = setInterval(()=>{ if(curTab==="wa" && !document.hidden) refrescarTerminal(); }, 30000);
   }catch(ex){ box.innerHTML = '<div class="capwarn">'+esc(ex.message)+'</div>'; }
 }
+const waOrdersBusy = new Set();
 document.addEventListener("click", e=>{
   const b = e.target.closest("[data-wv]"); if(!b) return;
   const v = WAV.find(x=>x.id===b.closest("[data-wa]").dataset.wa); if(!v) return;
-  b.disabled = true; waAction(v, b.dataset.wv).catch(ex=>toast(ex.message)).finally(()=>{ b.disabled = false; });
+  if(waOrdersBusy.has(v.id))return;
+  waOrdersBusy.add(v.id);
+  const controls=[...b.closest("[data-wa]").querySelectorAll("button[data-wv]")];
+  controls.forEach(x=>x.disabled=true);
+  waAction(v, b.dataset.wv).catch(ex=>toast(ex.message)).finally(()=>{waOrdersBusy.delete(v.id);controls.forEach(x=>x.disabled=false);});
 });
 document.addEventListener("change", e=>{ if(e.target.id==="waSt") drawWa(); });
 document.addEventListener("click", e=>{ if(e.target.id==="waReload") loadWa(); });
