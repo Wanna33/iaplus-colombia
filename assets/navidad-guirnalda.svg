@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="70" viewBox="0 0 480 70" fill="none">
+ <defs>
+  <linearGradient id="gold" x2="1" y2="1"><stop stop-color="#fff2b6"/><stop offset=".45" stop-color="#d9b466"/><stop offset="1" stop-color="#926026"/></linearGradient>
+  <radialGradient id="red" cx=".35" cy=".25"><stop stop-color="#d35054"/><stop offset="1" stop-color="#6c1629"/></radialGradient>
+  <g id="pine"><path d="M-30 0H30" stroke="#274e35" stroke-width="5"/><path d="m-26-12 9 12-9 12m10-25 10 13-10 13m10-27L4 0-6 14m10-26L14 0 4 12m10-23L24 0 14 11" stroke="#366442" stroke-width="3" stroke-linecap="round"/><path d="m-24-7 10 7-10 7m12-16 11 9-11 9m12-17 11 8L0 8m12-16 11 8-11 8" stroke="#577748" stroke-width="2"/></g>
+ </defs>
+ <path d="M-25 7Q120 61 240 6Q360 61 505 7" stroke="#153d2b" stroke-width="12"/>
+ <g><use href="#pine" transform="translate(0 14) rotate(15)"/><use href="#pine" transform="translate(48 28) rotate(10)"/><use href="#pine" transform="translate(96 32)"/><use href="#pine" transform="translate(144 29) rotate(-8)"/><use href="#pine" transform="translate(192 18) rotate(-18)"/><use href="#pine" transform="translate(240 6)"/><use href="#pine" transform="translate(288 18) rotate(18)"/><use href="#pine" transform="translate(336 29) rotate(8)"/><use href="#pine" transform="translate(384 32)"/><use href="#pine" transform="translate(432 28) rotate(-10)"/><use href="#pine" transform="translate(480 14) rotate(-15)"/></g>
+ <path d="M-10 19Q120 66 240 17Q360 66 490 19" stroke="#b99551" stroke-width="1.2"/>
+ <g fill="#ffe7a0" stroke="#f6cb6b" stroke-width="1"><circle cx="22" cy="29" r="3"/><circle cx="67" cy="40" r="3"/><circle cx="113" cy="43" r="3"/><circle cx="159" cy="38" r="3"/><circle cx="204" cy="28" r="3"/><circle cx="276" cy="28" r="3"/><circle cx="321" cy="38" r="3"/><circle cx="367" cy="43" r="3"/><circle cx="413" cy="40" r="3"/><circle cx="458" cy="29" r="3"/></g>
+ <path d="M120 33v13M360 33v13" stroke="#c9a35c"/>
+ <circle cx="120" cy="54" r="10" fill="url(#red)" stroke="#d0a35d"/><circle cx="360" cy="54" r="10" fill="url(#gold)"/>
+ <path d="M120 45v18M111 54h18M352 49q8 10 16 0M352 58q8-10 16 0" stroke="#eed08a" stroke-width=".7" opacity=".6"/>
+ <path d="M240 13c-22-18-34-6-20 4l20-4c22-18 34-6 20 4l-20-4-10 23-8-7 18-16 10 23 8-7z" fill="url(#red)" stroke="#d4af68" stroke-width="1.2"/><circle cx="240" cy="13" r="4" fill="url(#gold)"/>
+</svg>

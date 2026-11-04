@@ -2,7 +2,7 @@
 (function (scope) {
   'use strict';
   function markup() {
-    return `<svg class="world-map world-map-pro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720" role="img" aria-label="Tienda virtual de IA Plus con guirnaldas navideñas y un pequeño árbol con regalos en el rincón izquierdo. A la izquierda están recepción, sala de espera e inventario. En el centro, los exhibidores de cuentas digitales y sus pasillos. A la derecha, una oficina de soporte con tres escritorios y dos cajas. La entrada está abajo a la izquierda y la salida abajo a la derecha.">
+    return `<svg class="world-map world-map-pro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 720" role="img" aria-label="Tienda virtual de IA Plus con guirnaldas, luces navideñas y un pequeño árbol con regalos junto a una figura decorativa de Santa Claus en el rincón izquierdo. A la izquierda están recepción, sala de espera e inventario. En el centro, los exhibidores de cuentas digitales y sus pasillos. A la derecha, una oficina de soporte con tres escritorios y dos cajas. La entrada está abajo a la izquierda y la salida abajo a la derecha.">
     <defs>
       <linearGradient id="ws-wall" x2="0" y2="1"><stop stop-color="#587b6d"/><stop offset="1" stop-color="#3c6054"/></linearGradient>
       <linearGradient id="ws-floor" x2="0" y2="1"><stop stop-color="#f5f1e5"/><stop offset="1" stop-color="#e7e8d8"/></linearGradient>
@@ -19,6 +19,25 @@
       <g id="ws-lamp"><ellipse cy="13" rx="15" ry="4" fill="#f8e5ab" opacity=".22"/><path d="M0-12v5" stroke="#c8b786" stroke-width="2"/><path d="M-12 6q2-15 12-15T12 6z" fill="#e0c28c"/><ellipse cy="6" rx="12" ry="4" fill="#fff0c4"/></g>
       <g id="ws-christmas-tree"><ellipse cy="17" rx="23" ry="7" fill="#274b3820"/><rect x="-5" y="1" width="10" height="17" rx="2" fill="#9b7850"/><path d="M0-48 14-23H-14z" fill="#427d58"/><path d="M0-35 19-4H-19z" fill="#356f50"/><path d="M0-23 22 10H-22z" fill="#2a654a"/><path d="M-11-25q11 8 22 0M-15-9q15 10 30 0M-17 5q17 8 34 0" fill="none" stroke="#d8ba72" stroke-width="1.5"/><path d="m0-58 2.5 5 5.5.8-4 3.9.9 5.5L0-45.4-4.9-42.8-4-48.3l-4-3.9 5.5-.8z" fill="#f4d58b"/><g fill="#f6dfa1"><circle cx="-9" cy="-24" r="2"/><circle cx="9" cy="-24" r="2"/><circle cx="-13" cy="-8" r="2"/><circle cx="13" cy="-8" r="2"/><circle cy="8" r="2"/></g><g fill="#b96a56"><circle cy="-17" r="2.5"/><circle cx="-10" cy="1" r="2.5"/><circle cx="10" cy="1" r="2.5"/></g></g>
       <g id="ws-holiday-garland"><path d="M0 0q37 15 74 0t74 0t74 0" fill="none" stroke="#2c5746" stroke-width="6" stroke-linecap="round"/><path d="M0 0q37 15 74 0t74 0t74 0" fill="none" stroke="#7e9a66" stroke-width="1.4" stroke-dasharray="2 5"/><g fill="#f4d58b"><circle cx="18" cy="5.5" r="2.2"/><circle cx="55" cy="5.7" r="2.2"/><circle cx="92" cy="-5.5" r="2.2"/><circle cx="129" cy="-5.7" r="2.2"/><circle cx="166" cy="5.5" r="2.2"/><circle cx="203" cy="5.7" r="2.2"/></g><path d="m74-2-6-4v8l6-2 6 2v-8zm148 0-6-4v8l6-2 6 2v-8z" fill="#b7705e"/></g>
+      <g id="ws-santa-figurine">
+        <ellipse cy="4" rx="20" ry="6" fill="#2b4a3626"/>
+        <rect x="-17" y="-1" width="34" height="8" rx="3" fill="#b5945b"/><path d="M-14 1h28" stroke="#f1d38c" stroke-width="2"/>
+        <path d="M-12-9h10v10h-14q-2-5 4-6zm14 0h10v4q6 1 4 6H2z" fill="#34443d"/>
+        <path d="M-12-36q-6 6-7 21l6 5h26l6-5q-1-15-7-21z" fill="#a63d45"/>
+        <path d="M-14-32-6-37H6l8 5M0-30v16" fill="none" stroke="#fff0d6" stroke-width="5" stroke-linecap="round"/>
+        <path d="M-16-15q16 5 32 0" fill="none" stroke="#f4e7cf" stroke-width="5" stroke-linecap="round"/>
+        <path d="M-16-22h32" stroke="#3a473c" stroke-width="5"/><rect x="-4" y="-25" width="8" height="6" rx="1" fill="#e2b85f"/><rect x="-2" y="-23.5" width="4" height="3" fill="#5b5140"/>
+        <path d="M-14-32l-4 11M14-32l4 11" fill="none" stroke="#a63d45" stroke-width="8" stroke-linecap="round"/>
+        <ellipse cx="-17" cy="-19" rx="4" ry="5" fill="#fff0d6"/><ellipse cx="17" cy="-19" rx="4" ry="5" fill="#fff0d6"/>
+        <ellipse cy="-45" rx="13" ry="14" fill="#eab88d"/>
+        <path d="M-13-45q-1 19 13 22 14-3 13-22l-4 5-9-1-9 1z" fill="#fff3df"/>
+        <path d="M-9-40q4-5 9-1 5-4 9 1-3 5-9 1-6 4-9-1" fill="#fff9e9"/>
+        <ellipse cy="-42" rx="3" ry="2.5" fill="#dc9e7b"/><circle cx="-5.5" cy="-47" r="1.3" fill="#3e5143"/><circle cx="5.5" cy="-47" r="1.3" fill="#3e5143"/>
+        <path d="M-8-50h5m6 0h5" stroke="#fff4df" stroke-width="2" stroke-linecap="round"/>
+        <path d="M-13-54q2-18 15-15 10 2 14 14l-8 1-4-7-5 7z" fill="#ac4148"/>
+        <rect x="-14" y="-57" width="27" height="7" rx="3.5" fill="#fff1d8"/><circle cx="17" cy="-54" r="5" fill="#fff1d8"/>
+      </g>
+      <g id="ws-holiday-gift"><rect x="-9" y="-13" width="18" height="14" rx="2" fill="#3a7258"/><rect x="-10" y="-14" width="20" height="4" rx="1" fill="#4f8662"/><path d="M0-14V1m-9-8H9" stroke="#efce84" stroke-width="2.4"/><path d="M0-14q-9-8-8-2 1 4 8 2 9-8 8-2-1 4-8 2" fill="none" stroke="#efce84" stroke-width="1.8"/></g>
       <style>
         .ws-label{font-family:inherit;font-weight:750;font-size:11px;letter-spacing:1.2px;fill:#4b6857}
         .ws-small{font-family:inherit;font-weight:600;font-size:9px;letter-spacing:.5px;fill:#6c7d66}
@@ -42,7 +61,10 @@
     <path d="M875 48h61M885 56h51M895 64h41" stroke="#91ad8d" stroke-width="2" stroke-linecap="round" opacity=".6"/>
     <circle cx="849" cy="56" r="12" fill="#e6d6a9"/><path d="M849 48v9l5 3" fill="none" stroke="#53785e" stroke-width="2" stroke-linecap="round"/>
     <!-- Static Christmas trim stays on the wall, above every label and walking route. -->
-    <g aria-hidden="true"><use href="#ws-holiday-garland" x="348" y="76"/><use href="#ws-holiday-garland" x="586" y="76"/></g>
+    <g aria-hidden="true"><use href="#ws-holiday-garland" x="48" y="80"/><use href="#ws-holiday-garland" x="348" y="76"/><use href="#ws-holiday-garland" x="586" y="76"/><use href="#ws-holiday-garland" transform="translate(830 80) scale(.55)"/>
+      <path d="M33 112v500M967 112v500" fill="none" stroke="#526c4e" stroke-width="2"/>
+      <path d="M33 118v490M967 118v490" fill="none" stroke="#ffe4a0" stroke-width="4.5" stroke-linecap="round" stroke-dasharray=".1 37"/>
+    </g>
 
     <!-- Soft ceiling light pools and floor zoning, without obscuring paths. -->
     <ellipse cx="175" cy="195" rx="145" ry="110" fill="url(#ws-light)"/>
@@ -67,6 +89,8 @@
     <text x="100" y="245" class="ws-label">RECEPCIÓN</text>
     <!-- Reuses the small plant corner; kept left of Luna, the desk and reception label. -->
     <g aria-hidden="true"><use href="#ws-christmas-tree" x="64" y="289"/><rect x="44" y="301" width="15" height="13" rx="2" fill="#d7b77b"/><path d="M51.5 301v13m-7.5-8h15" stroke="#f8e4b7" stroke-width="2"/><path d="M51 300q-9-8-8-1 0 3 8 1m1 0q8-8 8-1 0 3-8 1" fill="none" stroke="#f8e4b7" stroke-width="1.5"/><rect x="70" y="306" width="16" height="12" rx="2" fill="#ad6959"/><path d="M78 306v12m-8-8h16" stroke="#ebd7a6" stroke-width="2"/><path d="M78 305q-7-7-7-2 0 3 7 2m0 0q7-7 7-2 0 3-7 2" fill="none" stroke="#ebd7a6" stroke-width="1.5"/></g>
+    <!-- Decorative Santa occupies only x43–81/y163–228, left of Luna's x112–186 route. -->
+    <g aria-hidden="true"><use href="#ws-santa-figurine" transform="translate(62 222) scale(.85)"/><use href="#ws-holiday-gift" x="103" y="316"/></g>
 
     <!-- Waiting lounge and coffee corner. -->
     <rect x="50" y="324" width="228" height="133" rx="18" fill="#d9e6d5" stroke="#c6d6bf"/>

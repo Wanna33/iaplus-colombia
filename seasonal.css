@@ -1,4 +1,4 @@
-/* Christmas collection: evergreen, burgundy, candlelight and Colombian photography. */
+/* Santa's digital workshop: warm light, evergreen, velvet red and gold. */
 html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasonal-green:#173f31}
 .seasonal-banner[hidden]{display:none!important}
 .seasonal-banner{position:relative;isolation:isolate;display:flex;align-items:center;min-height:154px;max-width:1192px;margin:26px auto;padding:28px 38px;overflow:hidden;border:1px solid #be9a574d;border-radius:22px;color:#fff7e6;background:linear-gradient(100deg,#113f32 0%,#1b4c39 66%,#264f36);box-shadow:0 12px 30px #153a2910}
@@ -17,7 +17,7 @@ html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasona
 .christmas-theme .storefront .trust-story-visual{min-height:0;border:1px solid #dac9a8;aspect-ratio:16/9}
 .christmas-theme .storefront .trust-photo-main{width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;object-position:center}
 .christmas-theme .storefront .trust-image-cta{background:#173f31ec;border-color:#ddc68b;color:#fff8e4}
-.christmas-theme .storefront .gift-strip{background:#fff8e8;border-color:#e3ce9e}
+.christmas-theme .storefront .gift-strip{background:#fff8e8;border-color:#e3ce9e;color:#264532;box-shadow:0 12px 28px #8d6c2c12}
 .christmas-theme .storefront .gift-strip-ic{background:#8b3541;color:#fff9e9}
 .christmas-theme .storefront .gift-strip-btn{background:#7c303c;color:#fff8e4;border-color:#7c303c}
 .christmas-theme .storefront .activation-hub{background:#f2f2e5;border-color:#daca9f}
@@ -32,7 +32,7 @@ html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasona
 .christmas-theme .activation-welcome-kicker{color:#853c45}
 .christmas-theme .activation-welcome-kicker:before{content:'🎄'}
 .christmas-theme .activation-welcome-primary{background:#214f38;border:1px solid #bc9b53}
-.christmas-theme .celebrate-colombia .cel-colombia-hero{background:linear-gradient(90deg,#123b2fe6,#123b2f9c 62%,#123b2f35),url('assets/navidad-portada-2026-640.webp') center 38%/cover;color:#fff9e7;border-bottom:1px solid #c1a15d}
+.christmas-theme .celebrate-colombia .cel-colombia-hero{background:linear-gradient(90deg,#123b2fe6,#123b2f9c 62%,#123b2f35),url('assets/navidad-santa-portada-2026-640.webp') center 38%/cover;color:#fff9e7;border-bottom:1px solid #c1a15d}
 .christmas-theme .celebrate-colombia .cel-confirmed{color:#ffe2a2}
 .christmas-theme .admin-app .side-brand small:after{content:' · NAVIDAD';color:#ead092}
 .christmas-theme .admin-app .side{border-right-color:#bfa064}
@@ -45,3 +45,66 @@ html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasona
 @media(max-width:800px){.christmas-theme .activation-welcome{grid-template-columns:1fr}.christmas-theme .activation-welcome-art{width:100%}.christmas-theme .activation-welcome-copy{padding:24px}.christmas-theme .storefront .trust-story-visual{max-width:620px}}
 @media(max-width:600px){.seasonal-banner{margin:18px 20px;padding:24px 20px;min-height:150px;border-radius:18px}.seasonal-banner>div{max-width:88%}.seasonal-banner:after{right:15px;font-size:47px;opacity:.4}.seasonal-banner h2{font-size:24px}.seasonal-banner p{font-size:13px}.seasonal-banner span{font-size:9px}.christmas-theme .storefront .hero-colombia-art{aspect-ratio:4/3}.christmas-theme .storefront .trust-image-cta{padding:12px 15px;max-width:calc(100% - 30px)}.christmas-theme .storefront .trust-image-cta b{font-size:18px}.christmas-theme .activation-welcome-copy{padding:22px 20px}}
 @media(prefers-reduced-motion:reduce){.seasonal-banner *{animation:none!important;transition:none!important}}
+
+/* A decorated stage around the content; all ornaments stay outside controls. */
+.christmas-theme .storefront{background:radial-gradient(ellipse at 0 30%,#e9eddc80,transparent 45%),#fcf8ef}
+.christmas-theme .storefront .nav{border-bottom:2px solid #c6a25d;background:#fffaf1f5}
+.christmas-theme .storefront .hero{position:relative;isolation:isolate;overflow:hidden;padding-top:90px;padding-bottom:76px;background:radial-gradient(ellipse at 84% 40%,#34613c55,transparent 50%),linear-gradient(115deg,#082e22,#123f2b 70%,#073021);color:#fff5df;border-bottom:2px solid #b69352}
+.christmas-theme .storefront .hero:before{content:'';position:absolute;inset:0 0 auto;height:70px;background:url('assets/navidad-guirnalda.svg') repeat-x center top/480px 70px;pointer-events:none;z-index:1}
+.christmas-theme .storefront .hero:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(circle,#f7d59180 1px,transparent 2px),radial-gradient(circle,#f7d59133 1px,transparent 2px);background-size:93px 121px,157px 193px;background-position:12px 20px,50px 70px;opacity:.35;animation:christmas-arrival 2s ease-out both}
+.christmas-theme .storefront .hero-bg{display:none}
+.christmas-theme .storefront .hero-in{gap:48px}
+.christmas-theme .storefront .hero h1{color:#fff9e9;text-shadow:0 2px 24px #0002}
+.christmas-theme .storefront .hero h1 .grad{color:#e7c475;background:none;-webkit-text-fill-color:currentColor}
+.christmas-theme .storefront .hero-text>p{color:#e0e8da}
+.christmas-theme .storefront .hero .pill{background:#f3d99e0d;border:1px solid #b99a58;color:#f4db9f;letter-spacing:.09em;font-size:10px}
+.christmas-theme .storefront .hero .pill>span{font-size:18px;line-height:1}
+.christmas-theme .storefront .hero .trust,.christmas-theme .storefront .hero .trust li{color:#e5eddf}.christmas-theme .storefront .hero .trust .ic{color:#f2d49a;stroke:currentColor}
+.christmas-theme .storefront .hero .btn-primary{color:#fff9e9;background:linear-gradient(110deg,#9f293e,#b33949)!important;border:1px solid #d3ab68;box-shadow:0 8px 28px #0002}
+.christmas-theme .storefront .hero .btn-ghost{background:#fffaf2;color:#214535;border-color:#d9be83}
+.christmas-theme .storefront .hero .first-visit-guide{background:#fffaf2f5;border-color:#cbb47d}
+.christmas-theme .storefront .hero-collage{border:2px solid #c8a65f;border-radius:28px;background:#0b281b;box-shadow:0 0 0 7px #d4b46d12,0 28px 65px #0005}
+.christmas-theme .storefront .collage-country{top:18px;left:18px;background:#073321e8;border-color:#c9ac6b;color:#f5dfa8;font-size:10px;backdrop-filter:blur(8px)}
+.christmas-theme .storefront .collage-plan{top:auto;bottom:72px;right:14px;padding:9px 12px;max-width:180px;border-radius:14px;background:#fff9eced;box-shadow:0 8px 24px #0002}
+.christmas-theme .storefront .collage-tools{bottom:14px;right:14px}
+.christmas-theme .seasonal-banner{min-height:190px;padding:36px 40px;margin-top:36px;border-color:#c4a05c;border-radius:24px;background:radial-gradient(ellipse at 90% 30%,#b5494860,transparent 60%),linear-gradient(100deg,#661b2b,#8b2d3b);box-shadow:0 12px 35px #60233312}
+.christmas-theme .seasonal-banner:after{content:'✦';right:48px;color:#f6daa0;font-size:120px;text-shadow:0 0 40px #e6c46766}
+.christmas-theme .seasonal-banner:before{inset:0;background:url('assets/navidad-guirnalda.svg') repeat-x center -45px/480px 70px;opacity:.65}
+.christmas-theme .seasonal-banner h2{color:#fff5dc;max-width:740px}.christmas-theme .seasonal-banner p{color:#f5dfd6}
+.christmas-theme .storefront .featured-section{background:linear-gradient(#fffaf0,#fffdf8);border-block:1px solid #e6d4ae}
+.christmas-theme .storefront .feature-chatgpt3{border-color:#d0ac62;box-shadow:0 12px 30px #22432a17}
+.christmas-theme .storefront .trust-story{padding-block:30px}
+.christmas-theme .storefront .trust-story-visual{border:2px solid #c7a262;overflow:visible;aspect-ratio:auto;display:flex;flex-direction:column;background:#133924;border-radius:24px;box-shadow:0 15px 40px #153a2920}
+.christmas-theme .storefront .trust-photo-main{position:relative;inset:auto;flex:none;height:auto;object-fit:contain;transform:none;border-radius:22px 22px 0 0}
+.christmas-theme .storefront .trust-image-cta{position:relative;inset:auto;transform:none;max-width:none;width:100%;border:0;border-top:1px solid #c7a262;border-radius:0 0 22px 22px;background:#133924;box-shadow:none;padding:18px 22px}
+.christmas-theme .storefront .trust-image-cta small{color:#f1d493}
+.christmas-theme .storefront .activation-hub{background:radial-gradient(ellipse at 0 0,#ead7a750,transparent 60%),#f4f2e5;border-color:#cdb16f}
+.christmas-theme .activation-welcome{position:relative;grid-template-columns:1fr;max-width:1120px;align-items:stretch;background:#fffaf0;box-shadow:0 20px 60px #103b2826;border:2px solid #b6944f}
+.christmas-theme .activation-welcome-art{width:100%;height:auto;aspect-ratio:16/9;border-bottom:2px solid #b6944f}
+.christmas-theme .activation-welcome-copy{padding:32px 40px;align-self:stretch}
+.christmas-theme .activation-welcome-kicker:before{content:none}
+.christmas-theme .activation-welcome-copy>p{max-width:760px;font-size:15px}
+.christmas-theme .activation-welcome h2{font-size:clamp(23px,3.1vw,34px)}
+.christmas-theme .activation-welcome-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-block:24px}
+.christmas-theme .activation-welcome-steps li>span{background:#8a283b;color:#fff8e8;border-color:#be9951}
+.christmas-theme .activation-welcome-primary{background:linear-gradient(110deg,#852339,#a73847);border-color:#c5a365;box-shadow:0 8px 22px #7c233624}
+.christmas-theme .activation-welcome-note{font-size:11px}
+.christmas-theme .account-app .account-overview{background-image:url('assets/navidad-guirnalda.svg'),linear-gradient(110deg,#0e3826,#23533a);background-repeat:repeat-x,no-repeat;background-position:center -50px,center;background-size:480px 70px,cover}
+.christmas-theme .celebrate-colombia .cel-colombia-hero{min-height:230px;background:linear-gradient(90deg,#073020ee 0%,#073020d9 42%,#07302020 100%),url('assets/navidad-santa-portada-2026.webp') right 32%/cover}
+.christmas-theme .celebrate-colombia .cel-hero-thanks{color:#fae7bb}
+.christmas-theme .admin-app .side-brand{background-image:url('assets/navidad-guirnalda.svg');background-position:center -44px;background-repeat:repeat-x;background-size:360px 53px}
+.christmas-theme .gifts-app .rg-hero{border-color:#c5aa6c;background:radial-gradient(ellipse at 0 0,#eddaa85c,transparent 60%),#fffaf0}
+.christmas-theme .gifts-app .rg-hero-art{border:2px solid #c4a05e;box-shadow:0 14px 35px #173b2020}
+.christmas-theme .gifts-app .rg-header{border-bottom:2px solid #c1a15f}
+@keyframes christmas-arrival{from{opacity:0}to{opacity:.35}}
+@media(min-width:1000px){.christmas-theme .activation-welcome{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center}.christmas-theme .activation-welcome-art{border-bottom:0}.christmas-theme .activation-welcome-copy{padding:28px}.christmas-theme .activation-welcome-steps{grid-template-columns:1fr;gap:14px;margin-block:20px}.christmas-theme .activation-welcome h2{font-size:28px}}
+@media(max-width:980px){.christmas-theme .storefront .hero-in{gap:36px}.christmas-theme .storefront .hero-text{max-width:660px}.christmas-theme .storefront .hero-side{max-width:660px}}
+@media(max-width:600px){.christmas-theme .storefront .hero{padding-top:68px;padding-bottom:36px}.christmas-theme .storefront .hero:before{height:48px;background-size:340px 50px}.christmas-theme .storefront .hero-in{gap:28px}.christmas-theme .storefront .hero .pill{font-size:9px;letter-spacing:.04em}.christmas-theme .storefront .hero .pill>span{font-size:17px}.christmas-theme .storefront .hero h1{margin-block:20px}.christmas-theme .storefront .hero-collage{border-radius:21px}.christmas-theme .storefront .collage-country{top:10px;left:10px;font-size:8px;padding:7px 10px}.christmas-theme .storefront .collage-plan{right:10px;bottom:66px;max-width:160px}.christmas-theme .storefront .collage-tools{bottom:10px;right:10px}.christmas-theme .seasonal-banner{margin-top:24px;padding:30px 24px;min-height:190px}.christmas-theme .seasonal-banner>div{max-width:100%}.christmas-theme .seasonal-banner:after{right:18px;top:25px;font-size:34px;opacity:.35}.christmas-theme .seasonal-banner h2{font-size:25px}.christmas-theme .storefront .trust-story{padding-block:15px}.christmas-theme .activation-welcome-copy{padding:24px 20px}.christmas-theme .activation-welcome-steps{grid-template-columns:1fr;gap:14px;margin-block:20px}.christmas-theme .activation-welcome-copy>p{font-size:14px}.christmas-theme .activation-welcome-actions{display:grid;grid-template-columns:1fr}.christmas-theme .celebrate-colombia .cel-colombia-hero{min-height:210px}}
+@media(prefers-reduced-motion:reduce){.christmas-theme .storefront .hero:after{animation:none}}
+.christmas-theme .account-app.is-signing-in{background:#fffbf2!important}
+.christmas-theme .account-app .account-signin{background:#fffbf2}
+.christmas-theme .signin-masthead{background:url('assets/navidad-guirnalda.svg') repeat-x center -49px/480px 70px}
+.christmas-theme .signin-scene>img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:22px;border:2px solid #b9985d;box-shadow:0 15px 35px #234c2926;filter:none}
+.christmas-theme .signin-scene:before{display:none}
+.christmas-theme .signin-colombia{background:#0f3b28eb;color:#f9e6b7;border-color:#c7a366;font-size:10px}
+.christmas-theme .signin-showcase h1 em{color:#9c3344}
