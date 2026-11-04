@@ -336,6 +336,7 @@ function ensureCatalog(){
 }
 function setTab(t){
   const previousTab=curTab;
+  document.body.classList.toggle('view-world',t==='world');
   if(t!=="world")window.IAPWorld?.stop();
   if(!NAV.some(n=>n.t===t)) t = "res";
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
@@ -347,7 +348,7 @@ function setTab(t){
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
 
   if(t==="log"){ loadLog(logCli); loadSeg(); }
-  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104-pro2"),loadAdminScript("admin-world.js?v=20261104-pro2")]).then(()=>{
+  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104-world7"),loadAdminScript("admin-world-scene.js?v=20261104-world7"),loadAdminScript("admin-world.js?v=20261104-world7")]).then(()=>{
     if(curTab!=="world")return;
     window.IAPWorld.mount(document.getElementById("adminWorld"),{
       readChats:async()=>{
