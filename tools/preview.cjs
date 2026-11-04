@@ -6,6 +6,10 @@ const mime={html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',
 http.createServer((req,res)=>{
   let p;try{p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{res.writeHead(400).end();return;}
   if(p==='/')p='/index.html';
+  if(p==='/__qa/account-pro.html'||p==='/__qa/account-pro.js'){
+    delete require.cache[require.resolve('./fixtures/account-pro-preview.cjs')];
+    const qa=require('./fixtures/account-pro-preview.cjs');res.setHeader('Content-Type',p.endsWith('.html')?mime.html:mime.js);res.setHeader('Cache-Control','no-store');return res.end(p.endsWith('.html')?qa.html():qa.js());
+  }
   if(p==='/__qa/admin.html'||p==='/__qa/admin-preview.js'||p==='/__qa/no-google.js'){
     delete require.cache[require.resolve('./fixtures/admin-preview.cjs')];
     const qa=require('./fixtures/admin-preview.cjs');
@@ -16,4 +20,4 @@ http.createServer((req,res)=>{
   if(fixtures[p]){fs.readFile(path.join(root,fixtures[p]),(error,data)=>{if(error){res.writeHead(404).end();return;}res.setHeader('Content-Type',mime[p.split('.').pop()]);res.setHeader('Cache-Control','no-store');res.end(data);});return;}
   if(!/^\/[\w./-]+\.(html|js|css|webp|png|jpg|svg|webmanifest)$/.test(p)||p.includes('..')||/^\/(backend|bot-local|whatsapp-bot|tools|\.)/.test(p)){res.writeHead(403).end();return;}
   fs.readFile(path.join(root,p),(error,data)=>{if(error){res.writeHead(404).end();return;}res.setHeader('Content-Type',mime[p.split('.').pop()]);res.setHeader('Cache-Control','no-cache');res.end(data);});
-}).listen(8765,'127.0.0.1',()=>console.log('Preview http://127.0.0.1:8765/index.html'));
+}).listen(Number(process.env.IAP_PREVIEW_PORT)||8765,'127.0.0.1',()=>console.log('Preview http://127.0.0.1:'+(process.env.IAP_PREVIEW_PORT||8765)+'/index.html'));

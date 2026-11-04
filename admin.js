@@ -59,13 +59,20 @@ function loadAdminStyle(href){
   });
 }
 
+const adminReadRequests=new Map();
+const adminCoalescedReads=new Set(["admin_list","admin_wa_chats","admin_wa_chat","admin_wa_list"]);
 async function api(action, data={}){
   const cred = load("iap_cred");
   if(!cred || cred.exp < Date.now()) throw new Error("Tu sesión venció. Inicia sesión otra vez.");
-  const j = await postJson(API_URL, {...data, action, idToken:cred.token}); if(!j.ok) throw new Error(j.error||"Error"); return j;
+  const key=adminCoalescedReads.has(action)?JSON.stringify([cred.token,action,data]):null;
+  if(key&&adminReadRequests.has(key))return adminReadRequests.get(key);
+  const run=async()=>{const j=await postJson(API_URL,{...data,action,idToken:cred.token});if(!j.ok)throw new Error(j.error||"Error");return j;};
+  if(!key||adminReadRequests.size>=32)return run();
+  const request=run().finally(()=>adminReadRequests.delete(key));adminReadRequests.set(key,request);return request;
 }
 
 function showLogin(){
+  window.IAPWorld?.stop();
   message("Acceso del administrador","Inicia sesión con la cuenta de Google autorizada.",'<div id="g" style="display:inline-block"></div>');
   if(!window.google?.accounts?.id&&!document.querySelector('script[data-google-identity]')){
     const script=document.createElement("script");script.src="https://accounts.google.com/gsi/client";script.async=true;script.dataset.googleIdentity="true";
@@ -340,7 +347,7 @@ function setTab(t){
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
 
   if(t==="log"){ loadLog(logCli); loadSeg(); }
-  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104"),loadAdminScript("admin-world.js?v=20261104")]).then(()=>{
+  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104-pro2"),loadAdminScript("admin-world.js?v=20261104-pro2")]).then(()=>{
     if(curTab!=="world")return;
     window.IAPWorld.mount(document.getElementById("adminWorld"),{
       readChats:async()=>{
@@ -1187,7 +1194,7 @@ document.addEventListener("keydown",e=>{ // "/" enfoca el buscador
   e.preventDefault(); if(curTab!=="cli"&&curTab!=="cod") setTab("cod"); (curTab==="cli"?$("#cq"):$("#q")).focus();
 });
 const isEditing = () => { const a=document.activeElement; return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); };
-start(); setInterval(()=>{ if(!document.hidden && !isEditing() && !godDirty && !generationBusy && !productDrafts.size && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
+start(); setInterval(()=>{ if(curTab!=="world" && curTab!=="wa" && !document.hidden && !isEditing() && !godDirty && !generationBusy && !productDrafts.size && $("#rows") && !document.querySelector("dialog[open]")) refresh(); }, 120000);
 
 
 /* =====================================================================
@@ -1629,38 +1636,50 @@ async function editSaldo(){
 
 /* ---------- Bandeja de WhatsApp: leer y responder chats ---------- */
 let IB = [], ibSel = "", ibTimer = null, IBC = null;
+let ibListRequest=0, ibChatRequest=0, ibPage=0;
+const IB_PAGE_SIZE=40, ibDrafts=new Map(), ibSending=new Set();
+function rememberInboxDraft(){const input=$("#ibTxt");if(!input?.dataset.chat)return;const tel=input.dataset.chat;if(input.value)ibDrafts.set(tel,input.value);else ibDrafts.delete(tel);}
+async function fetchInbox(){
+  const el=$("#ibList"), request=++ibListRequest;if(!el)return;
+  try{const j=await api("admin_wa_chats");if(request!==ibListRequest||!el.isConnected||curTab!=="wa")return;if(!Array.isArray(j.chats))throw Error("No se recibió una lista válida de conversaciones.");IB=j.chats;drawInbox();}
+  catch(ex){if(request===ibListRequest&&el.isConnected&&curTab==="wa")el.innerHTML='<div class="empty" role="status">'+esc(ex.message)+'</div>';}
+}
 const IBET = {pago:"✅ Pagó", pendiente:"⏳ Pendiente", interesado:"🔥 Interesado", queja:"😠 Queja", urgente:"🚨 Urgente", reembolso:"💸 Reembolso", no_interesado:"🙅 No interesado"};
 const IBETC = {pago:"t-ok", pendiente:"t-w", interesado:"t-av", queja:"t-b", urgente:"t-b", reembolso:"t-b", no_interesado:"t-g"};
 const etHtml = e => (e||[]).map(k=>`<span class="tag ${IBETC[k]||"t-g"}" style="font-size:11px;padding:1px 7px">${esc(IBET[k]||k)}</span>`).join(" ");
 const hace = ts => { if(!ts) return ""; const m = (Date.now()-ts)/60000; return m<1?"ahora":m<60?Math.round(m)+" min":m<1440?Math.round(m/60)+" h":Math.round(m/1440)+" d"; };
 async function loadInbox(){
   const el = $("#ibList"); if(!el) return;
-  $("#ibQ").oninput = drawInbox; $("#ibF").onchange = drawInbox; $("#ibReload").onclick = loadInbox;
-  try{ IB = (await api("admin_wa_chats")).chats || []; drawInbox(); }
-  catch(ex){ el.innerHTML = '<div class="empty">'+esc(/no válida|Acción/i.test(ex.message)?"Falta actualizar el asistente para ver los chats.":ex.message)+'</div>'; }
+  $("#ibQ").oninput = ()=>{ibPage=0;drawInbox();}; $("#ibF").onchange = ()=>{ibPage=0;drawInbox();}; $("#ibReload").onclick = fetchInbox;
+  await fetchInbox();
+  if(!el.isConnected||curTab!=="wa")return;
+  if(ibSel&&!$("#ibTxt"))openChat(ibSel,true);
   clearInterval(ibTimer); ibTimer = setInterval(()=>{
     if(curTab!=="wa" || document.hidden || document.querySelector("dialog[open]")) return;
-    api("admin_wa_chats").then(j=>{ IB = j.chats||[]; drawInbox(); }).catch(()=>{});
-    if(ibSel && !($("#ibTxt") && $("#ibTxt").value)) openChat(ibSel, true);
+    fetchInbox();
+    if(ibSel && !ibSending.has(ibSel) && !($("#ibTxt") && $("#ibTxt").value)) openChat(ibSel, true);
   }, 60000);
 }
 function inboxNeedsReply(c){return c.quien==="u" || /no pude completar|no puedo responder|respuesta automática.*error/i.test(c.ultimo||"");}
-function inboxUnique(chats){const byId=new Map();for(const c of chats||[]){const key=String(c.tel);if(!byId.has(key)||Number(c.ts)>Number(byId.get(key).ts))byId.set(key,c);}return [...byId.values()].sort((a,b)=>Number(b.ts)-Number(a.ts));}
+function inboxUnique(chats){const byId=new Map();for(const c of chats||[]){if(!c?.tel)continue;const key=String(c.tel);if(!byId.has(key)||Number(c.ts)>Number(byId.get(key).ts))byId.set(key,c);}return [...byId.values()].sort((a,b)=>Number(b.ts)-Number(a.ts));}
+function inboxPage(chats,q='',filter='',page=0){
+  const query=norm(q).trim();const list=inboxUnique(chats).filter(c=>{const tags=Array.isArray(c.etiquetas)?c.etiquetas:[];
+    if(filter==='sin'&&!inboxNeedsReply(c)||filter==='pausa'&&!c.pausa||filter==='alerta'&&!tags.some(t=>['urgente','queja','reembolso'].includes(t)))return false;
+    if(filter&&!['sin','pausa','alerta'].includes(filter)&&!tags.includes(filter))return false;
+    return !query||norm((c.nombre||'')+' '+c.tel+' '+(c.ultimo||'')).includes(query);
+  });
+  const pages=Math.max(1,Math.ceil(list.length/IB_PAGE_SIZE)),current=Math.min(pages-1,Math.max(0,Math.floor(Number(page)||0)));
+  return {items:list.slice(current*IB_PAGE_SIZE,(current+1)*IB_PAGE_SIZE),total:list.length,page:current,pages};
+}
 function drawInbox(){
   const el = $("#ibList"); if(!el) return;
   const q = ($("#ibQ").value||"").toLowerCase().trim(), f = $("#ibF").value;
-  const list = inboxUnique(IB).filter(c=>{
-    if(f==="sin" && !inboxNeedsReply(c)) return false;
-    if(f==="pausa" && !c.pausa) return false;
-    if(f==="alerta" && !c.etiquetas.some(e=>e==="urgente"||e==="queja")) return false;
-    if(f && !["sin","pausa","alerta"].includes(f) && !c.etiquetas.includes(f)) return false;
-    return !q || (c.nombre+" "+c.tel+" "+c.ultimo).toLowerCase().includes(q);
-  });
-  el.innerHTML = list.length ? list.slice(0,300).map(c=>`<button type="button" class="ib-it ${c.tel===ibSel?"on":""}" data-ib="${esc(c.tel)}">
+  const result=inboxPage(IB,q,f,ibPage);ibPage=result.page;
+  el.innerHTML = result.total ? `<div class="ib-page-summary" role="status">${result.total} conversaciones · página ${ibPage+1} de ${result.pages}</div>`+result.items.map(c=>`<button type="button" class="ib-it ${String(c.tel)===ibSel?"on":""}" data-ib="${esc(c.tel)}">
       <div class="ib-h"><b>${inboxNeedsReply(c)?'<span class="ib-dot" title="Requiere respuesta: mensaje del cliente o fallo del asistente"></span> ':""}${esc(c.nombre||("+"+c.tel))}</b><time>${hace(c.ts)}</time></div>
       <div class="ib-u">${c.quien==="a"?"🤖 ":c.quien==="d"?"👤 Tú: ":""}${esc(c.ultimo||(c.sinDatos?"(se actualiza con el próximo mensaje)":""))}</div>
       <div>${c.pausa?'<span class="tag t-g" style="font-size:11px;padding:1px 7px">⏸ Pausa</span> ':""}${etHtml(c.etiquetas)}</div></button>`).join("")
-    + (list.length>300?`<div class="empty">Mostrando 300 de ${list.length}. Usa el buscador.</div>`:"")
+    + (result.pages>1?`<div class="ib-pagination"><button type="button" class="btn s" data-ib-page="${ibPage-1}" ${ibPage===0?'disabled':''}>← Anterior</button><span>${ibPage+1} / ${result.pages}</span><button type="button" class="btn s" data-ib-page="${ibPage+1}" ${ibPage===result.pages-1?'disabled':''}>Siguiente →</button></div>`:"")
     : '<div class="empty">No hay chats con ese filtro.</div>';
 }
 const RAPIDAS = [
@@ -1682,36 +1701,51 @@ async function enviarCodigo(c){
   catch(ex){ toast(ex.message); }
 }
 async function openChat(tel, silencioso){
-  ibSel = tel; const box = $("#ibChat"); if(!box) return;
+  rememberInboxDraft();tel=String(tel);ibSel=tel;const request=++ibChatRequest, box=$("#ibChat");if(!box)return;
+  const current=()=>request===ibChatRequest&&ibSel===tel&&box.isConnected&&curTab==="wa";
   document.querySelectorAll(".ib-it").forEach(b=>b.classList.toggle("on", b.dataset.ib===tel));
   if(!silencioso) box.innerHTML = '<div class="empty" style="margin:auto">Cargando…</div>';
   try{
-    const c = IBC = await api("admin_wa_chat", {tel});
-    if(ibSel !== tel) return;
-    const borrador = $("#ibTxt") && silencioso ? $("#ibTxt").value : "";
+    const c = await api("admin_wa_chat", {tel});
+    if(!current())return;
+    if(!Array.isArray(c.turnos))throw Error("No se recibieron los mensajes del cliente.");
+    IBC=c;rememberInboxDraft();const borrador=ibDrafts.get(tel)||"";
+    const previousMessages=$("#ibMsgs"),oldScroll=previousMessages?.scrollTop||0,nearBottom=!previousMessages||previousMessages.scrollHeight-previousMessages.clientHeight-oldScroll<80;
     box.innerHTML = `<div class="ib-top"><b>${esc(c.nombre||"Cliente")}</b> <a class="mono" href="https://wa.me/${esc(c.tel)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:13px">+${esc(c.tel)}</a> ${etHtml(c.etiquetas)}
         <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn s" id="ibCod" title="Crea el código de activación y se lo envía por WhatsApp">🎟️ Enviar código</button><button class="btn s" id="ibPausa">${c.pausa?"▶ Reactivar asistente":"⏸ Pausar asistente"}</button></span></div>
       <div class="ib-msgs" id="ibMsgs">${c.turnos.length?c.turnos.map(t=>`<div class="bub ${t.r==="u"?"u":t.d?"d":"a"}">${t.img?"📷 <i>Imagen</i>\n":""}${esc(t.t).replace(/\*([^*\n]+)\*/g,"<b>$1</b>")}<small>${t.r==="u"?"Cliente":t.d?"Tú":"Asistente"} · ${fdt(new Date(t.ts).toISOString())}</small></div>`).join(""):'<div class="empty">Sin mensajes guardados.</div>'}</div>
       ${c.pausa?'<div class="capwarn" style="margin:8px 10px 0">El asistente está en pausa en este chat: no le responde hasta que lo reactives.</div>':""}
       <div class="ib-quick">${RAPIDAS.map((q,i)=>`<button type="button" class="chip" data-rq="${i}">${q.l}</button>`).join("")}</div>
-      <form class="ib-send" id="ibForm"><textarea id="ibTxt" rows="1" placeholder="Escribe un mensaje para el cliente…"></textarea><button class="btn p" type="submit">Enviar</button></form>`;
-    const m = $("#ibMsgs"); m.scrollTop = m.scrollHeight;
+      <form class="ib-send" id="ibForm"><label class="sr-only" for="ibTxt">Mensaje para ${esc(c.nombre||"el cliente")}</label><textarea id="ibTxt" data-chat="${esc(tel)}" maxlength="4000" rows="1" placeholder="Escribe un mensaje para el cliente…"></textarea><button class="btn p" type="submit" ${ibSending.has(tel)?'disabled':''}>${ibSending.has(tel)?'Enviando…':'Enviar'}</button></form>`;
+    const m = $("#ibMsgs"); m.scrollTop = !silencioso||nearBottom?m.scrollHeight:oldScroll;
     $("#ibTxt").value = borrador;
+    $("#ibTxt").oninput=rememberInboxDraft;
     $("#ibTxt").onkeydown = e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); $("#ibForm").requestSubmit(); } };
-    $("#ibForm").onsubmit = async e=>{
-      e.preventDefault(); const t = $("#ibTxt").value.trim(); if(!t) return; const bt = e.target.querySelector("button"); bt.disabled = true;
-      try{ await api("admin_wa_send", {tel, texto:t}); $("#ibTxt").value = ""; toast("Enviado ✔ (sale de tu WhatsApp en segundos)"); await openChat(tel, true); }
-      catch(ex){ toast(ex.message); } bt.disabled = false;
-    };
-    document.querySelectorAll("[data-rq]").forEach(b=>b.onclick=()=>{ const t=$("#ibTxt"); t.value = (t.value?t.value+"\n":"")+RAPIDAS[+b.dataset.rq].t; t.focus(); });
+    $("#ibForm").onsubmit = e=>{e.preventDefault();return sendInboxMessage(tel,e.target.querySelector('textarea'),e.target.querySelector('button[type=submit]'));};
+    document.querySelectorAll("[data-rq]").forEach(b=>b.onclick=()=>{ const t=$("#ibTxt"); t.value = ((t.value?t.value+"\n":"")+RAPIDAS[+b.dataset.rq].t).slice(0,4000);rememberInboxDraft();t.focus(); });
     $("#ibCod").onclick = ()=>enviarCodigo(c);
     $("#ibPausa").onclick = async ()=>{
-      try{ await api("admin_wa_pausa", {tel, on:!c.pausa}); toast(c.pausa?"El asistente vuelve a atender este chat ✔":"Asistente en pausa en este chat ✔"); const x = IB.find(i=>i.tel===tel); if(x) x.pausa = !c.pausa; drawInbox(); openChat(tel, true); }
+      try{ await api("admin_wa_pausa", {tel, on:!c.pausa}); toast(c.pausa?"El asistente vuelve a atender este chat ✔":"Asistente en pausa en este chat ✔"); const x = IB.find(i=>String(i.tel)===tel); if(x) x.pausa = !c.pausa; drawInbox(); if(ibSel===tel&&curTab==="wa")openChat(tel, true); }
       catch(ex){ toast(ex.message); }
     };
-  }catch(ex){ box.innerHTML = '<div class="empty" style="margin:auto">'+esc(ex.message)+'</div>'; }
+  }catch(ex){ if(current()){rememberInboxDraft();box.innerHTML = '<div class="empty" style="margin:auto" role="status">'+esc(ex.message)+'<br>Tu borrador sigue guardado en esta pestaña.</div>'; } }
 }
-document.addEventListener("click", e=>{ const b = e.target.closest("[data-ib]"); if(b) openChat(b.dataset.ib); });
+async function sendInboxMessage(tel,input,button){
+  tel=String(tel);if(!input||!button||ibSending.has(tel))return;
+  const raw=input.value,texto=raw.trim();if(!texto)return;
+  ibDrafts.set(tel,raw);ibSending.add(tel);button.disabled=true;button.textContent="Enviando…";
+  let sent=false;
+  try{
+    await api("admin_wa_send",{tel,texto});sent=true;
+    if(ibDrafts.get(tel)===raw)ibDrafts.delete(tel);
+    const visible=$("#ibTxt");if(visible?.dataset.chat===tel&&visible.value===raw)visible.value="";
+    toast("Mensaje enviado a la cola de WhatsApp ✔");
+  }catch(ex){toast(ex.message);}
+  finally{ibSending.delete(tel);if(button.isConnected){button.disabled=false;button.textContent="Enviar";}}
+  if(sent&&ibSel===tel&&curTab==="wa")await openChat(tel,true);
+  else if(ibSel===tel){const visibleButton=$("#ibForm")?.querySelector('button[type=submit]');if(visibleButton){visibleButton.disabled=false;visibleButton.textContent="Enviar";}}
+}
+document.addEventListener("click", e=>{const page=e.target.closest("[data-ib-page]");if(page&&!page.disabled){ibPage=Number(page.dataset.ibPage)||0;drawInbox();$("#ibList")?.scrollTo({top:0});return;}const b=e.target.closest("[data-ib]");if(b)openChat(b.dataset.ib);});
 
 /* ---------- Tablero de agentes ---------- */
 async function loadAgentes(){

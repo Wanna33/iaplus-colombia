@@ -1,0 +1,40 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync(require('node:path').join(__dirname,'../admin.js'),'utf8');
+const snippet=source.slice(source.indexOf('let IB = []'),source.indexOf('/* ---------- Tablero de agentes'));
+const elements=new Map(),requests=[];
+function element(id){const el={id,value:'',dataset:{},isConnected:true,disabled:false,textContent:'',scrollTop:0,scrollHeight:100,clientHeight:100,classList:{toggle(){}},querySelector(s){return s==='textarea'?elements.get('#ibTxt'):elements.get('#submit');},scrollTo(){},focus(){}};let html='';Object.defineProperty(el,'innerHTML',{get:()=>html,set(v){html=v;if(id==='ibChat'){for(const key of ['#ibTxt','#ibForm','#submit','#ibMsgs','#ibCod','#ibPausa']){const old=elements.get(key);if(old)old.isConnected=false;elements.delete(key);}if(v.includes('id="ibTxt"')){['ibTxt','ibForm','submit','ibMsgs','ibCod','ibPausa'].forEach(id=>elements.set('#'+id,element(id)));elements.get('#ibTxt').dataset.chat=v.match(/data-chat="([^"]*)"/)[1];}}}});return el;}
+for(const id of ['ibList','ibChat','ibQ','ibF','ibReload'])elements.set('#'+id,element(id));
+const ctx=vm.createContext({console,Map,Set,Date,String,Number,Math,Array,Error,SITE:'https://example.test/',curTab:'wa',esc:s=>String(s??''),fdt:()=>'',norm:s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),$:s=>elements.get(s),document:{hidden:false,addEventListener(){},querySelectorAll:()=>[],querySelector:()=>null},setInterval:()=>1,clearInterval(){},toast(){},api:(action,body)=>new Promise((resolve,reject)=>requests.push({action,body,resolve,reject}))});
+vm.runInContext(snippet+';this.state=()=>({selected:ibSel,drafts:[...ibDrafts],sending:[...ibSending]});',ctx);
+const reply=tel=>({ok:true,tel,nombre:'Client '+tel,etiquetas:[],turnos:[]});
+const take=action=>{const index=requests.findIndex(r=>r.action===action);assert.notEqual(index,-1,'Expected request '+action);return requests.splice(index,1)[0];};
+const input=()=>elements.get('#ibTxt');
+async function open(tel){const p=ctx.openChat(tel);take('admin_wa_chat').resolve(reply(tel));await p;}
+(async()=>{
+  const chats=Array.from({length:1000},(_,i)=>({tel:String(i+1),nombre:i===999?'José remoto':'Cliente '+i,ts:i,quien:'u'}));
+  chats.push({...chats[999],ts:1,nombre:'Registro viejo'});
+  const first=ctx.inboxPage(chats,'','',0);assert.equal(first.total,1000);assert.equal(first.items.length,40);assert.equal(first.pages,25);
+  const last=ctx.inboxPage(chats,'','',999);assert.equal(last.page,24);assert.equal(last.items.length,40);
+  assert.equal(ctx.inboxPage(chats,'jose','',0).items[0].tel,'1000');
+  assert.equal(ctx.inboxPage(chats,'','',-50).page,0);
+  assert.equal(ctx.inboxPage(chats,'missing','',9).page,0);
+  assert(ctx.inboxNeedsReply({quien:'a',ultimo:'No pude completar la respuesta automática'}));
+  await open('A');input().value='Borrador A';input().oninput();
+  await open('B');input().value='Borrador B';input().oninput();
+  await open('A');assert.equal(input().value,'Borrador A');
+  const sentInput=input(),sentButton=elements.get('#submit');
+  const sending=ctx.sendInboxMessage('A',sentInput,sentButton),sendRequest=take('admin_wa_send');
+  assert.equal(sendRequest.body.texto,'Borrador A');
+  await ctx.sendInboxMessage('A',sentInput,sentButton);assert.equal(requests.length,0,'Duplicate submission suppressed');
+  await open('B');assert.equal(input().value,'Borrador B');input().value='Nuevo borrador B';input().oninput();
+  sendRequest.resolve({ok:true});await sending;
+  assert.equal(ctx.state().selected,'B');assert.equal(input().value,'Nuevo borrador B');assert.equal(requests.length,0,'A response must not reopen A');
+  await open('A');assert.equal(input().value,'','Successful sent draft cleared for A only');
+  input().value='No perder si falla';input().oninput();const failed=ctx.sendInboxMessage('A',input(),elements.get('#submit'));take('admin_wa_send').reject(Error('offline'));await failed;
+  assert.equal(input().value,'No perder si falla');assert.equal(ctx.state().sending.length,0);
+  const old=ctx.openChat('A'),oldReq=take('admin_wa_chat');const newer=ctx.openChat('B'),newReq=take('admin_wa_chat');newReq.resolve(reply('B'));await newer;const before=elements.get('#ibChat').innerHTML;
+  oldReq.reject(Error('Stale A failure'));await old;assert.equal(elements.get('#ibChat').innerHTML,before,'Stale errors cannot replace B');
+  const req1=ctx.openChat('B',true),r1=take('admin_wa_chat');const req2=ctx.openChat('B',true),r2=take('admin_wa_chat');r2.resolve({...reply('B'),nombre:'Newest B'});await req2;r1.resolve({...reply('B'),nombre:'Stale B'});await req1;assert(elements.get('#ibChat').innerHTML.includes('Newest B'));
+  const detached=ctx.openChat('C'),detachedReq=take('admin_wa_chat');const oldBox=elements.get('#ibChat');oldBox.isConnected=false;elements.set('#ibChat',element('ibChat'));detachedReq.resolve(reply('C'));await detached;assert.equal(elements.get('#ibChat').innerHTML,'');
+  console.log('PASS: 1000 chats, 40-row pages, all-chat search, missing labels, draft retention, duplicate send lock, delayed send/navigation safety, stale failures/successes, detached UI protection. No network or messages.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -15,6 +15,8 @@ const PAQUETES = {
 };
 
 const soloRevisar = process.argv.includes('--check');
+// One final, shared presentation layer; keep one stylesheet request per customer page.
+for(const bundle of Object.values(PAQUETES))bundle.hojas.push('pro-refresh.css');
 let desactualizado = false;
 for (const [salida, { paginas, hojas }] of Object.entries(PAQUETES)) {
   const css = hojas.map((h) => fs.readFileSync(path.join(root, h), 'utf8')).join('\n');
