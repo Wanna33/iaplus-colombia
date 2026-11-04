@@ -283,3 +283,16 @@
 .storefront .gift-strip-btn{color:#a8480b}
 .storefront .activation-kicker{color:#566682}
 .storefront .trust-image-cta small{color:#0f7446}
+.storefront .first-visit-guide{margin-top:10px;padding:7px 9px;gap:8px}
+.storefront .first-visit-guide__play{width:28px;height:28px}
+.storefront .first-visit-guide__copy b{font-size:11px}
+.storefront .first-visit-guide__copy small{font-size:10px}
+.storefront .first-visit-guide__action{min-height:36px;padding:0 11px;font-size:11px}
+@media(max-width:600px){
+  .storefront .first-visit-guide{display:flex;justify-content:center;flex-wrap:wrap;width:100%;margin-top:8px;padding:5px 0;border:0;background:transparent;box-shadow:none}
+  .storefront .first-visit-guide__play{width:24px;height:24px}
+  .storefront .first-visit-guide__copy b{font-size:10px}
+  .storefront .first-visit-guide__copy small{display:none}
+  .storefront .first-visit-guide__action{min-height:32px;padding:0 7px;background:transparent;box-shadow:none;color:#075e3d;text-decoration:underline;text-underline-offset:3px;font-size:10px}
+  .storefront .first-visit-guide__close{width:24px;height:24px;font-size:16px}
+}
