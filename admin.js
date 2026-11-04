@@ -278,6 +278,7 @@ function countUp(){
 }
 /* ---------- Navegación: menú lateral (computador) y barra inferior (celular) ---------- */
 const IC = {
+  world:'<path d="M3 9h18l-2-6H5zM4 9v12h16V9M9 21v-7h6v7"/><path d="M3 9q2 5 5 0 4 5 8 0 3 5 5 0"/>',
   dios:'<path d="M12 2l2.6 6.3L21 9l-5 4.4L17.5 20 12 16.6 6.5 20 8 13.4 3 9l6.4-.7z"/>',
   res:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
   cli:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
@@ -293,6 +294,7 @@ const IC = {
 };
 const svgI = k => `<svg class="nvi" viewBox="0 0 24 24" aria-hidden="true">${IC[k]||""}</svg>`;
 const NAV = [
+  {g:"General", t:"world", l:"Tienda en vivo", s:"Tu equipo y tus clientes en una tienda virtual · solo para ti"},
   {g:"General", t:"local", l:"Bots sin API", s:"Automatizaciones locales · sin consumo de IA · mientras el panel está abierto"},
   {g:"General", t:"res", l:"Tablero", s:"Así va tu negocio hoy"},
   {g:"General", t:"dios", l:"Modo Dios", s:"Precios, instrucciones y asistente con cambios revisados"},
@@ -327,6 +329,7 @@ function ensureCatalog(){
 }
 function setTab(t){
   const previousTab=curTab;
+  if(t!=="world")window.IAPWorld?.stop();
   if(!NAV.some(n=>n.t===t)) t = "res";
   curTab = t; try{ sessionStorage.setItem("iap_tab", t); }catch{}
   document.querySelectorAll(".nv[data-t],.tabs button[data-t]").forEach(b=>{ const on=b.dataset.t===t; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -337,6 +340,17 @@ function setTab(t){
   if(previousTab!==t) window.scrollTo({top:0,left:0,behavior:"instant"});
 
   if(t==="log"){ loadLog(logCli); loadSeg(); }
+  if(t==="world")Promise.all([loadAdminStyle("admin-world.css?v=20261104"),loadAdminScript("admin-world.js?v=20261104")]).then(()=>{
+    if(curTab!=="world")return;
+    window.IAPWorld.mount(document.getElementById("adminWorld"),{
+      readChats:async()=>{
+        const [chats,sales]=await Promise.all([api("admin_wa_chats"),api("admin_wa_list")]);
+        if(!Array.isArray(sales.ventas))throw new Error("No se pudo comprobar la actividad de ventas.");
+        return {chats:chats.chats,sales:(sales.ventas||[]).map(v=>({id:v.id,telefono:v.telefono,nombre:v.nombre,estado:v.estado,producto:v.producto}))};
+      },
+      openChat:async tel=>{setTab("wa");await loadInbox();openChat(tel);}
+    });
+  }).catch(()=>{const el=$("#adminWorld");if(el)el.innerHTML='<div class="empty">No se pudo cargar la tienda virtual. Vuelve a abrir esta sección para reintentar.</div>';});
   if(t==="pay") loadPagos();
   if(t==="wa") loadWa();
   if(t==="rev") loadRev();
@@ -363,6 +377,7 @@ function render(){
   </div>
 
   <section id="tab-local" class="hide"><div id="localBots"></div></section>
+  <section id="tab-world" class="hide"><div id="adminWorld"></div></section>
   <section id="tab-res">
     <div class="dash-top"><h2 class="hello" id="hello"></h2>
       <div class="qa">
@@ -1629,18 +1644,20 @@ async function loadInbox(){
     if(ibSel && !($("#ibTxt") && $("#ibTxt").value)) openChat(ibSel, true);
   }, 60000);
 }
+function inboxNeedsReply(c){return c.quien==="u" || /no pude completar|no puedo responder|respuesta automática.*error/i.test(c.ultimo||"");}
+function inboxUnique(chats){const byId=new Map();for(const c of chats||[]){const key=String(c.tel);if(!byId.has(key)||Number(c.ts)>Number(byId.get(key).ts))byId.set(key,c);}return [...byId.values()].sort((a,b)=>Number(b.ts)-Number(a.ts));}
 function drawInbox(){
   const el = $("#ibList"); if(!el) return;
   const q = ($("#ibQ").value||"").toLowerCase().trim(), f = $("#ibF").value;
-  const list = IB.filter(c=>{
-    if(f==="sin" && c.quien!=="u") return false;
+  const list = inboxUnique(IB).filter(c=>{
+    if(f==="sin" && !inboxNeedsReply(c)) return false;
     if(f==="pausa" && !c.pausa) return false;
     if(f==="alerta" && !c.etiquetas.some(e=>e==="urgente"||e==="queja")) return false;
     if(f && !["sin","pausa","alerta"].includes(f) && !c.etiquetas.includes(f)) return false;
     return !q || (c.nombre+" "+c.tel+" "+c.ultimo).toLowerCase().includes(q);
   });
   el.innerHTML = list.length ? list.slice(0,300).map(c=>`<button type="button" class="ib-it ${c.tel===ibSel?"on":""}" data-ib="${esc(c.tel)}">
-      <div class="ib-h"><b>${c.quien==="u"?'<span class="ib-dot" title="Último mensaje del cliente"></span> ':""}${esc(c.nombre||("+"+c.tel))}</b><time>${hace(c.ts)}</time></div>
+      <div class="ib-h"><b>${inboxNeedsReply(c)?'<span class="ib-dot" title="Requiere respuesta: mensaje del cliente o fallo del asistente"></span> ':""}${esc(c.nombre||("+"+c.tel))}</b><time>${hace(c.ts)}</time></div>
       <div class="ib-u">${c.quien==="a"?"🤖 ":c.quien==="d"?"👤 Tú: ":""}${esc(c.ultimo||(c.sinDatos?"(se actualiza con el próximo mensaje)":""))}</div>
       <div>${c.pausa?'<span class="tag t-g" style="font-size:11px;padding:1px 7px">⏸ Pausa</span> ':""}${etHtml(c.etiquetas)}</div></button>`).join("")
     + (list.length>300?`<div class="empty">Mostrando 300 de ${list.length}. Usa el buscador.</div>`:"")
