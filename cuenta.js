@@ -163,7 +163,7 @@ function card(it, idx){
       <div class="field"><code>${esc(it.correo)}</code><button class="ib" data-copy="${esc(it.correo)}" title="Copiar correo" aria-label="Copiar correo de acceso">${I.copy}</button></div>
       <div class="lbl">${I.lock} Contraseña de acceso</div>
       <div class="field"><code class="pw" data-pw="${esc(it.clave)}">••••••••••</code><button class="ib tog" title="Mostrar u ocultar contraseña" aria-label="Mostrar u ocultar contraseña">${I.eye}</button><button class="ib" data-copy="${esc(it.clave)}" title="Copiar contraseña" aria-label="Copiar contraseña de acceso">${I.copy}</button></div>
-      ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> vence el mismo día que tu primera cuenta y comparte con ella tus pedidos de código de hoy.</div>`:""}
+      ${it.adicional?`<div class="note"><b>Cuenta adicional:</b> conserva la vigencia del plan que le dio acceso y comparte tus pedidos de código de hoy.</div>`:""}
       ${it.tiene2fa?`<div data-totp="${esc(String(it.correo).toLowerCase())}" data-rest="${it.restantes2fa??''}" data-max="${it.max2fa||2}"><div class="lbl">${I.lock} Código de dos pasos (autenticador)</div>
         <div class="tbox"><div class="tview" hidden><div class="trow"><span class="tcode">--- ---</span><span class="tcnt"><b class="tleft">30</b></span><button class="ib tcopy" data-copy="" title="Copiar código">${I.copy}</button></div><div class="tline"><i class="tbar"></i></div></div>
         <div class="task"><button class="cta tbtn" type="button" data-ask>🔐 Pedir código de autenticación</button> <small class="trest" style="color:var(--mut);margin-left:8px"></small></div></div>
