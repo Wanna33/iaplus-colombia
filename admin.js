@@ -499,7 +499,7 @@ function render(){
 
   <section id="tab-dios" class="hide">
     <div class="god-hero"><div><span class="overline">CONTROL DEL NEGOCIO</span><h2>Modo Dios</h2><p>Tu tienda, tus reglas. Revisa los cambios del asistente antes de guardarlos. Los precios se guardan por producto.</p></div><div class="god-badges" id="godBadges"></div></div>
-    <nav class="god-jumps" aria-label="Secciones de Modo Dios"><a href="#godAssistant">Asistente</a><a href="#godRules">Instrucciones</a><a href="#godAnswers">Respuestas</a><a href="#godCatalog">Planes y precios</a></nav>
+    <nav class="god-jumps" aria-label="Secciones de Modo Dios"><a href="#godAccounts">Agregar / eliminar cuentas</a><a href="#godAssistant">Asistente</a><a href="#godRules">Instrucciones</a><a href="#godAnswers">Respuestas</a><a href="#godCatalog">Planes y precios</a></nav>
     <div class="god-savebar" id="godSavebar" data-state="saved"><div><span class="save-indicator"></span><span id="godSaveStatus" role="status">Cargando configuración…</span></div><div><button class="btn s" type="button" id="godDiscard" disabled>Descartar</button><button class="btn p" type="button" id="godSaveAll" disabled>Guardar cambios</button></div></div>
     <div class="card" id="godCmd"><div class="cmd-head"><h2>🎛️ Centro de mando</h2><div class="acts"><span id="cmdStamp" class="god-hint" style="margin:0"></span><button class="btn s" type="button" id="cmdReload">↻ Actualizar</button></div></div>
       <div id="cmdLive" class="cmd-live"><span class="tag t-g">Cargando estado…</span></div>
@@ -545,6 +545,23 @@ function render(){
       <div id="gFaq" class="faq-list"></div>
       <div class="acts" style="margin-top:10px"><button class="btn s" id="gFaqAdd">➕ Agregar respuesta</button><button class="btn s" id="gFaqReset">↺ Volver a las de fábrica</button><span style="flex:1"></span><button class="btn p" id="gFaqOk">Revisar cambios</button></div>
     </div>
+    <div class="card" id="godAccounts"><h2>Agregar y eliminar cuentas</h2>
+      <p class="god-hint">Administra los accesos de tu inventario. Cada registro tiene su propio código y puede estar asignado a un cliente. Eliminar un registro quita ese acceso de la tienda; no cancela la cuenta en el proveedor.</p>
+      <details id="godAccountAdd"><summary>➕ Agregar una cuenta</summary>
+        <form id="godAccountForm" class="form" style="margin-top:14px">
+          <label>Producto<input name="producto" list="prodList" value="ChatGPT" required maxlength="80"></label>
+          <label>Correo o usuario de la cuenta<input name="correo" required autocomplete="off" maxlength="200"></label>
+          <label>Contraseña<input name="clave" type="password" required autocomplete="new-password" maxlength="500"></label>
+          <label>Clave del autenticador 2FA (opcional)<input name="clave2fa" type="password" autocomplete="off" maxlength="200"></label>
+          <label>Días del plan<input name="dias" type="number" min="1" max="366" value="30" required></label>
+          <label>Precio (COP)<input name="precio" type="number" min="0" step="500" value="${DEFAULT_PRICE}" required></label>
+          <div><button type="submit" class="btn p">Guardar cuenta y generar código</button></div>
+        </form>
+      </details>
+      <div class="tools" style="margin-top:18px"><label>Buscar cuenta o cliente<input id="godAccountSearch" type="search" placeholder="Correo, producto, cliente o código"></label><span id="godAccountCount" class="hint" role="status"></span></div>
+      <p id="godAccountMessage" class="hint" role="status"></p>
+      <div class="wrapt god-products"><table class="god-tab"><thead><tr><th>Producto</th><th>Cuenta</th><th>Código</th><th>Cliente</th><th>Acciones</th></tr></thead><tbody id="godAccountRows"></tbody></table></div>
+    </div>
     <div class="card" id="godCatalog"><h2>Productos, planes y precios</h2>
       <p class="god-hint">Cambia el precio o los días y toca Guardar: se actualiza en la tienda, en el asistente, en los revendedores y en los códigos nuevos. "Visible" apagado lo esconde de la tienda y el asistente deja de ofrecerlo.</p>
       <div class="tools catalog-control-tools"><label class="control-search"><span>Buscar producto</span><input id="godProductSearch" placeholder="ChatGPT, Canva, CapCut…" type="search"></label><span id="godProductCount" class="hint"></span></div><div class="wrapt god-products"><table class="god-tab"><thead><tr><th>Producto</th><th>Precio (COP)</th><th>Días</th><th>Visible</th><th>Disponibilidad</th><th></th></tr></thead><tbody id="gProds"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody></table></div>
@@ -587,6 +604,8 @@ function render(){
   $("#side").classList.remove("hide"); document.body.classList.add("has-side"); drawNav();
   if(!$("#fab")){ const f=document.createElement("button"); f.className="fab"; f.id="fab"; f.title="Nueva cuenta o código"; f.textContent="＋"; f.onclick=()=>{ setTab("cta"); const bx=$("#addBox"); bx.open=true; bx.scrollIntoView({behavior:"smooth",block:"start"}); setTimeout(()=>$("#fMail").focus(),400); }; document.body.appendChild(f); }
   $("#addForm").onsubmit = addAccount;
+  $("#godAccountForm").onsubmit = addGodAccount;
+  $("#godAccountSearch").oninput = drawGodAccounts;
   $("#fProd").addEventListener("change",()=>{ $("#fPrice").value = priceOf($("#fProd").value); $("#fDays").value = daysOf($("#fProd").value); saveDraft(); });
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
@@ -1799,7 +1818,44 @@ document.addEventListener('click',e=>{
   if(t.id==='cmdBienOk')return loadCmd({ajustes:{bienvenida:$('#cmdBien').value}},$('#cmdBien').value.trim()?'Bienvenida guardada.':'Se usará la bienvenida de fábrica.');
   if(t.id==='cmdBienBase'){$('#cmdBien').value=CMD?.base||'';$('#cmdBienN').textContent=$('#cmdBien').value.length+'/1500';cmdDirty=true;toast('Edítala y toca Guardar bienvenida.');}
 });
+let godAccountBusy=false;
+function drawGodAccounts(){
+  const host=$('#godAccountRows');if(!host)return;
+  const q=norm($('#godAccountSearch')?.value||'');
+  const found=items.filter(i=>!q||norm([i.producto,i.correo,i.codigo,i.cliente].join(' ')).includes(q));
+  $('#godAccountCount').textContent=found.length+' registros'+(found.length>80?' · mostrando 80; afina la búsqueda':'');
+  host.innerHTML=found.slice(0,80).map(i=>`<tr><td data-l="Producto">${esc(i.producto)}</td><td data-l="Cuenta">${esc(i.correo)}</td><td data-l="Código">${esc(i.codigo)}</td><td data-l="Cliente">${esc(i.cliente||'Sin asignar')}</td><td data-l="Acciones"><button type="button" class="btn s d" data-god-delete="${esc(i.codigo)}" ${godAccountBusy?'disabled':''}>Eliminar registro</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">No hay cuentas que coincidan.</td></tr>';
+}
+async function addGodAccount(e){
+  e.preventDefault();if(godAccountBusy)return;
+  const form=e.currentTarget,b=form.querySelector('button[type="submit"]'),data=Object.fromEntries(new FormData(form));
+  godAccountBusy=true;b.disabled=true;
+  try{
+    const j=await api('admin_add',data);form.reset();
+    $('#godAccountMessage').textContent='Cuenta guardada. Código de activación: '+j.codigo;
+    $('#godAccountAdd').open=false;await refresh();toast('Cuenta agregada ✔');
+  }catch(ex){toast(ex.message);}
+  finally{godAccountBusy=false;b.disabled=false;drawGodAccounts();}
+}
+async function deleteGodAccount(button){
+  if(godAccountBusy)return;godAccountBusy=true;button.disabled=true;
+  const expected=items.find(i=>String(i.codigo)===button.dataset.godDelete);
+  try{
+    if(!expected)throw Error('Actualiza el inventario e intenta de nuevo.');
+    const latest=await api('admin_list');
+    const current=latest.items?.find(i=>String(i.codigo)===String(expected.codigo)&&i.correo===expected.correo);
+    if(!current)throw Error('Ese registro cambió o ya fue eliminado. Actualiza el inventario.');
+    const warning='¿Eliminar este registro?\n\nProducto: '+current.producto+'\nCuenta: '+current.correo+'\nCódigo: '+current.codigo+'\nCliente: '+(current.cliente||'Sin asignar')+'\n\n'+(current.cliente?'El cliente perderá este acceso en Mi cuenta. ':'')+'La fila se borrará de la hoja y la acción quedará en Actividad. Esta eliminación no se puede deshacer desde el panel.';
+    if(!confirm(warning))return;
+    await api('admin_delete',{fila:current.fila});
+    $('#godAccountMessage').textContent='Registro eliminado: '+current.correo+' · '+current.codigo;
+    await refresh();toast('Registro eliminado ✔');
+  }catch(ex){toast(ex.message);}
+  finally{godAccountBusy=false;button.disabled=false;drawGodAccounts();}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-god-delete]');if(b)deleteGodAccount(b);});
 async function loadDios(){
+  drawGodAccounts();
   startCmd();
   if(godDirty||godSaving||godLoading)return;godLoading=true;godStatus('Cargando configuración…','loading');godControlsDisabled(true);
   try{
