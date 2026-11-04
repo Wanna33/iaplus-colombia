@@ -114,6 +114,8 @@ dialog[open]{animation:pop .25s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
 .passrow{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .passrow:last-child{border-bottom:0}
+.passrow [data-inventory-mail]{grid-column:1/-1;justify-self:end}
+@media(max-width:760px){.passrow [data-inventory-mail]{justify-self:stretch}}
 .pr-info{display:flex;flex-direction:column;min-width:0}.pr-info .mono{font-size:14px;word-break:break-all}.pr-info small{color:var(--mut)}
 .pr-in{font-family:Consolas,monospace;font-weight:700}
 @media(max-width:760px){.passrow{grid-template-columns:1fr}.passrow .btn{width:100%}.pr-cap{display:flex;align-items:center;gap:8px}}
@@ -460,6 +462,6 @@ dialog::backdrop{background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(4px)
 <script defer src="net.js"></script>
 <script defer src="admin-workflow.js"></script>
 <script defer src="admin-insights.js"></script>
-<script defer src="admin.js?v=inventario-rapido-20261104"></script>
+<script defer src="admin.js?v=inventario-seguro-20261104"></script>
 </body>
 </html>

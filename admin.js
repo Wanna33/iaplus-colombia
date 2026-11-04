@@ -240,11 +240,11 @@ function byProductHtml(){
 }
 function passListHtml(){
   const m = new Map();
-  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,total:0,clientes:0}; a.total++; if(i.cliente&&IAPInsights.isActive(i,Date.now())) a.clientes++; m.set(k,a); });
-  return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente activo":"clientes activos"} · ${a.total} ${a.total===1?"código":"códigos"}</small></div>
+  items.forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,retirada:i.retirada,total:0,clientes:0}; a.total++; if(i.cliente&&IAPInsights.isActive(i,Date.now())) a.clientes++; m.set(k,a); });
+  return [...m.values()].map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente activo":"clientes activos"} · ${a.total} ${a.total===1?"código":"códigos"}${a.retirada?" · Retirada · planes conservados":""}</small></div>
     <div class="pr-cap">${(()=>{ const c=capMap().get(a.correo.toLowerCase()); return c?capBar(c,getCap()):""; })()}</div>
     <input class="pr-in" data-pk="${esc(a.k)}" data-orig="${esc(a.clave)}" value="${esc(a.clave)}" autocomplete="off" aria-label="Contraseña de ${esc(a.correo)}">
-    <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+    <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button><button type="button" class="btn s" data-inventory-mail="${esc(a.correo)}" data-retire="${!a.retirada}">${a.retirada?"Restaurar cuenta":"Eliminar del inventario"}</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
 async function savePass(k){
   const inp = document.querySelector(`.pr-in[data-pk="${CSS.escape(k)}"]`), btn = document.querySelector(`[data-ps="${CSS.escape(k)}"]`); if(!inp) return;
@@ -481,7 +481,7 @@ function render(){
   </section>
 
   <section id="tab-cta" class="hide">
-    <div class="card"><h2>🧩 Mis cuentas</h2>
+    <div class="card"><div class="acts"><h2>🧩 Mis cuentas</h2><button type="button" class="btn p" id="openAddAccount">➕ Agregar cuenta</button></div><p class="hint">Eliminar del inventario retira la cuenta de las ventas nuevas. Los clientes conservan sus accesos y fechas; los códigos ya entregados siguen vigentes. Puedes restaurarla después. El retiro aplica a todos los productos con el mismo correo.</p>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada fila es una cuenta que compartes: ves cuántos clientes la usan (barra de cupo) y puedes cambiar su contraseña. Al guardar, <b>se actualiza sola para todos sus clientes</b>. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
       <div id="passList"></div></div>
     <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
@@ -547,7 +547,7 @@ function render(){
       <div class="acts" style="margin-top:10px"><button class="btn s" id="gFaqAdd">➕ Agregar respuesta</button><button class="btn s" id="gFaqReset">↺ Volver a las de fábrica</button><span style="flex:1"></span><button class="btn p" id="gFaqOk">Revisar cambios</button></div>
     </div>
     <div class="card" id="godAccounts"><h2>Agregar y eliminar cuentas</h2>
-      <p class="god-hint">Administra los accesos de tu inventario. Cada registro tiene su propio código y puede estar asignado a un cliente. Eliminar un registro quita ese acceso de la tienda; no cancela la cuenta en el proveedor.</p>
+      <p class="god-hint">Administra los accesos de tu inventario. Cada registro tiene su propio código y puede estar asignado a un cliente. Los registros asignados a clientes están protegidos. Para retirar una cuenta sin afectar los planes, usa Eliminar del inventario en Cuentas.</p>
       <details id="godAccountAdd"><summary>➕ Agregar una cuenta</summary>
         <form id="godAccountForm" class="form" style="margin-top:14px">
           <label>Producto<input name="producto" list="prodList" value="ChatGPT" required maxlength="80"></label>
@@ -737,6 +737,7 @@ function capMap(){
   items.forEach(i=>{
     const k = i.correo.toLowerCase();
     const a = m.get(k) || {correo:i.correo, filas:{}, act:0, libres:0, prob:false};
+    if(i.retirada) a.prob = true;
     if(a.filas[i.producto]===undefined) a.filas[i.producto] = i.fila;
     if(i.cliente){ if(IAPInsights.isActive(i,Date.now())) a.act++; }
     else if(i.estado==="Con problemas") a.prob = true;
@@ -844,7 +845,7 @@ async function autoGen(e){
 
 function accounts(){
   const m = new Map();
-  items.forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
+  items.filter(i=>!i.retirada).forEach(i=>{ const k=i.producto+"|"+i.correo; if(!m.has(k)) m.set(k,{k,producto:i.producto,correo:i.correo,fila:i.fila,dias:i.dias}); });
   return [...m.values()];
 }
 function fillProducts(){
@@ -1145,8 +1146,8 @@ document.addEventListener("click", async e=>{
     if(a==="new"){ if(!confirm(i.cliente?"Esta cuenta ya tiene cliente. Un código nuevo la libera y le quita el acceso al cliente actual. ¿Continuar?":"¿Generar un código nuevo para esta cuenta?")) return;
       const j = await api("admin_newcode",{fila:i.fila}); copy(msgFor({...i,codigo:j.codigo})); toast("Nuevo código creado y mensaje copiado ✔"); }
     if(a==="rev"){ if(!confirm("¿Quitar al cliente "+i.cliente+" de esta cuenta? El código quedará libre otra vez.")) return; await api("admin_revoke",{fila:i.fila}); toast("Cliente quitado ✔"); }
-    if(a==="del"){ if(!confirm("¿Borrar esta fila ("+(i.codigo||i.correo)+")"+(i.cliente?" y el acceso de "+i.cliente:"")+"? No se puede deshacer, pero queda anotado en el Registro.")) return;
-      await api("admin_delete",{fila:i.fila}); toast("Fila borrada ✔"); }
+    if(a==="del"){ if(i.cliente)return toast("Este registro tiene cliente. Usa Eliminar del inventario en Cuentas para conservar su plan."); if(!confirm("¿Borrar esta fila ("+(i.codigo||i.correo)+")"+(i.cliente?" y el acceso de "+i.cliente:"")+"? No se puede deshacer, pero queda anotado en el Registro.")) return;
+      await api("admin_delete",{fila:i.fila,codigo:i.codigo,correo:i.correo}); toast("Fila borrada ✔"); }
     if(a==="edit"){
       const v = await askForm("Editar cuenta "+i.correo,[
         {id:"correo",label:"Correo de la cuenta",value:i.correo},
@@ -1846,9 +1847,10 @@ async function deleteGodAccount(button){
     const latest=await api('admin_list');
     const current=latest.items?.find(i=>String(i.codigo)===String(expected.codigo)&&i.correo===expected.correo);
     if(!current)throw Error('Ese registro cambió o ya fue eliminado. Actualiza el inventario.');
+    if(current.cliente)throw Error('Este registro tiene cliente. Usa Eliminar del inventario en Cuentas para conservar su plan.');
     const warning='¿Eliminar este registro?\n\nProducto: '+current.producto+'\nCuenta: '+current.correo+'\nCódigo: '+current.codigo+'\nCliente: '+(current.cliente||'Sin asignar')+'\n\n'+(current.cliente?'El cliente perderá este acceso en Mi cuenta. ':'')+'La fila se borrará de la hoja y la acción quedará en Actividad. Esta eliminación no se puede deshacer desde el panel.';
     if(!confirm(warning))return;
-    await api('admin_delete',{fila:current.fila});
+    await api('admin_delete',{fila:current.fila,codigo:current.codigo,correo:current.correo});
     $('#godAccountMessage').textContent='Registro eliminado: '+current.correo+' · '+current.codigo;
     await refresh();toast('Registro eliminado ✔');
   }catch(ex){toast(ex.message);}
@@ -2000,3 +2002,20 @@ function exportBusinessSnapshot(){
 document.addEventListener('change',e=>{if(e.target.id!=='insightPeriod')return;const period=Number(e.target.value);if(![0,1,7,30,90].includes(period))return;insightPeriod=period;$('#stats').innerHTML=businessKpisHtml();drawBusinessInsights();countUp();});
 document.addEventListener('click',e=>{const el=e.target.closest('[data-insight-action],[data-insight-client],#insightExport');if(!el)return;if(el.id==='insightExport')return exportBusinessSnapshot();insightNavigate(el.dataset.insightAction,el.dataset.insightClient);});
 document.addEventListener('keydown',e=>{const el=e.target.closest('[data-insight-action][role="button"]');if(el&&['Enter',' '].includes(e.key)){e.preventDefault();el.click();}});
+
+// El retiro solo cambia disponibilidad de inventario en el servidor, nunca las filas del cliente.
+let inventoryBusy = false;
+document.addEventListener('click', async e => {
+  if(e.target.closest('#openAddAccount')) {
+    setTab('cta'); $('#addBox').open=true; $('#addBox').scrollIntoView({block:'center'}); $('#fProd').focus(); return;
+  }
+  const button=e.target.closest('[data-inventory-mail]'); if(!button || inventoryBusy)return;
+  const correo=button.dataset.inventoryMail, retirada=button.dataset.retire==='true';
+  if(!confirm((retirada?'¿Eliminar del inventario ':'¿Restaurar al inventario ')+correo+'?\n\n'+(retirada?'No recibirá ventas ni códigos nuevos. Los planes, accesos y códigos existentes se conservan. Mantén la cuenta activa en el proveedor para que los clientes puedan seguir usándola.':'Volverá a estar disponible para nuevas ventas. Los planes actuales no cambian.')))return;
+  inventoryBusy=true; button.disabled=true;
+  try {
+    const result=await api('admin_account_inventory',{correo,retirada});
+    if(result.retirada!==retirada)throw Error('El servidor todavía no confirma esta función. No se cambió el inventario desde el panel.');
+    await refresh();toast(retirada?'Cuenta retirada; planes conservados ✔':'Cuenta restaurada ✔');
+  } catch(ex) {toast(ex.message);} finally {inventoryBusy=false;button.disabled=false;}
+});
