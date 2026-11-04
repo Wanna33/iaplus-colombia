@@ -16,10 +16,35 @@
   function clearButton(){const b=document.createElement('button');b.type='button';b.className='pro-search-clear';b.textContent='Borrar búsqueda';b.setAttribute('aria-controls','grid');b.addEventListener('click',clear);return b;}
   let reset=null,frame=0;
   if(store){const toolbar=document.querySelector('#catalogo .toolbar');if(toolbar){reset=clearButton();reset.hidden=!search.value.trim();toolbar.append(reset);}}
+  // Search the existing answers locally; no chat request or customer data is sent.
+  if(store){
+    const faq=document.getElementById('faq');
+    const answers=faq?[...faq.querySelectorAll('details')]:[];
+    if(answers.length){
+      const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const texts=answers.map(answer=>normalize(answer.textContent));
+      const tools=document.createElement('div');tools.className='pro-faq-search';
+      tools.innerHTML='<label for="faqSearch">Encuentra una respuesta</label><div><input id="faqSearch" type="search" autocomplete="off" maxlength="160" placeholder="Prueba con: activar, garantía, pago…"><button type="button" class="pro-search-clear" hidden>Limpiar</button></div><p role="status" aria-live="polite" aria-atomic="true"></p>';
+      answers[0].before(tools);
+      const empty=document.createElement('p');empty.className='pro-faq-empty';empty.hidden=true;
+      empty.innerHTML='No encontramos esa respuesta. Prueba otra palabra o <a href="#contacto">consulta las opciones de contacto</a>.';answers.at(-1).after(empty);
+      const input=tools.querySelector('input'),button=tools.querySelector('button'),status=tools.querySelector('[role="status"]');
+      function filterAnswers(){
+        const query=normalize(input.value.trim()),words=query.split(/\s+/).filter(Boolean);let count=0;
+        answers.forEach((answer,index)=>{const show=words.every(word=>texts[index].includes(word));answer.hidden=!show;if(show){count++;answer.classList.add('in');}});
+        button.hidden=!query;empty.hidden=count>0;status.textContent=query?count+' de '+answers.length+' respuestas coinciden.':answers.length+' respuestas sobre compra, activación y soporte.';
+      }
+      const clearAnswers=()=>{input.value='';filterAnswers();input.focus();};
+      input.addEventListener('input',filterAnswers);button.addEventListener('click',clearAnswers);
+      input.addEventListener('keydown',event=>{if(event.key==='Escape'&&input.value){event.preventDefault();event.stopPropagation();clearAnswers();}});
+      filterAnswers();
+    }
+  }
   function sync(){
     frame=0;if(document.hidden)return;
     if(reset)reset.hidden=!search.value.trim();
     if(!account)return;
+    if(document.querySelector('#accountWorkspace .aw-tools'))return;
     const grid=document.querySelector('#app #grid');
     if(!grid)return;
     let results=grid.previousElementSibling;

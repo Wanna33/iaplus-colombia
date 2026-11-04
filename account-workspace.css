@@ -1,0 +1,40 @@
+/* Mi cuenta: access organization, scoped to the authenticated workspace. */
+.account-app #accountWorkspace{margin:0 0 22px;color:#23493b}
+.account-app .aw-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.account-app .aw-summary>div{display:flex;flex-direction:column;gap:7px;min-width:0;padding:18px;border:1px solid #dce7da;border-radius:17px;background:linear-gradient(145deg,#fffef8,#f3f7ef);box-shadow:0 4px 17px #23492e06}
+.account-app .aw-summary>div:nth-child(3){background:linear-gradient(145deg,#faf6e9,#f4f0dd);border-color:#e8dfc1}
+.account-app .aw-summary span{font-size:11px;font-weight:650;color:#5b7462;line-height:1.4}
+.account-app .aw-summary strong{font-size:30px;line-height:1.1;letter-spacing:-1px;font-weight:750;color:#285640;font-variant-numeric:tabular-nums}
+.account-app .aw-summary small{font-size:9px;line-height:1.6;color:#70836b}
+.account-app .aw-summary .aw-expiry strong{font-size:19px;letter-spacing:-.4px;line-height:1.35;margin:4px 0}
+.account-app .aw-tools{padding:21px 23px;background:#fffefa;border:1px solid #d8e4d4;border-radius:18px;box-shadow:0 5px 22px #23492e06}
+.account-app .aw-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}
+.account-app .aw-heading h2{font-size:19px;letter-spacing:-.6px;color:#28513d;margin:0 0 5px;line-height:1.3}
+.account-app .aw-heading p{font-size:11px;color:#6b7d66;line-height:1.6;margin:0}
+.account-app .aw-reset{border:1px solid #dbe5d1;background:#f4f7ed;border-radius:10px;font-family:inherit;font-size:11px;font-weight:650;padding:10px 12px;color:#567048;min-height:42px;cursor:pointer;white-space:nowrap}
+.account-app .aw-reset:disabled{opacity:.45;cursor:default}
+.account-app .aw-controls{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:end}
+.account-app .aw-controls label{display:block;min-width:0;font-size:10px;font-weight:650;color:#5c735c}
+.account-app .aw-controls label>span{display:block;margin:0 0 7px}
+.account-app .aw-controls input,.account-app .aw-controls select{box-sizing:border-box;width:100%;min-height:45px;font-family:inherit;font-size:12px;color:#355541;background:#f8faf3;border:1px solid #d6e2ce;border-radius:11px;padding:10px 12px;box-shadow:none;max-width:100%;outline-offset:3px}
+.account-app .aw-controls input::placeholder{color:#84927c;font-size:11px}
+.account-app .aw-controls input:focus,.account-app .aw-controls select:focus{border-color:#779b77;background:#fffef9}
+.account-app .aw-controls select{cursor:pointer}
+.account-app .aw-filters{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.account-app .aw-filters button{display:flex;align-items:center;gap:8px;background:#f8faf4;color:#59704d;border:1px solid #e0e6d6;border-radius:24px;min-height:39px;padding:8px 12px;font-family:inherit;font-size:10px;font-weight:650;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.account-app .aw-filters button>span{display:grid;place-items:center;border-radius:10px;min-width:18px;min-height:17px;background:#e8eedf;color:#7c8c6c;font-size:9px;font-variant-numeric:tabular-nums;padding:0 4px}
+.account-app .aw-filters button[aria-pressed=true]{background:#245d43;border-color:#245d43;color:#fffef1;box-shadow:0 3px 9px #245d4315}
+.account-app .aw-filters button[aria-pressed=true]>span{background:#49765a;color:#fff9dc}
+.account-app .aw-filters button:hover:not([aria-pressed=true]){background:#edf3e5;border-color:#b8cbaa}
+.account-app .aw-results{font-size:10px;line-height:1.5;color:#75876c;margin:14px 0 0;padding-top:12px;border-top:1px solid #e7ecdf}
+.account-app .aw-tools button:focus-visible,.account-app .aw-tools input:focus-visible,.account-app .aw-tools select:focus-visible{outline:3px solid #b4934c;outline-offset:3px}
+.account-app .sub-card[hidden]{display:none!important}
+@media(max-width:1050px){.account-app .aw-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.account-app .aw-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.account-app .aw-search-label{grid-column:1/-1}}
+@media(max-width:480px){.account-app .aw-summary{gap:8px;margin:15px 0}.account-app .aw-summary>div{padding:14px 12px;gap:6px;border-radius:14px}.account-app .aw-summary span{font-size:10px}.account-app .aw-summary strong{font-size:27px}.account-app .aw-summary small{font-size:8px}.account-app .aw-summary .aw-expiry strong{font-size:16px}.account-app .aw-tools{padding:16px 14px;border-radius:16px}.account-app .aw-heading{gap:12px;align-items:flex-start}.account-app .aw-heading h2{font-size:17px}.account-app .aw-heading p{font-size:10px}.account-app .aw-reset{font-size:9px;padding:8px;min-height:44px}.account-app .aw-controls{gap:10px}.account-app .aw-controls input,.account-app .aw-controls select{font-size:11px;padding:10px 8px;min-height:44px}.account-app .aw-filters{gap:6px}.account-app .aw-filters button{font-size:9px;padding:9px 10px;min-height:42px;gap:6px}.account-app .aw-results{font-size:9px}}
+.account-app .aw-summary span,.account-app .aw-controls label{font-size:12px}
+.account-app .aw-summary small,.account-app .aw-results{font-size:11px;color:#576e50}
+.account-app .aw-heading p,.account-app .aw-filters button,.account-app .aw-reset{font-size:12px}
+.account-app .aw-controls input,.account-app .aw-controls select{font-size:14px}
+.account-app .aw-controls input::placeholder{font-size:13px;color:#63765a}
+@media(max-width:600px){.account-app .aw-controls{grid-template-columns:1fr}.account-app .aw-controls input,.account-app .aw-controls select{font-size:16px;min-height:48px}.account-app .aw-heading{flex-wrap:wrap}.account-app .aw-heading h2{font-size:20px}.account-app .aw-filters button{min-height:44px}.account-app .aw-filters button>span{font-size:11px}.account-app .aw-summary .aw-expiry strong{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.account-app .aw-filters button{transition:none}}

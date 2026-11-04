@@ -41,8 +41,8 @@
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-details]');if(d){const p=find(d.dataset.details);if(p)details(p,d);return;}
     const b=e.target.closest('[data-compare]');if(b){const id=b.dataset.compare;if(!find(id))return;if(selected.has(id))selected.delete(id);else if(selected.size<3)selected.add(id);else{toast('Puedes comparar hasta 3 planes. Retira uno para agregar otro.');return;}sync();return;}
-    const cat=e.target.closest('[data-category]');if(cat){filter=cat.dataset.category;document.getElementById('search').value='';renderFilters();renderGrid();document.querySelector('.toolbar').scrollIntoView({behavior:'smooth',block:'start'});return;}
-    const jump=e.target.closest('[data-jump-product]');if(jump){document.getElementById('search').value=find(jump.dataset.jumpProduct)?.name||'';filter='Todos';renderFilters();renderGrid();}
+    const cat=e.target.closest('[data-category]');if(cat){discovery?.clearExtras();filter=cat.dataset.category;document.getElementById('search').value='';renderFilters();renderGrid();document.querySelector('.toolbar').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});return;}
+    const jump=e.target.closest('[data-jump-product]');if(jump){discovery?.clearExtras();document.getElementById('search').value=find(jump.dataset.jumpProduct)?.name||'';filter='Todos';renderFilters();renderGrid();}
   });
   window.addEventListener('iap:catalog-updated',()=>{featured();sync();});
   featured();sync();

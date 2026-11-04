@@ -74,6 +74,12 @@ let user = load("iap_user", null);
 if(user && load("iap_has", false) && !/[?&]tienda/.test(location.search)) location.replace("cuenta.html");
 let cart = load("iap_cart", []);
 let filter = "Todos";
+const discovery = window.IAPDiscovery?.mount({
+  getProducts:()=>PRODUCTS,
+  onChange:()=>renderGrid(),
+  onReset:()=>{ $("#search").value=""; $("#sort").value=""; filter="Todos"; renderFilters(); renderGrid(); },
+  notify:message=>toast(message)
+});
 
 // copiar con respaldo para navegadores antiguos o sin HTTPS
 function copyText(t){
@@ -89,8 +95,9 @@ function toast(msg){ const t=$("#toast"); clearTimeout(toastT); t.classList.remo
 
 /* ============ CATÁLOGO ============ */
 function renderFilters(){
-  if(new Set(PRODUCTS.map(p=>p.cat)).size<2){ $("#filters").innerHTML=""; return; }
   const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
+  if(!cats.includes(filter))filter="Todos";
+  if(cats.length<3){ $("#filters").innerHTML=""; return; }
   $("#filters").innerHTML = cats.map(c=>`<button class="chip ${c===filter?"on":""}" data-c="${c}" aria-pressed="${c===filter}">${c}</button>`).join("");
   $("#filters").onclick = e => { const b=e.target.closest(".chip"), c=b&&b.dataset.c; if(c && c!==filter){ filter=c; renderFilters(); swapGrid(); $("#filters .chip.on")?.scrollIntoView?.({inline:"center",block:"nearest",behavior:"smooth"}); } };
 }
@@ -102,12 +109,15 @@ function swapGrid(){
 }
 function renderGrid(){
   const q = (($("#search")||{}).value||"").trim(), so = ($("#sort")||{}).value||"";
+  discovery?.sync({query:q,category:filter,sort:so});
   let list = PRODUCTS.filter(p => (filter==="Todos" || p.cat===filter) && IAPCatalog.matches(p,q));
+  if(discovery)list=discovery.filter(list);
   if(so) list = [...list].sort((a,b)=> so==="asc" ? a.price-b.price : b.price-a.price);
-  const cnt=$("#count"); if(cnt) cnt.textContent = `${list.length} ${list.length===1?'plan':'planes'}${list.length===PRODUCTS.length?' en el catálogo':' de '+PRODUCTS.length}${filter==='Todos'?'':' · '+filter}`;
+  const cnt=$("#count"); if(cnt) cnt.textContent = `${list.length} ${list.length===1?'plan':'planes'}${list.length===PRODUCTS.length?' en el catálogo':' de '+PRODUCTS.length}${filter==='Todos'?'':' · '+filter}${discovery?.favoriteView()?' · favoritos':''}`;
   const first = gridFirst; gridFirst = false;
   $("#grid").innerHTML = list.map((p,n)=>`
     <article class="card ${first?"reveal":"anim"}" data-product="${p.id}" style="--d:${Math.min(n,8)*(first?80:55)}ms">
+      ${discovery?.cardAction(p)||''}
       ${p.hot||p.badge?'<span class="badge">'+(p.badge||'Destacado')+'</span>':''}
       <div class="ico ${p.lt?"lt":""} ${p.dark?"dk":""}">${iconOf(p)}</div>
       <h3>${esc(p.name)}</h3>
@@ -118,7 +128,7 @@ function renderGrid(){
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
       <div class="card-tools"><button type="button" data-details="${p.id}" aria-label="Ver detalles de ${esc(p.name)}">Ver detalles ↗</button><button type="button" data-compare="${p.id}" aria-pressed="false" aria-label="Comparar ${esc(p.name)}">＋ Comparar</button></div>
       ${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full buy-btn" data-paypal="${p.id}" aria-label="PayPal · ${window.IAPPayPal.amount(p.id)}: pagar ${esc(p.name)}">PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
-    </article>`).join("") || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
+    </article>`).join("") || discovery?.empty(q) || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); swapGrid(); };
   observeReveal();
   window.dispatchEvent(new CustomEvent('iap:catalog-updated'));

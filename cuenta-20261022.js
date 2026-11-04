@@ -199,7 +199,7 @@ function card(it, idx){
           <li>Si sigue igual, escríbenos por WhatsApp con una captura del error.</li></ol></details>`:""}
       </details>
     </div>`;
-  return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${idx*80}ms" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
+  return `<article class="sub-card ${ex?"expired":""}" style="animation-delay:${Math.min(idx,5)*45}ms" data-account-index="${idx}" data-s="${esc((it.producto+" "+it.correo).toLowerCase())}">
     <div class="sub-head"><div class="picon">${icon}</div>
       <div class="pname"><h2>${esc(it.producto||app.n)}</h2><small>${esc(duration)} · Cuenta ${idx+1}</small></div>
       <span class="account-status ${active?'active':ex?'ended':'pending'}">${active?'Activa':ex?'Vencida':'Por confirmar'}</span>
@@ -216,8 +216,8 @@ function card(it, idx){
   </article>`;
 }
 function histHtml(){
-  return `<div class="hist"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Inicio</th><th>Vence</th><th>Plan</th><th>Estado</th></tr></thead><tbody>
-    ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${IAPAccountState.isExpired(it)?"e":"a"}">${IAPAccountState.isExpired(it)?"Expirado":"Activo"}</span></td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="hist"><table><thead><tr><th>Producto</th><th>Cuenta</th><th>Inicio</th><th>Vence</th><th>Vigencia</th><th>Estado</th></tr></thead><tbody>
+    ${ITEMS.map(it=>`<tr><td><b>${esc(it.producto)}</b></td><td style="word-break:break-all">${esc(it.correo)}</td><td>${it.inicio?fmt(new Date(it.inicio)):"—"}</td><td>${it.fin?fmt(new Date(it.fin)):"—"}</td><td>${it.dias||30} días</td><td><span class="st ${IAPAccountState.isActive(it)?"a":IAPAccountState.isExpired(it)?"e":""}">${IAPAccountState.isActive(it)?"Activo":IAPAccountState.isExpired(it)?"Expirado":"Por confirmar"}</span></td></tr>`).join("")}</tbody></table></div>`;
 }
 function addBox(first){
   return `<div class="addbox" id="addbox"><span class="eyebrow">ACTIVACIÓN DE ACCESO</span><h3>${first?"Tu primer acceso empieza aquí":"¿Tienes otro código?"}</h3>
@@ -263,32 +263,36 @@ function bindAdd(){
 }
 
 function warnHtml(){
-  const out=[];
+  const out=[],seen=new Set();
   ITEMS.forEach(it=>{
     const app=appOf(it), name=app.n==="tu cuenta"?it.producto:app.n, end=it.fin?new Date(it.fin):null;
+    const group=[app.k||name,it.fin||'',IAPAccountState.isExpired(it)].join('|');if(seen.has(group))return;seen.add(group);
     const link="index.html?tienda=1#catalogo";
-    if(IAPAccountState.isExpired(it)) out.push(`<div class="warn bad"><span>⛔ Tu plan de <b>${esc(name)}</b> ya venció.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
-    else if(end){ const d=Math.ceil((end-Date.now())/DAY); if(d<=5) out.push(`<div class="warn"><span>⏰ Tu plan de <b>${esc(name)}</b> vence ${d<=0?"hoy":d===1?"mañana":"en "+d+" días"}.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`); }
+    if(IAPAccountState.isExpired(it)) out.push(`<div class="warn bad"><span>Hay accesos vencidos de <b>${esc(name)}</b>.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`);
+    else if(IAPAccountState.isActive(it)&&end){ const d=Math.ceil((end-Date.now())/DAY); if(d<=5) out.push(`<div class="warn"><span>Accesos de <b>${esc(name)}</b> vencen ${d<=0?"hoy":d===1?"mañana":"en "+d+" días"}.</span><a href="${link}" target="_blank" rel="noopener">Renovar</a></div>`); }
   });
   return out.slice(0,3).join("");
 }
 function renderMain(){
+  window.IAPAccountWorkspace?.unmount();
   ITEMS.sort((a,b)=>Number(!!a.retirada)-Number(!!b.retirada)||(Number(b.ordenCuenta)||0)-(Number(a.ordenCuenta)||0));
   document.querySelectorAll('.pw').forEach(hidePassword);
   const act = ITEMS.filter(i=>IAPAccountState.isActive(i)).length;
   $("#app").innerHTML = `
     ${warnHtml()}
-    <section class="account-overview"><div><span class="account-eyebrow">TU ESPACIO · IA PLUS COLOMBIA</span><h1>Tus cuentas, a la mano.</h1><p>${ITEMS.length} ${ITEMS.length===1?"cuenta":"cuentas"} · ${act} ${act===1?"plan vigente":"planes vigentes"}</p></div><div class="account-overview-actions"><a href="#addbox">Activar otro código <span aria-hidden="true">＋</span></a>${act?'<button class="guiabtn" id="guiaBtn" type="button">Guía paso a paso ↗</button>':""}</div></section>
-    <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab" aria-selected="${tab==="sub"}">Suscripción</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab" aria-selected="${tab==="hist"}">Historial de pedidos</button></div>
-    <div id="view">${tab==="sub"?`<div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay suscripciones que coincidan.</div></div>`:histHtml()}</div>
+    <section class="account-overview"><div><span class="account-eyebrow">TU ESPACIO · IA PLUS COLOMBIA</span><h1>Tus cuentas, a la mano.</h1><p>${ITEMS.length} ${ITEMS.length===1?"acceso registrado":"accesos registrados"} · ${act} ${act===1?"acceso vigente":"accesos vigentes"}</p></div><div class="account-overview-actions"><a href="#addbox">Activar otro código <span aria-hidden="true">＋</span></a>${act?'<button class="guiabtn" id="guiaBtn" type="button">Guía paso a paso ↗</button>':""}</div></section>
+    <div class="tabs" role="tablist"><button data-tab="sub" class="${tab==="sub"?"on":""}" role="tab" aria-selected="${tab==="sub"}">Mis accesos</button><button data-tab="hist" class="${tab==="hist"?"on":""}" role="tab" aria-selected="${tab==="hist"}">Historial de accesos</button></div>
+    <div id="view">${tab==="sub"?`<div id="accountWorkspace"></div><div class="grid" id="grid">${ITEMS.map(card).join("")}<div class="nores" id="nores" hidden>No hay accesos que coincidan.</div></div>`:histHtml()}</div>
     ${addBox(false)}`;
+  if(tab==="sub")window.IAPAccountWorkspace?.mount($("#accountWorkspace"),{items:ITEMS,grid:$("#grid"),productOf:appOf,query:filterQ,onQuery:value=>{filterQ=value;const input=$("#q");if(input)input.value=value;},onHide:card=>{card.querySelectorAll('.pw').forEach(hidePassword);const button=card.querySelector('[data-acc]');if(button?.getAttribute('aria-expanded')==='true')setAccess(button,false);}});
   bindAdd(); applyFilter(); tick(); refreshTotp(); buildMenu();
   const gb = $("#guiaBtn"); if(gb) gb.onclick = ()=>guia();
   // The guide opens on request, without covering the customer's accounts on arrival.
 }
 /* ---------- Guía paso a paso ---------- */
 function guia(){
-  const card = [...document.querySelectorAll(".sub-card:not(.expired)")][0]; if(!card) return;
+  let card = [...document.querySelectorAll(".sub-card")].find(el=>!el.hidden&&IAPAccountState.isActive(ITEMS[Number(el.dataset.accountIndex)]||{}));
+  if(!card){window.IAPAccountWorkspace?.reset();card=[...document.querySelectorAll(".sub-card")].find(el=>IAPAccountState.isActive(ITEMS[Number(el.dataset.accountIndex)]||{}));}if(!card)return;
   setAccess(card.querySelector("[data-acc]"),true);
   const help=card.querySelector(".account-help");if(help)help.open=true;
   const fields = card.querySelectorAll(".access .field"), ask = card.querySelector("[data-ask]"), how = card.querySelector(".how");
@@ -321,6 +325,7 @@ function guia(){
   ver();
 }
 function applyFilter(){
+  if(window.IAPAccountWorkspace?.isMounted()){window.IAPAccountWorkspace.setQuery(filterQ);return;}
   const g=$("#grid"); if(!g) return; let n=0;
   g.querySelectorAll(".sub-card").forEach(c=>{ const ok=!filterQ||c.dataset.s.includes(filterQ); c.style.display=ok?"":"none"; if(ok) n++; });
   $("#nores").hidden = n>0;
@@ -339,10 +344,10 @@ function tick(){
 function buildMenu(){
   const u=load("iap_user")||{}, em=String(u.email||""),act=ITEMS.filter(i=>IAPAccountState.isActive(i)).length;
   const portrait=u.picture?`<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">`:`<span class="avatar-initial">${esc((u.name||em||"?")[0].toUpperCase())}</span>`;
-  const av=$("#avBtn");av.innerHTML=portrait;av.classList.toggle("co-member-ring",act>0);av.setAttribute("aria-label",act?`Menú de usuario · ${act} planes activos · Colombia`:"Menú de usuario");
-  $("#menu").innerHTML=`<div class="member-profile"><div class="member-avatar ${act?'co-member-ring':''}">${portrait}</div><div><div class="who">${esc(u.name||"Mi cuenta")}</div><div class="sub">${esc(em)}</div><span class="member-level">${act?'🇨🇴 Miembro activo':'Mi cuenta'}</span></div></div><div class="saved">${act} ${act===1?'plan vigente':'planes vigentes'} en IA Plus</div><hr>
+  const av=$("#avBtn");av.innerHTML=portrait;av.classList.toggle("co-member-ring",act>0);av.setAttribute("aria-label",act?`Menú de usuario · ${act} accesos activos · Colombia`:"Menú de usuario");
+  $("#menu").innerHTML=`<div class="member-profile"><div class="member-avatar ${act?'co-member-ring':''}">${portrait}</div><div><div class="who">${esc(u.name||"Mi cuenta")}</div><div class="sub">${esc(em)}</div><span class="member-level">${act?'🇨🇴 Miembro activo':'Mi cuenta'}</span></div></div><div class="saved">${act} ${act===1?'acceso vigente':'accesos vigentes'} en IA Plus</div><hr>
     <button class="mi on" data-go="sub"><span class="ic">🔑</span>Mi suscripción</button>
-    <button class="mi" data-go="hist"><span class="ic">🧾</span>Pedidos históricos</button>
+    <button class="mi" data-go="hist"><span class="ic">🧾</span>Historial de accesos</button>
     <a href="index.html?tienda=1#catalogo"><span class="ic">🛍️</span>Comprar más cuentas</a>
     <a href="https://wa.me/${WHATSAPP}" target="_blank" rel="noopener"><span class="ic">🎧</span>Soporte</a>
     <a href="index.html?tienda=1#faq"><span class="ic">📖</span>Centro de ayuda</a>
@@ -361,7 +366,7 @@ document.addEventListener('iap:open-access',e=>{
   if(index<0)index=ITEMS.findIndex(it=>IAPAccountState.isActive(it));
   const panel=document.getElementById('acc'+index),button=document.querySelector('[data-acc="acc'+index+'"]');
   if(!panel||!button)return;
-  filterQ='';const search=$('#q');if(search)search.value='';applyFilter();
+  window.IAPAccountWorkspace?.reveal();filterQ='';const search=$('#q');if(search)search.value='';applyFilter();
   e.preventDefault();setAccess(button,true);button.focus({preventScroll:true});panel.closest('.sub-card')?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 });
 document.addEventListener("click", e=>{

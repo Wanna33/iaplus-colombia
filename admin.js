@@ -20,6 +20,7 @@ const fdt = iso => iso ? new Date(iso).toLocaleString("es-CO",{timeZone:"America
 const money = n => "$"+Math.round(Number(n)||0).toLocaleString("es-CO");
 const norm = s => String(s??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 let items = [], busy = false, hlCode = "", curTab = "res", TTL = null; // TTL: minutos que dura un código sin canjear (0 = nunca)
+let focusController=null,focusRoot=null,focusRequest=null;
 try{ curTab = sessionStorage.getItem("iap_tab") || "res"; }catch{}
 const DRAFT = "iap_admin_draft";
 // Permanente (localStorage): producto, correo y días. Las contraseñas y claves 2FA solo duran mientras la pestaña esté abierta (sessionStorage).
@@ -73,6 +74,7 @@ async function api(action, data={}){
 
 function showLogin(){
   window.IAPWorld?.stop();
+  focusController?.destroy();focusController=null;focusRoot=null;
   message("Acceso del administrador","Inicia sesión con la cuenta de Google autorizada.",'<div id="g" style="display:inline-block"></div>');
   if(!window.google?.accounts?.id&&!document.querySelector('script[data-google-identity]')){
     const script=document.createElement("script");script.src="https://accounts.google.com/gsi/client";script.async=true;script.dataset.googleIdentity="true";
@@ -364,12 +366,47 @@ function setTab(t){
   if(t==="rev") loadRev();
   if(t==="ag") loadAgentes();
   if(t==="dios" && !godDirty && !godSaving) loadDios();
-  if(t==="res") loadFeed();
+  if(t==="res"){loadFeed();loadFocus();}
   if(t==="prod"){ $("#byProd").innerHTML=byProductHtml();$("#prodTable").innerHTML=prodTableHtml(); }
   if(t==="cli") crows();
   if(t==="cod"){fillAccounts();fillAuto();rows();updateGeneratorPreview();ensureCatalog();}
   if(t==="cta"){if(!$("#passList").contains(document.activeElement))$("#passList").innerHTML=passListHtml();fillAccounts();}
   if(t==="local")Promise.all([loadAdminStyle("local-bots.css"),loadAdminScript("local-bots.js")]).then(()=>window.IAPLocalBots?.mount(document.getElementById("localBots"),items)).catch(()=>{const el=$("#localBots");if(el)el.innerHTML='<div class="empty">No se pudo cargar esta sección. Comprueba la conexión e inténtalo de nuevo.</div>';});
+}
+function loadFocus(){
+  const root=document.getElementById('adminFocus');
+  if(!root||curTab!=='res')return Promise.resolve();
+  if(focusRequest?.root===root)return focusRequest.promise;
+  const promise=(async()=>{
+    try{
+      await Promise.all([loadAdminStyle('admin-focus.css?v=20261104-complete2'),loadAdminScript('admin-focus.js?v=20261104-complete2')]);
+      if(!root.isConnected||curTab!=='res')return;
+      if(focusRoot!==root){
+        focusController?.destroy();focusRoot=root;
+        focusController=window.IAPAdminFocus.mount(root,{
+          onRetry:()=>loadFocus(),
+          openChat:tel=>{setTab('wa');openChat(tel);},
+          openSales:id=>{
+            setTab('wa');$('#waSt').value='';drawWa();
+            const target=[...document.querySelectorAll('[data-wa]')].find(el=>el.dataset.wa===String(id))||$('#waRows');
+            if(target){target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:'center',behavior:'auto'});}
+          }
+        });
+      }
+      const controller=focusController;controller.update({loading:true});
+      const [chats,sales]=await Promise.all([api('admin_wa_chats'),api('admin_wa_list')]);
+      if(!root.isConnected||focusController!==controller||curTab!=='res')return;
+      if(!Array.isArray(chats.chats)||!Array.isArray(sales.ventas))throw Error('Datos incompletos');
+      WAV=sales.ventas;controller.update({chats:chats.chats,sales:sales.ventas,updatedAt:Date.now()});
+    }catch(error){
+      if(!root.isConnected)return;
+      if(focusRoot===root&&focusController)focusController.update({error:error.message,loading:false});
+      else{root.innerHTML='<div class="empty" role="status">No se pudieron cargar los pendientes. <button type="button" class="btn s">Reintentar</button></div>';root.querySelector('button').onclick=()=>loadFocus();}
+    }
+  })();
+  focusRequest={root,promise};
+  promise.finally(()=>{if(focusRequest?.promise===promise)focusRequest=null;});
+  return promise;
 }
 function updateViews(){
   $("#stats").innerHTML = statsHtml(); $("#alerts").innerHTML = alertsHtml(); $("#attn").innerHTML = attentionHtml(); $("#due").innerHTML = dueHtml(); $("#months").innerHTML = monthsHtml();
@@ -396,6 +433,7 @@ function render(){
         <button class="btn" data-goto="dios">⚡ Modo Dios</button>
         <button class="btn" data-goto="rev">🤝 Revendedores</button>
       </div></div>
+    <div id="adminFocus"><p class="hint" role="status">Cargando centro de pendientes…</p></div>
     <div class="insight-toolbar"><div><span class="overline">TU NEGOCIO EN UN VISTAZO</span><p>Clientes, activaciones y disponibilidad con los datos del panel.</p></div><div><label for="insightPeriod">Periodo de análisis</label><select id="insightPeriod"><option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option><option value="0">Todo el historial</option></select><button class="btn" id="insightExport" type="button">Descargar resumen</button></div></div>
     <div class="kpis business-kpis" id="stats"></div><p class="insight-scope" id="insightScope"></p><div id="businessInsights" class="business-insights"></div>
     <div class="dgrid">

@@ -1,0 +1,39 @@
+/* Shared interaction language. Content stays visible without JavaScript. */
+:root{--iap-ease:cubic-bezier(.22,.75,.25,1);--iap-fast:160ms;--iap-enter:360ms}
+:is(.storefront,.account-app,.admin-app) :is(button,a,input,select,summary){transition-timing-function:var(--iap-ease)}
+:is(.storefront,.account-app,.admin-app) :is(input,select,textarea){transition:border-color var(--iap-fast),box-shadow var(--iap-fast),background-color var(--iap-fast)}
+:is(.storefront,.account-app,.admin-app) :is(button,a):focus-visible{outline:3px solid #ad873c;outline-offset:4px}
+.storefront .reveal{transition:opacity 460ms var(--iap-ease) min(var(--d,0ms),200ms),translate 460ms var(--iap-ease) min(var(--d,0ms),200ms);translate:0 16px}
+.storefront .reveal.in{translate:0 0}
+.storefront #grid .card.anim{animation:iap-card-enter var(--iap-enter) var(--iap-ease) backwards;animation-delay:min(var(--d,0ms),180ms)}
+.account-app .sub-card{animation:iap-card-enter var(--iap-enter) var(--iap-ease) backwards}
+.admin-app [id^="tab-"]:not(.hide){animation:iap-view-enter 260ms var(--iap-ease) backwards}
+:is(.storefront,.account-app,.admin-app) dialog[open]{animation:iap-dialog-enter 240ms var(--iap-ease) both}
+:is(.storefront,.account-app,.admin-app) dialog[open]::backdrop{animation:iap-backdrop-enter 200ms ease-out}
+.storefront .compare-tray:not([hidden]),.account-app .menu.open{animation:iap-view-enter 220ms var(--iap-ease) both}
+.account-app .account-help[open]>*:not(summary),.storefront #faq details[open]>p{animation:iap-view-enter 220ms var(--iap-ease)}
+.storefront .hero-text{animation:iap-view-enter 500ms var(--iap-ease) both}
+.storefront .hero-side{animation:iap-view-enter 600ms var(--iap-ease) 80ms backwards}
+.pro-faq-search{margin:25px 0 20px;padding:20px;border:1px solid #d3dfce;border-radius:17px;background:#ffffffd9}
+.pro-faq-search>label{display:block;margin-bottom:10px;font-weight:750;font-size:13px;color:#264b37}
+.pro-faq-search>div{display:flex;gap:9px;align-items:center}
+.pro-faq-search input{flex:1;min-width:0;width:100%;min-height:48px;padding:12px 14px;border:1px solid #c6d6bf;border-radius:10px;background:#f9fcf5;color:#23472f;font:inherit;font-size:13px}
+.pro-faq-search>p{margin:10px 0 0;font-size:12px;color:#546d4c}
+.storefront #faq details[hidden],.pro-faq-empty[hidden]{display:none!important}
+.pro-faq-empty{padding:24px;background:#fff;border:1px dashed #b7c8ac;border-radius:14px;line-height:1.8;color:#4f6646;font-size:14px}
+.pro-faq-empty a{color:#15594b;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:600px){.pro-faq-search input{font-size:16px}.pro-faq-search{padding:16px}}
+@media(hover:hover) and (pointer:fine){
+ :is(.storefront,.account-app) :is(.btn,.buy-btn,.cta,.tbtn,.ib,.pro-search-clear){transition:background-color var(--iap-fast),border-color var(--iap-fast),box-shadow var(--iap-fast),translate var(--iap-fast)}
+ :is(.storefront,.account-app) :is(.btn,.buy-btn,.cta,.tbtn,.ib,.pro-search-clear):active:not(:disabled){translate:0 1px}
+ .storefront .nav .links a,.admin-app .nv{transition:background-color 180ms,color 180ms,box-shadow 180ms}
+ .storefront .featured-plan{transition:transform 260ms var(--iap-ease),box-shadow 260ms var(--iap-ease),border-color 180ms}
+}
+@keyframes iap-card-enter{from{opacity:.35;translate:0 12px}to{opacity:1;translate:0 0}}
+@keyframes iap-view-enter{from{opacity:.5;translate:0 7px}to{opacity:1;translate:0 0}}
+@keyframes iap-dialog-enter{from{opacity:0;translate:0 12px;scale:.985}to{opacity:1;translate:0 0;scale:1}}
+@keyframes iap-backdrop-enter{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+ :is(.storefront,.account-app,.admin-app) *,:is(.storefront,.account-app,.admin-app) *::before,:is(.storefront,.account-app,.admin-app) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+ .storefront .reveal{opacity:1!important;translate:none!important}
+}
