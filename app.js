@@ -412,7 +412,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-pay]
   const fine = matchMedia("(hover:hover) and (pointer:fine)").matches && !matchMedia("(prefers-reduced-motion:reduce)").matches;
   if(!fine || !hero) return;
   // foco de luz que sigue al mouse en la portada (un solo cuadro por movimiento)
-  const bg = hero.querySelector(".hero-bg"); let raf = 0, ev = null;
+  const bg = hero.querySelector(".hero-bg"); if(!bg) return; let raf = 0, ev = null;
   hero.addEventListener("pointermove", e => { ev = e; if(raf) return; raf = requestAnimationFrame(() => { raf = 0; const r = hero.getBoundingClientRect(); bg.style.setProperty("--sx", (ev.clientX - r.left) + "px"); bg.style.setProperty("--sy", (ev.clientY - r.top) + "px"); }); });
   // botón principal magnético: se acerca un poco al cursor
   hero.querySelectorAll(".cta .btn").forEach(b => {

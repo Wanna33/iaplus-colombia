@@ -85,7 +85,7 @@
       if(activeCount){activeCount.textContent=`${active} ${active===1?'activo':'activos'}`;activeCount.hidden=!active;}
       if(more){
         // Set the initial layout once; native details then keeps the user's choice.
-        if(!disclosureInitialized){more.open=!win.matchMedia?.('(max-width: 600px)').matches||model.active()||model.count()>0;disclosureInitialized=true;}
+        if(!disclosureInitialized){more.open=(!doc.body.classList.contains('catalog-first')&&!win.matchMedia?.('(max-width: 600px)').matches)||model.active()||model.count()>0;disclosureInitialized=true;}
         more.hidden=false;
       }
     }
