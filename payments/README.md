@@ -6,7 +6,7 @@ La tienda carga `paypal-inline.js` y `paypal-inline-frame.html` / `.js`. Los bot
 
 El comprador inicia sesión con Google, obtiene una cotización autenticada y paga en la ventana integrada. El servidor crea y captura el pedido, comprueba importe, moneda, propietario y referencia, y entrega el acceso de forma idempotente. La interfaz muestra la cuenta activa únicamente tras recibir `ENTREGADO` del servidor. Un mensaje del iframe nunca basta para activar.
 
-Los pedidos pendientes se conservan y se pueden retomar sin crear otro pedido. Los pagos sin inventario muestran `APROBADO_SIN_STOCK`, sin afirmar que se entregó acceso.
+Los pedidos pendientes se guardan por Gmail y se pueden retomar sin crear otro pedido. Un registro antiguo rechazado explícitamente por el servidor se archiva localmente y permite cotizar de nuevo. Un fallo de red conserva el pedido; nunca provoca una compra nueva automática. Las compras ya entregadas muestran acceso a Mi cuenta y una opción explícita para comprar otro plan. Los pagos sin inventario muestran `APROBADO_SIN_STOCK`, sin afirmar que se entregó acceso.
 
 | Plan | Precio USD |
 | --- | --- |
@@ -59,6 +59,7 @@ En sandbox solo el administrador puede probar; no se entregan accesos reales. La
 ```
 node tools/check-paypal.cjs
 node tools/check-paypal-worker.cjs
+node tools/check-paypal-inline.cjs
 node tools/check-store.cjs
 ```
 
@@ -70,3 +71,5 @@ Documentación oficial:
 - https://developer.paypal.com/api/codes/currency
 - https://developer.paypal.com/api/rest/reference/idempotency/
 - https://developer.paypal.com/api/webhooks/overview/
+
+La prueba de interfaz usa jsdom: `npm install --prefix outputs/paypal-qa jsdom`. No crea pedidos ni realiza cobros.
