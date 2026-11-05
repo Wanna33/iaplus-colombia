@@ -17,7 +17,8 @@ for(const file of ['backend/Code.gs','backend/Code-con-PayPal.gs']){
  const original=JSON.stringify(rows), props={'INVENTARIO_RETIRADA_retired@test.example':'1'},logs=[];
  const sh={getDataRange:()=>({getValues:()=>rows}),getLastRow:()=>rows.length,getRange:(n,c,h,w)=>({setValues:v=>{assert.equal(n,rows.length+1);assert.equal(w,15);assert.equal(h,v.length);rows.push(...v);}})};
  const ctx=vm.createContext({Date,Map,Set,Number,Infinity,DEFAULT_DAYS:30,DAY:day,ADICIONAL:'Cuenta adicional',CATALOGO:{chatgpt:{match:['chatgpt']}},isAdmin_:e=>e==='admin@test.example',newCode_:taken=>{const c='NEW'+ ++id;assert.ok(!taken[c]);taken[c]=true;return c;},PropertiesService:{getScriptProperties:()=>({getProperty:k=>props[k],getProperties:()=>({...props})})},log_:(...a)=>logs.push(a)});
- for(const n of ['plan_','cuentaRetirada_','cuentasConCupo_','prepararChatgptGlobal_','guardarChatgptGlobal_','autoAgregar_'])vm.runInContext(extract(source,n),ctx);
+  ctx.designPending_=()=>{}; // Bundle fulfillment is covered separately in check-design-bundles.cjs.
+  for(const n of ['plan_','cuentaRetirada_','cuentasConCupo_','prepararChatgptGlobal_','guardarChatgptGlobal_','autoAgregar_'])vm.runInContext(extract(source,n),ctx);
  const grants=ctx.prepararChatgptGlobal_(rows);
  assert.equal(grants.clientes,1);assert.equal(grants.cuentas,35);assert.equal(grants.filas.length,34,'all accounts, including beyond previous 30 limit');
  assert.ok(grants.filas.every(r=>r[4]==='active@test.example'&&r[6]===start&&r[7]===90&&r[12]===0));

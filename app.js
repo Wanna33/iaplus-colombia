@@ -38,7 +38,7 @@ PRODUCTS.splice(0, PRODUCTS.length, ...PRODUCTS.filter(p => AVAILABLE_PRODUCT_ID
 
 /* ============ PRECIOS EN VIVO: los que el dueño tiene en el panel (Modo Dios) ============ */
 const perDe = d => d===30?"/mes":d===90?"/3 meses":d===180?"/6 meses":d===365?"/12 meses":d%30===0?`/${d/30} meses`:`/${d} días`;
-function aplicarPrecios(lista){
+function aplicarPrecios(lista, live=false){
   if(!Array.isArray(lista)) return false; let cambio = false;
   for(const s of lista){
     const i = PRODUCTS.findIndex(p=>p.id===s.k); if(i<0) continue;
@@ -47,6 +47,7 @@ function aplicarPrecios(lista){
     if(s.price>0 && s.price!==p.price){ p.price = s.price; cambio = true; }
     if(s.dias>0 && s.dias!==(p.days||30)){ p.days = s.dias; p.per = perDe(s.dias); cambio = true; }
   }
+  if(live){ IAPDesign.apply(PRODUCTS, lista); cambio=true; }
   return cambio;
 }
 try{ aplicarPrecios(JSON.parse(localStorage.getItem("iap_precios")||"null")); }catch{}
@@ -58,7 +59,7 @@ const runWhenIdle = fn => new Promise(resolve => {
 runWhenIdle(() => fetch(CONFIG.API_URL, {method:"POST", body:JSON.stringify({action:"precios"}), credentials:"omit"})).then(r=>r.json()).then(j=>{
   if(!j || !j.ok) return;
   try{ localStorage.setItem("iap_precios", JSON.stringify(j.productos)); }catch{}
-  if(aplicarPrecios(j.productos)){
+  if(aplicarPrecios(j.productos,true)){
     try{ renderFilters(); renderGrid(); }catch{}
     const hs=document.querySelector(".hero-from"); if(hs) hs.textContent=cop((PRODUCTS.find(p=>p.id==="chatgpt3")||{}).price || Math.min(...PRODUCTS.map(p=>p.price)));
   }
@@ -121,7 +122,7 @@ function renderGrid(){
       <div class="price">${cop(p.price)} <small>COP ${p.per}</small></div>
       <div class="perday">≈ ${cop(Math.round(p.price/(p.days||30)/10)*10)} al día</div>
       <div class="card-tools"><button type="button" data-details="${p.id}" aria-label="Ver detalles de ${esc(p.name)}">Ver detalles ↗</button><button type="button" data-compare="${p.id}" aria-pressed="false" aria-label="Comparar ${esc(p.name)}">＋ Comparar</button></div>
-      ${window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full buy-btn" data-paypal="${p.id}" aria-label="Tarjeta / PayPal · ${window.IAPPayPal.amount(p.id)}: pagar ${esc(p.name)}">Tarjeta / PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
+      ${p.unavailable?`<button class="btn full" disabled>Temporalmente sin disponibilidad</button>`:window.IAPPayPal?.canPay(p.id)?`<button type="button" class="btn paypal-button full buy-btn" data-paypal="${p.id}" aria-label="Tarjeta / PayPal · ${window.IAPPayPal.amount(p.id)}: pagar ${esc(p.name)}">Tarjeta / PayPal · ${window.IAPPayPal.amount(p.id)}</button>`:`<a class="btn btn-primary full buy-btn" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent('Hola, quiero comprar '+p.name+' ('+cop(p.price)+' COP '+p.per+')')}"><svg class="ic"><use href="#i-wa"/></svg>Comprar por WhatsApp</a>`}
     </article>`).join("") || `<div class="nores"><svg class="ic big"><use href="#i-search"/></svg>No encontramos «${esc(q)}». <button class="linkbtn" id="clearSearch">Ver todo el catálogo</button></div>`;
   const cl=$("#clearSearch"); if(cl) cl.onclick=()=>{ $("#search").value=""; filter="Todos"; renderFilters(); swapGrid(); };
   observeReveal();

@@ -57,6 +57,9 @@
   }
   function answer(question, catalog = [], context = {}) {
     const q=normalize(question);
+    const D=typeof IAPDesign==='undefined'?require('./design-offers.js'):IAPDesign;
+    const images=D.imageIntent(q);
+    catalog=catalog.filter(p=>!p.imageOnly||images);
     const C=typeof IAPCatalog==='undefined'?require('./catalog-utils.js'):IAPCatalog;
     const named=Object.keys(families).filter(key=>families[key].test(q));
     const family=familyOf(q)||(followUp.test(q)?context.family||null:null);
@@ -65,6 +68,10 @@
     const cheapest=/barat|economic|menor precio|mas bajo/.test(q);
     const category=categoryOf(q)||((budget||cheapest||followUp.test(q))?context.category:null);
     const inFamily=key=>catalog.filter(p=>families[key].test(normalize(p.name)));
+    if(images && !/problema|no funciona|error|limite|no puedo/.test(q)){
+      const plans=catalog.filter(p=>/^chatgpt|^diseno6$/.test(p.id)&&(!budget||p.price<=budget)&&!p.unavailable);
+      return {text:'Para generar imágenes con ChatGPT, estas son las opciones disponibles. Los planes de diseño indican por separado los meses de ChatGPT y CapCut. La promoción se aplica a compras nuevas, sin modificar planes anteriores.',products:plans,family:'chatgpt',catalog:true};
+    }
     if(/^(muchas )?gracias\b|^(chao|adios|hasta luego)\b/.test(q)&&!family&&!category) return {text:'¡Con gusto! Si necesitas algo más, aquí estaré. Recuerda que la activación llega después de confirmar tu pago.'};
     if(/devol|devuelv|reembols|cambiar de opinion|me arrepent/.test(q)) return {text:'Una vez pagado y entregado el acceso no hay devolución de dinero por cambio de opinión o por no usar el servicio. Si la cuenta no corresponde a lo ofrecido o no funciona y no logramos reemplazarla, tienes derecho a la garantía que indica la ley. Revisa los términos y condiciones o escríbenos por WhatsApp.',terms:true,contact:true};
     if(/problema|falla|garantia|no funciona|no sirve|no entra|no me deja|error/.test(q)) return {text:'Si tu cuenta presenta una falla, abre «Mi cuenta» y solicita ayuda por WhatsApp. El equipo revisará el caso según las condiciones de garantía. No escribas contraseñas ni códigos en este chat.',account:true,contact:true};

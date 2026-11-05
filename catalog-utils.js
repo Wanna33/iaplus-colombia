@@ -6,7 +6,7 @@
   const duration = p => {const d=days(p);return d===365?'12 meses':d%30===0?`${d/30} ${d===30?'mes':'meses'}`:`${d} días`;};
   const mode = p => {const f=normalize((p.feats||[]).join(' '));return /compartid/.test(f)?'Cuenta compartida':/privad/.test(f)?'Cuenta privada':'Modalidad por confirmar';};
   const devices = p => {const f=(p.feats||[]).find(f=>/dispositivo/i.test(f))||'';const n=f.match(/(\d+)\s*(?:solo\s*)?dispositivo/);return n?(n[1]==='1'?'1 dispositivo':`Hasta ${n[1]} dispositivos`):'Consultar dispositivos';};
-  const matches = (p,query) => {const q=normalize(query);return !q||normalize([p.name,p.cat,...(p.feats||[])].join(' ')).includes(q);};
+  const matches = (p,query) => {const q=normalize(query);const images=typeof IAPDesign!=='undefined'&&IAPDesign.imageIntent(q);if(p.imageOnly&&!images)return false;if(images&&/chatgpt|diseno6/.test(p.id))return true;return !q||normalize([p.name,p.cat,...(p.feats||[])].join(' ')).includes(q);};
   const api={normalize,money,days,duration,mode,devices,matches};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.IAPCatalog=api;
 })(typeof window!=='undefined'?window:globalThis);
