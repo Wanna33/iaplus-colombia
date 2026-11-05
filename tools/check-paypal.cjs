@@ -83,5 +83,19 @@ assert.equal(t.c.ppCreate_({quote:q.quote},customer).id,p.id);assert.equal(t.rem
 assert.throws(()=>t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},'stranger@example.test'));
 assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');
 assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');assert.equal(t.deliveries,1);assert.equal(t.captures,1);
+
+// Adversarial capture validation: none of these may deliver an account.
+for(const mutate of [
+ remote=>remote.purchase_units[0].amount.currency_code='EUR',
+ remote=>remote.purchase_units[0].payee.merchant_id='OTHER-MERCHANT',
+ remote=>remote.purchase_units[0].payments.captures[0].status='PENDING',
+ remote=>remote.purchase_units[0].payments.captures[0].amount.value='0.01',
+ remote=>remote.purchase_units[0].payments.captures[0].final_capture=false,
+]) {
+ t=setup();({q,p}=purchase(t));const remote=t.remote.get(p.id);remote.status='COMPLETED';remote.purchase_units[0].payments={captures:[{id:'TESTCAPTURE',status:'COMPLETED',amount:{currency_code:'USD',value:q.total},final_capture:true}]};mutate(remote);
+ try{t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id,estado:'ENTREGADO',paid:true},customer);}catch(error){}
+ assert.equal(t.deliveries,0);assert.equal(t.captures,0);
+}
+console.log('PASS: wrong currency/merchant, pending/underpaid/nonfinal captures and client-supplied paid flags cannot activate access.');
 for(const file of ['paypal-checkout.js','admin-paypal.js','pago.js'])new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
 console.log('PASS: USD prices; ownership; altered amount/reference rejection; pending payments; stable order/capture idempotency; crash recovery; sandbox isolation; webhook verification and replay. No external requests or real charges.');

@@ -35,15 +35,16 @@
   }
   dialog.addEventListener('close', () => { active++; source?.isConnected && source.focus(); });
   async function confirm() {
+    if (order?.owner !== emailOf()) throw new Error('La sesión cambió. Cierra esta ventana y vuelve a entrar con tu cuenta.');
     if (confirming) return confirming;
     if (!order?.ref || !order?.id) throw new Error('No encontramos el pedido. Revisa tus pagos antes de volver a pagar.');
-    const current = active;
+    const current = active, purchase = {...order}, buyer = emailOf();
     confirming = (async () => {
       status('Verificando el pago y activando tu cuenta…');
-      const result = await apiRaw({action:'paypal_confirm',ref:order.ref,id:order.id});
-      if (current !== active) return result;
+      const result = await apiRaw({action:'paypal_confirm',ref:purchase.ref,id:purchase.id});
+      if (current !== active || emailOf() !== buyer) return result;
       if (result.estado === 'ENTREGADO') {
-        forget(order, order.owner || emailOf()); save('iap_has', true);
+        forget(purchase, buyer); save('iap_has', true);
         show('<h2 id="inlineTitle">¡Tu cuenta está lista!</h2><p>El pago fue verificado y tu suscripción ya está activa.</p><a class="btn full iap-hosted-support" href="cuenta.html">Ver mi cuenta y mis accesos</a>');
       } else if (result.estado === 'APROBADO_SIN_STOCK') {
         show('<h2 id="inlineTitle">Pago recibido</h2><p>No quedan accesos disponibles. Registramos tu pago y avisamos al equipo para resolver la entrega. No vuelvas a pagar.</p><a class="btn full" href="cuenta.html">Ir a mi cuenta</a>');
@@ -75,7 +76,7 @@
           if(current !== active || emailOf() !== buyer) return;
           forget(existing, buyer);
         }
-        if(current !== active) return;
+        if(current !== active || emailOf() !== buyer) return;
         if(!previous) {
           result = await apiRaw({action:'paypal_quote',producto:id,checkout:'embedded'});
         } else if(previous.estado === 'ENTREGADO') {
@@ -120,7 +121,7 @@
             if (created.checkout !== 'embedded' || created.total !== quote.total || created.env !== 'live' || !/^IAPP-[A-Z2-9]{12}$/.test(created.ref) || !/^[A-Z0-9]{1,36}$/.test(created.id)) throw new Error('No se recibió un pedido válido.');
             // Persist even if the buyer closed the dialog while the request was in flight.
             remember({provider:'paypal',ref:created.ref,id:created.id,t:Date.now()},buyer);
-            if (current !== active) return;
+            if (current !== active || emailOf() !== buyer) return;
             order = {...created,owner:buyer}; review.hidden = false;
             respond(message.request,{id:created.id});
           } catch(e) { creating = null; status(e.message); respond(message.request,{error:e.message}); }

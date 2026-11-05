@@ -16,7 +16,7 @@ async function setup(options={}) {
     if(b.action==='paypal_status'){if(options.statusError)throw Error(options.statusError);return {estado:options.state||'PENDIENTE',checkout:quote};}
     if(b.action==='paypal_quote')return quote;
     if(b.action==='paypal_create')return {checkout:'embedded',total:'10.87',env:'live',ref:'IAPP-'+ 'B'.repeat(12),id:'NEWORDER'};
-    if(b.action==='paypal_confirm')return {estado:'ENTREGADO'};
+    if(b.action==='paypal_confirm'){if(options.onConfirm)await options.onConfirm(w);return {estado:'ENTREGADO'};}
   }});
   w.eval(fs.readFileSync('paypal-inline.js','utf8'));await tick();w.document.querySelector('[data-paypal]').click();await tick();await tick();
   const send=(data,origin='https://store.example.test')=>{const f=w.document.querySelector('iframe');w.dispatchEvent(new w.MessageEvent('message',{source:f.contentWindow,origin,data}));};
@@ -34,6 +34,8 @@ async function setup(options={}) {
   t.send({type:'iap-inline-approved',id:'WRONG',request:'4'});await tick();assert.ok(!t.calls.includes('paypal_confirm'));
   t.send({type:'iap-inline-approved',id:'NEWORDER',request:'5'});await tick();assert.equal(t.calls.filter(x=>x==='paypal_confirm').length,1);assert.match(t.w.document.body.textContent,/Tu cuenta está lista/);assert.equal(JSON.parse(t.w.localStorage.getItem('iap_pay')),null);t.close();
   t=await setup();t.w.user={email:'changed@example.test'};t.send({type:'iap-inline-create',request:'6'});await tick();assert.ok(!t.calls.includes('paypal_create'));t.close();
+  t=await setup({pending});t.w.user={email:'another@example.test'};t.w.document.querySelector('[data-check]').click();await tick();assert.ok(!t.calls.includes('paypal_confirm'));t.close();
+  t=await setup({onConfirm:async w=>{w.user={email:'changed@example.test'};}});t.send({type:'iap-inline-create',request:'7'});await tick();t.send({type:'iap-inline-approved',id:'NEWORDER',request:'8'});await tick();await tick();assert.doesNotMatch(t.w.document.body.textContent,/Tu cuenta está lista/);assert.equal(t.w.localStorage.getItem('iap_has'),null);t.close();
   t=await setup({version:1});assert.ok(!t.hasFrame());t.close();
   console.log('PASS: stale and foreign pending orders, isolated accounts, network retention, pending reuse, completed purchase, session change, origin checks, single creation and server-confirmed delivery. No real charges.');
 })().catch(error=>{console.error(error);process.exit(1)});

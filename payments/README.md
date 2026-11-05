@@ -79,3 +79,10 @@ La prueba de interfaz usa jsdom: `npm install --prefix outputs/paypal-qa jsdom`.
 Tarjeta y PayPal se renderizan en paralelo. La tienda conserva por cinco minutos únicamente la disponibilidad y los precios públicos, y los actualiza en segundo plano. Nunca se cachean confirmaciones de pago ni se omite la cotización autenticada. Las conexiones a PayPal se preparan anticipadamente. Prueba: `node tools/check-paypal-parallel.cjs`.
 
 Elegibilidad revisada de nuevo el 5 de noviembre: la aplicación live no presenta habilitación Apple Pay y el SDK responde `merchantCountry: CO`, `isEligible: false`; tarjeta estándar sí es elegible. Apple Pay no está operativo. También necesita dominio verificado en la raíz `/.well-known/`, no debajo del directorio `/iaplus-colombia/`. No se sustituye el checkout automático por enlaces alojados sin entrega verificada.
+
+## Revisión de activación y seguridad — 5 noviembre 2026
+
+- Verificación pública en producción: `paypal_quote`, `paypal_create`, `paypal_confirm` y `admin_list` rechazan solicitudes sin sesión, incluso con `paid:true` y `estado:ENTREGADO` enviados por el cliente.
+- Pruebas simuladas: propietario ajeno, importe/moneda/receptor incorrectos, captura pendiente o parcial, indicador de pago falsificado, webhook con firma rechazada y repeticiones no entregan un acceso indebido. Una captura válida entrega una sola vez, incluso tras interrupción simulada.
+- Interfaz reforzada: al cambiar de Gmail durante la recuperación o confirmación, no se muestra la suscripción como activa en la nueva sesión. La confirmación conserva una copia del pedido original.
+- Límites: revisión centrada en el flujo PayPal, no auditoría integral ni garantía de ausencia de vulnerabilidades. No se efectuaron cargos reales. La entrega requiere cupo; sin cupo se registra la incidencia, no se declara una entrega falsa. Reembolsos y contracargos requieren seguimiento operativo.
