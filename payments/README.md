@@ -1,34 +1,24 @@
 # PayPal para IA Plus Colombia
 
-## Botones alojados incorporados el 5 de noviembre de 2026
+## Pago integrado y activación automática — 5 de noviembre de 2026
 
-La tienda usa `paypal-hosted.js` y un documento de pago separado (`paypal-hosted-frame.html` / `.js`) para los tres botones creados por el propietario. Se conserva la política estricta de scripts de la tienda; solo el documento de pago admite los scripts inline generados por el SDK de PayPal. El identificador del botón se valida contra una lista fija y los mensajes del marco se validan por ventana de origen e identificador.
+La tienda carga `paypal-inline.js` y `paypal-inline-frame.html` / `.js`. Los botones alojados anteriores quedan como archivos históricos y ya no se cargan en `index.html`.
 
-| Plan | Botón alojado | USD verificado en PayPal |
-| --- | --- | --- |
-| 1 mes | ESZ3PJJFB5752 | 3.17 |
-| 3 meses | QJWRD7JVZVBMQ | 6.34 |
-| 6 meses | R244SQBE54KXA | 10.87 |
+El comprador inicia sesión con Google, obtiene una cotización autenticada y paga en la ventana integrada. El servidor crea y captura el pedido, comprueba importe, moneda, propietario y referencia, y entrega el acceso de forma idempotente. La interfaz muestra la cuenta activa únicamente tras recibir `ENTREGADO` del servidor. Un mensaje del iframe nunca basta para activar.
 
-El propietario confirmó USD 10.87 para 6 meses en esta sesión. La configuración REST anterior sigue mostrando USD 15.85: no se ha modificado. La fachada `IAPPayPal` y el manejador de captura dirigen las tarjetas y los detalles de estos tres planes al botón alojado correspondiente, evitando ofrecer el checkout anterior con otro importe.
+Los pedidos pendientes se conservan y se pueden retomar sin crear otro pedido. Los pagos sin inventario muestran `APROBADO_SIN_STOCK`, sin afirmar que se entregó acceso.
 
-**Entrega de estos botones: verificación y activación por WhatsApp.** No crean los pedidos internos del flujo REST, por lo que no se deben tratar como entregas automáticas ni activar cuentas a partir de mensajes del iframe o parámetros de retorno. El usuario ve las instrucciones antes de pagar y un enlace para enviar comprobante y Gmail. Se mantiene un enlace directo al checkout público de cada botón como respaldo.
+| Plan | Precio USD |
+| --- | --- |
+| 1 mes | 3.17 |
+| 3 meses | 6.34 |
+| 6 meses | 10.87 |
 
-Se verificaron las páginas públicas de los tres botones sin crear pedidos ni capturar pagos. El servidor REST respondió `ready:true`, `env:live` durante esta revisión; esto reemplaza el estado antiguo descrito abajo, pero no prueba que los botones alojados estén conectados al webhook REST. Tarjetas y Apple Pay dependen de la elegibilidad que muestre PayPal; no se ha probado un cobro ni un dispositivo Apple.
+El propietario confirmó 10.87 para seis meses. Estos precios ya están en las propiedades del servidor. Apps Script versión 53 conserva el endpoint de IA Plus y expone `checkoutVersion:2`. Se comprobó OAuth sin crear pedidos ni cobrar. El webhook live registrado recibe `PAYMENT.CAPTURE.COMPLETED`.
 
-### Antecedentes de la integración REST
+La tarjeta usa los campos avanzados si PayPal los habilita; en caso contrario usa el botón estándar de tarjeta de PayPal. La comprobación actual habilitó el botón estándar y no los campos avanzados. Apple Pay directo devolvió `isEligible:false`: no se anuncia ni se muestra como disponible. El ajuste Apple Pay de enlaces alojados no demuestra elegibilidad para esta integración REST. No se realizó un cobro real ni se verificó un dispositivo Apple.
 
-Estado verificado el 20 de octubre de 2026: servidor de Apps Script actualizado a la versión 44; endpoint de webhook publicado y con respuesta de salud HTTP 200; interfaz publicada en GitHub Pages (versión `2026.10.20-paypal-1`). PayPal permanece deshabilitado: falta guardar la llave privada y registrar el webhook, pendientes de la confirmación específica del propietario. No se realizaron cobros reales.
-
-Precios autorizados por el propietario:
-
-| Clave | Plan | Precio PayPal |
-| --- | --- | --- |
-| chatgpt | 1 mes / 30 días | USD 3.17 |
-| chatgpt3 | 3 meses / 90 días | USD 6.34 |
-| chatgpt6 | 6 meses / 180 días | USD 15.85 |
-
-Estos son precios fijos en USD. El catálogo COP se conserva para WhatsApp y Wompi. No se infiere una tasa de cambio. Los planes sin precio USD no muestran PayPal.
+La política de scripts de la tienda sigue restringida; el SDK se aísla en su documento de pago. Los mensajes se validan por origen y ventana. Los secretos permanecen en Apps Script.
 
 ## Configuración protegida
 
@@ -39,7 +29,7 @@ Propiedades del mismo proyecto que ya atiende la tienda:
 - `PAYPAL_ENV`: `live` (valor predeterminado).
 - `PAYPAL_CLIENT_ID`: opcional, permite sustituir el ID público incorporado.
 - `PAYPAL_CLIENT_SECRET`: llave privada del ambiente live.
-- `PAYPAL_USD_PRICES`: opcional; los valores predeterminados son `{"chatgpt":"3.17","chatgpt3":"6.34","chatgpt6":"15.85"}`.
+- `PAYPAL_USD_PRICES`: opcional; los valores predeterminados son `{"chatgpt":"3.17","chatgpt3":"6.34","chatgpt6":"10.87"}`.
 - `PAYPAL_ENABLED`: `true` para mostrar los botones. Sin esta propiedad, el cobro permanece deshabilitado.
 - `PAYPAL_WEBHOOK_ID`: ID del webhook registrado para la misma aplicación y ambiente.
 - `PAYPAL_MERCHANT_ID`: opcional para una comprobación adicional del destinatario.

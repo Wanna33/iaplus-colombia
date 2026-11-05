@@ -1,7 +1,7 @@
 // Add this file to the SAME Apps Script project as backend/Code.gs.
 // Client ID is public. NEVER put PAYPAL_CLIENT_SECRET in this file or the website.
 const PP_CLIENT_DEFAULT = 'BAABfRwhgdDqJkgoQAK7BAb7TstoJyR6QJUc7z4xq1sP2bX__MPedKq79R0WR4fouBnSfkkSx5H1b0gs04';
-const PP_USD_DEFAULT = {chatgpt:'3.17',chatgpt3:'6.34',chatgpt6:'15.85'};
+const PP_USD_DEFAULT = {chatgpt:'3.17',chatgpt3:'6.34',chatgpt6:'10.87'};
 const PP_HEADERS = ['Referencia','Pedido PayPal','Cotizacion','Datos del pedido','Estado','Captura PayPal','Creado'];
 function ppConfig_(){
   const props=PropertiesService.getScriptProperties(),g=k=>String(props.getProperty(k)||'').trim();
@@ -57,10 +57,12 @@ function ppQuote_(b,email){
   const pending=ordersSheet_().getDataRange().getValues().slice(1).filter(r=>String(r[1]).toLowerCase()===email&&r[4]==='PENDIENTE'&&r[5] instanceof Date&&Date.now()-r[5].getTime()<3600000);
   if(pending.length>=5)throw fail_('Tienes varios pedidos pendientes. Revisa tus pagos antes de crear otro.');
   const q={id:'PPQ-'+randStr_(20,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),ref:'IAPP-'+randStr_(12,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),email:email,product:id,name:p.name,days:p.dias,match:p.match.slice(),cop:p.price,cents:ppCents_(c.prices[id]),currency:'USD',env:c.env,expires:Date.now()+15*60000};
+  q.checkout=b.checkout==='embedded'?'embedded':'redirect';
   CacheService.getScriptCache().put(q.id,JSON.stringify(q),900);
-  return {ok:true,quote:q.id,name:q.name,days:q.days,currency:q.currency,total:ppAmount_(q.cents),catalogCOP:q.cop,env:q.env,expires:q.expires};
+  return {ok:true,quote:q.id,name:q.name,days:q.days,currency:q.currency,total:ppAmount_(q.cents),catalogCOP:q.cop,env:q.env,expires:q.expires,checkout:q.checkout,clientId:c.client};
 }
 function ppApproval_(order){
+  if(order.data.checkout==='embedded')return {ok:true,provider:'paypal',ref:order.ref,id:order.id,currency:'USD',total:ppAmount_(order.data.cents),env:order.data.env,checkout:'embedded'};
   const url=String(order.data.approval||''),pattern=order.data.env==='live'?/^https:\/\/www\.paypal\.com\//:/^https:\/\/www\.sandbox\.paypal\.com\//;
   if(!pattern.test(url))throw fail_('No se recibió un enlace válido de PayPal. Revisa tu pedido.');
   return {ok:true,provider:'paypal',ref:order.ref,id:order.id,approveUrl:url,currency:'USD',total:ppAmount_(order.data.cents),env:order.data.env};
@@ -79,6 +81,10 @@ function ppCreate_(b,email){
   const osh=ordersSheet_();if(!findOrder_(osh,q.ref))osh.appendRow([q.ref,email,q.product,q.cop,'PENDIENTE',new Date(),'','','PayPal · USD '+ppAmount_(q.cents)]);
   const back=TIENDA_URL+'pago.html?provider=paypal&ref='+encodeURIComponent(q.ref);
   const body={intent:'CAPTURE',purchase_units:[{reference_id:q.ref,custom_id:q.ref,invoice_id:q.ref,description:'IA Plus Colombia · '+q.name+' · '+q.days+' días',amount:{currency_code:'USD',value:ppAmount_(q.cents)}}],payment_source:{paypal:{experience_context:{brand_name:'IA Plus Colombia',shipping_preference:'NO_SHIPPING',user_action:'PAY_NOW',return_url:back,cancel_url:back+'&cancel=1'}}}};
+  if(q.checkout==='embedded'){
+    delete body.payment_source;
+    body.application_context={brand_name:'IA Plus Colombia',shipping_preference:'NO_SHIPPING',user_action:'PAY_NOW',return_url:back,cancel_url:back+'&cancel=1'};
+  }
   const result=ppCall_(c,'/v2/checkout/orders','post',body,q.ref+'-create');
   if(!/^[A-Z0-9]{1,36}$/.test(String(result.id||'')))throw fail_('PayPal no devolvió un pedido válido.');
   const approval=(result.links||[]).find(l=>l.rel==='payer-action'||l.rel==='approve');
@@ -136,7 +142,12 @@ function ppHandle_(b,email){
   const order=ppOwned_(b,email);if(order.state==='ENTREGADO')return {ok:true,estado:'ENTREGADO'};
   if(order.state==='SIMULACION')return {ok:true,estado:'SIMULACION'};
   if(!order.data.customerName){order.data.customerName=NAME_||'';ppSave_(order);}
-  return ppSettle_(order,b.action==='paypal_confirm');
+  const result=ppSettle_(order,b.action==='paypal_confirm');
+  if(b.action==='paypal_status'&&result.estado==='PENDIENTE'&&order.data.checkout==='embedded'){
+    const q=order.data;
+    result.checkout={checkout:'embedded',quote:order.quote,name:q.name,days:q.days,total:ppAmount_(q.cents),currency:'USD',env:q.env,clientId:ppConfig_().client,expires:q.expires};
+  }
+  return result;
 }
 function ppWebhook_(body){
   const c=ppConfig_(),event=body.event||{},h=body.headers||{};if(!c.webhook)return {ok:false};

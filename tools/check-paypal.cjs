@@ -35,7 +35,7 @@ function setup(environment='live'){
       if(url.endsWith('/v1/oauth2/token'))return response({access_token:'mock-token',expires_in:3600});
       if(url.endsWith('/v1/notifications/verify-webhook-signature'))return response({verification_status:verifySuccess?'SUCCESS':'FAILURE'});
       if(url.endsWith('/v2/checkout/orders')){
-        const payload=JSON.parse(options.payload),id='ORDER'+String(++orderSequence).padStart(8,'0');
+        const payload=JSON.parse(options.payload),id='ORDER'+String(++orderSequence).padStart(8,'0');context.lastCreatePayload=payload;
         const order={id,intent:payload.intent,status:'APPROVED',purchase_units:payload.purchase_units.map(u=>({...u,payee:{merchant_id:'TESTMERCHANT'}})),links:[{rel:'payer-action',href:(environment==='live'?'https://www.paypal.com/':'https://www.sandbox.paypal.com/')+'checkoutnow?token='+id}]};remote.set(id,order);return response(order,201);
       }
       const match=url.match(/\/v2\/checkout\/orders\/(ORDER\d+)(\/capture)?$/);if(!match||!remote.has(match[1]))return response({},404);
@@ -56,6 +56,7 @@ assert.equal(t.remote.get(p.id).purchase_units[0].amount.value,'6.34');
 assert.throws(()=>t.c.ppOwned_({ref:p.ref},'intruder@example.test'));
 assert.throws(()=>t.c.ppOwned_({ref:p.ref,id:'WRONG'},customer));
 assert.equal(t.c.ppCreate_({quote:q.quote},customer).id,p.id);assert.equal(t.remote.size,1);
+
 assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');
 assert.equal(t.deliveries,1);assert.equal(t.captures,1);assert.equal(t.accounts.rows.at(-1)[7],90);assert.equal(t.accounts.rows.at(-1)[12],0);
 assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');assert.equal(t.deliveries,1);assert.equal(t.captures,1);
@@ -69,5 +70,18 @@ t=setup();t.props.PAYPAL_ENABLED='false';assert.throws(()=>t.c.ppQuote_({product
 t=setup();assert.throws(()=>t.c.ppQuote_({producto:'canva'},customer));q=t.c.ppQuote_({producto:'chatgpt'},customer);t.c.CATALOGO.chatgpt.price=999;assert.throws(()=>t.c.ppCreate_({quote:q.quote},customer));
 t=setup();({q,p}=purchase(t));const event={event_type:'CHECKOUT.ORDER.APPROVED',resource:{id:p.id}},headers={'paypal-transmission-id':'TRANS','paypal-transmission-time':new Date().toISOString(),'paypal-transmission-sig':'test-signature','paypal-auth-algo':'SHA256withRSA','paypal-cert-url':'https://api.paypal.com/v1/notifications/certs/TEST'};
 t.verify=false;assert.equal(t.c.ppWebhook_({event,headers}).ok,false);assert.equal(t.captures,0);t.verify=true;assert.equal(t.c.ppWebhook_({event,headers}).estado,'ENTREGADO');assert.equal(t.deliveries,1);assert.equal(t.c.ppWebhook_({event,headers}).estado,'ENTREGADO');assert.equal(t.deliveries,1);assert.equal(t.captures,1);
+t=setup();q=t.c.ppQuote_({producto:'chatgpt6',checkout:'embedded'},customer);
+assert.equal(q.total,'10.87');assert.equal(q.checkout,'embedded');assert.equal(q.clientId,'public-test-client');assert.equal(q.secret,undefined);
+p=t.c.ppCreate_({quote:q.quote,total:'0.01'},customer);
+assert.equal(p.checkout,'embedded');assert.equal(p.approveUrl,undefined);assert.equal(t.c.lastCreatePayload.payment_source,undefined);
+assert.equal(t.c.lastCreatePayload.purchase_units[0].amount.value,'10.87');
+t.remote.get(p.id).status='CREATED';
+const resumed=t.c.ppHandle_({action:'paypal_status',ref:p.ref,id:p.id},customer);
+assert.equal(resumed.estado,'PENDIENTE');assert.equal(resumed.checkout.total,'10.87');assert.equal(resumed.checkout.clientId,'public-test-client');assert.equal(resumed.checkout.secret,undefined);assert.equal(t.captures,0);
+t.remote.get(p.id).status='APPROVED';
+assert.equal(t.c.ppCreate_({quote:q.quote},customer).id,p.id);assert.equal(t.remote.size,1);
+assert.throws(()=>t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},'stranger@example.test'));
+assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');
+assert.equal(t.c.ppHandle_({action:'paypal_confirm',ref:p.ref,id:p.id},customer).estado,'ENTREGADO');assert.equal(t.deliveries,1);assert.equal(t.captures,1);
 for(const file of ['paypal-checkout.js','admin-paypal.js','pago.js'])new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
 console.log('PASS: USD prices; ownership; altered amount/reference rejection; pending payments; stable order/capture idempotency; crash recovery; sandbox isolation; webhook verification and replay. No external requests or real charges.');

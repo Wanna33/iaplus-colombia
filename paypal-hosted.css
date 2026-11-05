@@ -13,5 +13,6 @@
 .iap-hosted-fallback{background:#ffc439;color:#172c50!important}
 .iap-hosted-support{background:#e8f7ed;color:#145b31!important}
 .iap-hosted-frame{display:block;width:100%;height:240px;border:0;background:#fff}
+.iap-hosted-dialog [hidden]{display:none!important}
 .iap-hosted-dialog :focus-visible{outline:3px solid #0070e0;outline-offset:3px}
 @media(max-width:480px){.iap-hosted-dialog{padding:18px}.iap-hosted-dialog h2{font-size:21px}}
