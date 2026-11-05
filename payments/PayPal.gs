@@ -57,7 +57,7 @@ function ppQuote_(b,email){
   const pending=ordersSheet_().getDataRange().getValues().slice(1).filter(r=>String(r[1]).toLowerCase()===email&&r[4]==='PENDIENTE'&&r[5] instanceof Date&&Date.now()-r[5].getTime()<3600000);
   if(pending.length>=5)throw fail_('Tienes varios pedidos pendientes. Revisa tus pagos antes de crear otro.');
   const q={id:'PPQ-'+randStr_(20,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),ref:'IAPP-'+randStr_(12,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),email:email,product:id,name:p.name,days:p.dias,match:p.match.slice(),cop:p.price,cents:ppCents_(c.prices[id]),currency:'USD',env:c.env,expires:Date.now()+15*60000};
-  q.checkout=b.checkout==='embedded'?'embedded':'redirect';
+  q.checkout=b.checkout==='hosted'?'hosted':b.checkout==='embedded'?'embedded':'redirect';
   CacheService.getScriptCache().put(q.id,JSON.stringify(q),900);
   return {ok:true,quote:q.id,name:q.name,days:q.days,currency:q.currency,total:ppAmount_(q.cents),catalogCOP:q.cop,env:q.env,expires:q.expires,checkout:q.checkout,clientId:c.client};
 }
@@ -70,7 +70,7 @@ function ppApproval_(order){
 function ppCreate_(b,email){
   const quote=String(b.quote||'');if(!/^PPQ-[A-Z2-9]{20}$/.test(quote))throw fail_('Cotización de PayPal no válida.');
   let order=ppFind_(2,quote),q;
-  if(order){ppOwned_({ref:order.ref},email);q=order.data;if(order.id)return ppApproval_(order);}
+  if(order){ppOwned_({ref:order.ref},email);q=order.data;if(q.checkout==='hosted'&&q.resource)return ppHostedApproval_(order);if(order.id)return ppApproval_(order);}
   else{try{q=JSON.parse(CacheService.getScriptCache().get(quote)||'null');}catch(e){} }
   if(!q||q.email!==email||q.expires<Date.now())throw fail_('La cotización venció. Vuelve a revisar el precio de PayPal.');
   const valid=ppGuard_(email,q.product),c=valid.config,p=valid.product;
@@ -79,6 +79,7 @@ function ppCreate_(b,email){
     const sh=ppSheet_();order={n:sh.getLastRow()+1,ref:q.ref,id:'',quote:quote,data:q,state:'CREANDO',created:new Date()};ppSave_(order);
   }
   const osh=ordersSheet_();if(!findOrder_(osh,q.ref))osh.appendRow([q.ref,email,q.product,q.cop,'PENDIENTE',new Date(),'','','PayPal · USD '+ppAmount_(q.cents)]);
+  if(q.checkout==='hosted')return ppHostedCreate_(order,c);
   const back=TIENDA_URL+'pago.html?provider=paypal&ref='+encodeURIComponent(q.ref);
   const body={intent:'CAPTURE',purchase_units:[{reference_id:q.ref,custom_id:q.ref,invoice_id:q.ref,description:'IA Plus Colombia · '+q.name+' · '+q.days+' días',amount:{currency_code:'USD',value:ppAmount_(q.cents)}}],payment_source:{paypal:{experience_context:{brand_name:'IA Plus Colombia',shipping_preference:'NO_SHIPPING',user_action:'PAY_NOW',return_url:back,cancel_url:back+'&cancel=1'}}}};
   if(q.checkout==='embedded'){
@@ -93,6 +94,7 @@ function ppCreate_(b,email){
   return ppApproval_(order);
 }
 function ppValidateOrder_(remote,order){
+  if(order.data.checkout==='hosted')return ppHostedValidate_(remote,order);
   const units=remote.purchase_units||[],u=units[0]||{},q=order.data;
   if(String(remote.id)!==order.id||remote.intent!=='CAPTURE'||units.length!==1||u.reference_id!==order.ref||u.custom_id!==order.ref||u.invoice_id!==order.ref||!u.amount||u.amount.currency_code!=='USD'||ppCents_(u.amount.value)!==q.cents)throw fail_('El pago de PayPal no coincide con el pedido. Contacta con la tienda.');
   if(q.merchant&&(!u.payee||u.payee.merchant_id!==q.merchant))throw fail_('El destinatario de PayPal no coincide.');
@@ -137,11 +139,23 @@ function ppSettle_(order,capture){
   return ppDeliver_(order);
 }
 function ppHandle_(b,email){
+  if(b.action==='paypal_hosted_create'){
+    if(!ppHostedReady_())throw fail_('El pago con activación automática aún no está disponible. Intenta más tarde.');
+    const recent=ppSheet_().getDataRange().getValues().slice(1).reverse().find(r=>{try{const q=JSON.parse(String(r[3]));return q.email===email&&q.product===b.producto&&q.env===ppConfig_().env&&q.checkout==='hosted'&&q.resource&&r[4]==='PENDIENTE'&&Date.now()-new Date(r[6]).getTime()<3600000;}catch(e){return false;}});
+    if(recent)return ppHostedApproval_(ppOwned_({ref:String(recent[0])},email));
+    const quote=ppQuote_({producto:b.producto,checkout:'hosted'},email);
+    return ppCreate_({quote:quote.quote},email);
+  }
   if(b.action==='paypal_quote')return ppQuote_(b,email);
   if(b.action==='paypal_create')return ppCreate_(b,email);
   const order=ppOwned_(b,email);if(order.state==='ENTREGADO')return {ok:true,estado:'ENTREGADO'};
   if(order.state==='SIMULACION')return {ok:true,estado:'SIMULACION'};
   if(!order.data.customerName){order.data.customerName=NAME_||'';ppSave_(order);}
+  if(order.data.checkout==='hosted'){
+    if(b.capture&&!order.id)ppHostedCaptureReturn_(order,b.capture);
+    if(!order.id)return Object.assign({ok:true,estado:'PENDIENTE'}, {checkout:ppHostedApproval_(order)});
+    return ppSettle_(order,false);
+  }
   const result=ppSettle_(order,b.action==='paypal_confirm');
   if(b.action==='paypal_status'&&result.estado==='PENDIENTE'&&order.data.checkout==='embedded'){
     const q=order.data;
@@ -150,13 +164,16 @@ function ppHandle_(b,email){
   return result;
 }
 function ppWebhook_(body){
-  const c=ppConfig_(),event=body.event||{},h=body.headers||{};if(!c.webhook)return {ok:false};
+  const c=ppConfig_(),event=body.event||{},h=body.headers||{},hostedWebhook=PropertiesService.getScriptProperties().getProperty('PAYPAL_HOSTED_WEBHOOK_ID');if(!c.webhook&&!hostedWebhook)return {ok:false};
   const fields=['paypal-transmission-id','paypal-transmission-time','paypal-transmission-sig','paypal-auth-algo','paypal-cert-url'];if(fields.some(k=>typeof h[k]!=='string'||!h[k]||h[k].length>4096))return {ok:false};
   if(!/^https:\/\/api(?:-m)?(?:\.sandbox)?\.paypal\.com\/v1\/notifications\/certs\//.test(h['paypal-cert-url']))return {ok:false};
-  const verified=ppCall_(c,'/v1/notifications/verify-webhook-signature','post',{auth_algo:h['paypal-auth-algo'],cert_url:h['paypal-cert-url'],transmission_id:h['paypal-transmission-id'],transmission_sig:h['paypal-transmission-sig'],transmission_time:h['paypal-transmission-time'],webhook_id:c.webhook,webhook_event:event});
-  if(verified.verification_status!=='SUCCESS')return {ok:false};
+  const ids=[c.webhook,hostedWebhook].filter((id,i,all)=>id&&all.indexOf(id)===i);let verified=false;
+  for(let i=0;i<ids.length;i++){const result=ppCall_(c,'/v1/notifications/verify-webhook-signature','post',{auth_algo:h['paypal-auth-algo'],cert_url:h['paypal-cert-url'],transmission_id:h['paypal-transmission-id'],transmission_sig:h['paypal-transmission-sig'],transmission_time:h['paypal-transmission-time'],webhook_id:ids[i],webhook_event:event});if(result.verification_status==='SUCCESS'){verified=true;break;}}
+  if(!verified)return {ok:false};
   const resource=event.resource||{},id=event.event_type==='CHECKOUT.ORDER.APPROVED'?resource.id:(((resource.supplementary_data||{}).related_ids||{}).order_id);
-  if(!/^[A-Z0-9]{1,36}$/.test(String(id||'')))return {ok:true};const order=ppFind_(1,id);if(!order||order.data.env!==c.env)return {ok:true};
+  if(!/^[A-Z0-9]{1,36}$/.test(String(id||'')))return {ok:true};let order=ppFind_(1,id);
+  if(!order&&event.event_type==='PAYMENT.CAPTURE.COMPLETED')order=ppHostedBind_(id,c);
+  if(!order||order.data.env!==c.env)return {ok:true};
   if(event.event_type==='CHECKOUT.ORDER.APPROVED'||event.event_type==='PAYMENT.CAPTURE.COMPLETED')return ppSettle_(order,event.event_type==='CHECKOUT.ORDER.APPROVED');
   if(/REFUNDED|REVERSED/.test(String(event.event_type))){log_('Revisar incidencia PayPal',order.ref+' · '+event.event_type,'paypal');avisar_('Revisar pago PayPal',[order.ref,event.event_type,'Verifica el movimiento en PayPal antes de cambiar el acceso.']);}
   return {ok:true};
@@ -178,3 +195,41 @@ function ppAdminSet_(b){
 function paypalEstado(){Logger.log(JSON.stringify(ppStatus_()));}
 function paypalVerificarConexion(){ppToken_(ppConfig_());Logger.log('PayPal: autenticación correcta. No se crearon pedidos ni se capturaron pagos.');}
 function ppSummaries_(){const result={};ppSheet_().getDataRange().getValues().slice(1).forEach(r=>{try{const q=JSON.parse(String(r[3]));result[String(r[0])]={total:ppAmount_(q.cents),env:q.env};}catch(e){}});return result;}
+
+// Per-purchase hosted links retain PayPal's hosted payment methods. A redirect,
+// browser-supplied reference or paid flag is NEVER proof of a completed payment.
+function ppHostedReady_(){const c=ppConfig_(),p=PropertiesService.getScriptProperties();return !!(ppStatus_().ready&&c.merchant&&(c.webhook||p.getProperty('PAYPAL_HOSTED_WEBHOOK_ID'))&&p.getProperty('PAYPAL_HOSTED_AUTO')==='true');}
+function ppHostedApproval_(order){
+  const q=order.data,host=q.env==='live'?'www.paypal.com':'www.sandbox.paypal.com';
+  if(!/^PLB-[A-Z0-9]{6,40}$/.test(q.resource||'')||q.approval!=='https://'+host+'/ncp/payment/'+q.resource)throw fail_('No se recibió un enlace de pago válido.');
+  return {ok:true,provider:'paypal',checkout:'hosted',ref:order.ref,id:order.id||'',approveUrl:q.approval,name:q.name,days:q.days,total:ppAmount_(q.cents),currency:'USD',env:q.env};
+}
+function ppHostedCreate_(order,c){
+  if(!ppHostedReady_())throw fail_('El pago automático aún no está disponible.');
+  const q=order.data;
+  const resource=ppCall_(c,'/v1/checkout/payment-resources','post',{integration_mode:'LINK',type:'BUY_NOW',return_url:TIENDA_URL+'pago.html?provider=paypal&hosted=1&ref='+encodeURIComponent(order.ref),line_items:[{name:q.name,product_id:order.ref,description:'Acceso por '+q.days+' días. Pago único, sin renovación automática.',unit_amount:{currency_code:'USD',value:ppAmount_(q.cents)},collect_shipping_address:false}]},order.ref+'-hosted');
+  q.resource=resource.id;q.approval=((resource.links||[]).find(l=>l.rel==='payment_link')||{}).href||'';q.merchant=c.merchant;
+  ppHostedApproval_(order);order.state='PENDIENTE';ppSave_(order);return ppHostedApproval_(order);
+}
+function ppHostedValidate_(remote,order){
+  const q=order.data,units=remote.purchase_units||[],u=units[0]||{},items=u.items||[],item=items[0]||{};
+  if(q.env!==ppConfig_().env||!q.merchant||remote.intent!=='CAPTURE'||(order.id&&remote.id!==order.id)||!/^\w{1,36}$/.test(String(remote.id||''))||units.length!==1||!u.payee||u.payee.merchant_id!==q.merchant||!u.amount||u.amount.currency_code!=='USD'||ppCents_(u.amount.value)!==q.cents||items.length!==1||item.sku!==order.ref||item.item_id!==q.resource||String(item.quantity)!=='1'||!item.unit_amount||item.unit_amount.currency_code!=='USD'||ppCents_(item.unit_amount.value)!==q.cents)throw fail_('El pago no coincide con este pedido.');
+  return u;
+}
+function ppHostedBind_(id,c,expected){
+  const remote=ppCall_(c,'/v2/checkout/orders/'+id),u=(remote.purchase_units||[])[0]||{},sku=((u.items||[])[0]||{}).sku;
+  if(!/^IAPP-[A-Z2-9]{12}$/.test(String(sku||'')))return null;
+  const order=expected||ppFind_(0,sku);if(!order||order.ref!==sku||order.data.checkout!=='hosted'||order.data.env!==c.env)return null;
+  const unit=ppHostedValidate_(remote,order);
+  if(remote.status!=='COMPLETED'||!ppCompleteCapture_(unit,order))return null;
+  const used=ppFind_(1,id);if(used&&used.ref!==order.ref)throw fail_('Este pago ya está asociado a otro pedido.');
+  order.id=id;ppSave_(order);return order;
+}
+function ppHostedCaptureReturn_(order,capture){
+  if(!/^[A-Z0-9]{1,36}$/.test(String(capture)))throw fail_('Identificador de pago no válido.');
+  const c=ppConfig_();if(c.env!==order.data.env)throw fail_('Ambiente de pago no válido.');
+  const cap=ppCall_(c,'/v2/payments/captures/'+capture);
+  const link=(cap.links||[]).find(l=>l.rel==='up'),match=String(link&&link.href||'').match(/^https:\/\/api(?:-m)?(?:\.sandbox)?\.paypal\.com\/v2\/checkout\/orders\/([A-Z0-9]{1,36})$/);
+  if(!match)return;
+  const bound=ppHostedBind_(match[1],c,order);if(bound)order.id=bound.id;
+}

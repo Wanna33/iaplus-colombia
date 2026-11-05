@@ -1,23 +1,37 @@
-## Checkout activo: botones alojados restaurados (5 noviembre 2026)
+## Checkout activo: enlace individual y activación automática (5 noviembre 2026)
 
-Por petición del propietario se restauró el flujo inicial de `paypal-hosted.js` con
-los tres botones originales de PayPal. PayPal presenta los métodos que admite
-para el comprador, incluido Apple Pay cuando corresponde. La tienda informa antes
-del pago que la activación se verifica por WhatsApp; este flujo no activa accesos
-automáticamente. Se comprobó que el checkout alojado muestra Apple Pay y abre la
-pantalla oficial de Apple con el código para continuar en iPhone. Se cerró esa
-pantalla sin autorizar ni completar un cobro; no es prueba de captura/entrega real.
+`paypal-hosted-auto.js` pide al servidor un enlace exclusivo por compra autenticada.
+La [API de enlaces de PayPal](https://developer.paypal.com/api/payment-links-buttons/)
+ofrece el checkout alojado con tarjetas, PayPal y Apple Pay según elegibilidad.
+El pago abre una ventana de PayPal y la tienda espera la confirmación para mostrar
+la suscripción en Mi cuenta, sin enviar comprobantes por WhatsApp.
 
-`paypal-inline.js` y `paypal-apple.js` permanecen en el repositorio pero no se cargan
-en el catálogo. Los pedidos anteriores, su servidor y su webhook se conservan.
-Los apartados de integración automática que siguen describen esa implementación
-conservada, no el checkout activo.
+El servidor guarda la referencia en `product_id`. En una transacción Sandbox real
+se verificó que PayPal devuelve `items.sku` con esa referencia y `items.item_id`
+con el ID `PLB-...`. La captura Sandbox de USD 3,17 quedó `COMPLETED` y final.
+El validador exige ambos campos, destinatario configurado, USD exactos, cantidad 1
+y captura final. Ninguna URL de retorno ni bandera del navegador autoriza accesos.
+
+Los [webhooks de los enlaces](https://www.paypal.com/us/cshelp/article/paypal-pay-links-and-button-troubleshooting-tips-ts2341)
+requieren la asociación NVP/SOAP de la cuenta, además del webhook REST anterior.
+Propiedades privadas: `PAYPAL_HOSTED_WEBHOOK_ID`, `PAYPAL_MERCHANT_ID` y
+`PAYPAL_HOSTED_AUTO=true`. La firma se verifica contra los IDs configurados;
+se consulta el pedido remoto y se entrega bajo el bloqueo del servidor.
+El retorno puede aportar `tx`, pero se consulta la captura y su pedido remoto
+antes de aceptar cualquier asociación. Un segundo pago del mismo enlace no crea
+una segunda suscripción. Los pagos sin cupo quedan registrados sin fingir entrega.
+
+Pruebas: `node tools/check-paypal-hosted-auto.cjs`,
+`node tools/check-paypal-hosted-ui.cjs`, `node tools/check-paypal-worker.cjs`.
+No se ha realizado un cobro real para certificar el flujo completo en producción.
+Los módulos `paypal-hosted.js`, `paypal-inline.js` y `paypal-apple.js` son históricos.
+Los apartados siguientes documentan las integraciones anteriores conservadas.
 
 # PayPal para IA Plus Colombia
 
-## Pago integrado y activación automática — 5 de noviembre de 2026
+## Histórico: pago integrado y activación automática
 
-La tienda carga `paypal-inline.js` y `paypal-inline-frame.html` / `.js`. Los botones alojados anteriores quedan como archivos históricos y ya no se cargan en `index.html`.
+Esta implementación utilizaba `paypal-inline.js` y `paypal-inline-frame.html` / `.js`.
 
 El comprador inicia sesión con Google, obtiene una cotización autenticada y paga en la ventana integrada. El servidor crea y captura el pedido, comprueba importe, moneda, propietario y referencia, y entrega el acceso de forma idempotente. La interfaz muestra la cuenta activa únicamente tras recibir `ENTREGADO` del servidor. Un mensaje del iframe nunca basta para activar.
 

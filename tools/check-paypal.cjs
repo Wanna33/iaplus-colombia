@@ -99,3 +99,4 @@ for(const mutate of [
 console.log('PASS: wrong currency/merchant, pending/underpaid/nonfinal captures and client-supplied paid flags cannot activate access.');
 for(const file of ['paypal-checkout.js','admin-paypal.js','pago.js'])new vm.Script(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
 console.log('PASS: USD prices; ownership; altered amount/reference rejection; pending payments; stable order/capture idempotency; crash recovery; sandbox isolation; webhook verification and replay. No external requests or real charges.');
+module.exports={setup,headers};

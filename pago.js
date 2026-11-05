@@ -13,7 +13,9 @@
   // Solo se aceptan identificadores con letras, números, guion o guion bajo: lo que llegue por la URL no se envía tal cual al servidor.
   const SAFE_ID = /^[A-Za-z0-9_-]{4,80}$/;
   const cleanId = v => (typeof v === 'string' && SAFE_ID.test(v)) ? v : '';
-  const txId = cleanId(provider==='paypal'?(params.get('token')||pend?.id||''):(params.get('id')||''));
+  const hosted = provider==='paypal'&&(params.get('hosted')==='1'||pend?.checkout==='hosted');
+  const txId = hosted?'':cleanId(provider==='paypal'?(params.get('token')||pend?.id||''):(params.get('id')||''));
+  const captureId = hosted?cleanId(params.get('tx')||''):'';
   const ref = cleanId(provider==='paypal'?(params.get('ref')||pend?.ref):(pend&&pend.ref));
   const canceled = provider==='paypal'&&params.get('cancel')==='1';
   const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
@@ -56,7 +58,7 @@
     if(!ref){ show("🤔", "No encontramos un pago en curso", "Si ya pagaste, escríbenos y lo revisamos de inmediato.", '<a class="btn w" href="'+wa("Hola, pagué en la tienda pero no veo mi cuenta.")+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a><a class="btn g" href="cuenta.html">Ir a Mi cuenta</a>'); return; }
     for(let i=0; i<45; i++){
       let j;
-      try{ j = await call({action:provider==='paypal'?(canceled?'paypal_status':'paypal_confirm'):'pay_confirm', ref, id:txId}); }
+      try{ j = await call({action:provider==='paypal'?(canceled?'paypal_status':'paypal_confirm'):'pay_confirm', ref, id:txId, capture:captureId}); }
       catch(e){ show("⚠️", "No pudimos confirmar el pago", esc(e.message), '<a class="btn w" href="'+wa("Hola, tuve un problema con mi pago. Referencia "+ref)+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>'); return; }
       if(!j.ok){ show("⚠️", "No pudimos confirmar el pago", esc(j.error||"Intenta de nuevo."), '<a class="btn w" href="'+wa("Hola, tuve un problema con mi pago. Referencia "+ref)+'" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>'); return; }
       if(j.estado === "ENTREGADO"){ done(); show("🎉", "¡Pago aprobado!", "Tu cuenta ya está lista. Entra a <b>Mi cuenta</b> para ver el correo, la contraseña y tu plan.", '<a class="btn p" href="cuenta.html">🔓 Ver mi cuenta</a>'); return; }
