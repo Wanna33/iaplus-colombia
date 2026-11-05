@@ -432,7 +432,13 @@ function writeListCache(j){
     else localStorage.removeItem(LIST_CACHE);
   }catch{}
 }
-async function loadAll(){
+let listRequest = null;
+function loadAll(){
+  if(listRequest)return listRequest;
+  listRequest=loadAllOnce().finally(()=>{listRequest=null;});
+  return listRequest;
+}
+async function loadAllOnce(){
   const pc = load("iap_pending_code");
   if(pc && !activationBusy){
     activationBusy=true;
@@ -447,7 +453,7 @@ async function loadAll(){
   }
   let paintedKey = "";
   try{
-    const cached = (!pc && !WELCOME_CODE && !FLASH) ? readListCache() : null;
+    const cached = null; // Las credenciales necesitan disponibilidad actual confirmada por el servidor.
     if(cached){ // se pinta lo último que se vio mientras llega la respuesta del servidor
       ITEMS = cached.items; IS_ADMIN = false; buildMenu(); renderMain(); paintedKey = listKey(cached.items);
       if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
@@ -458,12 +464,13 @@ async function loadAll(){
     }
     if(!j) j = await callApi({action:"list"});
     if(!j.ok) throw new Error(j.error||"Error");
-    writeListCache(j);
+    j.items = (j.items||[]).filter(i=>!i.retirada&&!i.eliminada&&i.publica!==false);
+    try { localStorage.removeItem(LIST_CACHE); } catch {}
     if(paintedKey && listKey(j.items) === paintedKey){ // nada cambió: no se vuelve a dibujar
       ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); return;
     }
     ITEMS = j.items; IS_ADMIN = !!j.admin; save("iap_admin", IS_ADMIN); save("iap_has", ITEMS.length>0); buildMenu();
-    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">Aún no tienes suscripciones activas.</p>${addBox(true)}`; bindAdd(); showFlash(); if(WELCOME_CODE){ WELCOME_CODE=null; window.IAPCelebrate?.show(null); } return; }
+    if(!ITEMS.length){ $("#app").innerHTML = `<div class="ttl"><h1><em>Mi suscripción</em> (0)</h1><span class="tag">IA Plus</span></div><p style="color:var(--mut);font-weight:700;margin:18px 0 0">${(j.planes||[]).some(p=>IAPAccountState.isActive(p))?"Tu plan sigue vigente. Estamos preparando cuentas disponibles; tus fechas se conservan. Contacta con soporte si necesitas ayuda.":"Aún no tienes suscripciones activas."}</p>${addBox(true)}`; bindAdd(); showFlash(); if(WELCOME_CODE){ WELCOME_CODE=null; window.IAPCelebrate?.show(null); } return; }
     renderMain(); showFlash();
     if(WELCOME_CODE){ const c=WELCOME_CODE; WELCOME_CODE=null; window.IAPCelebrate?.show(ITEMS.find(i=>i.codigo===c)||ITEMS.find(i=>!i.vencida)||null); }
     if(!timer) timer=setInterval(()=>{if(!document.hidden){tick();refreshTotp();}},1000);
@@ -473,6 +480,8 @@ async function loadAll(){
     message("No pudimos cargar tu cuenta", /fetch|network|load failed/i.test(err.message)?"Parece que no hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.":esc(err.message)); }
 }
 loadAll();
+setInterval(()=>{if(!document.hidden&&!activationBusy)loadAll();},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!activationBusy)loadAll();});
 (function(){
   const link="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("Hola, necesito ayuda con mi cuenta");
   const w=$("#bnWa"); if(w) w.href=link; const t=$("#topWa"); if(t) t.href=link;

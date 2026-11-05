@@ -1,0 +1,17 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const state={},props={getProperty:k=>state[k]||null,setProperty:(k,v)=>state[k]=v,deleteProperty:k=>delete state[k],getProperties:()=>({...state})};
+const rows=[[],['CODE','ChatGPT','bad@example.test','secret','buyer@example.test','Activo',new Date(),30],['CODE2','ChatGPT','good@example.test','secret2','','Disponible','',30]];const snapshot=JSON.stringify(rows);
+const ctx={console,PropertiesService:{getScriptProperties:()=>props},Utilities:{},CacheService:{getScriptCache:()=>({get:()=>1})}};vm.createContext(ctx);vm.runInContext(fs.readFileSync('backend/Code.gs','utf8'),ctx);
+ctx.sheet_=()=>({getDataRange:()=>({getValues:()=>rows})});ctx.log_=()=>{};ctx.plan_=()=>({inicio:new Date().toISOString(),fin:new Date(Date.now()+86400000).toISOString(),dias:30,vencida:false});ctx.autoAgregar_=()=>{};ctx.has2fa_=()=>false;
+const admin='j03l1525@gmail.com',mail='bad@example.test';
+assert.throws(()=>ctx.handle_({action:'admin_account_public',correo:mail,publica:false},'stranger@example.test'));
+assert.equal(ctx.handle_({action:'admin_account_public',correo:mail,publica:false},admin).publica,false);
+assert.equal(ctx.cuentaPublica_(mail),false);
+assert.equal(ctx.cuentasConCupo_(rows,{match:['chatgpt']},999).some(x=>x.correo===mail),false);
+let r=ctx.handle_({action:'list'},'buyer@example.test');assert.equal(r.items.length,0);assert.equal(r.planes.length,1);assert.equal(r.planes[0].vencida,false);
+ctx.handle_({action:'admin_account_public',correo:mail,publica:true},admin);assert.equal(ctx.handle_({action:'list'},'buyer@example.test').items.length,1);
+ctx.handle_({action:'admin_account_delete',correo:mail},admin);assert.equal(ctx.handle_({action:'list'},'buyer@example.test').items.length,0);
+assert.throws(()=>ctx.handle_({action:'admin_account_public',correo:mail,publica:true},admin));
+assert.throws(()=>ctx.handle_({action:'admin_account_inventory',correo:mail,retirada:false},admin));
+state['TOTP_'+mail]='TEST';assert.throws(()=>ctx.handle_({action:'totp',correo:mail},'buyer@example.test'));
+assert.equal(JSON.stringify(rows),snapshot);console.log('PASS: admin-only switch, off/on visibility, sale pool, permanent removal, restore blocked, TOTP blocked, all subscription rows/dates/codes unchanged.');

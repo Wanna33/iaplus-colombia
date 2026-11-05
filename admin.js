@@ -249,11 +249,11 @@ function byProductHtml(){
 }
 function passListHtml(){
   const m = new Map();
-  items.filter(i=>!i.retirada).forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,retirada:i.retirada,recomendada:i.recomendada,ordenCuenta:i.ordenCuenta||0,total:0,clientes:0}; a.total++; if(i.cliente&&IAPInsights.isActive(i,Date.now())) a.clientes++; m.set(k,a); });
+  items.filter(i=>!i.eliminada).forEach(i=>{ const k=(i.producto||"")+"|"+i.correo.toLowerCase(); const a=m.get(k)||{k,producto:i.producto,correo:i.correo,clave:i.clave,publica:i.publica!==false&&!i.retirada,retirada:i.retirada,recomendada:i.recomendada,ordenCuenta:i.ordenCuenta||0,total:0,clientes:0}; a.total++; if(i.cliente&&IAPInsights.isActive(i,Date.now())) a.clientes++; m.set(k,a); });
   return [...m.values()].sort((a,b)=>b.ordenCuenta-a.ordenCuenta).map(a=>`<div class="passrow"><div class="pr-info"><b>${EMO(a.producto)} ${esc(a.producto)}</b><span class="mono">${esc(a.correo)}</span><small>${a.clientes} ${a.clientes===1?"cliente activo":"clientes activos"} · ${a.total} ${a.total===1?"código":"códigos"}${a.retirada?" · Retirada · planes conservados":""}</small></div>
     <div class="pr-cap">${(()=>{ const c=capMap().get(a.correo.toLowerCase()); return c?capBar(c,getCap()):""; })()}</div>
     <input class="pr-in" data-pk="${esc(a.k)}" data-orig="${esc(a.clave)}" value="${esc(a.clave)}" autocomplete="off" aria-label="Contraseña de ${esc(a.correo)}">
-    <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button><button type="button" class="btn s" data-recommend-mail="${esc(a.correo)}" data-recommend="${!a.recomendada}" aria-pressed="${!!a.recomendada}">${a.recomendada?"★ Recomendada · Quitar marca":"☆ Marcar como recomendada"}</button><button type="button" class="btn s" data-inventory-mail="${esc(a.correo)}" data-retire="${!a.retirada}">${a.retirada?"Restaurar cuenta":"Eliminar del inventario"}</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
+    <button class="btn s p" data-ps="${esc(a.k)}" disabled>Guardar</button><button type="button" class="btn s" data-recommend-mail="${esc(a.correo)}" data-recommend="${!a.recomendada}" aria-pressed="${!!a.recomendada}">${a.recomendada?"★ Recomendada · Quitar marca":"☆ Marcar como recomendada"}</button><button type="button" class="btn s" role="switch" aria-checked="${a.publica}" data-public-mail="${esc(a.correo)}" data-public="${!a.publica}">${a.publica?"🟢 Activa para clientes · Apagar":"⚪ Apagada para clientes · Encender"}</button><button type="button" class="btn s" data-delete-account="${esc(a.correo)}">Eliminar permanentemente</button></div>`).join("") || '<div class="empty">Aún no hay cuentas.</div>';
 }
 async function savePass(k){
   const inp = document.querySelector(`.pr-in[data-pk="${CSS.escape(k)}"]`), btn = document.querySelector(`[data-ps="${CSS.escape(k)}"]`); if(!inp) return;
@@ -542,7 +542,7 @@ function render(){
   </section>
 
   <section id="tab-cta" class="hide">
-    <div class="card"><div class="acts"><h2>🧩 Mis cuentas</h2><button type="button" class="btn p" id="openAddAccount">➕ Agregar cuenta</button></div><p class="hint">Eliminar del inventario retira la cuenta de las ventas nuevas. Los clientes conservan sus accesos y fechas; los códigos ya entregados siguen vigentes. Las cuentas retiradas desaparecen de este inventario, conservando los planes activados. Las nuevas aparecen primero. Marca como recomendadas las que mejor funcionan; tus clientes verán esa marca. El retiro aplica a todos los productos con el mismo correo.</p>
+    <div class="card"><div class="acts"><h2>🧩 Mis cuentas</h2><button type="button" class="btn p" id="openAddAccount">➕ Agregar cuenta</button></div><p class="hint">Solo las cuentas encendidas aparecen a los clientes. Apagar oculta la cuenta y bloquea nuevas entregas; puedes volver a encenderla. Eliminar permanentemente la quita del inventario y de los accesos públicos. Los planes, códigos activados y fechas de los clientes se conservan. El cambio aplica a todos los productos con el mismo correo.</p>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Cada fila es una cuenta que compartes: ves cuántos clientes la usan (barra de cupo) y puedes cambiar su contraseña. Al guardar, <b>se actualiza sola para todos sus clientes</b>. Escribe la nueva y pulsa <b>Guardar</b> (o Enter).</p>
       <div id="passList"></div></div>
     <details class="card" id="addBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">➕ Agregar una cuenta nueva (correo y contraseña distintos)</summary>
@@ -2124,5 +2124,18 @@ document.addEventListener('click', async e => {
     const j=await api('admin_account_recommend',{correo:b.dataset.recommendMail,recomendada});
     if(j.recomendada!==recomendada)throw Error('El servidor no confirmó la recomendación.');
     await refresh();toast(recomendada?'Tus clientes verán esta cuenta como recomendada ★':'Recomendación retirada');
+  }catch(ex){toast(ex.message);}finally{inventoryBusy=false;b.disabled=false;}
+});
+
+// Disponibilidad pública independiente de los planes de los clientes.
+document.addEventListener('click', async e => {
+  const b=e.target.closest('[data-public-mail],[data-delete-account]'); if(!b || inventoryBusy)return;
+  const eliminar=!!b.dataset.deleteAccount, correo=b.dataset.deleteAccount||b.dataset.publicMail, publica=b.dataset.public==='true';
+  if(eliminar&&!confirm('¿Eliminar permanentemente '+correo+' del inventario y de todos los accesos públicos? No se podrá restaurar desde el panel. Los planes y sus fechas se conservan.'))return;
+  inventoryBusy=true;b.disabled=true;
+  try{
+    const j=await api(eliminar?'admin_account_delete':'admin_account_public',{correo,publica});
+    if(eliminar?j.eliminada!==true:j.publica!==publica)throw Error('El servidor aún no confirmó el cambio. Actualiza el backend antes de usar este control.');
+    await refresh();toast(eliminar?'Cuenta eliminada; planes conservados':publica?'Cuenta encendida para clientes':'Cuenta apagada: ya no se entrega a clientes');
   }catch(ex){toast(ex.message);}finally{inventoryBusy=false;b.disabled=false;}
 });
