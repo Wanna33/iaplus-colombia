@@ -1,5 +1,23 @@
 # PayPal para IA Plus Colombia
 
+## Botones alojados incorporados el 5 de noviembre de 2026
+
+La tienda usa `paypal-hosted.js` y un documento de pago separado (`paypal-hosted-frame.html` / `.js`) para los tres botones creados por el propietario. Se conserva la política estricta de scripts de la tienda; solo el documento de pago admite los scripts inline generados por el SDK de PayPal. El identificador del botón se valida contra una lista fija y los mensajes del marco se validan por ventana de origen e identificador.
+
+| Plan | Botón alojado | USD verificado en PayPal |
+| --- | --- | --- |
+| 1 mes | ESZ3PJJFB5752 | 3.17 |
+| 3 meses | QJWRD7JVZVBMQ | 6.34 |
+| 6 meses | R244SQBE54KXA | 10.87 |
+
+El propietario confirmó USD 10.87 para 6 meses en esta sesión. La configuración REST anterior sigue mostrando USD 15.85: no se ha modificado. La fachada `IAPPayPal` y el manejador de captura dirigen las tarjetas y los detalles de estos tres planes al botón alojado correspondiente, evitando ofrecer el checkout anterior con otro importe.
+
+**Entrega de estos botones: verificación y activación por WhatsApp.** No crean los pedidos internos del flujo REST, por lo que no se deben tratar como entregas automáticas ni activar cuentas a partir de mensajes del iframe o parámetros de retorno. El usuario ve las instrucciones antes de pagar y un enlace para enviar comprobante y Gmail. Se mantiene un enlace directo al checkout público de cada botón como respaldo.
+
+Se verificaron las páginas públicas de los tres botones sin crear pedidos ni capturar pagos. El servidor REST respondió `ready:true`, `env:live` durante esta revisión; esto reemplaza el estado antiguo descrito abajo, pero no prueba que los botones alojados estén conectados al webhook REST. Tarjetas y Apple Pay dependen de la elegibilidad que muestre PayPal; no se ha probado un cobro ni un dispositivo Apple.
+
+### Antecedentes de la integración REST
+
 Estado verificado el 20 de octubre de 2026: servidor de Apps Script actualizado a la versión 44; endpoint de webhook publicado y con respuesta de salud HTTP 200; interfaz publicada en GitHub Pages (versión `2026.10.20-paypal-1`). PayPal permanece deshabilitado: falta guardar la llave privada y registrar el webhook, pendientes de la confirmación específica del propietario. No se realizaron cobros reales.
 
 Precios autorizados por el propietario:
