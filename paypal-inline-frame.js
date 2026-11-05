@@ -30,6 +30,12 @@
       const callbacks={createOrder:async()=> (await request('iap-inline-create')).id,
         onApprove:async details=>{await request('iap-inline-approved',{id:details.orderID});},
         onError:notifyError,onCancel:()=>send({type:'iap-inline-error'})};
+      const walletReady = (async()=>{
+      const wallet=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.PAYPAL,style:{layout:'vertical',height:48,shape:'rect',tagline:false}});
+      if(wallet.isEligible()) await wallet.render('#wallet-buttons');
+      else document.getElementById('wallet-buttons').textContent='PayPal no disponible para esta compra.';
+      document.getElementById('wallet-loading').hidden=true;
+      })().catch(()=>{document.getElementById('wallet-loading').hidden=true;document.getElementById('wallet-buttons').textContent='No se pudo cargar PayPal. Cierra y vuelve a abrir el pago.';});
       let cards = false, cardAvailable = false;
       if (window.paypal.CardFields) {
         const fields = paypal.CardFields({...callbacks,style:{input:{'font-size':'16px','color':'#172c50'}}});
@@ -45,10 +51,7 @@
       }
       document.getElementById('card-loading').hidden=true;
       if(!cardAvailable) document.getElementById('card-button').textContent='Tarjeta no disponible para esta compra.';
-      const wallet=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.PAYPAL,style:{layout:'vertical',height:48,shape:'rect',tagline:false}});
-      if(wallet.isEligible()) await wallet.render('#wallet-buttons');
-      else document.getElementById('wallet-buttons').textContent='PayPal no disponible para esta compra.';
-      document.getElementById('wallet-loading').hidden=true;
+      await walletReady;
       send({type:'iap-inline-loaded'});
     } catch(error) {console.error('PayPal initialization:', error?.message);notifyError();}
   });

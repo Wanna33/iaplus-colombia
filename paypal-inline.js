@@ -92,7 +92,7 @@
       if (current !== active || emailOf() !== buyer) return;
       if (result.checkout !== 'embedded' || result.env !== 'live' || result.currency !== 'USD' || !/^[A-Za-z0-9_-]{20,200}$/.test(result.clientId || '') || !/^\d+\.\d{2}$/.test(result.total)) throw new Error('El servidor aún no está listo para el pago integrado.');
       const quote = result;
-      show(`<section class="iap-order-summary"><span class="iap-checkout-eyebrow">TU PLAN, A UN PASO</span><h2 id="inlineTitle">${esc(quote.name)}</h2><div class="iap-order-bottom"><span class="iap-plan-duration">${Number(quote.days)} días de acceso<small>Pago único · sin renovación automática</small></span><span class="iap-hosted-total">${money(quote.total)}<small>USD</small></span></div></section><div class="iap-payment-heading"><h3>¿Cómo quieres pagar?</h3><p>Elige tu medio de pago para continuar.</p></div><p class="iap-loading-status" role="status">Preparando tus opciones de pago…</p><iframe class="iap-hosted-frame" title="Pagar con tarjeta o PayPal" allow="payment" src="paypal-inline-frame.html?v=20261105-design2"></iframe><div class="iap-activation-note"><span aria-hidden="true">✓</span><p><strong>Tu acceso se activa automáticamente</strong><br>Cuando se confirme el pago, lo encontrarás en Mi cuenta.</p></div><p class="iap-checkout-footnote">Pago procesado por PayPal. Tus datos de tarjeta se introducen en sus campos seguros. <a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a></p><button class="btn full" type="button" data-check hidden>Revisar mi pago</button>`);
+      show(`<section class="iap-order-summary"><span class="iap-checkout-eyebrow">TU PLAN, A UN PASO</span><h2 id="inlineTitle">${esc(quote.name)}</h2><div class="iap-order-bottom"><span class="iap-plan-duration">${Number(quote.days)} días de acceso<small>Pago único · sin renovación automática</small></span><span class="iap-hosted-total">${money(quote.total)}<small>USD</small></span></div></section><div class="iap-payment-heading"><h3>¿Cómo quieres pagar?</h3><p>Elige tu medio de pago para continuar.</p></div><p class="iap-loading-status" role="status">Preparando tus opciones de pago…</p><iframe class="iap-hosted-frame" title="Pagar con tarjeta o PayPal" allow="payment" src="paypal-inline-frame.html?v=20261105-fast1"></iframe><div class="iap-activation-note"><span aria-hidden="true">✓</span><p><strong>Tu acceso se activa automáticamente</strong><br>Cuando se confirme el pago, lo encontrarás en Mi cuenta.</p></div><p class="iap-checkout-footnote">Pago procesado por PayPal. Tus datos de tarjeta se introducen en sus campos seguros. <a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a></p><button class="btn full" type="button" data-check hidden>Revisar mi pago</button>`);
       const frame = dialog.querySelector('iframe');
       const review = dialog.querySelector('[data-check]');
       review.hidden = !order;
@@ -141,10 +141,19 @@
     const button = event.target.closest('[data-paypal]');
     if (button && config?.prices[button.dataset.paypal]) { event.preventDefault(); event.stopImmediatePropagation(); start(button.dataset.paypal,button); }
   },true);
-  postJson(CONFIG.API_URL,{action:'paypal_config'}).then(value => {
-    if (!value.ok || !value.ready || value.env !== 'live' || value.checkoutVersion !== 2) return;
+  const configKey = 'iap_paypal_public_config_v2';
+  function applyConfig(value) {
+    if (!value?.ok || !value.ready || value.env !== 'live' || value.checkoutVersion !== 2) return false;
     config = value;
-    window.IAPPayPal = {canPay:id=>!!config.prices[id],amount:id=>money(config.prices[id]),get available(){return true;}};
-    renderGrid();
+    window.IAPPayPal = {canPay:id=>!!config?.prices[id],amount:id=>money(config.prices[id]),get available(){return !!config;}};
+    renderGrid(); return true;
+  }
+  // Only public availability/prices are cached. Quotes, ownership, capture and
+  // delivery always go to the authenticated server; stale prices cannot charge.
+  const cachedConfig = load(configKey, null);
+  if (cachedConfig?.until > Date.now()) applyConfig(cachedConfig.value);
+  postJson(CONFIG.API_URL,{action:'paypal_config'}).then(value => {
+    if (applyConfig(value)) save(configKey,{until:Date.now()+300000,value});
+    else { config=null; save(configKey,null); renderGrid(); }
   }).catch(()=>{});
 })();

@@ -73,3 +73,9 @@ Documentación oficial:
 - https://developer.paypal.com/api/webhooks/overview/
 
 La prueba de interfaz usa jsdom: `npm install --prefix outputs/paypal-qa jsdom`. No crea pedidos ni realiza cobros.
+
+## Carga del checkout
+
+Tarjeta y PayPal se renderizan en paralelo. La tienda conserva por cinco minutos únicamente la disponibilidad y los precios públicos, y los actualiza en segundo plano. Nunca se cachean confirmaciones de pago ni se omite la cotización autenticada. Las conexiones a PayPal se preparan anticipadamente. Prueba: `node tools/check-paypal-parallel.cjs`.
+
+Elegibilidad revisada de nuevo el 5 de noviembre: la aplicación live no presenta habilitación Apple Pay y el SDK responde `merchantCountry: CO`, `isEligible: false`; tarjeta estándar sí es elegible. Apple Pay no está operativo. También necesita dominio verificado en la raíz `/.well-known/`, no debajo del directorio `/iaplus-colombia/`. No se sustituye el checkout automático por enlaces alojados sin entrega verificada.
