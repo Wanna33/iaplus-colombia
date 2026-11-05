@@ -53,3 +53,10 @@ for(const f of shell)assert.ok(fs.existsSync(path.join(root,f)),`Missing precach
 for(const f of ['app.js','assistants.js','public-assistant.js','store-tools.js','catalog-utils.js','sw.js'])execFileSync(process.execPath,['--check',path.join(root,f)]);
 execFileSync(process.execPath,[path.join(root,'tools','build-css.cjs'),'--check']);
 console.log('PASS: 17 planes; modalidad, dispositivos, duracion, busqueda, contexto, presupuesto, precios actualizados, recursos offline, estilos al día y sintaxis.');
+
+// The retained catalog is historical; only these plans can be offered now.
+const available=vm.runInNewContext(source.slice(source.indexOf('const PRODUCTS ='),source.indexOf('/* ============ PRECIOS EN VIVO:'))+'; PRODUCTS');
+assert.deepEqual(Array.from(available,p=>p.id),['chatgpt','chatgpt3','chatgpt6']);
+assert.ok(!answer('Quiero comprar Canva',available).products?.length);
+assert.ok(!answer('CapCut 3 meses',available).products?.length);
+console.log('PASS: public storefront offers only the three ChatGPT plans; unavailable products are not recommended.');

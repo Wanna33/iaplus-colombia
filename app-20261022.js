@@ -32,6 +32,10 @@ const PRODUCTS = [
   {id:"filmora", name:"Filmora", cat:"Edición de video", ico:"🎞️", img:"filmora.webp", lt:true, price:10000, per:"/mes", feats:["Cuenta lista para usar","Entrega rápida por WhatsApp","Garantía durante el plan"]},
 ];
 
+// Disponibilidad comercial actual. Conserva los demás productos para futuras altas.
+const AVAILABLE_PRODUCT_IDS = ['chatgpt','chatgpt3','chatgpt6'];
+PRODUCTS.splice(0, PRODUCTS.length, ...PRODUCTS.filter(p => AVAILABLE_PRODUCT_IDS.includes(p.id)));
+
 /* ============ PRECIOS EN VIVO: los que el dueño tiene en el panel (Modo Dios) ============ */
 const perDe = d => d===30?"/mes":d===90?"/3 meses":d===180?"/6 meses":d===365?"/12 meses":d%30===0?`/${d/30} meses`:`/${d} días`;
 function aplicarPrecios(lista){
