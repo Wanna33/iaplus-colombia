@@ -9,7 +9,7 @@
   document.body.append(dialog);
   const status = text => { const el = dialog.querySelector('[role=status]'); if (el) el.textContent = text; };
   const pending = () => load('iap_pay', null);
-  const header = '<header><strong>Pago seguro</strong><button type="button" data-close aria-label="Cerrar pago">✕</button></header>';
+  const header = '<header><span class="iap-checkout-brand"><span class="iap-checkout-mark" aria-hidden="true">IA</span><span>IA Plus Colombia<small>Pago seguro</small></span></span><button type="button" data-close aria-label="Cerrar pago">✕</button></header>';
   function show(body) {
     dialog.innerHTML = header + body;
     dialog.querySelector('[data-close]').onclick = () => dialog.close();
@@ -59,7 +59,7 @@
       if (current !== active) return;
       if (result.checkout !== 'embedded' || result.env !== 'live' || result.currency !== 'USD' || !/^[A-Za-z0-9_-]{20,200}$/.test(result.clientId || '') || !/^\d+\.\d{2}$/.test(result.total)) throw new Error('El servidor aún no está listo para el pago integrado.');
       const quote = result;
-      show(`<h2 id="inlineTitle">${esc(quote.name)}</h2><p class="iap-hosted-total">${money(quote.total)} <small>USD · ${Number(quote.days)} días · pago único</small></p><p>Tu acceso se activa automáticamente cuando PayPal confirma el pago. La tarjeta se introduce en campos seguros de PayPal.</p><p><a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a></p><p role="status">Cargando métodos de pago…</p><iframe class="iap-hosted-frame" title="Pagar con tarjeta o PayPal" allow="payment" src="paypal-inline-frame.html"></iframe><button class="btn full" type="button" data-check hidden>Revisar mi pago</button>`);
+      show(`<section class="iap-order-summary"><span class="iap-checkout-eyebrow">TU PLAN, A UN PASO</span><h2 id="inlineTitle">${esc(quote.name)}</h2><div class="iap-order-bottom"><span class="iap-plan-duration">${Number(quote.days)} días de acceso<small>Pago único · sin renovación automática</small></span><span class="iap-hosted-total">${money(quote.total)}<small>USD</small></span></div></section><div class="iap-payment-heading"><h3>¿Cómo quieres pagar?</h3><p>Elige tu medio de pago para continuar.</p></div><p class="iap-loading-status" role="status">Preparando tus opciones de pago…</p><iframe class="iap-hosted-frame" title="Pagar con tarjeta o PayPal" allow="payment" src="paypal-inline-frame.html?v=20261105-design2"></iframe><div class="iap-activation-note"><span aria-hidden="true">✓</span><p><strong>Tu acceso se activa automáticamente</strong><br>Cuando se confirme el pago, lo encontrarás en Mi cuenta.</p></div><p class="iap-checkout-footnote">Pago procesado por PayPal. Tus datos de tarjeta se introducen en sus campos seguros. <a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a></p><button class="btn full" type="button" data-check hidden>Revisar mi pago</button>`);
       const frame = dialog.querySelector('iframe');
       const review = dialog.querySelector('[data-check]');
       review.hidden = !order;
@@ -72,7 +72,7 @@
         if (message.type === 'iap-inline-ready') {
           frame.contentWindow.postMessage({type:'iap-inline-init',clientId:quote.clientId,total:quote.total,name:quote.name},location.origin);
         } else if (message.type === 'iap-inline-loaded') {
-          clearTimeout(timer); status('Selecciona tu medio de pago.');
+          clearTimeout(timer); status('');
         } else if (message.type === 'iap-inline-height' && Number.isFinite(message.height)) {
           frame.style.height = Math.max(180,Math.min(1400,message.height))+'px';
         } else if (message.type === 'iap-inline-error') {

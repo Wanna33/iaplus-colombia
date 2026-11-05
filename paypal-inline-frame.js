@@ -3,7 +3,7 @@
   let initialized = false, sequence = 0;
   const requests = new Map();
   const send = data => parent.postMessage(data,location.origin);
-  const notifyError = () => { document.getElementById('status').textContent = 'No se pudo completar el pago. Revisa el estado en la tienda antes de volver a pagar.'; send({type:'iap-inline-error'}); };
+  const notifyError = () => { document.querySelectorAll('.method-skeleton').forEach(el=>el.hidden=true); document.getElementById('status').textContent = 'No se pudo completar el pago. Revisa el estado en la tienda antes de volver a pagar.'; send({type:'iap-inline-error'}); };
   function request(type, extra = {}) {
     const key = String(++sequence);
     return new Promise((resolve,reject) => {
@@ -30,21 +30,25 @@
       const callbacks={createOrder:async()=> (await request('iap-inline-create')).id,
         onApprove:async details=>{await request('iap-inline-approved',{id:details.orderID});},
         onError:notifyError,onCancel:()=>send({type:'iap-inline-error'})};
-      let cards = false;
+      let cards = false, cardAvailable = false;
       if (window.paypal.CardFields) {
         const fields = paypal.CardFields({...callbacks,style:{input:{'font-size':'16px','color':'#172c50'}}});
         if (fields.isEligible()) {
-          cards = true; document.getElementById('card-form').hidden=false;
+          cards = true; cardAvailable = true; document.getElementById('card-form').hidden=false;
           await Promise.all([fields.NameField({placeholder:'Nombre en la tarjeta'}).render('#card-name'),fields.NumberField({placeholder:'Número de tarjeta'}).render('#card-number'),fields.ExpiryField({placeholder:'MM/AA'}).render('#card-expiry'),fields.CVVField({placeholder:'CVV'}).render('#card-cvv')]);
           document.getElementById('pay-card').onclick=async event=>{const button=event.currentTarget;button.disabled=true;try{await fields.submit({contingencies:['SCA_WHEN_REQUIRED']});}catch{notifyError();}finally{button.disabled=false;}};
         }
       }
       if (!cards) {
-        const card=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.CARD,style:{layout:'vertical'}});
-        if(card.isEligible()) await card.render('#card-button');
+        const card=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.CARD,style:{layout:'vertical',height:48,shape:'rect',tagline:false}});
+        if(card.isEligible()) { await card.render('#card-button'); cardAvailable = true; }
       }
-      const wallet=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.PAYPAL,style:{layout:'vertical'}});
+      document.getElementById('card-loading').hidden=true;
+      if(!cardAvailable) document.getElementById('card-button').textContent='Tarjeta no disponible para esta compra.';
+      const wallet=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.PAYPAL,style:{layout:'vertical',height:48,shape:'rect',tagline:false}});
       if(wallet.isEligible()) await wallet.render('#wallet-buttons');
+      else document.getElementById('wallet-buttons').textContent='PayPal no disponible para esta compra.';
+      document.getElementById('wallet-loading').hidden=true;
       send({type:'iap-inline-loaded'});
     } catch(error) {console.error('PayPal initialization:', error?.message);notifyError();}
   });
