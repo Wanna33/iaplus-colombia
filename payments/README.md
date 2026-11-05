@@ -1,3 +1,18 @@
+## Checkout activo: botones alojados restaurados (5 noviembre 2026)
+
+Por petición del propietario se restauró el flujo inicial de `paypal-hosted.js` con
+los tres botones originales de PayPal. PayPal presenta los métodos que admite
+para el comprador, incluido Apple Pay cuando corresponde. La tienda informa antes
+del pago que la activación se verifica por WhatsApp; este flujo no activa accesos
+automáticamente. Se comprobó que el checkout alojado muestra Apple Pay y abre la
+pantalla oficial de Apple con el código para continuar en iPhone. Se cerró esa
+pantalla sin autorizar ni completar un cobro; no es prueba de captura/entrega real.
+
+`paypal-inline.js` y `paypal-apple.js` permanecen en el repositorio pero no se cargan
+en el catálogo. Los pedidos anteriores, su servidor y su webhook se conservan.
+Los apartados de integración automática que siguen describen esa implementación
+conservada, no el checkout activo.
+
 # PayPal para IA Plus Colombia
 
 ## Pago integrado y activación automática — 5 de noviembre de 2026

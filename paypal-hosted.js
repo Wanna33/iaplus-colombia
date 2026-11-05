@@ -62,12 +62,12 @@
     frame.allow = 'payment';
     frame.className = 'iap-hosted-frame';
     frame.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
-    frame.src = 'paypal-hosted-frame.html?button=' + plan.button;
+    frame.src = 'paypal-hosted-frame.html?v=20261105-restored1&button=' + plan.button;
     const status = dialog.querySelector('#iapHostedStatus');
     const fail = () => { if (generation === current && dialog.open) status.textContent = 'Si los botones no aparecen, abre el pago directamente en PayPal con el enlace de abajo.'; };
     const timeout = setTimeout(fail, 20000);
     function receive(message) {
-      if (message.source !== frame.contentWindow || message.data?.button !== plan.button) return;
+      if (message.origin !== location.origin || message.source !== frame.contentWindow || message.data?.button !== plan.button) return;
       if (generation !== current) return;
       if (message.data.type === 'iap-paypal-ready') {
         clearTimeout(timeout); status.textContent = '';
