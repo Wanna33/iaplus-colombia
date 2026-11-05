@@ -137,7 +137,7 @@
         <button type="button" class="gv-btn" data-gv="max" title="Ampliar" aria-label="Ampliar el video" hidden>⤢</button>
         <button type="button" class="gv-btn" data-gv="close" title="Cerrar" aria-label="Cerrar el video">✕</button></div></div>
       <div class="gv-body"><span class="eyebrow">VIDEO GUÍA</span><h2>Activa y entra a tu cuenta</h2>
-      <video controls playsinline autoplay poster="assets/navidad-santa-bienvenida-2026.webp"><source src="assets/video/como-activar-v2.mp4" type="video/mp4"></video>
+      <video controls playsinline autoplay poster="assets/iaplus-colombia-bienvenida-2026.webp"><source src="assets/video/como-activar-v2.mp4" type="video/mp4"></video>
       <p>Paso a paso: tienda, pagos, activar con enlace o código y entrar a tu ChatGPT Plus. <b>Toca ⌄ para minimizarlo</b> y seguir los pasos mientras lo ves.</p></div>`;
     document.body.appendChild(d);
     try { window.IAPVideoChapters && IAPVideoChapters.mount(d.querySelector("video")); } catch {}

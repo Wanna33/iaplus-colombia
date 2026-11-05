@@ -24,7 +24,7 @@ function ensureCred(){
       bar.innerHTML=`
         <header class="signin-masthead"><a class="signin-brand" href="index.html?tienda=1"><img src="assets/brand-iaplus.svg?v=pro4" alt="iapluscolombia" width="200" height="58"></a><a class="signin-store-link" href="index.html?tienda=1">Ir a la tienda <span aria-hidden="true">↗</span></a></header>
         <section class="signin-showcase" aria-labelledby="signinWelcomeTitle">
-          <div class="signin-scene"><img src="assets/navidad-santa-portada-2026-640.webp" width="640" height="480" alt="Santa Claus te recibe en su taller navideño con un regalo, su portátil y un árbol iluminado" fetchpriority="high" decoding="async"><span class="signin-colombia">🎅 Tu Navidad digital, en Colombia</span></div>
+          <div class="signin-scene"><img src="assets/iaplus-colombia-presentacion-2026-640.webp" width="640" height="480" alt="IA Plus Colombia te recibe con su emblema colombiano y una tienda digital navideña" fetchpriority="high" decoding="async"><span class="signin-colombia">🎅 Tu Navidad digital, en Colombia</span></div>
           <h1 id="signinWelcomeTitle">Tu mundo digital.<br> <em>Con magia navideña. 🎄</em></h1>
         </section>
         <section class="signin-access" aria-labelledby="signinAccessTitle">

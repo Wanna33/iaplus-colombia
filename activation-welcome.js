@@ -15,7 +15,7 @@
       showSuccess() {
         const steps = text("activationWelcomeSteps");
         const art=welcome.querySelector('.activation-welcome-art img');
-        if(art){art.src='assets/navidad-santa-confianza-2026.webp';art.alt='Santa Claus celebra la Navidad con IA Plus Colombia.';}
+        if(art){art.src='assets/iaplus-colombia-activacion-2026.webp';art.alt='¡Tu acceso está listo! Disfruta tu mundo digital con IA Plus Colombia.';}
         welcome.classList.add("activation-welcome--success");
         text("activationWelcomeKicker").textContent = "🎁 ACCESO ACTIVADO · IA PLUS COLOMBIA";
         text("activationWelcomeTitle").textContent = "🎄 ¡Listo! Tu acceso está activado";

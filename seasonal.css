@@ -32,7 +32,7 @@ html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasona
 .christmas-theme .activation-welcome-kicker{color:#853c45}
 .christmas-theme .activation-welcome-kicker:before{content:'🎄'}
 .christmas-theme .activation-welcome-primary{background:#214f38;border:1px solid #bc9b53}
-.christmas-theme .celebrate-colombia .cel-colombia-hero{background:linear-gradient(90deg,#123b2fe6,#123b2f9c 62%,#123b2f35),url('assets/navidad-santa-portada-2026-640.webp') center 38%/cover;color:#fff9e7;border-bottom:1px solid #c1a15d}
+.christmas-theme .celebrate-colombia .cel-colombia-hero{background:linear-gradient(90deg,#123b2fe6,#123b2f9c 62%,#123b2f35),url('assets/iaplus-colombia-presentacion-2026-640.webp') center 38%/cover;color:#fff9e7;border-bottom:1px solid #c1a15d}
 .christmas-theme .celebrate-colombia .cel-confirmed{color:#ffe2a2}
 .christmas-theme .admin-app .side-brand small:after{content:' · NAVIDAD';color:#ead092}
 .christmas-theme .admin-app .side{border-right-color:#bfa064}
@@ -90,7 +90,7 @@ html.christmas-theme{--seasonal-accent:#8b3541;--seasonal-warm:#c2a260;--seasona
 .christmas-theme .activation-welcome-primary{background:linear-gradient(110deg,#852339,#a73847);border-color:#c5a365;box-shadow:0 8px 22px #7c233624}
 .christmas-theme .activation-welcome-note{font-size:11px}
 .christmas-theme .account-app .account-overview{background-image:url('assets/navidad-guirnalda.svg'),linear-gradient(110deg,#0e3826,#23533a);background-repeat:repeat-x,no-repeat;background-position:center -50px,center;background-size:480px 70px,cover}
-.christmas-theme .celebrate-colombia .cel-colombia-hero{min-height:230px;background:linear-gradient(90deg,#073020ee 0%,#073020d9 42%,#07302020 100%),url('assets/navidad-santa-portada-2026.webp') right 32%/cover}
+.christmas-theme .celebrate-colombia .cel-colombia-hero{min-height:230px;background:linear-gradient(90deg,#073020ee 0%,#073020d9 42%,#07302020 100%),url('assets/iaplus-colombia-presentacion-2026.webp') right 32%/cover}
 .christmas-theme .celebrate-colombia .cel-hero-thanks{color:#fae7bb}
 .christmas-theme .admin-app .side-brand{background-image:url('assets/navidad-guirnalda.svg');background-position:center -44px;background-repeat:repeat-x;background-size:360px 53px}
 .christmas-theme .gifts-app .rg-hero{border-color:#c5aa6c;background:radial-gradient(ellipse at 0 0,#eddaa85c,transparent 60%),#fffaf0}
