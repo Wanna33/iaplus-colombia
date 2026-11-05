@@ -24,3 +24,24 @@
 .iap-payment-heading{margin-top:22px}.iap-payment-heading h3{font-size:17px;margin:0;letter-spacing:-.3px}.iap-hosted-dialog .iap-payment-heading p{font-size:12px;margin:4px 0 14px;color:#6a7890}.iap-hosted-dialog .iap-loading-status{font-size:12px;color:#5b6d88;margin:8px 0}.iap-loading-status:empty{display:none}.iap-hosted-frame{height:330px}.iap-activation-note{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#eef9f3;border-radius:13px;margin-top:15px;color:#216247}.iap-activation-note>span{display:grid;place-items:center;width:25px;height:25px;flex-shrink:0;background:#d6efdf;border-radius:50%;font-weight:800}.iap-hosted-dialog .iap-activation-note p{font-size:11px;line-height:1.6;margin:0}.iap-activation-note strong{font-size:12px}.iap-hosted-dialog .iap-checkout-footnote{font-size:10px;line-height:1.6;text-align:center;color:#6a7890;margin:13px 8px 0}.iap-checkout-footnote a{white-space:nowrap}
 @media(max-width:480px){.iap-hosted-dialog{padding:16px;border-radius:23px;max-height:calc(100dvh - 16px);width:calc(100% - 16px)}.iap-order-summary{padding:16px;margin-top:16px}.iap-hosted-dialog .iap-order-summary h2{font-size:20px}.iap-hosted-dialog .iap-hosted-total{font-size:25px}.iap-plan-duration small{max-width:155px;font-size:10px}.iap-payment-heading{margin-top:18px}}
 .iap-order-summary{padding:14px 17px;margin-top:14px}.iap-hosted-dialog .iap-order-summary h2{margin:6px 0 12px}.iap-payment-heading{margin-top:15px}.iap-hosted-dialog .iap-payment-heading p{margin-bottom:10px}.iap-hosted-dialog .iap-activation-note{margin-top:10px;padding:10px 12px}.iap-hosted-dialog .iap-checkout-footnote{margin-top:10px}
+/* Compact purchase: one primary action, secondary information on demand. */
+.iap-checkout-compact{width:min(420px,calc(100% - 24px));padding:24px;border-radius:26px}
+.iap-checkout-compact header{color:#64748b;font-size:13px}
+.iap-checkout-compact header button{width:40px;height:40px;flex-shrink:0}
+.iap-compact-summary{text-align:center;padding:10px 0 18px}
+.iap-checkout-compact .iap-compact-summary h2{font-size:23px;line-height:1.3;letter-spacing:-.5px;margin:12px 0 6px}
+.iap-checkout-compact .iap-compact-duration{font-size:13px;color:#64748b;margin:0}
+.iap-compact-price{font-size:42px;line-height:1.2;font-weight:800;letter-spacing:-1.8px;margin-top:18px;font-variant-numeric:tabular-nums}
+.iap-compact-price span{font-size:12px;letter-spacing:0;color:#64748b;font-weight:600}
+.iap-checkout-compact .iap-compact-pay{min-height:54px;background:#ffc439;color:#172c50;font-size:16px;font-weight:800;gap:14px;margin-top:0;box-shadow:0 5px 14px #ffc43930}
+.iap-checkout-compact .iap-compact-pay:hover{background:#ffbb20}
+.iap-checkout-compact .iap-compact-methods{text-align:center;font-size:12px;color:#64748b;margin:12px 0 0}
+.iap-checkout-compact .iap-compact-activation{text-align:center;font-size:13px;color:#216247;margin:16px 0}
+.iap-compact-activation span{margin-right:4px}
+.iap-checkout-compact .iap-compact-status{font-size:13px;text-align:center;color:#4f6079;margin:12px 0}
+.iap-compact-status:empty{display:none}
+.iap-compact-details{border-top:1px solid #e8edf3;padding-top:4px;color:#64748b;font-size:12px}
+.iap-compact-details summary{padding:13px 0 9px;cursor:pointer;min-height:40px;box-sizing:border-box}
+.iap-checkout-compact .iap-compact-details p{font-size:12px;margin:9px 0;overflow-wrap:anywhere}
+.iap-checkout-compact .iap-compact-details .btn{font-size:12px;min-height:44px}
+@media(max-width:480px){.iap-checkout-compact{width:calc(100% - 24px);padding:20px}.iap-checkout-compact .iap-compact-summary h2{font-size:21px}.iap-compact-price{font-size:38px}}

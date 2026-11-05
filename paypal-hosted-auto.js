@@ -3,12 +3,12 @@
   'use strict';
   const plans={chatgpt:'3.17',chatgpt3:'6.34',chatgpt6:'10.87'};
   const dialog=document.createElement('dialog');
-  dialog.className='iap-hosted-dialog';dialog.setAttribute('aria-labelledby','hostedAutoTitle');document.body.append(dialog);
+  dialog.className='iap-hosted-dialog iap-checkout-compact';dialog.setAttribute('aria-labelledby','hostedAutoTitle');document.body.append(dialog);
   let generation=0,timer,source,checking=false;
   const email=()=>String(user?.email||'').trim().toLowerCase();
   const key=buyer=>'iap_hosted_pending:'+buyer;
   const current=(n,buyer)=>n===generation&&dialog.open&&email()===buyer;
-  const header='<header class="iap-checkout-brand"><strong>IA Plus Colombia · Pago seguro</strong><button type="button" data-close aria-label="Cerrar pago">✕</button></header>';
+  const header='<header class="iap-checkout-brand"><strong>Pago seguro</strong><button type="button" data-close aria-label="Cerrar pago">✕</button></header>';
   const show=body=>{dialog.innerHTML=header+body;dialog.querySelector('[data-close]').onclick=()=>dialog.close();if(!dialog.open)dialog.showModal();};
   const status=text=>{const el=dialog.querySelector('[role=status]');if(el)el.textContent=text;};
   const validLink=p=>p?.checkout==='hosted'&&p.env==='live'&&/^https:\/\/www\.paypal\.com\/ncp\/payment\/PLB-[A-Z0-9]{6,40}$/.test(p.approveUrl||'')&&/^IAPP-[A-Z2-9]{12}$/.test(p.ref||'');
@@ -28,7 +28,7 @@
       if(result.estado==='APROBADO_SIN_STOCK'){
         show('<h2 id="hostedAutoTitle">Pago recibido</h2><p>Registramos tu pago, pero el último acceso se agotó. Avisamos al equipo para resolver la entrega. No vuelvas a pagar.</p><a class="btn full" href="cuenta.html">Ir a Mi cuenta</a>');return;
       }
-      status('Esperando la confirmación de PayPal. Al completarse el pago, tu suscripción aparecerá aquí automáticamente.');
+      if(dialog.querySelector('[data-pay]')?.dataset.started==='true')status('Esperando confirmación del pago…');
     }catch(error){if(current(n,buyer))status(error.message+' Si ya pagaste, no repitas el pago. Puedes volver a revisar el pedido.');}
     finally{checking=false;}
     if(current(n,buyer)&&round<60)timer=setTimeout(()=>monitor(p,buyer,n,round+1),8000);
@@ -56,9 +56,9 @@
       if(!validLink(p))throw new Error('No pudimos preparar el pago automático. Intenta de nuevo en unos momentos.');
       // Retain a created order even if its dialog was closed while awaiting the server.
       remember(p,buyer);if(!current(n,buyer))return;
-      show(`<section class="iap-order-summary"><span class="iap-checkout-eyebrow">TU PLAN, A UN PASO</span><h2 id="hostedAutoTitle">${esc(p.name)}</h2><div class="iap-order-bottom"><span class="iap-plan-duration">${Number(p.days)} días de acceso<small>Pago único · sin renovación automática</small></span><span class="iap-hosted-total">US$${esc(p.total)}<small>USD</small></span></div></section><h3>Elige cómo pagar en PayPal</h3><p>Tarjeta de crédito o débito · PayPal · Apple Pay cuando esté disponible.</p><a class="btn full paypal-button" href="${esc(p.approveUrl)}" target="_blank" rel="noopener" data-pay>Pagar ahora · US$${esc(p.total)}</a><p class="iap-checkout-footnote">Se abrirá el pago seguro de PayPal. Puedes mantener esta ventana abierta: tu acceso se activará aquí al confirmarse el pago.</p><div class="iap-activation-note"><span aria-hidden="true">✓</span><p><strong>Activación automática en tu cuenta</strong><br>Sin enviar comprobantes ni escribir por WhatsApp.</p></div><p role="status">Tu pedido está listo para pagar.</p><button type="button" class="btn full" data-review>Revisar mi pago</button><p class="iap-checkout-footnote">Gmail de activación: ${esc(buyer)}<br><a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a></p>`);
+      show(`<section class="iap-compact-summary"><h2 id="hostedAutoTitle">${esc(p.name)}</h2><p class="iap-compact-duration">${Number(p.days)} días · pago único</p><div class="iap-compact-price">US$${esc(p.total)} <span>USD</span></div></section><a class="btn full paypal-button iap-compact-pay" href="${esc(p.approveUrl)}" target="_blank" rel="noopener" data-pay>Pagar ahora <span aria-hidden="true">→</span></a><p class="iap-compact-methods">Tarjetas · PayPal · Apple Pay*</p><p class="iap-compact-activation"><span aria-hidden="true">✓</span> Activación automática</p><p class="iap-compact-status" role="status" aria-live="polite"></p><details class="iap-compact-details"><summary>Detalles de la compra</summary><p>Acceso para <strong>${esc(buyer)}</strong>.</p><p>Sin renovación automática. El cobro se realiza en USD.</p><p>El pago se abre en PayPal. *Apple Pay depende de la disponibilidad para tu dispositivo y país.</p><a href="terminos.html" target="_blank" rel="noopener">Términos y garantía</a><button type="button" class="btn full" data-review>Revisar mi pago</button></details>`);
       dialog.querySelector('[data-review]').onclick=()=>{clearTimeout(timer);monitor(p,buyer,n);};
-      dialog.querySelector('[data-pay]').addEventListener('click',()=>{clearTimeout(timer);timer=setTimeout(()=>monitor(p,buyer,n),4000);});
+      dialog.querySelector('[data-pay]').addEventListener('click',()=>{dialog.querySelector('[data-pay]').dataset.started='true';status('Confirma el pago en PayPal.');clearTimeout(timer);timer=setTimeout(()=>monitor(p,buyer,n),4000);});
       timer=setTimeout(()=>monitor(p,buyer,n),8000);
     }catch(error){if(current(n,buyer)){show('<h2 id="hostedAutoTitle">No pudimos preparar el pago</h2><p role="status">'+esc(error.message)+'</p><button type="button" class="btn full" data-retry>Reintentar</button>');dialog.querySelector('[data-retry]')?.addEventListener('click',()=>start(id,button));}}
   }
