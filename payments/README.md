@@ -80,7 +80,28 @@ Tarjeta y PayPal se renderizan en paralelo. La tienda conserva por cinco minutos
 
 Elegibilidad revisada de nuevo el 5 de noviembre: la aplicación live no presenta habilitación Apple Pay y el SDK responde `merchantCountry: CO`, `isEligible: false`; tarjeta estándar sí es elegible. Apple Pay no está operativo. También necesita dominio verificado en la raíz `/.well-known/`, no debajo del directorio `/iaplus-colombia/`. No se sustituye el checkout automático por enlaces alojados sin entrega verificada.
 
-## Revisión de activación y seguridad — 5 noviembre 2026
+## Apple Pay integrado — implementación del 5 noviembre
+
+`paypal-apple.js` implementa el SDK oficial con consulta de elegibilidad del comercio,
+compatibilidad del dispositivo, validación del dominio y autorización nativa. La opción
+permanece visible pero deshabilitada si no puede comprobarse su disponibilidad. No se
+redirige a los enlaces alojados con entrega manual.
+
+El pedido y la captura utilizan el mismo servidor autenticado. El recibo de la tienda
+se muestra después de cerrar la hoja nativa de Apple Pay, y solo con el resultado
+verificado del servidor. No se guardan ni registran tokens de Apple Pay.
+
+Validación: `node tools/check-paypal-apple.cjs` y `node tools/check-paypal-inline.cjs`
+simulan éxito, rechazo de dominio, cuenta/dispositivo no elegibles, captura pendiente,
+fallos, cancelación y mensajes falsificados. No prueban una transacción real.
+
+Pendiente operativo: PayPal no muestra habilitación Apple Pay en la aplicación Live,
+el dominio aún no está registrado y la última consulta real de disponibilidad falló.
+La opción activa de Enlaces y botones de pago pertenece a otro flujo. Esta implementación
+no constituye confirmación de Apple Pay operativo ni sustituye la habilitación y prueba real.
+Documentación: https://developer.paypal.com/v5/apple-pay/integrate/
+
+## Evidencia de seguridad del checkout
 
 - Verificación pública en producción: `paypal_quote`, `paypal_create`, `paypal_confirm` y `admin_list` rechazan solicitudes sin sesión, incluso con `paid:true` y `estado:ENTREGADO` enviados por el cliente.
 - Pruebas simuladas: propietario ajeno, importe/moneda/receptor incorrectos, captura pendiente o parcial, indicador de pago falsificado, webhook con firma rechazada y repeticiones no entregan un acceso indebido. Una captura válida entrega una sola vez, incluso tras interrupción simulada.

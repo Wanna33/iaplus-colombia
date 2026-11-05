@@ -24,12 +24,14 @@
     try {
       await new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(data.clientId)+'&locale=es_CO&currency=USD&intent=capture&components=buttons,card-fields&enable-funding=card&disable-funding=venmo';
+        script.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(data.clientId)+'&locale=es_CO&currency=USD&intent=capture&components=buttons,card-fields,applepay&enable-funding=card&disable-funding=venmo';
         script.onload=resolve;script.onerror=reject;document.head.append(script);
       });
       const callbacks={createOrder:async()=> (await request('iap-inline-create')).id,
         onApprove:async details=>{await request('iap-inline-approved',{id:details.orderID});},
         onError:notifyError,onCancel:()=>send({type:'iap-inline-error'})};
+      // Apple eligibility must not delay card or PayPal rendering.
+      if (window.IAPApplePay) void window.IAPApplePay({total:data.total,request,send,onError:notifyError});
       const walletReady = (async()=>{
       const wallet=paypal.Buttons({...callbacks,fundingSource:paypal.FUNDING.PAYPAL,style:{layout:'vertical',height:48,shape:'rect',tagline:false}});
       if(wallet.isEligible()) await wallet.render('#wallet-buttons');
