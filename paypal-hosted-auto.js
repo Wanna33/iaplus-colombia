@@ -16,7 +16,7 @@
   function finish(p,buyer){save(key(buyer),null);const old=load('iap_pay',null);if(old?.ref===p.ref)save('iap_pay',null);save('iap_has',true);}
   dialog.addEventListener('close',()=>{generation++;clearTimeout(timer);source?.isConnected&&source.focus();});
   window.IAPPayPal={canPay:id=>!!plans[id],amount:id=>plans[id]?'US$'+plans[id]:'',get available(){return true;}};
-  fetch(CONFIG.API_URL,{method:'POST',body:JSON.stringify({action:'paypal_config'}),credentials:'omit'}).then(r=>r.json()).then(j=>{if(j.ready&&j.prices?.diseno6){plans.diseno6=String(j.prices.diseno6);if(typeof renderGrid==='function')renderGrid();}}).catch(()=>{});
+  fetch(CONFIG.API_URL,{method:'POST',body:JSON.stringify({action:'paypal_config'}),credentials:'omit'}).then(r=>r.json()).then(j=>{if(j.ready&&j.prices){for(const id of ['diseno3','diseno6'])if(j.prices[id])plans[id]=String(j.prices[id]);if(typeof renderGrid==='function')renderGrid();}}).catch(()=>{});
   async function monitor(p,buyer,n,round=0){
     if(!current(n,buyer)||checking)return;
     checking=true;

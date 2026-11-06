@@ -1,6 +1,7 @@
-# Planes de diseño
+# Combos de diseño
 
-- `chatgpt3`: $20.000 COP / USD 6.34; ChatGPT 90 días + CapCut Pro 30 días.
+- `chatgpt3`: $20.000 COP / USD 6.34; solo ChatGPT 90 días.
+- `diseno3`: $25.000 COP / USD 7.93; ChatGPT 90 días + CapCut Pro 30 días.
 - `diseno6`: $50.000 COP / USD 15.85; ChatGPT 180 días + CapCut Pro 180 días. Oferta condicionada al interés del cliente en crear imágenes con ChatGPT.
 - `chatgpt6` conserva su precio y duración actuales; es un producto diferente.
 

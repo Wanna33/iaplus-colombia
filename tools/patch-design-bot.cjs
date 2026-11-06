@@ -10,8 +10,9 @@ if(!s.includes("from './design-offers'")){
  s=s.replace('  const prods = await catalogo(env);','  const prods = offeredProducts(await catalogo(env), wantsImages(chat.turnos));');
  s=s.replace('if (esPreguntaGeneral(chat, pregunta)) {','if (esPreguntaGeneral(chat, pregunta) && !prods.some(p=>p.capcutDias)) {');
  s=s.replace('  if (!nuevos.length || nuevos.some((t) => t.img) || !cfg.asistente) return null;', '  if (!nuevos.length || nuevos.some((t) => t.img) || !cfg.asistente || wantsImages(chat.turnos)) return null;');
- s=s.replace('else if (auto) { respuesta = conPrecios(auto.texto, await catalogo(env).catch(() => [])); usadas', "else if (auto) { const catalogoActual=await catalogo(env).catch(() => []); respuesta = conPrecios(auto.texto, catalogoActual); if(/20\\.000/.test(respuesta)&&catalogoActual.some(p=>p.key==='chatgpt3'&&p.capcutDias===30&&p.disponible))respuesta+='\\n\\n🎁 En compras nuevas del plan de diseño de $20.000: 3 meses de ChatGPT + 1 mes de CapCut Pro incluido. Cada acceso tiene su propio vencimiento.'; usadas");
+ s=s.replace('else if (auto) { respuesta = conPrecios(auto.texto, await catalogo(env).catch(() => [])); usadas', "else if (auto) { const catalogoActual=await catalogo(env).catch(() => []); respuesta = conPrecios(auto.texto, catalogoActual); if(/20\\.000/.test(respuesta)&&catalogoActual.some(p=>p.key==='diseno3'&&p.capcutDias===30&&!p.oculto&&p.disponible))respuesta+='\\n\\n🎨 También está el combo de diseño por $25.000 para compras nuevas: 3 meses de ChatGPT + 1 mes de CapCut Pro incluido. Cada acceso tiene su propio vencimiento.'; usadas");
 }
 if(!s.includes('${designRules(prods)}'))s=s.replace('${lista}\n\nMEDIOS DE PAGO','${lista}\n\n${designRules(prods)}\n\nMEDIOS DE PAGO');
+s=s.replace("p.key==='chatgpt3'&&p.capcutDias===30", "p.key==='diseno3'&&p.capcutDias===30&&!p.oculto").replace('🎁 En compras nuevas del plan de diseño de $20.000:', '🎨 También está el combo de diseño por $25.000 para compras nuevas:');
 fs.writeFileSync(file,s);
 console.log('Design rules prepared; activation depends on private inventory configuration.');

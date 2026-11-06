@@ -69,7 +69,7 @@
     const category=categoryOf(q)||((budget||cheapest||followUp.test(q))?context.category:null);
     const inFamily=key=>catalog.filter(p=>families[key].test(normalize(p.name)));
     if(images && !/problema|no funciona|error|limite|no puedo/.test(q)){
-      const plans=catalog.filter(p=>/^chatgpt|^diseno6$/.test(p.id)&&(!budget||p.price<=budget)&&!p.unavailable);
+      const plans=catalog.filter(p=>/^chatgpt|^diseno[36]$/.test(p.id)&&(!budget||p.price<=budget)&&!p.unavailable);
       return {text:'Para generar imágenes con ChatGPT, estas son las opciones disponibles. Los planes de diseño indican por separado los meses de ChatGPT y CapCut. La promoción se aplica a compras nuevas, sin modificar planes anteriores.',products:plans,family:'chatgpt',catalog:true};
     }
     if(/^(muchas )?gracias\b|^(chao|adios|hasta luego)\b/.test(q)&&!family&&!category) return {text:'¡Con gusto! Si necesitas algo más, aquí estaré. Recuerda que la activación llega después de confirmar tu pago.'};

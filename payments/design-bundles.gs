@@ -7,14 +7,13 @@ function designPool_(rows, account) {
   return cuentasConCupo_(rows, {match:['capcut']}, CAP_PAGOS).filter(a => a.correo === account && String(rows[a.fila - 1][3] || '').trim());
 }
 function designSnapshot_(product) {
-  if (product !== 'chatgpt3' && product !== 'diseno6') return null;
+  if (product !== 'diseno3' && product !== 'diseno6') return null;
   const c = designConfig_();
   if (!c.enabled || !c.startAt || Date.now() < c.startAt) {
-    if (product === 'diseno6') throw fail_('El paquete de diseño todavía no está disponible.');
-    return null;
+    throw fail_('El combo de diseño todavía no está disponible.');
   }
   if (!designPool_(sheet_().getDataRange().getValues(), c.account).length) throw fail_('El paquete con CapCut está temporalmente sin disponibilidad. No realices el pago todavía.');
-  return {version:1, product:product, account:c.account, days:product === 'chatgpt3' ? 30 : 180, created:Date.now(), startAt:c.startAt};
+  return {version:1, product:product, account:c.account, days:product === 'diseno3' ? 30 : 180, created:Date.now(), startAt:c.startAt};
 }
 function designNote_(note, snapshot) { return snapshot ? note + ' | DESIGN:' + JSON.stringify(snapshot) : note; }
 function designFromNote_(note) {
@@ -23,7 +22,7 @@ function designFromNote_(note) {
   try { return JSON.parse(s.slice(i + 10)); } catch (e) { return null; }
 }
 function designValid_(s) {
-  return !!(s && s.version === 1 && ['chatgpt3','diseno6'].indexOf(s.product) >= 0 && s.days === (s.product === 'chatgpt3' ? 30 : 180) && s.created >= s.startAt && s.startAt > 0 && s.account);
+  return !!(s && s.version === 1 && ['chatgpt3','diseno3','diseno6'].indexOf(s.product) >= 0 && s.days === (s.product === 'diseno6' ? 180 : 30) && s.created >= s.startAt && s.startAt > 0 && s.account);
 }
 function designDeliver_(sh, snapshot, reference, email, started, name) {
   if (!snapshot) return;
@@ -56,9 +55,9 @@ function designConfigure_(b) {
   const account = String(b.account || '').trim().toLowerCase();
   if (!account || !designPool_(sheet_().getDataRange().getValues(), account).length) throw fail_('Agrega primero la cuenta de CapCut Pro al inventario privado y comprueba su disponibilidad.');
   const config = {enabled:true, account:account, startAt:old.startAt || Date.now()};
-  const prices=Object.assign({},ppConfig_().prices,{diseno6:'15.85'});
+  const prices=Object.assign({},ppConfig_().prices,{diseno3:'7.93',diseno6:'15.85'});
   p.setProperty('PAYPAL_USD_PRICES',JSON.stringify(prices));
   p.setProperty('DESIGN_PROMO', JSON.stringify(config));
-  log_('Promoción diseño habilitada', 'Solo pedidos nuevos; 3+1 por 20000 COP y 6+6 por 50000 COP', 'admin');
+  log_('Promoción diseño habilitada', 'Solo pedidos nuevos; 3+1 por 25000 COP y 6+6 por 50000 COP', 'admin');
   return {ok:true, active:true, startAt:config.startAt};
 }
