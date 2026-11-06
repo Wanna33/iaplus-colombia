@@ -499,7 +499,9 @@ function render(){
   </section>
 
   <section id="tab-cod" class="hide">
-    <div class="admin-section-intro"><span class="overline">ENTREGA PROFESIONAL</span><h2>Códigos listos para tus clientes.</h2><p>Configura el plan, revisa el lote y entrega un enlace de activación claro.</p></div>
+    <div class="admin-section-intro"><span class="overline">ENTREGA INMEDIATA</span><h2>Un código y su enlace, en un paso.</h2><p>Elige los meses de ChatGPT. Seleccionamos automáticamente una cuenta activa.</p></div>
+    <div class="card quick-code-card"><h2>Generar acceso de ChatGPT</h2><form id="quickCodeForm" class="form"><div><label for="quickMonths">Duración del plan</label><select id="quickMonths"><option value="1">1 mes · 30 días</option><option value="3">3 meses · 90 días</option><option value="6">6 meses · 180 días</option></select></div><div><button class="btn p" type="submit">Generar código y enlace</button></div></form><p class="hint">Se crea un código de un solo uso. Los días empiezan cuando el cliente lo activa.</p><div data-quick-result aria-live="polite"></div></div>
+    <details class="card" id="advancedCodes"><summary>Opciones avanzadas: otros productos y lotes</summary>
     <div class="card generator-card"><div class="card-heading"><div><span class="overline">GENERADOR DE ACCESOS</span><h2>Prepara tu próximo lote</h2></div><span class="tag t-av">Un código · un uso</span></div>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Los códigos se distribuyen entre las cuentas disponibles de menor carga. Las cuentas marcadas con problemas quedan fuera. Hasta 200 códigos por lote.</p>
       <div class="generator-presets" role="group" aria-label="Plan rápido de ChatGPT"><span>ChatGPT rápido</span><button type="button" data-code-preset="ChatGPT">1 mes</button><button type="button" data-code-preset="ChatGPT 3 meses">3 meses</button><button type="button" data-code-preset="ChatGPT 6 meses">6 meses</button></div>
@@ -519,6 +521,7 @@ function render(){
       </details><details class="capacity-details"><summary>Ver distribución y disponibilidad de cuentas</summary><div id="capInfo" class="capinfo"></div></details>
       <div class="newcode" id="autoOut" aria-live="polite"></div>
     </div>
+    </details>
     <details class="card" id="manualBox"><summary style="cursor:pointer;font-weight:700;font-size:16px">🔑 Generar código de una cuenta en particular</summary>
       <p style="color:var(--mut);font-size:14px;margin-bottom:12px">Elige la cuenta y listo: se crean códigos nuevos de un solo uso. El correo, la contraseña y el código 2FA son los mismos de la cuenta. Se crea 1 código por defecto; puedes subir la cantidad si lo necesitas.</p>
       <form id="genForm" class="form">
@@ -671,6 +674,7 @@ function render(){
   $("#fProd").addEventListener("change",()=>{ $("#fPrice").value = priceOf($("#fProd").value); $("#fDays").value = daysOf($("#fProd").value); saveDraft(); });
   $("#addForm").addEventListener("input", saveDraft);
   restoreDraft();
+  IAPQuickCode.mount({form:$("#quickCodeForm"),api,load,save,esc,copy,refresh,owner:load("iap_user")?.email||"admin"});
   $("#genForm").onsubmit = genCode;
   $("#autoForm").onsubmit = autoGen; $("#aProd").onchange = onAutoProd;
   $("#aCount").checked = countFree();
@@ -695,7 +699,7 @@ function render(){
 // Acciones rápidas del Resumen
 function quick(a){
   const go=(tab,el)=>{ setTab(tab); setTimeout(()=>{ el&&el.scrollIntoView({behavior:"smooth",block:"start"}); },60); };
-  if(a==="gen") go("cod",$("#autoForm"));
+  if(a==="gen") go("cod",$("#quickCodeForm"));
   else if(a==="acc"){ setTab("cta"); $("#addBox").open=true; setTimeout(()=>{ $("#addBox").scrollIntoView({behavior:"smooth",block:"start"}); $("#fMail").focus(); },80); }
   else if(a==="pass"){ setTab("cta"); setTimeout(()=>{ const i=document.querySelector(".pr-in"); if(i){ i.scrollIntoView({behavior:"smooth",block:"center"}); i.focus(); i.select(); } },80); }
   else if(a==="avisar") $("#attn").scrollIntoView({behavior:"smooth",block:"start"});
@@ -798,7 +802,7 @@ function capMap(){
   items.forEach(i=>{
     const k = i.correo.toLowerCase();
     const a = m.get(k) || {correo:i.correo, filas:{}, act:0, libres:0, prob:false};
-    if(i.retirada) a.prob = true;
+    if(i.retirada || i.publica===false || i.eliminada || i.estado==="Con problemas") a.prob = true;
     if(a.filas[i.producto]===undefined) a.filas[i.producto] = i.fila;
     if(i.cliente){ if(IAPInsights.isActive(i,Date.now())) a.act++; }
     else if(i.estado==="Con problemas") a.prob = true;
@@ -915,8 +919,8 @@ function fillProducts(){
 }
 function fillAccounts(){
   fillProducts();
-  const sel=$("#gAcc"); if(!sel) return; const prev=sel.value; const list=accounts();
-  sel.innerHTML = list.length ? list.map(a=>{ const c=capMap().get(a.correo.toLowerCase()); const u=c?used(c):0, cap=getCap(); return `<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)} (${noCap()?u+" cliente"+(u===1?"":"s"):u+"/"+cap+(u>=cap?" · LLENA":"")})</option>`; }).join("") : '<option value="">Primero agrega una cuenta (abajo)</option>';
+  const sel=$("#gAcc"); if(!sel) return; const prev=sel.value,capacity=capMap(); const list=accounts().filter(a=>!capacity.get(a.correo.toLowerCase())?.prob);
+  sel.innerHTML = list.length ? list.map(a=>{ const c=capacity.get(a.correo.toLowerCase()); const u=c?used(c):0, cap=getCap(); return `<option value="${esc(a.k)}">${esc(a.producto)} — ${esc(a.correo)} (${noCap()?u+" cliente"+(u===1?"":"s"):u+"/"+cap+(u>=cap?" · LLENA":"")})</option>`; }).join("") : '<option value="">Enciende o agrega una cuenta disponible en Cuentas</option>';
   if(prev && list.some(a=>a.k===prev)) sel.value=prev; else syncDays();
 }
 function syncDays(){ const a=accounts().find(x=>x.k===$("#gAcc").value); if(a){ $("#gDays").value=a.dias; $("#gPrice").value=priceOf(a.producto); } }
@@ -1605,7 +1609,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#sideShade")){ openSide(false); return; }
   if(e.target.closest("#gTheme")){ lsSet("iap_theme", load("iap_theme")==="dark" ? "" : "dark"); applyTheme(); return; }
   if(e.target.closest("#gLogout")){ if(!confirm("¿Cerrar la sesión del panel?")) return; try{ window.google?.accounts?.id?.disableAutoSelect(); }catch{} ["iap_cred","iap_user","iap_admin"].forEach(k=>{ try{ localStorage.removeItem(k); }catch{} }); location.reload(); return; }
-  const gp = e.target.closest("[data-genp]"); if(gp){ setTab("cod"); const sel=$("#aProd"); if(sel){ sel.value = gp.dataset.genp; onAutoProd(); } setTimeout(()=>{ $("#autoForm")?.scrollIntoView({behavior:"smooth",block:"start"}); $("#aQty")?.focus(); },80); return; }
+  const gp = e.target.closest("[data-genp]"); if(gp){ setTab("cod"); $("#advancedCodes").open=true; const sel=$("#aProd"); if(sel){ sel.value = gp.dataset.genp; onAutoProd(); } setTimeout(()=>{ $("#autoForm")?.scrollIntoView({behavior:"smooth",block:"start"}); $("#aQty")?.focus(); },80); return; }
   const k = e.target.closest(".kpi[data-goto]"); if(k){ setTab(k.dataset.goto); window.scrollTo({top:0,behavior:"smooth"}); }
 });
 document.addEventListener("keydown", e=>{

@@ -17,6 +17,7 @@ exports.js=()=>{
     if(data.action==='admin_wa_chats'){qaWorld++;if(qaWorld>1&&location.search.includes('world-fail'))return {ok:false,error:'Conexión interrumpida de prueba'};return {ok:true,chats:Array.from({length:qaCount},(_,i)=>({tel:'demo-'+i,nombre:['Ana','David','Mariana','Juan','Sara','Lucas','Valeria','Tomás'][i%8]+(qaCount>8?' '+(i+1):''),ts:qaNow-i*60000+(i===0&&qaWorld>1?60000:0),quien:i%3?'a':'u',ultimo:'Consulta de demostración',etiquetas:i%8===2?['queja']:i%8===4?['pago']:[],vendido:i===1&&qaWorld>1}))};}
     if(data.action==='admin_wa_list')return {ok:true,ventas:qaWorld>1?[{id:'demo-sale',telefono:'demo-1',nombre:'David',producto:'ChatGPT',estado:'AUTO-CONFIRMADO'}]:[]};
     if(data.action==='admin_wa_chat')return {ok:true,tel:data.tel,nombre:'Cliente de demostración',etiquetas:[],pausa:false,turnos:[{r:'u',t:'Hola, quisiera información. Conversación ficticia para verificar la navegación.',ts:Date.now()}]};
+    if(data.action==='admin_quick_code')return {ok:true,codigo:'IAP-DEMO-TEST',dias:Number(data.meses)*30};
     if(data.action==='admin_catalogo')return {ok:true,productos:[]};
     if(data.action==='admin_log')return {ok:true,log:[]};
     return {ok:true,pedidos:[],ventas:[],config:{},saldo:0};

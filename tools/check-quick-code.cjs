@@ -1,0 +1,21 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('backend/Code.gs','utf8');
+assert.equal(require('./patch-quick-code.cjs').patch(source),source);
+let rows,props,flushFailure=false,serial=0,locked=0;
+const ctx={Date,console,PropertiesService:{getScriptProperties:()=>({getProperties:()=>({...props}),getProperty:k=>props[k]})},SpreadsheetApp:{flush:()=>{if(flushFailure){flushFailure=false;throw Error('simulated lost response');}}},LockService:{getScriptLock:()=>({waitLock:()=>{locked++;},releaseLock:()=>{}})},ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({text,setMimeType(){return this;}})}};
+vm.createContext(ctx);vm.runInContext(source,ctx);
+const sheet={getDataRange:()=>({getValues:()=>rows}),appendRow:r=>rows.push([...r]),getLastRow:()=>rows.length,getRange:n=>({setValues:v=>rows[n-1]=[...v[0]]})};
+ctx.sheet_=()=>sheet;ctx.isAdmin_=email=>email==='admin@example.test';ctx.log_=()=>{};ctx.newCode_=()=> 'IAP-TEST-'+String(++serial).padStart(4,'2');ctx.aplicarCatalogo_=()=>{};
+ctx.verify_=token=>{if(!token)throw ctx.fail_('Inicia sesión con Google.');return token==='admin'?'admin@example.test':'client@example.test';};
+function fixture(){rows=[Array(15).fill('')];props={};for(const [name,state] of [['off','Sin código'],['retired','Sin código'],['deleted','Sin código'],['problem','Con problemas'],['empty','Sin código'],['ready','Sin código'],['owned','Activo']])rows.push(['BASE-'+name,'ChatGPT',name+'@example.test',name==='empty'?'':'fixture-password',name==='owned'?'buyer@example.test':'',state,name==='owned'?new Date():'',30,0,'','','',10000,'','']);for(const [name,key] of [['off','APAGADA'],['retired','RETIRADA'],['deleted','ELIMINADA']])props['INVENTARIO_'+key+'_'+name+'@example.test']='1';}
+function make(months,id='request-1234567890'){return ctx.adminQuickCode_({meses:months,solicitud:id,precio:1},'admin@example.test');}
+for(const months of [1,3,6]){fixture();const owned=JSON.stringify(rows.at(-1)),r=make(months);assert.equal(r.dias,months*30);assert.ok(r.precio>1,'price must be authoritative');assert.ok(r.enlace.endsWith('cuenta.html?codigo='+r.codigo));const written=rows.find(row=>row[0]===r.codigo);assert.equal(written[2],'ready@example.test');assert.equal(written[4],'');assert.equal(written[6],'','duration starts on activation');assert.equal(JSON.stringify(rows.at(-1)),owned);assert.equal(make(months).codigo,r.codigo);assert.equal(rows.filter(row=>row[0]===r.codigo).length,1);assert.throws(()=>make(months===1?3:1),/otra duración/);}
+fixture();flushFailure=true;assert.throws(()=>make(3),/lost response/);const before=rows.length;const recovered=make(3);assert.equal(rows.length,before);assert.equal(rows.filter(row=>row[0]===recovered.codigo).length,1);
+assert.equal(rows.find(row=>row[0]===recovered.codigo)[1],'ChatGPT 3 meses','label matches the selected plan');
+props.TTL_MIN='1';rows.find(row=>row[0]===recovered.codigo)[14]=new Date(Date.now()-120000);assert.equal(make(3).caducado,true,'expired requests must not be shown as ready');
+rows.find(row=>row[0]===recovered.codigo)[0]='';assert.equal(make(3).caducado,true,'cleaned codes can start a fresh request');
+fixture();props['INVENTARIO_APAGADA_ready@example.test']='1';props['INVENTARIO_APAGADA_owned@example.test']='1';assert.throws(()=>make(1),/No hay cuentas/);
+assert.throws(()=>ctx.adminQuickCode_({meses:1,solicitud:'request-1234567890'},'client@example.test'),/administrador/);assert.throws(()=>make(2),/Elige/);assert.throws(()=>make(1,'bad'),/Solicitud/);
+function post(body){return JSON.parse(ctx.doPost({postData:{contents:JSON.stringify(body)}}).text);}
+assert.equal(post({action:'admin_quick_code',meses:1,solicitud:'request-1234567890'}).ok,false);assert.equal(post({action:'admin_quick_code',meses:1,solicitud:'request-1234567890',idToken:'client'}).ok,false);fixture();const locksBefore=locked;assert.equal(post({action:'admin_quick_code',meses:6,solicitud:'route-1234567890',idToken:'admin'}).dias,180);assert.ok(locked>locksBefore,'writes must hold the existing server lock');
+console.log('PASS quick-code backend: active inventory, 1/3/6 months, authoritative prices, no client changes, durable retry, admin authorization and write lock.');
