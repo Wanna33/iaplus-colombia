@@ -121,7 +121,7 @@
   const form=dialog.querySelector('form');
   const field=form.querySelector('input');
   let conversation={};
-  const addLink=(box,text,href)=>{const a=document.createElement('a');a.textContent=text;a.href=href;if(href.startsWith('https:')){a.target='_blank';a.rel='noopener';}else a.onclick=()=>dialog.close();box.append(a);};
+  const addLink=(box,text,href)=>{const a=document.createElement('a');a.textContent=text;a.href=href;if(href.startsWith('https:')){a.target='_blank';a.rel='noopener';}else a.onclick=()=>dialog.close();box.append(a);return a;};
   function respond(text){
     const user=document.createElement('p');user.className='ph-question';user.textContent=text;log.append(user);
     const result=answer(text,typeof PRODUCTS==='undefined'?[]:PRODUCTS,conversation);
@@ -130,7 +130,10 @@
     const box=document.createElement('div');box.className='ph-answer';
     const copy=document.createElement('p');copy.textContent=result.text;box.append(copy);
     const phone=typeof CONFIG==='undefined'?'573102035327':CONFIG.WHATSAPP;
-    (result.products||[]).forEach(p=>addLink(box,`${p.name} · ${money(p.price)} COP ${p.per}`,'#catalogo'));
+    (result.products||[]).forEach(p=>{
+      const a=addLink(box,`${p.name} · ${money(p.price)} COP ${p.per}`,'#catalogo');
+      a.onclick=()=>{dialog.close();const search=document.getElementById('search');if(search){search.value=p.name;search.dispatchEvent(new Event('input',{bubbles:true}));}};
+    });
     if(result.catalog)addLink(box,'Ver catálogo de cuentas ↗','#catalogo');
     if(result.advisor)addLink(box,'Ayúdame a elegir ↗','#asistentes');
     if(result.account)addLink(box,'Abrir Mi cuenta ↗','cuenta.html');
