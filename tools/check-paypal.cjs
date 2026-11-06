@@ -1,5 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto'),path=require('node:path');
-const addon=fs.readFileSync(path.join(__dirname,'../payments/PayPal.gs'),'utf8');
+const deployedSource=fs.readFileSync(path.join(__dirname,'../backend/Code.gs'),'utf8');
+const addon=deployedSource.slice(deployedSource.indexOf('// Add this file to the SAME Apps Script project'));
 new vm.Script(fs.readFileSync(path.join(__dirname,'../backend/Code.gs'),'utf8'));
 function setup(environment='live'){
   let sequence=0,orderSequence=0,captureCount=0,deliveries=0,crash=false,verifySuccess=true;
@@ -23,7 +24,7 @@ function setup(environment='live'){
   const orders=new Sheet('Pedidos',[['Ref','Email','Product','COP','State','Date','Transaction','Account','Note']]);sheets.set('Pedidos',orders);
   const response=(json,status=200)=>({getResponseCode:()=>status,getContentText:()=>JSON.stringify(json)});
   const context={Date,JSON,Number,String,Object,Array,Math,RegExp,Error,CATALOGO:{chatgpt:{name:'ChatGPT',match:['chatgpt'],price:10000,dias:30},chatgpt3:{name:'ChatGPT 3 meses',match:['chatgpt'],price:20000,dias:90},chatgpt6:{name:'ChatGPT 6 meses',match:['chatgpt'],price:50000,dias:180},canva:{name:'Canva',match:['canva'],price:10000,dias:30}},CAP_PAGOS:Infinity,TIENDA_URL:'https://shop.example.test/',NAME_:'Fixture Customer',
-    PropertiesService:{getScriptProperties:()=>({getProperty:key=>props[key],setProperties:values=>Object.assign(props,values)})},
+    PropertiesService:{getScriptProperties:()=>({getProperty:key=>props[key],getProperties:()=>({...props}),setProperty:(key,value)=>props[key]=value,setProperties:values=>Object.assign(props,values)})},
     CacheService:{getScriptCache:()=>({get:key=>cache.get(key),put:(key,value)=>cache.set(key,value)})},
     SpreadsheetApp:{flush:()=>{}},Utilities:{base64Encode:value=>Buffer.from(value).toString('base64')},
     sha256hex_:value=>crypto.createHash('sha256').update(value).digest('hex'),fail_:message=>new Error(message),
